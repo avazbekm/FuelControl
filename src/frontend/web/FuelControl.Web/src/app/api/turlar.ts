@@ -7,7 +7,8 @@ export type Ruxsat = Sxema['Ruxsat'];
 export type Rol = Sxema['Rol'];
 export type TolovTuri = Sxema['TolovTuri'];
 export type HarakatTuri = Sxema['HarakatTuri'];
-export type HisobotGuruhi = Sxema['HisobotGuruhi'];
+/** API'da `guruh` oddiy satr (katta-kichik harfga bog'liq emas): operator | kun | oy. */
+export type HisobotGuruhi = 'Operator' | 'Kun' | 'Oy';
 
 export type Foydalanuvchi = Sxema['FoydalanuvchiDto'];
 export type LoginJavobi = Sxema['LoginJavobiDto'];

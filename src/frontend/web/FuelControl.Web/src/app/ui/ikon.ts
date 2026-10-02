@@ -42,6 +42,8 @@ const YOLLAR: Record<string, string> = {
   chevronLeft: 'M15 18l-6-6 6-6',
   chevronRight: 'M9 18l6-6-6-6',
   upload: 'M12 20V9 M7 14l5-5 5 5 M4 5h16',
+  share: 'M12 15V3 M8 7l4-4 4 4 M6 11H5v10h14V11h-1',
+  install: 'M12 3v12 M7 10l5 5 5-5 M5 21h14',
 };
 
 @Component({

@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "api": "openapi-typescript http://localhost:5100/openapi/v1.json -o src/app/api/schema.d.ts",
+    "api": "openapi-typescript http://localhost:5000/openapi/v1.json -o src/app/api/schema.d.ts",
     "lugat": "node scripts/lugat.mjs"
   },
   "private": true,

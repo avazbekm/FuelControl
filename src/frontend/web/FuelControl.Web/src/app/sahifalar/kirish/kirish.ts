@@ -6,10 +6,11 @@ import { Til, TilKodi } from '../../core/til';
 import { Tema } from '../../core/tema';
 import { ApiXato, AloqaXato } from '../../api/api';
 import { Ikon } from '../../ui/ikon';
+import { OrnatishTaklif } from '../../ui/ornatish-taklif';
 
 @Component({
   selector: 'kirish-sahifa',
-  imports: [FormsModule, Ikon],
+  imports: [FormsModule, Ikon, OrnatishTaklif],
   templateUrl: './kirish.html',
   styleUrl: './kirish.scss',
 })

@@ -8,6 +8,7 @@ import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { pul, kun, isoKun, oyBoshi, oyQosh, sonOl } from '../../core/format';
 import type { HarakatTuri, OperatorHisob } from '../../api/turlar';
 import { Ikon } from '../../ui/ikon';
+import { orqagaBogla } from '../../core/orqaga';
 
 const BADGE: Record<HarakatTuri, string> = { Maosh: 'yashil', Avans: 'sariq', Kamomat: 'qizil', Ortiqcha: 'yashil', Tolov: 'kok' };
 
@@ -39,6 +40,7 @@ export class OperatorHisobSahifa {
   protected readonly h = signal<OperatorHisob | null>(null);
   protected readonly xato = signal<string | null>(null);
   protected readonly dialog = signal(false);
+  private readonly _dialogOrqaga = orqagaBogla(this.dialog, false);
   protected readonly dTuri = signal<'Avans' | 'Tolov'>('Avans');
   protected dSumma = '';
   protected dIzoh = '';

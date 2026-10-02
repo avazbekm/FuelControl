@@ -6,6 +6,7 @@ import { Bildirish } from './core/bildirish';
 import { Til } from './core/til';
 import { Tema } from './core/tema';
 import { Navbat } from './core/navbat';
+import { Ornatish } from './core/ornatish';
 import { Ikon } from './ui/ikon';
 
 @Component({
@@ -34,6 +35,7 @@ export class App {
   constructor() {
     inject(Tema);
     inject(Navbat); // navbat ilova ochilishi bilan yuborishni boshlaydi
+    inject(Ornatish); // beforeinstallprompt sahifa yuklanishi bilan keladi — erta ushlaymiz
     const sw = inject(SwUpdate);
     if (sw.isEnabled) {
       sw.versionUpdates.pipe(filter((e) => e.type === 'VERSION_READY')).subscribe(() => this.yangiVersiya.set(true));

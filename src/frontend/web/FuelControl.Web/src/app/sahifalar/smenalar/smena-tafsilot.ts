@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Location } from '@angular/common';
-import { api, ol, ApiXato } from '../../api/api';
+import { api, ol } from '../../api/api';
 import { Auth } from '../../core/auth';
 import { Til } from '../../core/til';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
@@ -12,6 +12,7 @@ import { Ikon } from '../../ui/ikon';
 import { SotuvQator } from '../../ui/sotuv-qator';
 import { SotuvTahrir } from '../../ui/sotuv-tahrir';
 import { smenaJami } from './smenalar';
+import { orqagaBogla } from '../../core/orqaga';
 
 const TURLAR: TolovTuri[] = ['Naqd', 'Plastik', 'Click'];
 
@@ -50,6 +51,7 @@ export class SmenaTafsilotSahifa {
   protected izoh = '';
   protected readonly band = signal(false);
   protected readonly tahrir = signal<{ s: Sotuv; rejim: 'tahrir' | 'bekor' } | null>(null);
+  private readonly _tahrirOrqaga = orqagaBogla(this.tahrir, null);
   protected readonly turlar = TURLAR;
   protected readonly pul = pul;
   protected readonly kunSoat = kunSoat;
@@ -87,31 +89,13 @@ export class SmenaTafsilotSahifa {
   async yukla() {
     const id = +this.id();
     try {
-      const [s, sotuvlar] = await Promise.all([
-        this.smenaOl(id),
-        ol(api.GET('/sotuvlar', { params: { query: { smenaId: id } } })),
-      ]);
+      const { smena: s, sotuvlar } = await ol(api.GET('/smenalar/{id}', { params: { path: { id } } }));
       this.smena.set(s);
       this.sotuvlar.set([...sotuvlar].sort((a, b) => b.vaqt.localeCompare(a.vaqt)));
       this.xato.set(s ? null : this.til.t('MalumotYoq'));
       if (this.yop() && this.yopaOladi() && !this.yopishOchiq()) this.yopishOchiq.set(true);
     } catch (e) {
       if (!this.smena()) this.xato.set(xatoMatni(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy')));
-    }
-  }
-
-  /**
-   * GET /smenalar/{id}. Backend bu endpoint'ni qo'shmaguncha (404/405) ro'yxatdan qidiramiz.
-   * `npm run api` dan keyin sxemada paydo bo'lgach, cast va fallback olib tashlanadi.
-   */
-  private async smenaOl(id: number): Promise<Smena | null> {
-    try {
-      const yol = '/smenalar/{id}' as unknown as '/smenalar/{id}/yop';
-      return await ol((api.GET as unknown as (y: string, o: object) => Promise<{ data?: unknown; error?: unknown; response: Response }>)(yol, { params: { path: { id } } }));
-    } catch (e) {
-      if (!(e instanceof ApiXato) || (e.status !== 404 && e.status !== 405)) throw e;
-      const royxat = await ol(api.GET('/smenalar'));
-      return royxat.find((x) => x.id === id) ?? null;
     }
   }
 

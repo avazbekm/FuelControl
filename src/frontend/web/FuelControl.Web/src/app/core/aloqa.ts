@@ -28,6 +28,8 @@ export class Aloqa {
 
   private hub: HubConnection | null = null;
   private qaytaTaymer: ReturnType<typeof setTimeout> | undefined;
+  /** "QaytaUlan" dan keyin onclose kelganda kutmasdan ulanish uchun. */
+  private qaytaUlanKutilmoqda = false;
 
   constructor() {
     addEventListener('online', () => { this.onlayn.set(true); this.tiklandi$.next(); this.boshla(); });
@@ -50,10 +52,20 @@ export class Aloqa {
       hub.on('SotuvOzgardi', (s: Sotuv) => this.hodisa$.next({ turi: 'SotuvOzgardi', sotuv: s }));
       hub.on('SmenaOzgardi', (s: Smena) => this.hodisa$.next({ turi: 'SmenaOzgardi', smena: s }));
       hub.on('NarxOzgardi', (m: unknown) => this.hodisa$.next({ turi: 'NarxOzgardi', malumot: m }));
+      // Server foydalanuvchi ruxsati/roli o'zgarganda ulanishni uzadi: /me ni yangilab darhol qayta ulanamiz.
+      hub.on('QaytaUlan', async () => {
+        this.qaytaUlanKutilmoqda = true;
+        await this.auth.yangila();
+        this.boshla();
+      });
       hub.onreconnecting(() => this.hubHolati.set('ulanmoqda'));
-      hub.onreconnected(() => { this.hubHolati.set('ulangan'); this.tiklandi$.next(); });
+      hub.onreconnected(() => { this.qaytaUlanKutilmoqda = false; this.hubHolati.set('ulangan'); this.tiklandi$.next(); });
       // Avtomatik qayta ulanish ham to'xtasa — o'zimiz qayta boshlaymiz.
-      hub.onclose(() => { this.hubHolati.set('uzilgan'); this.keyinroq(); });
+      hub.onclose(() => {
+        this.hubHolati.set('uzilgan');
+        if (this.qaytaUlanKutilmoqda) { this.qaytaUlanKutilmoqda = false; this.boshla(); return; }
+        this.keyinroq();
+      });
       this.hub = hub;
     }
     if (this.hub.state !== HubConnectionState.Disconnected) return;

@@ -49,7 +49,7 @@
       @if (s.izoh) { <div class="ikkilamchi kichik-matn">{{ til.t('Izoh') }}: {{ s.izoh }}</div> }
 
       @if (yopaOladi() && !yopishOchiq()) {
-        <button class="tugma asosiy" (click)="yopishOchiq.set(true)"><ikon nomi="stop" [olcham]="16" /> {{ til.t('SmenaniYopish') }}</button>
+        <button class="tugma asosiy" (click)="yopishOchiq.set(true)"><ikon nomi="lock" [olcham]="16" /> {{ til.t('SmenaniYopish') }}</button>
       }
     </section>
 
@@ -94,13 +94,15 @@
         @for (x of sotuvlar(); track x.id) {
           <div class="element" [class.bekor]="x.holati === 'BekorQilingan'">
             <sotuv-qator [s]="x" [operatorKorsat]="false" />
-            @if (x.holati === 'Faol') {
+            @if (x.holati === 'Faol' && (auth.bor('SotuvTahrirlash') || auth.bor('SotuvBekorQilish'))) {
+              <span class="amal-tugmalar">
               @if (auth.bor('SotuvTahrirlash')) {
                 <button class="tugma ikonli kichik shaffof" (click)="tahrir.set({ s: x, rejim: 'tahrir' })" [attr.aria-label]="til.t('Tahrirlash')"><ikon nomi="edit" [olcham]="16" /></button>
               }
               @if (auth.bor('SotuvBekorQilish')) {
                 <button class="tugma ikonli kichik shaffof xavfli" (click)="tahrir.set({ s: x, rejim: 'bekor' })" [attr.aria-label]="til.t('BekorQilish')"><ikon nomi="x" [olcham]="16" /></button>
               }
+              </span>
             }
           </div>
         } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }

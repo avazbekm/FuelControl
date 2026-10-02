@@ -32,5 +32,16 @@
  "Yangilash2": ["Yangilash", "Янгилаш", "Обновить"],
  "BekorSoni": ["Bekor qilingan", "Бекор қилинган", "Отменено"],
  "OyNomlari": ["Yanvar,Fevral,Mart,Aprel,May,Iyun,Iyul,Avgust,Sentabr,Oktabr,Noyabr,Dekabr", "Январ,Феврал,Март,Апрел,Май,Июн,Июл,Август,Сентябр,Октябр,Ноябр,Декабр", "Январь,Февраль,Март,Апрель,Май,Июнь,Июль,Август,Сентябрь,Октябрь,Ноябрь,Декабрь"],
- "ExcelXlsx": ["Excel'ga chiqarish", "Excel'га чиқариш", "Выгрузить в Excel"]
+ "ExcelXlsx": ["Excel'ga chiqarish", "Excel'га чиқариш", "Выгрузить в Excel"],
+ "IlovaniOrnatish": ["Ilovani o'rnatish", "Иловани ўрнатиш", "Установить приложение"],
+ "OrnatishIzoh": ["Bosh ekranga qo'shing — ilova kabi tez ochiladi va internetsiz ham ishlaydi", "Бош экранга қўшинг — илова каби тез очилади ва интернетсиз ҳам ишлайди", "Добавьте на главный экран — открывается как приложение и работает без интернета"],
+ "IosOrnatish1": ["Safari pastidagi «Ulashish» tugmasini bosing", "Safari пастидаги «Улашиш» тугмасини босинг", "Нажмите «Поделиться» внизу Safari"],
+ "IosOrnatish2": ["«Bosh ekranga qo'shish» ni tanlang", "«Бош экранга қўшиш» ни танланг", "Выберите «На экран „Домой“»"],
+ "Keyinroq": ["Keyinroq", "Кейинроқ", "Позже"],
+ "IlovaOrnatilgan": ["Ilova o'rnatilgan", "Илова ўрнатилган", "Приложение установлено"],
+ "Tab_Panel": ["Panel", "Панел", "Панель"],
+ "Tab_Hisobot": ["Hisobot", "Ҳисобот", "Отчёты"],
+ "Tab_Smena": ["Smenalar", "Сменалар", "Смены"],
+ "Tab_Operator": ["Operator", "Оператор", "Операторы"],
+ "Tab_Hisobim": ["Hisobim", "Ҳисобим", "Мой счёт"]
 }

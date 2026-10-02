@@ -4,11 +4,12 @@ import { Til, TilKodi } from '../../core/til';
 import { Tema, TemaRejimi } from '../../core/tema';
 import { Navbat } from '../../core/navbat';
 import { Ikon } from '../../ui/ikon';
+import { OrnatishTaklif } from '../../ui/ornatish-taklif';
 
 /** PWA'da faqat til, mavzu va chiqish (qolgan sozlamalar desktop'da, Admin uchun). */
 @Component({
   selector: 'sozlamalar-sahifa',
-  imports: [Ikon],
+  imports: [Ikon, OrnatishTaklif],
   template: `
     <div class="sahifa">
       <div class="sahifa-bosh"><h1>{{ til.t('Sozlamalar') }}</h1></div>
@@ -37,6 +38,8 @@ import { Ikon } from '../../ui/ikon';
           }
         </div>
       </section>
+
+      <ornatish-taklif />
 
       @if (navbat.royxat().length) {
         <section class="shisha karta ustunlar">

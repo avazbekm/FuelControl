@@ -15,13 +15,13 @@ export interface Bolim {
 
 /** Menyu tartibi: boshliq uchun avval hisobotlar, operator uchun sotuv. */
 export const BOLIMLAR: Bolim[] = [
-  { yol: 'boshqaruv', kalit: 'BoshqaruvPaneli', qisqaKalit: 'Boshqaruv', ikon: 'grid', korinadi: (a) => a.bor('Boshqaruv') },
+  { yol: 'boshqaruv', kalit: 'BoshqaruvPaneli', qisqaKalit: 'Tab_Panel', ikon: 'grid', korinadi: (a) => a.bor('Boshqaruv') },
   { yol: 'sotuv', kalit: 'SotuvKiritish', qisqaKalit: 'Sotuv', ikon: 'plus', korinadi: (a) => a.bor('SotuvKiritish') },
-  { yol: 'hisobotlar', kalit: 'Hisobotlar', ikon: 'file', korinadi: (a) => a.bor('Hisobotlar') },
-  { yol: 'smenalar', kalit: 'Smenalar', ikon: 'clock', korinadi: (a) => a.bor('Smenalar') },
-  { yol: 'operatorlar', kalit: 'OperatorlarHisobi', qisqaKalit: 'Operatorlar', ikon: 'users', korinadi: (a) => a.bor('Operatorlar') },
+  { yol: 'hisobotlar', kalit: 'Hisobotlar', qisqaKalit: 'Tab_Hisobot', ikon: 'file', korinadi: (a) => a.bor('Hisobotlar') },
+  { yol: 'smenalar', kalit: 'Smenalar', qisqaKalit: 'Tab_Smena', ikon: 'clock', korinadi: (a) => a.bor('Smenalar') },
+  { yol: 'operatorlar', kalit: 'OperatorlarHisobi', qisqaKalit: 'Tab_Operator', ikon: 'users', korinadi: (a) => a.bor('Operatorlar') },
   // Operatorlar ruxsati yo'q, lekin sotuv kirituvchi — o'z hisob-varaqasini ko'radi (API o'z id'si uchun ruxsat beradi).
-  { yol: 'hisobim', kalit: 'MeningHisobim', ikon: 'user', korinadi: (a) => !a.bor('Operatorlar') && a.bor('SotuvKiritish') },
+  { yol: 'hisobim', kalit: 'MeningHisobim', qisqaKalit: 'Tab_Hisobim', ikon: 'user', korinadi: (a) => !a.bor('Operatorlar') && a.bor('SotuvKiritish') },
   { yol: 'audit', kalit: 'AuditJurnali', ikon: 'shield', korinadi: (a) => a.bor('Audit') },
 ];
 

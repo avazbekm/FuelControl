@@ -28,6 +28,12 @@ main {
 }
 .tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px; }
 .tab.faol { color: var(--asosiy); background: var(--asosiy-och); }
+@media (max-width: 380px) { .tab { font-size: 10px; } }
+
+/* Sensorli ekranda yozish paytida (klaviatura ochiq) tab-bar maydonni yopmasin. */
+@media (pointer: coarse) {
+  :host:has(input:not([type=checkbox]):not([type=radio]):focus, textarea:focus) .tablar { display: none; }
+}
 
 .yon { display: none; }
 

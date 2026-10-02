@@ -8,12 +8,13 @@ import { Til } from '../../core/til';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { Malumot, Yoqilgi, jonliYangila } from '../../core/malumot';
 import { Navbat, NavbatSotuvi } from '../../core/navbat';
+import { orqagaBogla } from '../../core/orqaga';
 import { pul, litr, soat, isoKun, sonOl, davomiylik } from '../../core/format';
 import type { Aparat, Smena, Sotuv } from '../../api/turlar';
 import { Ikon } from '../../ui/ikon';
 import { SotuvQator } from '../../ui/sotuv-qator';
 import { SotuvTahrir } from '../../ui/sotuv-tahrir';
-import { TolovKiritish, TolovTanlovi, Qismlar, BOSH_QISMLAR, tolovlarYasa } from '../../ui/tolov-kiritish';
+import { TolovKiritish, TolovTanlovi, Qismlar, BOSH_QISMLAR, sotuvTolovi } from '../../ui/tolov-kiritish';
 
 @Component({
   selector: 'sotuv-sahifa',
@@ -43,6 +44,7 @@ export class SotuvSahifa {
   protected readonly smena = signal<Smena | null | undefined>(undefined);
   protected readonly sotuvlar = signal<Sotuv[]>([]);
   protected readonly tahrir = signal<{ s: Sotuv; rejim: 'tahrir' | 'bekor' } | null>(null);
+  private readonly _tahrirOrqaga = orqagaBogla(this.tahrir, null);
 
   protected readonly pul = pul;
   protected readonly litr = litr;
@@ -127,8 +129,8 @@ export class SotuvSahifa {
     if (!a) return this.xato.set(this.til.t('AvvalAparat'));
     const h = this.hisob();
     if (h.summa <= 0) return this.xato.set(this.til.t('Xato_Summa'));
-    const tolovlar = tolovlarYasa(this.turi(), this.qismlar(), h.summa);
-    if (!tolovlar) return this.xato.set(this.til.t('Xato_AralashYigindi'));
+    const tolov = sotuvTolovi(this.turi(), this.qismlar(), h.summa);
+    if (!tolov) return this.xato.set(this.til.t('Xato_AralashYigindi'));
 
     // Har sotuvga yangi IdempotencyKey — navbatdan qayta yuborilsa ham server bitta marta yozadi.
     const kalit = crypto.randomUUID();
@@ -139,7 +141,7 @@ export class SotuvSahifa {
         aparatId: a.id,
         summa: this.rejim() === 'summa' ? h.summa : null,
         litr: this.rejim() === 'litr' ? h.litr : null,
-        tolovlar,
+        ...tolov,
         idempotencyKey: kalit,
       },
       yaratildi: new Date().toISOString(),

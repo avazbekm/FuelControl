@@ -65,7 +65,7 @@ export class AuditSahifa {
 
   async yukla() {
     try {
-      this.yozuvlar.set(await ol(api.GET('/audit', { params: { query: { q: this.q().trim() || undefined } } })));
+      this.yozuvlar.set(await ol(api.GET('/audit', { params: { query: { q: this.q().trim() || undefined, limit: 500 } } })));
       this.xato.set(null);
     } catch (e) {
       this.xato.set(xatoMatni(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy')));

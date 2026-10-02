@@ -17,6 +17,16 @@ export function tolovlarYasa(turi: TolovTanlovi, q: Qismlar, summa: number): Tol
   return r.reduce((s, x) => s + x.summa, 0) === summa && r.length ? r : null;
 }
 
+/**
+ * Yangi sotuv so'rovi uchun to'lov qismi: bitta to'lovda `tolovTuri` (summani server joriy narxdan hisoblaydi —
+ * offline navbatda narx o'zgarsa ham rad etilmaydi), aralashda `tolovlar[]`.
+ */
+export function sotuvTolovi(turi: TolovTanlovi, q: Qismlar, summa: number): { tolovTuri: TolovTuri; tolovlar: null } | { tolovlar: Tolov[] } | null {
+  if (turi !== 'Aralash') return { tolovTuri: turi, tolovlar: null };
+  const r = tolovlarYasa(turi, q, summa);
+  return r ? { tolovlar: r } : null;
+}
+
 /** Mavjud to'lovlardan tanlov holatini tiklash (tahrirlash dialogi uchun). */
 export function tanlovniTikla(t: Tolov[]): { turi: TolovTanlovi; qismlar: Qismlar } {
   const q = BOSH_QISMLAR();

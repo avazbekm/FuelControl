@@ -15,6 +15,8 @@
 }
 .forma { width: 100%; max-width: 400px; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; }
 .pin-tugma { min-height: 28px; padding: 0 8px; font-size: 13px; color: var(--asosiy); }
+@media (pointer: coarse) { .pin-tugma { min-height: 44px; margin: -8px 0; } }
 .klaviatura { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .klaviatura .tugma { min-height: 54px; font-size: 22px; font-weight: 650; }
 .izoh { margin: 0; text-align: center; }
+.taklif-joy { width: 100%; max-width: 400px; display: flex; }

@@ -144,7 +144,7 @@ export interface paths {
                     dan?: string;
                     gacha?: string;
                     operatorId?: number;
-                    guruh?: components["schemas"]["HisobotGuruhi"];
+                    guruh?: string;
                 };
                 header?: never;
                 path?: never;
@@ -1298,8 +1298,6 @@ export interface components {
             qatorlar: components["schemas"]["HisobotQatoriDto"][];
             jami: components["schemas"]["HisobotQatoriDto"];
         };
-        /** @enum {unknown} */
-        HisobotGuruhi: "Operator" | "Kun" | "Oy";
         HisobotQatoriDto: {
             guruh: string;
             yoqilgi: null | string;
