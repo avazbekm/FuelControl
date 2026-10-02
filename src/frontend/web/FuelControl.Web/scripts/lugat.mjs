@@ -2,7 +2,7 @@
 // Ishga tushirish: npm run lugat
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const manba = readFileSync(new URL('../../FuelControl.Desktop/Services/Til.cs', import.meta.url), 'utf8');
+const manba = readFileSync(new URL('../../../desktop/FuelControl.Desktop/Services/Til.cs', import.meta.url), 'utf8');
 const s = String.raw`"((?:[^"\\]|\\.)*)"`;
 const qator = new RegExp(String.raw`\["([^"]+)"\]\s*=\s*\(\s*` + s + String.raw`\s*,\s*` + s + String.raw`\s*,\s*` + s + String.raw`\s*\)`, 'g');
 const ochir = (x) => JSON.parse(`"${x}"`);

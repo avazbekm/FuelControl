@@ -186,6 +186,32 @@ public sealed class JoriyRuxsatTests : IAsyncLifetime
         Assert.Equal("application/manifest+json", manifest.Content.Headers.ContentType!.MediaType);
     }
 
+    [Theory]
+    [InlineData("operator", HttpStatusCode.OK)]
+    [InlineData("KUN", HttpStatusCode.OK)]
+    [InlineData("Oy", HttpStatusCode.OK)]
+    [InlineData(null, HttpStatusCode.OK)]
+    [InlineData("xato", HttpStatusCode.BadRequest)]
+    [InlineData("7", HttpStatusCode.BadRequest)]
+    [InlineData("1", HttpStatusCode.BadRequest)]
+    public async Task HisobotGuruhi_HarfgaBoglanmaydi_NotogriQiymat400(string? guruh, HttpStatusCode kutilgan)
+    {
+        var admin = await Kir("admin", "admin1234");
+        var javob = await admin.GetAsync("/hisobot" + (guruh is null ? "" : $"?guruh={guruh}"));
+        Assert.Equal(kutilgan, javob.StatusCode);
+        if (kutilgan == HttpStatusCode.BadRequest)
+            Assert.Equal("application/problem+json", javob.Content.Headers.ContentType!.MediaType);
+    }
+
+    [Fact]
+    public async Task NotogriParametrTuri_400ProblemDetails()
+    {
+        var admin = await Kir("admin", "admin1234");
+        var javob = await admin.GetAsync("/hisobot?dan=bugun");
+        Assert.Equal(HttpStatusCode.BadRequest, javob.StatusCode);
+        Assert.Equal("application/problem+json", javob.Content.Headers.ContentType!.MediaType);
+    }
+
     [Fact]
     public async Task EksportAuditgaYoziladi_RuxsatsizRadEtiladi()
     {

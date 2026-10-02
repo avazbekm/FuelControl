@@ -6,8 +6,8 @@
 **/*.db-shm
 **/*.db-wal
 **/zaxira-*/
-src/FuelControl.Api/wwwroot/
-src/FuelControl.Desktop/
+src/backend/FuelControl.Api/wwwroot/
+src/frontend/desktop/
 tests/
 .vs/
 deploy/.env

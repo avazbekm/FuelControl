@@ -16,6 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\FuelControl.Api\FuelControl.Api.csproj" />
+    <ProjectReference Include="..\..\src\backend\FuelControl.Api\FuelControl.Api.csproj" />
   </ItemGroup>
 </Project>

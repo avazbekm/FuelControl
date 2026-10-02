@@ -7,13 +7,13 @@ Dizayn hujjatlari: `docs/backend-topshiriq.md` (domen va API tavsifi — majburi
 ## 1. Texnologiya
 
 - **Angular 20+** (standalone components, signals), TypeScript, **PWA** (`@angular/pwa`: service worker, manifest, "Bosh ekranga qo'shish").
-- API klienti **OpenAPI'dan generatsiya**: API ishga tushganda `http://localhost:5000/openapi/v1.json` (portni `src/FuelControl.Api/Properties/launchSettings.json` dan tekshiring). Generator: `openapi-typescript` + `openapi-fetch` yoki `ng-openapi-gen` — bittasini tanlang, generatsiya buyrug'ini `package.json` skriptiga qo'ying.
+- API klienti **OpenAPI'dan generatsiya**: API ishga tushganda `http://localhost:5000/openapi/v1.json` (portni `src/backend/FuelControl.Api/Properties/launchSettings.json` dan tekshiring). Generator: `openapi-typescript` + `openapi-fetch` yoki `ng-openapi-gen` — bittasini tanlang, generatsiya buyrug'ini `package.json` skriptiga qo'ying.
 - Real vaqt: **SignalR** (`@microsoft/signalr`), hub `/hub`, token `?access_token=` orqali; hodisalar: `SotuvQoshildi`, `SotuvOzgardi`, `SmenaOzgardi`, `NarxOzgardi`.
 - Auth: `POST /auth/login` {login, parolYokiPin} → JWT (12 soat), `localStorage`da; har so'rovga `Authorization: Bearer`. 401 → login sahifasi. Ruxsatlar JWT javobidagi `foydalanuvchi.ruxsatlar` massivida (matn: "Boshqaruv", "SotuvKiritish", …) — menyu va tugmalar shunga qarab.
 - Enum'lar JSON'da **matn** ("Naqd", "Operator").
 - Pul: butun so'm, formati `16 600 000` (bo'shliq ming ajratgich); litr 2 xona `237 323.06`.
-- **3 til**: o'zbek lotin (standart), o'zbek kirill, rus — o'z i18n xizmati (JSON lug'at), til tanlash login va sozlamalarda. Desktop lug'ati `src/FuelControl.Desktop/Services/Til.cs` da — kalit va tarjimalarni **shundan oling**, bir xil bo'lsin.
-- Joylashuv: `src/FuelControl.Web/` (Angular loyiha). Build natijasi keyin API'ning `wwwroot`iga joylanadi (Docker'da api konteyneri statik beradi) — `angular.json`da `outputPath` ni `../FuelControl.Api/wwwroot` qilib qo'ying, lekin **API loyihasiga boshqa tegmang**.
+- **3 til**: o'zbek lotin (standart), o'zbek kirill, rus — o'z i18n xizmati (JSON lug'at), til tanlash login va sozlamalarda. Desktop lug'ati `src/frontend/desktop/FuelControl.Desktop/Services/Til.cs` da — kalit va tarjimalarni **shundan oling**, bir xil bo'lsin.
+- Joylashuv: `src/frontend/web/FuelControl.Web/` (Angular loyiha). Build natijasi keyin API'ning `wwwroot`iga joylanadi (Docker'da api konteyneri statik beradi) — `angular.json`da `outputPath` ni `../../../backend/FuelControl.Api/wwwroot` qilib qo'ying, lekin **API loyihasiga boshqa tegmang**.
 - Dev'da API boshqa portda — `proxy.conf.json` bilan `/api`siz to'g'ridan-to'g'ri yo'llar (`/auth`, `/sotuvlar`, …) va `/hub` ni proxy qiling.
 
 ## 2. Ekranlar (mobil-birinchi, 390 px dan boshlab; planshet/desktop'da ham chiroyli)
@@ -33,7 +33,7 @@ Aloqa yo'q bo'lsa — yuqorida "Aloqa yo'q" bannerи; SignalR qayta ulanadi.
 
 ## 3. Ish tartibi
 
-1. API'ni ishga tushiring (`dotnet run --project src/FuelControl.Api`, dev admin: `admin / admin1234`, `appsettings.Development.json`), OpenAPI'dan klient generatsiya qiling.
+1. API'ni ishga tushiring (`dotnet run --project src/backend/FuelControl.Api`, dev admin: `admin / admin1234`, `appsettings.Development.json`), OpenAPI'dan klient generatsiya qiling.
 2. Skelet: auth, layout (tab-bar/yon menyu), i18n, tema, PWA manifest/service worker.
 3. Ekranlar: Boshqaruv → Hisobotlar → Smenalar → Sotuv (offline navbat bilan) → Operatorlar → Audit.
 4. `ng build` xatosiz, Lighthouse PWA tekshiruvi o'tsin, telefon o'lchamida (390×844) va desktop'da skrinshot bilan tekshiring.

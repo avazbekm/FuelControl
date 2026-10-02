@@ -14,8 +14,14 @@ public static class HisobotEndpointlari
 {
     public static void HisobotUlash(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/hisobot", async (FuelControlDbContext db, DateOnly? dan, DateOnly? gacha, int? operatorId, HisobotGuruhi guruh = HisobotGuruhi.Operator) =>
+        app.MapGet("/hisobot", async (FuelControlDbContext db, DateOnly? dan, DateOnly? gacha, int? operatorId, string? guruh) =>
         {
+            // ?guruh=operator|kun|oy — katta-kichik harfga bog'liq emas
+            // Enum.TryParse sonlarni ham qabul qiladi ("7" → aniqlanmagan qiymat) — faqat nomlar.
+            if (!Enum.TryParse<HisobotGuruhi>(guruh ?? "Operator", true, out var guruhQiymati)
+                || !Enum.IsDefined(guruhQiymati) || int.TryParse(guruh, out _))
+                throw new BiznesXatosi("guruh faqat operator, kun yoki oy bo'lishi mumkin.");
+            var g2 = guruhQiymati;
             var d = Vaqt.Dan(dan); var g = Vaqt.Gacha(gacha);
             var sq = db.Sotuvlar.Include(x => x.Tolovlar).AsQueryable();
             var hq = db.Harakatlar.AsQueryable();
@@ -30,7 +36,7 @@ public static class HisobotEndpointlari
             string YoqilgiNomi(Sotuv s) => yoqilgilar[aparatlar[s.AparatId]];
 
             // Guruh kaliti: operator bo'yicha — Id (nomi bir xil ikki operator aralashmasin), kun/oy — Toshkent sanasi.
-            string Kalit(DateTime utc, int op) => guruh switch
+            string Kalit(DateTime utc, int op) => g2 switch
             {
                 HisobotGuruhi.Kun => utc.Add(Vaqt.Toshkent).ToString("yyyy-MM-dd"),
                 HisobotGuruhi.Oy => utc.Add(Vaqt.Toshkent).ToString("yyyy-MM"),
@@ -53,14 +59,14 @@ public static class HisobotEndpointlari
             }
 
             // Guruh qiymati tilga bog'liq emas: kun "yyyy-MM-dd", oy "yyyy-MM", operator — ismi. Klient o'z tilida formatlaydi.
-            string GuruhNomi(string kalit) => guruh == HisobotGuruhi.Operator ? ismlar.GetValueOrDefault(int.Parse(kalit), "?") : kalit;
+            string GuruhNomi(string kalit) => g2 == HisobotGuruhi.Operator ? ismlar.GetValueOrDefault(int.Parse(kalit), "?") : kalit;
 
             var sotuvGuruhlari = sotuvlar.ToLookup(x => Kalit(x.Vaqt, x.OperatorId));
             var harakatGuruhlari = harakatlar.ToLookup(x => Kalit(x.Sana, x.OperatorId));
             var kalitlar = sotuvGuruhlari.Select(x => x.Key).Union(harakatGuruhlari.Select(x => x.Key)).ToList();
 
             // Tartib: operator — ism bo'yicha, kun/oy — yangisi tepada.
-            kalitlar = guruh == HisobotGuruhi.Operator
+            kalitlar = g2 == HisobotGuruhi.Operator
                 ? kalitlar.OrderBy(k => ismlar.GetValueOrDefault(int.Parse(k), "?")).ToList()
                 : kalitlar.OrderByDescending(k => k).ToList();
 

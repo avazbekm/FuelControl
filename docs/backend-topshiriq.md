@@ -1,20 +1,20 @@
 # FuelControl — Backend (server) topshirig'i
 
-Bu hujjat backend sessiyasi uchun. Desktop (Avalonia) UI tayyor va `src/FuelControl.Desktop` da; hozir u `Services/MockMalumot.cs` dagi xotiradagi ma'lumot bilan ishlaydi. Vazifa: haqiqiy server yozish, keyin desktop'ni unga ulash.
+Bu hujjat backend sessiyasi uchun. Desktop (Avalonia) UI tayyor va `src/frontend/desktop/FuelControl.Desktop` da; hozir u `Services/MockMalumot.cs` dagi xotiradagi ma'lumot bilan ishlaydi. Vazifa: haqiqiy server yozish, keyin desktop'ni unga ulash.
 
 Asl TZ: `C:\Users\siddi\Downloads\FuelControl — texnik topshiriq (TZ).docx` (o'qib chiqing). Quyida TZ'dan keyin qabul qilingan **qo'shimcha qarorlar** ham bor — ular TZ'dan ustun.
 
 ## 1. Loyiha tuzilmasi (FuelControl.slnx ga qo'shing)
 
 ```
-src/FuelControl.Contracts/   — DTO + enum'lar (desktop va PWA bilan umumiy), faqat POCO, bog'liqliksiz
-src/FuelControl.Core/        — domen modellari va biznes qoidalari (hisoblash, smena, totalizator, ruxsat tekshiruvi)
-src/FuelControl.Api/         — ASP.NET Core Minimal API (.NET 10), EF Core + SQLite (WAL), JWT, SignalR, OpenAPI
+src/backend/FuelControl.Contracts/   — DTO + enum'lar (desktop va PWA bilan umumiy), faqat POCO, bog'liqliksiz
+src/backend/FuelControl.Core/        — domen modellari va biznes qoidalari (hisoblash, smena, totalizator, ruxsat tekshiruvi)
+src/backend/FuelControl.Api/         — ASP.NET Core Minimal API (.NET 10), EF Core + SQLite (WAL), JWT, SignalR, OpenAPI
 tests/FuelControl.Core.Tests/ — xUnit, biznes qoidalari uchun
 deploy/                      — docker-compose.yml (api + caddy + cloudflared), Dockerfile
 ```
 
-Kod uslubi: desktop'dagidek **o'zbekcha identifikatorlar** (Sotuv, Smena, Foydalanuvchi, Ruxsat…), izohlar o'zbekcha. Mavjud modellarni `src/FuelControl.Desktop/Models/Modellar.cs` dan asos qilib oling — nomlar bir xil bo'lsin, desktop'ga ulash oson bo'ladi.
+Kod uslubi: desktop'dagidek **o'zbekcha identifikatorlar** (Sotuv, Smena, Foydalanuvchi, Ruxsat…), izohlar o'zbekcha. Mavjud modellarni `src/frontend/desktop/FuelControl.Desktop/Models/Modellar.cs` dan asos qilib oling — nomlar bir xil bo'lsin, desktop'ga ulash oson bo'ladi.
 
 ## 2. Domen (Core) — TZ + qo'shimcha qarorlar
 

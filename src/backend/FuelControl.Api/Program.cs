@@ -70,6 +70,7 @@ app.UseExceptionHandler(h => h.Run(async ctx =>
     var (status, xabar) = xato switch
     {
         BiznesXatosi b => (b.Status, b.Message),
+        BadHttpRequestException bad => (400, "So'rov noto'g'ri: " + bad.Message),
         ArgumentException a => (400, a.Message),
         InvalidOperationException i => (409, i.Message),
         _ => (500, "Serverda kutilmagan xato yuz berdi."),
@@ -81,7 +82,7 @@ app.UseExceptionHandler(h => h.Run(async ctx =>
 }));
 app.UseStatusCodePages();
 
-// PWA (src/FuelControl.Web build → wwwroot). Hash marshrutlash — SPA fallback kerak emas.
+// PWA (src/frontend/web/FuelControl.Web build → wwwroot). Hash marshrutlash — SPA fallback kerak emas.
 var turlar = new FileExtensionContentTypeProvider();
 turlar.Mappings[".webmanifest"] = "application/manifest+json";
 app.UseDefaultFiles();

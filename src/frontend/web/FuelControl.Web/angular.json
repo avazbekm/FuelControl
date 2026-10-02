@@ -55,7 +55,7 @@
               "src/styles.scss"
             ],
             "outputPath": {
-              "base": "../FuelControl.Api/wwwroot",
+              "base": "../../../backend/FuelControl.Api/wwwroot",
               "browser": ""
             }
           },

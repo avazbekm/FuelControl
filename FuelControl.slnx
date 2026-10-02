@@ -1,9 +1,9 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/FuelControl.Contracts/FuelControl.Contracts.csproj" />
-    <Project Path="src/FuelControl.Core/FuelControl.Core.csproj" />
-    <Project Path="src/FuelControl.Api/FuelControl.Api.csproj" />
-    <Project Path="src/FuelControl.Desktop/FuelControl.Desktop.csproj" />
+    <Project Path="src/backend/FuelControl.Contracts/FuelControl.Contracts.csproj" />
+    <Project Path="src/backend/FuelControl.Core/FuelControl.Core.csproj" />
+    <Project Path="src/backend/FuelControl.Api/FuelControl.Api.csproj" />
+    <Project Path="src/frontend/desktop/FuelControl.Desktop/FuelControl.Desktop.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FuelControl.Api.Tests/FuelControl.Api.Tests.csproj" />

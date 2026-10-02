@@ -7,7 +7,7 @@ Boshliqlar uchun hisobot/boshqaruv paneli, operatorlar uchun sotuv kiritish (off
 | Buyruq | Nima qiladi |
 |---|---|
 | `npm start` | dev server (http://localhost:4200), API yo'llari `proxy.conf.json` orqali `localhost:5100` ga |
-| `npm run build` | production build → `../FuelControl.Api/wwwroot` (service worker bilan) |
+| `npm run build` | production build → `../../../backend/FuelControl.Api/wwwroot` (service worker bilan) |
 | `npm run api` | ishlab turgan API'dan (`/openapi/v1.json`) `src/app/api/schema.d.ts` ni qayta generatsiya |
 | `npm run lugat` | desktop `Til.cs` dan `src/app/core/lugat.json` ni qayta yasash |
 

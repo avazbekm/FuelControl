@@ -10,5 +10,5 @@ publish/
 *.db-wal
 zaxira-dev/
 zaxira-web/
-src/FuelControl.Api/wwwroot/
+src/backend/FuelControl.Api/wwwroot/
 deploy/.env
