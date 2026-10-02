@@ -1,0 +1,82 @@
+<div class="sahifa">
+  <div class="sahifa-bosh">
+    @if (!ozimmi()) {
+      <button class="tugma ikonli" (click)="ortga()" [attr.aria-label]="til.t('Ortga')"><ikon nomi="back" [olcham]="18" /></button>
+    }
+    <h1>{{ ozimmi() ? til.t('MeningHisobim') : (h()?.operatorIsmi ?? til.t('OperatorHisobi')) }}</h1>
+    @if (!ozimmi() && auth.bor('AvansBerish')) {
+      <button class="tugma asosiy kichik" (click)="dialogOch()"><ikon nomi="cash" [olcham]="16" /> {{ til.t('AvansTolov') }}</button>
+    }
+  </div>
+
+  <div class="oy-nav">
+    <button class="tugma ikonli kichik" (click)="oyAlmashtir(-1)" [attr.aria-label]="til.t('OldingiOy')"><ikon nomi="chevronLeft" [olcham]="18" /></button>
+    <span class="oy-nomi">{{ oyNomi() }}</span>
+    <button class="tugma ikonli kichik" (click)="oyAlmashtir(1)" [disabled]="joriyOymi()" [attr.aria-label]="til.t('KeyingiOy')"><ikon nomi="chevronRight" [olcham]="18" /></button>
+  </div>
+
+  @if (xato(); as x) { <div class="shisha karta bosh">{{ x }}</div> }
+  @else if (h(); as h) {
+    <div class="kpilar">
+      <div class="shisha kpi"><span class="nom"><ikon nomi="cash" [olcham]="16" />{{ til.t('OylikMaosh') }}</span><span class="qiymat">{{ pul(h.oylikMaosh) }}<small>{{ til.t('Som') }}</small></span></div>
+      <div class="shisha kpi"><span class="nom"><ikon nomi="user" [olcham]="16" />{{ til.t('JoriyQoldiq') }}</span>
+        <span class="qiymat" [class.qizil]="h.qoldiq < 0" [class.yashil]="h.qoldiq > 0">{{ pul(h.qoldiq) }}<small>{{ til.t('Som') }}</small></span></div>
+      <div class="shisha kpi"><span class="nom"><ikon nomi="clock" [olcham]="16" />{{ til.t('OyJami') }}</span>
+        <span class="qiymat" [class.qizil]="h.oyJami < 0">{{ pul(h.oyJami) }}<small>{{ til.t('Som') }}</small></span></div>
+    </div>
+
+    <section class="shisha karta">
+      <h2>{{ til.t('ShuOyKorsatkich') }}</h2>
+      <div class="kor">
+        @for (k of korsatkichlar(); track k.turi) {
+          <div><span class="ikkilamchi kichik-matn">{{ til.t('H_' + k.turi) }}</span><b class="son" [class.qizil]="k.summa < 0">{{ pul(k.summa) }}</b></div>
+        }
+      </div>
+    </section>
+
+    <section class="shisha karta">
+      <h2>{{ til.t('HisobHarakatlari') }}</h2>
+      <div class="royxat">
+        @for (x of h.harakatlar; track x.id) {
+          <div class="element">
+            <span class="matnlar">
+              <span class="asosiy-matn"><span class="badge" [class]="'badge ' + badge[x.turi]">{{ til.t('H_' + x.turi) }}</span> {{ x.izoh }}</span>
+              <span class="ikkinchi son">{{ kun(x.sana) }} · {{ x.kimYozdi }}</span>
+            </span>
+            <span class="ong"><b [class.qizil]="x.summa < 0" [class.yashil]="x.summa > 0">{{ x.summa > 0 ? '+' : '' }}{{ pul(x.summa) }}</b></span>
+          </div>
+        } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+      </div>
+    </section>
+  } @else {
+    <div class="shisha karta"><div class="skelet" style="height:160px"></div></div>
+  }
+</div>
+
+@if (dialog()) {
+  <div class="parda" (click)="dialog.set(false)">
+    <form class="dialog" (click)="$event.stopPropagation()" (ngSubmit)="pulBer()" role="dialog" aria-modal="true">
+      <div class="dialog-bosh">
+        <h2>{{ til.t('PulBerish') }} — {{ h()?.operatorIsmi }}</h2>
+        <button type="button" class="tugma ikonli kichik" (click)="dialog.set(false)" aria-label="×"><ikon nomi="x" [olcham]="18" /></button>
+      </div>
+      <div class="segment">
+        <button type="button" [class.tanlangan]="dTuri() === 'Avans'" (click)="dTuri.set('Avans')">{{ til.t('Avans') }}</button>
+        <button type="button" [class.tanlangan]="dTuri() === 'Tolov'" (click)="dTuri.set('Tolov')">{{ til.t('MaoshTolovi') }}</button>
+      </div>
+      <div class="maydon">
+        <label for="d-summa">{{ til.t('SummaSom') }}</label>
+        <input id="d-summa" class="kiritish katta" name="summa" inputmode="numeric" [(ngModel)]="dSumma" autocomplete="off" placeholder="0" />
+      </div>
+      <div class="maydon">
+        <label for="d-izoh">{{ til.t('IzohIxtiyoriy') }}</label>
+        <input id="d-izoh" class="kiritish" name="izoh" [(ngModel)]="dIzoh" [placeholder]="til.t('IzohMisol2')" />
+      </div>
+      @if (dXato()) { <div class="xato-matn">{{ dXato() }}</div> }
+      <div class="amallar">
+        <button type="button" class="tugma" (click)="dialog.set(false)">{{ til.t('Yopish') }}</button>
+        <button type="submit" class="tugma asosiy" [disabled]="band()">@if (band()) { <span class="aylanma"></span> } {{ til.t('Saqlash') }}</button>
+      </div>
+    </form>
+  </div>
+}

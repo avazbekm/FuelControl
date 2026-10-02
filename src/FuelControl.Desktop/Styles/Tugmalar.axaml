@@ -1,0 +1,242 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ===== Suv tomchisi (Liquid Glass) tugma shabloni — barcha Button'lar uchun ===== -->
+
+    <LinearGradientBrush x:Key="TomchiKok" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#6A98FF" />
+        <GradientStop Offset="0.55" Color="#2F6BFF" />
+        <GradientStop Offset="1" Color="#1F55E6" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TomchiYashil" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#5AD79A" />
+        <GradientStop Offset="0.55" Color="#1EA66A" />
+        <GradientStop Offset="1" Color="#158C58" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TomchiTubToq" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0.45" Color="#000A28A0" />
+        <GradientStop Offset="1" Color="#520A28A0" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TomchiAks" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#F2FFFFFF" />
+        <GradientStop Offset="0.48" Color="#00FFFFFF" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TomchiAksRangli" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#99FFFFFF" />
+        <GradientStop Offset="0.48" Color="#00FFFFFF" />
+    </LinearGradientBrush>
+
+    <ControlTheme x:Key="{x:Type Button}" TargetType="Button">
+        <Setter Property="Background" Value="{DynamicResource TomchiShisha}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TomchiChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource Matn}" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="20,11" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+        <Setter Property="ClipToBounds" Value="False" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Panel ClipToBounds="False">
+                    <!-- Soya: effektlarsiz, 7 ta yumaloq qatlam bilan "blur" — chetlari asta so'nadi, tugma chegarasidan tashqariga chiqadi -->
+                    <Border Name="PART_SoyaQuti" Margin="-28,-20,-28,-40" BorderBrush="#241C366E" BorderThickness="0" IsHitTestVisible="False" ClipToBounds="False">
+                        <Panel>
+                            <Border CornerRadius="{TemplateBinding CornerRadius}" Background="{Binding #PART_SoyaQuti.BorderBrush}" Opacity="0.15" Margin="21,18,21,22" />
+                            <Border CornerRadius="{TemplateBinding CornerRadius}" Background="{Binding #PART_SoyaQuti.BorderBrush}" Opacity="0.15" Margin="23,20,23,24" />
+                            <Border CornerRadius="{TemplateBinding CornerRadius}" Background="{Binding #PART_SoyaQuti.BorderBrush}" Opacity="0.15" Margin="25,22,25,26" />
+                            <Border CornerRadius="{TemplateBinding CornerRadius}" Background="{Binding #PART_SoyaQuti.BorderBrush}" Opacity="0.15" Margin="27,24,27,28" />
+                            <Border CornerRadius="{TemplateBinding CornerRadius}" Background="{Binding #PART_SoyaQuti.BorderBrush}" Opacity="0.15" Margin="29,26,29,30" />
+                            <Border CornerRadius="{TemplateBinding CornerRadius}" Background="{Binding #PART_SoyaQuti.BorderBrush}" Opacity="0.15" Margin="31,28,31,32" />
+                        </Panel>
+                    </Border>
+                    <Border Name="PART_Bg"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}" />
+                    <!-- Pastki ichki tus (suyuqlik qalinligi) -->
+                    <Border Name="PART_Tub"
+                            Background="{DynamicResource TomchiTub}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Margin="1" IsHitTestVisible="False" />
+                    <!-- Yuqoridagi yorug'lik aksi (suv tomchisi) -->
+                    <Border Name="PART_Aks"
+                            Background="{StaticResource TomchiAks}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Margin="1" IsHitTestVisible="False" />
+                    <ContentPresenter Name="PART_ContentPresenter"
+                                      Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Padding="{TemplateBinding Padding}"
+                                      HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      RecognizesAccessKey="True" />
+                </Panel>
+            </ControlTemplate>
+        </Setter>
+
+        
+        <Style Selector="^:pointerover /template/ Border#PART_SoyaQuti">
+            <Setter Property="BorderBrush" Value="#2B1C366E" />
+        </Style>
+        <Style Selector="^:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.97)" />
+        </Style>
+        <Style Selector="^:disabled">
+            <Setter Property="Opacity" Value="0.45" />
+        </Style>
+
+        <!-- Rangli variantlar -->
+        <Style Selector="^.primary, ^.success, ^.chip.tanlangan, ^.nav.faol, ^.tolov.tanlangan">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="#8CFFFFFF" />
+        </Style>
+        <Style Selector="^.primary, ^.chip.tanlangan, ^.nav.faol, ^.tolov.tanlangan">
+            <Setter Property="Background" Value="{StaticResource TomchiKok}" />
+        </Style>
+        
+        <Style Selector="^.primary /template/ Border#PART_SoyaQuti, ^.chip.tanlangan /template/ Border#PART_SoyaQuti, ^.nav.faol /template/ Border#PART_SoyaQuti, ^.tolov.tanlangan /template/ Border#PART_SoyaQuti">
+            <Setter Property="BorderBrush" Value="#452F6BFF" />
+        </Style>
+        <Style Selector="^.primary /template/ Border#PART_Aks, ^.success /template/ Border#PART_Aks, ^.chip.tanlangan /template/ Border#PART_Aks, ^.nav.faol /template/ Border#PART_Aks, ^.tolov.tanlangan /template/ Border#PART_Aks">
+            <Setter Property="Background" Value="{StaticResource TomchiAksRangli}" />
+        </Style>
+        <Style Selector="^.primary /template/ Border#PART_Tub, ^.success /template/ Border#PART_Tub, ^.chip.tanlangan /template/ Border#PART_Tub, ^.nav.faol /template/ Border#PART_Tub, ^.tolov.tanlangan /template/ Border#PART_Tub">
+            <Setter Property="Background" Value="{StaticResource TomchiTubToq}" />
+        </Style>
+        <Style Selector="^.success">
+            <Setter Property="Background" Value="{StaticResource TomchiYashil}" />
+        </Style>
+        
+        <Style Selector="^.success /template/ Border#PART_SoyaQuti">
+            <Setter Property="BorderBrush" Value="#451EA66A" />
+        </Style>
+        <Style Selector="^.danger">
+            <Setter Property="Background" Value="{DynamicResource TomchiQizil}" />
+            <Setter Property="Foreground" Value="{DynamicResource BadgeQizilMatn}" />
+        </Style>
+
+        <!-- Kichik variant (chip) -->
+        <Style Selector="^.chip">
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="Medium" />
+        </Style>
+
+        <!-- Yon menyu: faol bo'lmaganda shaffof -->
+        <Style Selector="^.nav">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource MatnYumshoq}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        
+        <Style Selector="^.nav /template/ Border#PART_SoyaQuti">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.nav /template/ Border#PART_Aks, ^.nav /template/ Border#PART_Tub">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.nav:pointerover /template/ Border#PART_Bg">
+            <Setter Property="Background" Value="{DynamicResource NavHover}" />
+        </Style>
+        <Style Selector="^.nav:pointerover /template/ Border#PART_SoyaQuti">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.nav.faol /template/ Border#PART_Bg, ^.nav.faol:pointerover /template/ Border#PART_Bg">
+            <Setter Property="Background" Value="{StaticResource TomchiKok}" />
+        </Style>
+        <Style Selector="^.nav.faol /template/ Border#PART_SoyaQuti, ^.nav.faol:pointerover /template/ Border#PART_SoyaQuti">
+            <Setter Property="BorderBrush" Value="#3D2F6BFF" />
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+        <Style Selector="^.nav.faol /template/ Border#PART_Aks, ^.nav.faol /template/ Border#PART_Tub">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- To'lov turi: keng tugma -->
+        <Style Selector="^.tolov">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Height" Value="54" />
+            <Setter Property="FontSize" Value="15" />
+        </Style>
+
+        <!-- Aparat plitkasi -->
+        <Style Selector="^.aparat">
+            <Setter Property="CornerRadius" Value="24" />
+            <Setter Property="Width" Value="156" />
+            <Setter Property="Height" Value="124" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="FontWeight" Value="Normal" />
+        </Style>
+        <Style Selector="^.aparat.tanlangan">
+            <Setter Property="BorderBrush" Value="#2F6BFF" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+        <Style Selector="^.aparat.tanlangan /template/ Border#PART_Bg">
+            <Setter Property="Background" Value="{DynamicResource AsosiyOch}" />
+        </Style>
+        <Style Selector="^.aparat.tanlangan /template/ Border#PART_SoyaQuti">
+            <Setter Property="BorderBrush" Value="#332F6BFF" />
+        </Style>
+
+        <!-- Ikonka tugma (faqat belgi) -->
+        <Style Selector="^.ikon">
+            <Setter Property="Padding" Value="8" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        
+        <Style Selector="^.ikon /template/ Border#PART_SoyaQuti">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.ikon /template/ Border#PART_Aks, ^.ikon /template/ Border#PART_Tub">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <!-- Bosiladigan karta: tugma bezaksiz, ichidagi Border o'zi shisha karta -->
+        <Style Selector="^.karta">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="26" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        
+        <Style Selector="^.karta /template/ Border#PART_SoyaQuti, ^.karta:pointerover /template/ Border#PART_SoyaQuti">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.karta /template/ Border#PART_Aks, ^.karta /template/ Border#PART_Tub">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+
+        <!-- Havola ko'rinishi -->
+        <Style Selector="^.link">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="#2F6BFF" />
+        </Style>
+        
+        <Style Selector="^.link /template/ Border#PART_SoyaQuti">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.link /template/ Border#PART_Aks, ^.link /template/ Border#PART_Tub">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>

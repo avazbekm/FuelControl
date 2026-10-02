@@ -1,0 +1,20 @@
+:host {
+  display: flex; flex-direction: column; min-height: 100dvh;
+  padding: calc(12px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+}
+.yuqori { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+.til { width: 168px; }
+.markaz { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 12px 0; }
+.brend { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 360px; }
+.brend h1 { font-size: 30px; }
+.brend p { margin: 0; font-size: 14px; }
+.logo {
+  width: 64px; height: 64px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; background: linear-gradient(180deg, #6A96FF, #2F6BFF 60%, #2457E0);
+  box-shadow: 0 12px 30px rgba(47, 107, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+.forma { width: 100%; max-width: 400px; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; }
+.pin-tugma { min-height: 28px; padding: 0 8px; font-size: 13px; color: var(--asosiy); }
+.klaviatura { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.klaviatura .tugma { min-height: 54px; font-size: 22px; font-weight: 650; }
+.izoh { margin: 0; text-align: center; }

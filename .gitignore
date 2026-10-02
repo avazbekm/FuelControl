@@ -1,0 +1,14 @@
+bin/
+obj/
+*.user
+.vs/
+publish/
+
+# Mahalliy baza va zaxiralar
+*.db
+*.db-shm
+*.db-wal
+zaxira-dev/
+zaxira-web/
+src/FuelControl.Api/wwwroot/
+deploy/.env

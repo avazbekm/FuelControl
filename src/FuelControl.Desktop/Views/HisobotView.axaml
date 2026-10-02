@@ -1,0 +1,124 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="using:FuelControl.Desktop.Controls"
+             xmlns:vm="using:FuelControl.Desktop.ViewModels"
+             xmlns:m="using:FuelControl.Desktop.Models"
+             xmlns:ctl="using:FuelControl.Desktop.Controls"
+             x:Class="FuelControl.Desktop.Views.HisobotView"
+             x:DataType="vm:HisobotViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="28,24,28,28" RowSpacing="16">
+
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="3">
+                <TextBlock Text="{l:T Hisobotlar}" Classes="sarlavha" />
+                <TextBlock Classes="izoh"><Run Text="{l:T Davr}" /><Run Text=": " /><Run Text="{Binding DavrMatni}" /></TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <Button Classes="ghost" Command="{Binding ExcelCommand}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).KoradiEksport}"><StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="excel" Olcham="16" /><TextBlock Text="Excel" /></StackPanel></Button>            </StackPanel>
+        </Grid>
+
+        <!-- Filtrlar -->
+        <Border Grid.Row="1" Classes="card" Padding="16">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="12">
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{l:T Dan, Katta=True}" Classes="yorliq" />
+                        <DatePicker SelectedDate="{Binding Dan}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{l:T Gacha, Katta=True}" Classes="yorliq" />
+                        <DatePicker SelectedDate="{Binding Gacha}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="{l:T Operator, Katta=True}" Classes="yorliq" />
+                        <ComboBox ItemsSource="{Binding OperatorFiltri}" SelectedItem="{Binding TanlanganOperator}" Width="220">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="m:Foydalanuvchi"><TextBlock Text="{Binding ToliqIsm}" /></DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="{l:T Guruhlash, Katta=True}" Classes="yorliq" />
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Button Classes="chip" Classes.tanlangan="{Binding OperatorBoyicha}" Content="{l:T OperatorBoyicha}" Command="{Binding GuruhniTanlaCommand}" CommandParameter="0" />
+                            <Button Classes="chip" Classes.tanlangan="{Binding KunBoyicha}" Content="{l:T Kunlik}" Command="{Binding GuruhniTanlaCommand}" CommandParameter="1" />
+                            <Button Classes="chip" Classes.tanlangan="{Binding OyBoyicha}" Content="{l:T Oylik}" Command="{Binding GuruhniTanlaCommand}" CommandParameter="2" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="{l:T TezDavr}" Classes="izoh" VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <Button Classes="chip" Content="{l:T Bugun}" Command="{Binding TezDavrCommand}" CommandParameter="bugun" />
+                    <Button Classes="chip" Content="{l:T Kecha}" Command="{Binding TezDavrCommand}" CommandParameter="kecha" />
+                    <Button Classes="chip" Content="{l:T Oxirgi7Kun}" Command="{Binding TezDavrCommand}" CommandParameter="hafta" />
+                    <Button Classes="chip" Content="{l:T ShuOy}" Command="{Binding TezDavrCommand}" CommandParameter="oy" />
+                    <Button Classes="chip" Content="{l:T OtganOy}" Command="{Binding TezDavrCommand}" CommandParameter="otganOy" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Jami KPI -->
+        <UniformGrid Grid.Row="2" Columns="6" ColumnSpacing="12">
+            <Border Classes="kpi"><StackPanel Spacing="4"><TextBlock Text="{l:T JamiSavdo, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiSumma}" Classes="qiymat" FontSize="20" /></StackPanel></Border>
+            <Border Classes="kpi"><StackPanel Spacing="4"><TextBlock Text="{l:T Litr, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiLitr}" Classes="qiymat" FontSize="20" /></StackPanel></Border>
+            <Border Classes="kpi"><StackPanel Spacing="4"><TextBlock Text="{l:T Naqd, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiNaqd}" Classes="qiymat" FontSize="20" /></StackPanel></Border>
+            <Border Classes="kpi"><StackPanel Spacing="4"><TextBlock Text="{l:T Plastik, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiPlastik}" Classes="qiymat" FontSize="20" /></StackPanel></Border>
+            <Border Classes="kpi"><StackPanel Spacing="4"><TextBlock Text="{l:T Click, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiClick}" Classes="qiymat" FontSize="20" /></StackPanel></Border>
+            <Border Classes="kpi">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{l:T KamomatAvans, Katta=True}" Classes="nom" />
+                    <TextBlock Classes="qiymat" FontSize="20" Foreground="{DynamicResource Qizil}" Text="{Binding JamiKamomat}" />
+                    <TextBlock Classes="izoh"><Run Text="{l:T AvansKichik}" /><Run Text=": " /><Run Text="{Binding JamiAvans}" /><Run Text="  ·  " /><Run Text="{l:T Bekor}" /><Run Text=": " /><Run Text="{Binding BekorSoni}" /></TextBlock>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- Jadval -->
+        <Border Grid.Row="3" Classes="card" Padding="8">
+            <DataGrid ItemsSource="{Binding Qatorlar}">
+                <DataGrid.Styles>
+                    <Style Selector="DataGridRow TextBlock.jami">
+                        <Setter Property="FontWeight" Value="Bold" />
+                    </Style>
+                </DataGrid.Styles>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{Binding GuruhSarlavha}" Binding="{Binding Guruh}" Width="240" />
+                    <DataGridTemplateColumn Header="{l:T Yoqilgi}" Width="110">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:HisobotQatori">
+                                <TextBlock Text="{Binding Yoqilgi}" VerticalAlignment="Center" Classes.jami="{Binding Jami}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="{l:T Litr}" Width="110">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:HisobotQatori"><TextBlock Text="{Binding Litr}" VerticalAlignment="Center" Classes.jami="{Binding Jami}" /></DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="{l:T Summa}" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:HisobotQatori"><TextBlock Text="{Binding Summa}" VerticalAlignment="Center" Classes.jami="{Binding Jami}" /></DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="{l:T Naqd}" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:HisobotQatori"><TextBlock Text="{Binding Naqd}" VerticalAlignment="Center" Classes.jami="{Binding Jami}" /></DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="{l:T Plastik}" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:HisobotQatori"><TextBlock Text="{Binding Plastik}" VerticalAlignment="Center" Classes.jami="{Binding Jami}" /></DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="{l:T Click}" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:HisobotQatori"><TextBlock Text="{Binding Click}" VerticalAlignment="Center" Classes.jami="{Binding Jami}" /></DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="{l:T Sotuvlar}" Binding="{Binding Soni}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

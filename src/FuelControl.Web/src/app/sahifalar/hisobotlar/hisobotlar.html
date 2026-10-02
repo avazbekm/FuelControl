@@ -1,0 +1,124 @@
+<div class="sahifa">
+  <div class="sahifa-bosh">
+    <h1>{{ til.t('Hisobotlar') }}</h1>
+    @if (auth.bor('Eksport')) {
+      <button class="tugma kichik" (click)="eksport()" [disabled]="!natija() || eksportBand()">
+        @if (eksportBand()) { <span class="aylanma"></span> } @else { <ikon nomi="excel" [olcham]="16" /> } {{ til.t('ExcelXlsx') }}
+      </button>
+    }
+      </div>
+
+  <section class="shisha karta ustunlar">
+    <div class="chiplar">
+      @for (t of tezlar; track t.kod) {
+        <button class="chip" [class.tanlangan]="tez() === t.kod" (click)="tezTanla(t.kod)">{{ til.t(t.kalit) }}</button>
+      }
+    </div>
+    <div class="filtrlar">
+      <div class="maydon">
+        <label for="h-dan">{{ til.t('Dan') }}</label>
+        <input id="h-dan" type="date" class="kiritish" [ngModel]="dan()" (ngModelChange)="sanaOzgardi('dan', $event)" [max]="gacha()" />
+      </div>
+      <div class="maydon">
+        <label for="h-gacha">{{ til.t('Gacha') }}</label>
+        <input id="h-gacha" type="date" class="kiritish" [ngModel]="gacha()" (ngModelChange)="sanaOzgardi('gacha', $event)" [min]="dan()" />
+      </div>
+      @if (operatorlar().length) {
+        <div class="maydon">
+          <label for="h-op">{{ til.t('Operator') }}</label>
+          <select id="h-op" class="kiritish" [ngModel]="operatorId()" (ngModelChange)="operatorTanla($event)">
+            <option [ngValue]="null">{{ til.t('BarchaOperatorlar') }}</option>
+            @for (o of operatorlar(); track o.id) { <option [ngValue]="o.id">{{ o.ism }}</option> }
+          </select>
+        </div>
+      }
+      <div class="maydon">
+        <span class="yorliq">{{ til.t('Guruhlash') }}</span>
+        <div class="segment">
+          @for (g of guruhlar; track g.kod) {
+            <button [class.tanlangan]="guruh() === g.kod" (click)="guruhTanla(g.kod)">{{ til.t(g.kalit) }}</button>
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  @if (xato(); as x) {
+    <div class="shisha karta bosh">{{ x }}<br /><br /><button class="tugma" (click)="yukla()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button></div>
+  } @else if (natija(); as n) {
+    <div class="kpilar" [class.xira]="yuklanmoqda()">
+      @for (k of kpilar(); track k.kalit) {
+        <div class="shisha kpi" [class.asosiy-kpi]="k.asosiy">
+          <span class="nom">@if (k.rang) { <span class="nuqta" [style.background]="'var(--q-' + k.rang + ')'"></span> }{{ til.t(k.kalit) }}</span>
+          <span class="qiymat" [class.qizil]="k.qizil">{{ k.qiymat }}@if (k.birlik) {<small>{{ til.t(k.birlik) }}</small>}</span>
+        </div>
+      }
+    </div>
+
+    <section class="shisha karta" [class.xira]="yuklanmoqda()">
+      <!-- Keng ekran: jadval -->
+      <div class="jadval-oram keng">
+        <table class="jadval">
+          <thead>
+            <tr>
+              <th>{{ til.t(guruh() === 'Operator' ? 'Operator' : guruh() === 'Kun' ? 'Sana' : 'Oy') }}</th>
+              @for (u of ustunlar; track u.maydon) { <th class="o">{{ til.t(u.kalit) }}</th> }
+            </tr>
+          </thead>
+          @for (b of bolimlar(); track b.guruh) {
+            <tbody [class.bolim]="b.yoqilgilar.length">
+              @for (y of b.yoqilgilar; track y.yoqilgi) {
+                <tr class="yoq-qator">
+                  <td><span class="ichki">{{ y.yoqilgi }}</span></td>
+                  @for (u of ustunlar; track u.maydon) { <td class="o">{{ qiymat(y, u) }}</td> }
+                </tr>
+              }
+              <tr [class.guruh-jami]="b.yoqilgilar.length">
+                <td>{{ nomi(b.jami) }}</td>
+                @for (u of ustunlar; track u.maydon) {
+                  <td class="o" [class.qizil]="u.maydon === 'kamomat' && b.jami.kamomat > 0">
+                    @if (u.maydon === 'summa') { <b>{{ qiymat(b.jami, u) }}</b> } @else { {{ qiymat(b.jami, u) }} }
+                  </td>
+                }
+              </tr>
+            </tbody>
+          } @empty { <tbody><tr><td [attr.colspan]="ustunlar.length + 1" class="bosh">{{ til.t('MalumotYoq') }}</td></tr></tbody> }
+          <tfoot>
+            <tr>
+              <td>{{ til.t('Jami') }}</td>
+              @for (u of ustunlar; track u.maydon) { <td class="o" [class.qizil]="u.maydon === 'kamomat' && n.jami.kamomat > 0">{{ qiymat(n.jami, u) }}</td> }
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Telefon: kartalar -->
+      <div class="kartalar">
+        @for (b of bolimlar(); track b.guruh) {
+          <div class="h-karta">
+            <div class="qator ora"><b>{{ nomi(b.jami) }}</b><b class="son">{{ pul(b.jami.summa) }}</b></div>
+            <div class="h-ichki son">
+              <span><span class="nuqta" style="background:var(--q-naqd)"></span>{{ pul(b.jami.naqd) }}</span>
+              <span><span class="nuqta" style="background:var(--q-plastik)"></span>{{ pul(b.jami.plastik) }}</span>
+              <span><span class="nuqta" style="background:var(--q-click)"></span>{{ pul(b.jami.click) }}</span>
+            </div>
+            @for (y of b.yoqilgilar; track y.yoqilgi) {
+              <div class="qator ora kichik-matn yoq-ichki son">
+                <span>{{ y.yoqilgi }} · {{ litr(y.litr) }} {{ til.t('L') }}</span><span>{{ pul(y.summa) }}</span>
+              </div>
+            }
+            <div class="ikkilamchi kichik-matn son">
+              {{ litr(b.jami.litr) }} {{ til.t('L') }}
+              @if (b.jami.soni) { · {{ b.jami.soni }} {{ til.t('TaSotuv') }} }
+              @if (b.jami.kamomat) { · <span class="qizil">{{ til.t('Kamomat') }} {{ pul(b.jami.kamomat) }}</span> }
+              @if (b.jami.avans) { · {{ til.t('AvansKichik') }} {{ pul(b.jami.avans) }} }
+              @if (b.jami.bekorSoni) { · {{ b.jami.bekorSoni }} {{ til.t('Bekor') }} }
+            </div>
+          </div>
+        } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+      </div>
+    </section>
+  } @else {
+    <div class="shisha karta"><div class="skelet" style="height:200px"></div></div>
+  }
+</div>

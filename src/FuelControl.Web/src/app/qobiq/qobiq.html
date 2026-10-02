@@ -1,0 +1,92 @@
+@if (aloqa.muammo() !== 'yoq') {
+  <div class="banner" role="status">
+    @if (aloqa.muammo() === 'aloqaYoq') {
+      <ikon nomi="wifiOff" [olcham]="16" /> {{ til.t('AloqaYoq') }}
+    } @else {
+      <span class="aylanma"></span> {{ til.t('QaytaUlanmoqda') }}
+    }
+  </div>
+}
+
+<aside class="yon shisha">
+  <div class="brend">
+    <span class="logo"><ikon nomi="drop" [olcham]="20" [qalinlik]="2" /></span>
+    <div>
+      <div class="brend-nom">FuelControl</div>
+      <div class="ikkilamchi kichik-matn">{{ til.t('BrendIzoh') }}</div>
+    </div>
+  </div>
+  <nav>
+    @for (b of bolimlar(); track b.yol) {
+      <a class="nav" [routerLink]="'/' + b.yol" routerLinkActive="faol">
+        <ikon [nomi]="b.ikon" /> <span>{{ til.t(b.kalit) }}</span>
+      </a>
+    }
+    <a class="nav" routerLink="/sozlamalar" routerLinkActive="faol">
+      <ikon nomi="gear" /> <span>{{ til.t('Sozlamalar') }}</span>
+    </a>
+  </nav>
+  <div class="bosh-joy"></div>
+  <button class="tugma keng" (click)="tema.almashtir()">
+    <ikon [nomi]="tema.qorongimi() ? 'sun' : 'moon'" [olcham]="18" /> {{ til.t('QorongiRejim') }}
+  </button>
+  <div class="men">
+    <span class="avatar">{{ bosh() }}</span>
+    <div class="matnlar">
+      <div class="ism">{{ auth.foydalanuvchi()?.toliqIsm }}</div>
+      <div class="ikkilamchi kichik-matn">{{ til.t('Rol_' + auth.foydalanuvchi()?.rol) }}</div>
+    </div>
+    <button class="tugma ikonli kichik shaffof" (click)="auth.chiqish()" [attr.aria-label]="til.t('Chiqish')" [title]="til.t('Chiqish')">
+      <ikon nomi="power" [olcham]="18" />
+    </button>
+  </div>
+</aside>
+
+<main>
+  <router-outlet />
+</main>
+
+<nav class="tablar shisha" [attr.aria-label]="til.t('Bolimlar')">
+  @for (b of tablar(); track b.yol) {
+    <a class="tab" [routerLink]="'/' + b.yol" routerLinkActive="faol">
+      <ikon [nomi]="b.ikon" [olcham]="22" />
+      <span>{{ til.t(b.qisqaKalit ?? b.kalit) }}</span>
+    </a>
+  }
+  @if (qolganlar().length) {
+    <button class="tab" [class.faol]="yanaFaol()" (click)="yanaOchiq.set(true)">
+      <ikon nomi="more" [olcham]="22" [qalinlik]="3" />
+      <span>{{ til.t('Yana') }}</span>
+    </button>
+  } @else {
+    <a class="tab" routerLink="/sozlamalar" routerLinkActive="faol">
+      <ikon nomi="gear" [olcham]="22" />
+      <span>{{ til.t('Sozlamalar') }}</span>
+    </a>
+  }
+</nav>
+
+@if (yanaOchiq()) {
+  <div class="parda" (click)="yanaOchiq.set(false)">
+    <div class="dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+      <div class="dialog-bosh">
+        <h2>{{ til.t('Yana') }}</h2>
+        <button class="tugma ikonli kichik" (click)="yanaOchiq.set(false)" aria-label="×"><ikon nomi="x" [olcham]="18" /></button>
+      </div>
+      <div class="royxat">
+        @for (b of qolganlar(); track b.yol) {
+          <a class="element" [routerLink]="'/' + b.yol">
+            <span class="ikon-doira"><ikon [nomi]="b.ikon" [olcham]="18" /></span>
+            <span class="matnlar"><span class="asosiy-matn">{{ til.t(b.kalit) }}</span></span>
+            <ikon nomi="chevronRight" [olcham]="18" />
+          </a>
+        }
+        <a class="element" routerLink="/sozlamalar">
+          <span class="ikon-doira"><ikon nomi="gear" [olcham]="18" /></span>
+          <span class="matnlar"><span class="asosiy-matn">{{ til.t('Sozlamalar') }}</span></span>
+          <ikon nomi="chevronRight" [olcham]="18" />
+        </a>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,14 @@
+{
+  "/auth": { "target": "http://localhost:5100", "secure": false },
+  "/me": { "target": "http://localhost:5100", "secure": false },
+  "/boshqaruv": { "target": "http://localhost:5100", "secure": false },
+  "/hisobot": { "target": "http://localhost:5100", "secure": false },
+  "/smenalar": { "target": "http://localhost:5100", "secure": false },
+  "/sotuvlar": { "target": "http://localhost:5100", "secure": false },
+  "/operatorlar": { "target": "http://localhost:5100", "secure": false },
+  "/aparatlar": { "target": "http://localhost:5100", "secure": false },
+  "/yoqilgilar": { "target": "http://localhost:5100", "secure": false },
+  "/foydalanuvchilar": { "target": "http://localhost:5100", "secure": false },
+  "/audit": { "target": "http://localhost:5100", "secure": false },
+  "/hub": { "target": "http://localhost:5100", "secure": false, "ws": true }
+}

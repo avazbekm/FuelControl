@@ -1,0 +1,282 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ctl="using:FuelControl.Desktop.Controls">
+
+    <!-- Rejimga bog'liq bo'lmagan ranglar (rejimga bog'liqlari: Styles/Yorug.axaml va Qorongi.axaml) -->
+    <Styles.Resources>
+        <SolidColorBrush x:Key="Asosiy"         Color="#2F6BFF" />
+        <SolidColorBrush x:Key="AsosiyToq"      Color="#1B4FE0" />
+        <SolidColorBrush x:Key="Binafsha"       Color="#7C5CFF" />
+        <SolidColorBrush x:Key="Moviy"          Color="#19B5C9" />
+
+        <LinearGradientBrush x:Key="ShishaToq" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#F52F6BFF" />
+            <GradientStop Offset="1" Color="#EB1B3FD6" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="OrbKok" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#7FB0FF" />
+            <GradientStop Offset="0.55" Color="#2F6BFF" />
+            <GradientStop Offset="1" Color="#1B3FD6" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="NaychaKok" StartPoint="0%,0%" EndPoint="0%,100%">
+            <GradientStop Offset="0" Color="#7FB0FF" />
+            <GradientStop Offset="0.5" Color="#2F6BFF" />
+            <GradientStop Offset="1" Color="#2458D6" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="LogoFon" StartPoint="0%,0%" EndPoint="100%,100%">
+            <GradientStop Offset="0" Color="#4C8DFF" />
+            <GradientStop Offset="0.55" Color="#3A6BFF" />
+            <GradientStop Offset="1" Color="#8B5CF6" />
+        </LinearGradientBrush>
+    </Styles.Resources>
+
+    <!-- Ro'yxat konteynerlari tugma soyasini kesmasin -->
+    <Style Selector="ItemsControl, ItemsPresenter, ItemsControl /template/ Border, WrapPanel, UniformGrid">
+        <Setter Property="ClipToBounds" Value="False" />
+    </Style>
+
+    <!-- ===== Ikonka standart rangi (rejimga qarab) ===== -->
+    <Style Selector="ctl|Ikon">
+        <Setter Property="Rang" Value="{DynamicResource IkonRang}" />
+    </Style>
+
+    <!-- ===== Shisha panellar ===== -->
+    <Style Selector="Border.card, Border.kpi">
+        <Setter Property="Background" Value="{DynamicResource Shisha}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShishaChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="26" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="BoxShadow" Value="0 18 48 0 #1F1C366E, 0 1 2 0 #0F1C366E" />
+    </Style>
+    <Style Selector="Border.kpi">
+        <Setter Property="Padding" Value="18,20" />
+    </Style>
+    <Style Selector="Border.kpi TextBlock.qiymat">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+    </Style>
+    <Style Selector="Border.kpi TextBlock.nom">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
+        <Setter Property="LetterSpacing" Value="1" />
+    </Style>
+
+    <Style Selector="Border.tile">
+        <Setter Property="Background" Value="{DynamicResource TileFon}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShishaChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Padding" Value="14" />
+    </Style>
+
+    <Style Selector="Border.deep">
+        <Setter Property="Background" Value="{StaticResource ShishaToq}" />
+        <Setter Property="BorderBrush" Value="#73FFFFFF" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="30" />
+        <Setter Property="Padding" Value="24" />
+        <Setter Property="BoxShadow" Value="0 24 56 0 #591B3FD6" />
+    </Style>
+
+    <Style Selector="Border.orb">
+        <Setter Property="Background" Value="{StaticResource OrbKok}" />
+        <Setter Property="CornerRadius" Value="999" />
+    </Style>
+    <Style Selector="Border.logo">
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Background" Value="{StaticResource LogoFon}" />
+        <Setter Property="BoxShadow" Value="0 12 28 0 #5A4F6BFF" />
+    </Style>
+    <Style Selector="Border.avatar">
+        <Setter Property="Background" Value="{DynamicResource AvatarFon}" />
+        <Setter Property="CornerRadius" Value="999" />
+    </Style>
+    <Style Selector="Border.avatar TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource BadgeKokMatn}" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Dialog va parda -->
+    <Style Selector="Border.parda">
+        <Setter Property="Background" Value="{DynamicResource Parda}" />
+    </Style>
+    <Style Selector="Border.dialog">
+        <Setter Property="Background" Value="{DynamicResource DialogFon}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShishaChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="32" />
+        <Setter Property="Padding" Value="30" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="BoxShadow" Value="0 30 80 0 #4D14285A, 0 2 6 0 #1F14285A" />
+    </Style>
+    <Style Selector="Border.chiziq">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource Chiziq}" />
+    </Style>
+
+    <!-- ===== Belgi (badge) ===== -->
+    <Style Selector="Border.badge">
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="11,4" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource BadgeFon}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShishaChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.badge TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource MatnYumshoq}" />
+    </Style>
+    <Style Selector="Border.badge.yashil"><Setter Property="Background" Value="{DynamicResource BadgeYashilFon}" /></Style>
+    <Style Selector="Border.badge.yashil TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeYashilMatn}" /></Style>
+    <Style Selector="Border.badge.qizil"><Setter Property="Background" Value="{DynamicResource BadgeQizilFon}" /></Style>
+    <Style Selector="Border.badge.qizil TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeQizilMatn}" /></Style>
+    <Style Selector="Border.badge.sariq"><Setter Property="Background" Value="{DynamicResource BadgeSariqFon}" /></Style>
+    <Style Selector="Border.badge.sariq TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeSariqMatn}" /></Style>
+    <Style Selector="Border.badge.kok"><Setter Property="Background" Value="{DynamicResource BadgeKokFon}" /></Style>
+    <Style Selector="Border.badge.kok TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeKokMatn}" /></Style>
+    <Style Selector="Border.badge.kulrang"><Setter Property="Background" Value="{DynamicResource BadgeKulrangFon}" /></Style>
+    <Style Selector="Border.badge.kulrang TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeKulrangMatn}" /></Style>
+
+    <!-- ===== Matnlar ===== -->
+    <Style Selector="TextBlock.sarlavha">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+        <Setter Property="LetterSpacing" Value="-0.5" />
+    </Style>
+    <Style Selector="TextBlock.kichikSarlavha">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.izoh">
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
+    </Style>
+    <Style Selector="TextBlock.yorliq">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
+        <Setter Property="LetterSpacing" Value="1" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+    <Style Selector="TextBlock.pul">
+        <Setter Property="FontWeight" Value="ExtraBold" />
+    </Style>
+    <Style Selector="TextBlock.musbat">
+        <Setter Property="Foreground" Value="{DynamicResource Yashil}" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+    </Style>
+    <Style Selector="TextBlock.manfiy">
+        <Setter Property="Foreground" Value="{DynamicResource Qizil}" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+    </Style>
+    <Style Selector="TextBlock.jadvalSarlavha">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
+    </Style>
+
+    <!-- Rangli tugma ichidagi ikonka oq bo'ladi -->
+    <Style Selector="Button.primary ctl|Ikon, Button.success ctl|Ikon, Button.chip.tanlangan ctl|Ikon, Button.nav.faol ctl|Ikon, Button.tolov.tanlangan ctl|Ikon">
+        <Setter Property="Rang" Value="White" />
+    </Style>
+    <Style Selector="Button.danger ctl|Ikon">
+        <Setter Property="Rang" Value="{DynamicResource BadgeQizilMatn}" />
+    </Style>
+    <Style Selector="Button.tolov.tanlangan">
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <!-- ===== Kiritish maydonlari ===== -->
+    <Style Selector="TextBox">
+        <Setter Property="CornerRadius" Value="21" />
+        <Setter Property="MinHeight" Value="42" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource KiritishFon}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource KiritishChegara}" />
+        <Setter Property="Foreground" Value="{DynamicResource Matn}" />
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+    <Style Selector="TextBox:pointerover /template/ Border#PART_BorderElement, TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="{DynamicResource KiritishFokus}" />
+        <Setter Property="BorderBrush" Value="#2F6BFF" />
+    </Style>
+    <Style Selector="TextBox.katta">
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+        <Setter Property="MinHeight" Value="64" />
+        <Setter Property="CornerRadius" Value="22" />
+        <Setter Property="Padding" Value="22,0" />
+        <Setter Property="TextAlignment" Value="Right" />
+    </Style>
+    <Style Selector="ComboBox">
+        <Setter Property="CornerRadius" Value="21" />
+        <Setter Property="MinHeight" Value="42" />
+        <Setter Property="Padding" Value="16,0,8,0" />
+        <Setter Property="Background" Value="{DynamicResource KiritishFon}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource KiritishChegara}" />
+        <Setter Property="Foreground" Value="{DynamicResource Matn}" />
+    </Style>
+    <Style Selector="DatePicker">
+        <Setter Property="CornerRadius" Value="21" />
+    </Style>
+    <Style Selector="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource Matn}" />
+    </Style>
+
+    <!-- ===== Shisha naycha (progress) ===== -->
+    <Style Selector="ProgressBar">
+        <Setter Property="Height" Value="10" />
+        <Setter Property="MinHeight" Value="10" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Background" Value="{DynamicResource NaychaFon}" />
+        <Setter Property="Foreground" Value="{StaticResource NaychaKok}" />
+    </Style>
+    <Style Selector="ProgressBar /template/ Border#PART_Indicator">
+        <Setter Property="CornerRadius" Value="999" />
+    </Style>
+
+    <!-- ===== DataGrid ===== -->
+    <Style Selector="DataGrid">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource Chiziq}" />
+        <Setter Property="RowHeight" Value="42" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="IsReadOnly" Value="True" />
+        <Setter Property="CanUserReorderColumns" Value="False" />
+        <Setter Property="CanUserResizeColumns" Value="True" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="Foreground" Value="{DynamicResource Matn}" />
+    </Style>
+    <Style Selector="DataGridColumnHeader">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="Height" Value="36" />
+    </Style>
+    <Style Selector="DataGridCell">
+        <Setter Property="Padding" Value="4,0" />
+        <Setter Property="Foreground" Value="{DynamicResource Matn}" />
+    </Style>
+    <Style Selector="DataGridRow:pointerover /template/ Rectangle#BackgroundRectangle">
+        <Setter Property="Fill" Value="{DynamicResource QatorHover}" />
+    </Style>
+    <Style Selector="DataGridRow:selected /template/ Rectangle#BackgroundRectangle">
+        <Setter Property="Fill" Value="#1A2F6BFF" />
+        <Setter Property="Opacity" Value="1" />
+    </Style>
+    <Style Selector="DataGridRow:selected:pointerover /template/ Rectangle#BackgroundRectangle">
+        <Setter Property="Fill" Value="#262F6BFF" />
+    </Style>
+</Styles>

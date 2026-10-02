@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.angular/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/zaxira-*/
+src/FuelControl.Api/wwwroot/
+src/FuelControl.Desktop/
+tests/
+.vs/
+deploy/.env

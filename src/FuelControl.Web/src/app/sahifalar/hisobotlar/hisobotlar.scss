@@ -1,0 +1,27 @@
+.filtrlar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.filtrlar > .maydon:nth-child(n + 3) { grid-column: 1 / -1; }
+@media (min-width: 900px) {
+  .filtrlar { grid-template-columns: 170px 170px minmax(0, 1fr) minmax(0, 1.3fr); align-items: end; }
+  .filtrlar > .maydon:nth-child(n + 3) { grid-column: auto; }
+}
+.nuqta { width: 8px; height: 8px; border-radius: 999px; display: inline-block; margin-right: 4px; }
+.asosiy-kpi .qiymat { color: var(--asosiy); }
+.xira { opacity: 0.6; transition: opacity 0.2s; }
+
+.keng { display: none; }
+.kartalar { display: flex; flex-direction: column; }
+.h-karta { padding: 12px 4px; border-bottom: 1px solid var(--chiziq); display: flex; flex-direction: column; gap: 6px; }
+.h-karta:last-child { border-bottom: 0; }
+.h-ichki { display: flex; gap: 14px; font-size: 13px; flex-wrap: wrap; }
+@media (min-width: 700px) {
+  .keng { display: block; }
+  .kartalar { display: none; }
+}
+
+/* Yoqilg'i kesimi: guruh ichidagi qatorlar */
+.yoq-qator td { color: var(--matn-2); font-size: 13px; padding-top: 6px; padding-bottom: 6px; }
+.ichki { padding-left: 16px; position: relative; }
+.ichki::before { content: ""; position: absolute; left: 4px; top: 50%; width: 6px; height: 1px; background: var(--matn-2); }
+.guruh-jami td { font-weight: 650; }
+tbody.bolim { border-bottom: 2px solid var(--chiziq); }
+.yoq-ichki { color: var(--matn-2); padding-left: 10px; border-left: 2px solid var(--naycha); }

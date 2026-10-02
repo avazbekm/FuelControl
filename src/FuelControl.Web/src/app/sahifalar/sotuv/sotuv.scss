@@ -1,0 +1,40 @@
+.smena-panel, .navbat-panel { display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 10px; border-radius: 22px; flex-wrap: wrap; }
+.smena-panel .bosh-joy { min-width: 160px; }
+.navbat-panel { background: var(--b-sariq-fon); color: var(--b-sariq); padding-left: 16px; }
+.yashil-doira { background: var(--b-yashil-fon); color: var(--yashil); }
+
+.aparatlar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 520px) { .aparatlar { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.aparat {
+  position: relative; text-align: left; cursor: pointer; overflow: hidden;
+  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto auto; column-gap: 10px; row-gap: 2px;
+  padding: 12px; border-radius: 20px;
+  background: linear-gradient(160deg, var(--shisha-1), var(--shisha-2));
+  border: 1.5px solid var(--shisha-chegara);
+  box-shadow: 0 4px 14px rgba(30, 50, 110, 0.06), inset 0 1px 0 var(--shisha-nur);
+  transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s;
+}
+.aparat:active { transform: scale(0.98); }
+.aparat::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--rang); }
+.aparat.tanlangan { border-color: var(--asosiy); box-shadow: 0 0 0 4px rgba(47, 107, 255, 0.18), 0 8px 20px rgba(47, 107, 255, 0.15); }
+.raqam {
+  grid-row: 1 / span 2; width: 40px; height: 40px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800; color: #fff; background: var(--rang);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+}
+.yoq { font-weight: 700; align-self: end; }
+.narx { font-size: 13px; color: var(--matn-3); }
+.narx small { color: var(--matn-2); }
+.total { grid-column: 1 / span 2; font-size: 12px; color: var(--matn-2); margin-top: 6px; }
+
+.birlik { width: 170px; }
+.kiritish-qator { position: relative; }
+.kiritish-qator .kiritish { padding-right: 64px; }
+.birlik-belgi { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--matn-2); font-weight: 650; }
+
+.hisob { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; padding: 12px 14px; border-radius: 18px; box-shadow: none; }
+.hisob > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.katta-son { font-size: 18px; color: var(--asosiy); }
+
+.navbatda { opacity: 0.8; }
+.amal-tugmalar { display: flex; flex: none; }

@@ -1,0 +1,139 @@
+<div class="sahifa">
+  <div class="sahifa-bosh">
+    <h1>{{ til.t('BugungiHisobot') }}</h1>
+    <button class="tugma ikonli" (click)="yukla()" [disabled]="yuklanmoqda()" [attr.aria-label]="til.t('Yangilash')">
+      @if (yuklanmoqda()) { <span class="aylanma"></span> } @else { <ikon nomi="refresh" [olcham]="18" /> }
+    </button>
+  </div>
+
+  @if (xato(); as x) {
+    <div class="shisha karta bosh">{{ x }} <br /><br />
+      <button class="tugma" (click)="yukla()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button>
+    </div>
+  } @else if (d(); as d) {
+    <div class="kpilar">
+      <div class="shisha kpi">
+        <span class="nom"><span class="ikon-doira kichik"><ikon nomi="cash" [olcham]="16" /></span>{{ til.t('BugungiSavdo') }}</span>
+        <span class="qiymat">{{ pul(d.kpi.bugungiSumma) }}<small>{{ til.t('Som') }}</small></span>
+        @if (ozgarish() !== null) {
+          <span class="izoh"><span [class.yashil]="ozgarish()! >= 0" [class.qizil]="ozgarish()! < 0">{{ ozgarish()! >= 0 ? '+' : '' }}{{ ozgarish() }}%</span> {{ til.t('KechagigaNisbatan') }}</span>
+        }
+      </div>
+      <div class="shisha kpi">
+        <span class="nom"><span class="ikon-doira kichik"><ikon nomi="drop" [olcham]="16" /></span>{{ til.t('SotilganYoqilgi') }}</span>
+        <span class="qiymat">{{ litr(d.kpi.bugungiLitr) }}<small>{{ til.t('L') }}</small></span>
+        <span class="izoh">{{ d.kpi.sotuvSoni }} {{ til.t('TaSotuv') }}</span>
+      </div>
+      <div class="shisha kpi">
+        <span class="nom"><span class="ikon-doira kichik"><ikon nomi="clock" [olcham]="16" /></span>{{ til.t('OchiqSmenalar') }}</span>
+        <span class="qiymat">{{ d.kpi.ochiqSmenalar }}</span>
+        <span class="izoh">{{ til.t('HozirIshlayotgan') }}</span>
+      </div>
+      <div class="shisha kpi">
+        <span class="nom"><span class="ikon-doira kichik qizil-doira"><ikon nomi="cash" [olcham]="16" /></span>{{ til.t('ShuOyKamomat') }}</span>
+        <span class="qiymat" [class.qizil]="d.kpi.oyKamomat > 0">{{ pul(d.kpi.oyKamomat) }}<small>{{ til.t('Som') }}</small></span>
+        <span class="izoh">{{ pul(d.kpi.oyJami) }} {{ til.t('Som') }} {{ til.t('OylikSavdo') }}</span>
+      </div>
+    </div>
+
+    <div class="panjara uch">
+      <section class="shisha karta">
+        <h2>{{ til.t('Oxirgi14Kun') }}</h2>
+        <div class="grafik" role="img" [attr.aria-label]="til.t('Oxirgi14Kun')">
+          <div class="max-chiziq son">{{ pul(ustunMax()) }}</div>
+          <div class="ustunlar-q">
+            @for (u of ustunlar(); track u.sana; let i = $index) {
+              <button class="ustun" [class.bugun]="u.bugun" [class.tanlangan]="tanlanganUstun() === i"
+                      (click)="ustunTanla(i)" (mouseenter)="tanlanganUstun.set(i)" (mouseleave)="tanlanganUstun.set(null)"
+                      [attr.aria-label]="u.sana + ': ' + pul(u.summa) + ' ' + til.t('Som')">
+                <span class="tayoq" [style.height.%]="u.foiz"></span>
+                <span class="kun" [class.yashir]="i % 2 === 1 && !u.bugun">{{ u.sana.slice(8) }}</span>
+                @if (tanlanganUstun() === i) {
+                  <span class="izohcha shisha" [class.ong-tomon]="i > 9" [class.chap-tomon]="i < 3">
+                    <b>{{ u.sana.slice(8) }}.{{ u.sana.slice(5, 7) }}.{{ u.sana.slice(0, 4) }}</b>
+                    <span class="son">{{ pul(u.summa) }} {{ til.t('Som') }}</span>
+                    <span class="son ikkilamchi">{{ litr(u.litr) }} {{ til.t('L') }}</span>
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section class="shisha karta">
+        <h2>{{ til.t('TolovTurlariBugun') }}</h2>
+        <div class="stek" role="img">
+          @for (t of tolovlar(); track t.turi) {
+            @if (t.foiz > 0) { <span [style.flex-grow]="t.foiz" [style.background]="'var(--q-' + t.turi.toLowerCase() + ')'"></span> }
+          }
+          @if (!d.kpi.bugungiSumma) { <span class="bosh-stek"></span> }
+        </div>
+        <div class="royxat">
+          @for (t of tolovlar(); track t.turi) {
+            <div class="element">
+              <span class="nuqta" [style.background]="'var(--q-' + t.turi.toLowerCase() + ')'"></span>
+              <span class="matnlar"><span class="asosiy-matn">{{ til.t(t.turi) }}</span></span>
+              <span class="ong"><b>{{ pul(t.summa) }}</b><span class="ikkilamchi kichik-matn">{{ t.foiz.toFixed(0) }}%</span></span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <div class="panjara ikki">
+      <section class="shisha karta">
+        <h2>{{ til.t('YoqilgiTurlariBugun') }}</h2>
+        <div class="royxat">
+          @for (y of yoqilgilar(); track y.nomi) {
+            <div class="element yoq-qator">
+              <span class="matnlar">
+                <span class="qator ora"><span class="asosiy-matn"><span class="nuqta" [style.background]="y.rang"></span> {{ y.nomi }}</span><b class="son">{{ pul(y.summa) }}</b></span>
+                <span class="naycha"><span [style.width.%]="y.foiz" [style.background]="y.rang"></span></span>
+                <span class="ikkinchi son">{{ litr(y.litr) }} {{ til.t('L') }}</span>
+              </span>
+            </div>
+          } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+        </div>
+      </section>
+
+      <section class="shisha karta">
+        <h2>{{ til.t('OperatorlarBugun') }}</h2>
+        <div class="royxat">
+          @for (o of d.operatorlar; track o.operatorId) {
+            @if (auth.bor('Operatorlar')) {
+              <a class="element" [routerLink]="['/operatorlar', o.operatorId]">
+                <ng-container *ngTemplateOutlet="op; context: { $implicit: o }" />
+              </a>
+            } @else {
+              <div class="element"><ng-container *ngTemplateOutlet="op; context: { $implicit: o }" /></div>
+            }
+          } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+        </div>
+        <ng-template #op let-o>
+          <span class="avatar">{{ o.ism.slice(0, 1) }}</span>
+          <span class="matnlar">
+            <span class="asosiy-matn">{{ o.ism }}</span>
+            <span class="ikkinchi"><span class="badge" [class.yashil]="o.smenaOchiqmi" [class.kul]="!o.smenaOchiqmi">{{ til.t(o.smenaOchiqmi ? 'SmenaOchiq' : 'SmenaYopiq') }}</span>
+              <span class="son"> {{ o.sotuvSoni }} {{ til.t('TaSotuv') }} · {{ litr(o.bugungiLitr) }} {{ til.t('L') }}</span></span>
+          </span>
+          <span class="ong"><b>{{ pul(o.bugungiSumma) }}</b><span class="ikkilamchi kichik-matn">{{ til.t('Som') }}</span></span>
+        </ng-template>
+      </section>
+    </div>
+
+    <section class="shisha karta">
+      <h2><span class="jonli"></span>{{ til.t('OxirgiSotuvlar') }}</h2>
+      <div class="royxat">
+        @for (s of d.oxirgiSotuvlar; track s.id) {
+          <div class="element" [class.bekor]="s.holati === 'BekorQilingan'"><sotuv-qator [s]="s" /></div>
+        } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+      </div>
+    </section>
+  } @else {
+    <div class="kpilar">
+      @for (i of [1, 2, 3, 4]; track i) { <div class="shisha kpi"><div class="skelet" style="height:64px"></div></div> }
+    </div>
+    <div class="shisha karta"><div class="skelet" style="height:200px"></div></div>
+  }
+</div>

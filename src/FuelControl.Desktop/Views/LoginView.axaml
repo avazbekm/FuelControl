@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="using:FuelControl.Desktop.Controls"
+             xmlns:vm="using:FuelControl.Desktop.ViewModels"
+             xmlns:s="using:FuelControl.Desktop.Services"
+             xmlns:ctl="using:FuelControl.Desktop.Controls"
+             x:Class="FuelControl.Desktop.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+
+    <Grid ColumnDefinitions="*,*" MaxWidth="1240">
+        <!-- Chap: brend -->
+        <StackPanel Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="22" MaxWidth="460">
+            <Border Classes="logo" Width="92" Height="92" CornerRadius="28">
+                <ctl:Ikon Nomi="pump" Olcham="50" Rang="White" Qalinlik="1.8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <TextBlock Text="FuelControl" FontSize="52" FontWeight="ExtraBold" LetterSpacing="-1.5" />
+            <TextBlock Text="{l:T LoginShior}"
+                       FontSize="17" Foreground="{DynamicResource MatnYumshoq}" TextWrapping="Wrap" LineHeight="27" />
+            <WrapPanel ItemSpacing="8" LineSpacing="8">
+                <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="cash" Olcham="14" /><TextBlock Text="{l:T Naqd}" /></StackPanel></Border>
+                <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="card" Olcham="14" /><TextBlock Text="{l:T Plastik}" /></StackPanel></Border>
+                <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="phone" Olcham="14" /><TextBlock Text="{l:T Click}" /></StackPanel></Border>
+                <Border Classes="badge kok"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="clock" Olcham="14" Rang="#1B4FE0" /><TextBlock Text="{l:T SmenaKamomati}" /></StackPanel></Border>
+                <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="users" Olcham="14" /><TextBlock Text="{l:T OperatorHisobi}" /></StackPanel></Border>
+                <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="file" Olcham="14" /><TextBlock Text="{l:T ExcelPdf}" /></StackPanel></Border>
+            </WrapPanel>
+        </StackPanel>
+
+        <!-- O'ng: kirish formasi -->
+        <Border Grid.Column="1" Classes="card" Width="420" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="34" CornerRadius="32">
+            <StackPanel Spacing="18">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{l:T TizimgaKirish}" Classes="sarlavha" FontSize="24" />
+                        <TextBlock Text="{l:T KirishIzoh}" Classes="izoh" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Top" Margin="8,0,0,0">
+                        <Button Classes="chip" Content="UZ" Padding="10,6" Classes.tanlangan="{Binding $parent[Window].((vm:MainViewModel)DataContext).Til.Lotin}" Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).TilniTanlaCommand}" CommandParameter="uz" />
+                        <Button Classes="chip" Content="ЎЗ" Padding="10,6" Classes.tanlangan="{Binding $parent[Window].((vm:MainViewModel)DataContext).Til.Kirill}" Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).TilniTanlaCommand}" CommandParameter="uzk" />
+                        <Button Classes="chip" Content="RU" Padding="10,6" Classes.tanlangan="{Binding $parent[Window].((vm:MainViewModel)DataContext).Til.Ruscha}" Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).TilniTanlaCommand}" CommandParameter="ru" />
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{l:T Login, Katta=True}" Classes="yorliq" />
+                    <TextBox Text="{Binding Login}" PlaceholderText="{l:T LoginniKiriting}" />
+                    <!-- Shu kompyuterda kirganlar: tez tanlash -->
+                    <StackPanel IsVisible="{Binding OxirgiKirganlarBor}" Spacing="6">
+                        <TextBlock Text="{l:T OxirgiKirganlar}" Classes="izoh" />
+                        <ItemsControl ItemsSource="{Binding OxirgiKirganlar}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel ItemSpacing="6" LineSpacing="6" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="s:OxirgiKirgan">
+                                    <Button Classes="chip" Padding="10,6" Content="{Binding ToliqIsm}" ToolTip.Tip="{Binding Login}"
+                                            Command="{Binding $parent[ItemsControl].((vm:LoginViewModel)DataContext).LoginniTanlaCommand}" CommandParameter="{Binding}" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Operator: PIN -->
+                <StackPanel IsVisible="{Binding Operatormi}" Spacing="12">
+                    <StackPanel>
+                        <TextBlock Text="{l:T PinKod, Katta=True}" Classes="yorliq" />
+                        <TextBox Text="{Binding Pin}" PasswordChar="●" Classes="katta" TextAlignment="Center" MaxLength="6" IsReadOnly="True" />
+                    </StackPanel>
+                    <UniformGrid Columns="3" Rows="4" ColumnSpacing="8" RowSpacing="8">
+                        <UniformGrid.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Height" Value="52" />
+                                <Setter Property="FontSize" Value="20" />
+                                <Setter Property="HorizontalAlignment" Value="Stretch" />
+                            </Style>
+                        </UniformGrid.Styles>
+                        <Button Content="1" Command="{Binding RaqamCommand}" CommandParameter="1" />
+                        <Button Content="2" Command="{Binding RaqamCommand}" CommandParameter="2" />
+                        <Button Content="3" Command="{Binding RaqamCommand}" CommandParameter="3" />
+                        <Button Content="4" Command="{Binding RaqamCommand}" CommandParameter="4" />
+                        <Button Content="5" Command="{Binding RaqamCommand}" CommandParameter="5" />
+                        <Button Content="6" Command="{Binding RaqamCommand}" CommandParameter="6" />
+                        <Button Content="7" Command="{Binding RaqamCommand}" CommandParameter="7" />
+                        <Button Content="8" Command="{Binding RaqamCommand}" CommandParameter="8" />
+                        <Button Content="9" Command="{Binding RaqamCommand}" CommandParameter="9" />
+                        <Border />
+                        <Button Content="0" Command="{Binding RaqamCommand}" CommandParameter="0" />
+                        <Button Command="{Binding RaqamCommand}" CommandParameter="⌫"><ctl:Ikon Nomi="backspace" Olcham="20" /></Button>
+                    </UniformGrid>
+                </StackPanel>
+
+                <!-- Boshliq / Admin: parol -->
+                <StackPanel IsVisible="{Binding !Operatormi}">
+                    <TextBlock Text="{l:T Parol, Katta=True}" Classes="yorliq" />
+                    <TextBox Text="{Binding Parol}" PasswordChar="●" PlaceholderText="{l:T ParolniKiriting}" ctl:AvtoFokus.Yoqilgan="True" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding Xato}" Foreground="{DynamicResource Qizil}" FontSize="12" IsVisible="{Binding Xato, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+                <Button Classes="primary" HorizontalAlignment="Stretch" Height="50" FontSize="15" Command="{Binding KirishCommand}" IsDefault="True">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{l:T Kirish}" /><ctl:Ikon Nomi="arrow" Olcham="18" Rang="White" /></StackPanel>
+                </Button>
+
+                <!-- Server manzili: odatda yashirin, bosilsa tahrirlanadi -->
+                <StackPanel Spacing="6">
+                    <Button Classes="ikon" HorizontalAlignment="Center" Padding="8,4" Command="{Binding ServerniOchYopCommand}">
+                        <TextBlock Text="{Binding ServerIzohi}" Classes="izoh" />
+                    </Button>
+                    <StackPanel IsVisible="{Binding ServerOchiq}">
+                        <TextBlock Text="{l:T ServerManzili, Katta=True}" Classes="yorliq" />
+                        <TextBox Text="{Binding ServerManzili}" PlaceholderText="http://192.168.1.10:5000" />
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

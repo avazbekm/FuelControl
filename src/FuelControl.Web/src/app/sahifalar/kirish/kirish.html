@@ -1,0 +1,66 @@
+<div class="yuqori">
+  <div class="segment til">
+    @for (t of tillar; track t.kod) {
+      <button [class.tanlangan]="til.kod() === t.kod" (click)="til.tanla(t.kod)">{{ t.nom }}</button>
+    }
+  </div>
+  <button class="tugma ikonli" (click)="tema.almashtir()" [attr.aria-label]="til.t('QorongiRejim')">
+    <ikon [nomi]="tema.qorongimi() ? 'sun' : 'moon'" [olcham]="18" />
+  </button>
+</div>
+
+<main class="markaz">
+  <div class="brend">
+    <span class="logo"><ikon nomi="drop" [olcham]="30" [qalinlik]="2" /></span>
+    <h1>FuelControl</h1>
+    <p class="ikkilamchi">{{ til.t('LoginShior') }}</p>
+  </div>
+
+  <form class="shisha forma" (ngSubmit)="kir()" autocomplete="on">
+    <h2>{{ til.t('TizimgaKirish') }}</h2>
+    @if (auth.tugadi()) {
+      <div class="badge sariq">{{ til.t('SessiyaTugadi') }}</div>
+    }
+    <div class="maydon">
+      <label for="login">{{ til.t('Login') }}</label>
+      <input id="login" class="kiritish" name="login" [(ngModel)]="login" autocomplete="username"
+             autocapitalize="none" spellcheck="false" enterkeyhint="next" />
+    </div>
+
+    <div class="maydon">
+      <div class="qator ora">
+        <label for="parol" class="yorliq">{{ til.t('PinYokiParol') }}</label>
+        <button type="button" class="tugma kichik shaffof pin-tugma" (click)="pinRejim.set(!pinRejim())">
+          <ikon nomi="grid" [olcham]="16" /> {{ til.t('PinKlaviatura') }}
+        </button>
+      </div>
+      <input id="parol" class="kiritish" name="parol" type="password" [(ngModel)]="parol"
+             autocomplete="current-password" [attr.inputmode]="pinRejim() ? 'none' : null" enterkeyhint="go" />
+    </div>
+
+    @if (pinRejim()) {
+      <div class="klaviatura">
+        @for (r of raqamlar; track $index) {
+          @if (r === '') { <span></span> }
+          @else {
+            <button type="button" class="tugma" (click)="tugmaBos(r)" [attr.aria-label]="r === '<' ? 'backspace' : r">
+              @if (r === '<') { <ikon nomi="backspace" /> } @else { {{ r }} }
+            </button>
+          }
+        }
+      </div>
+    }
+
+    <label class="belgi">
+      <input type="checkbox" name="eslab" [(ngModel)]="eslab" /> {{ til.t('EslabQol') }}
+    </label>
+
+    @if (xato()) { <div class="xato-matn" role="alert">{{ xato() }}</div> }
+
+    <button class="tugma asosiy keng" type="submit" [disabled]="yuklanmoqda()">
+      @if (yuklanmoqda()) { <span class="aylanma"></span> } @else { <ikon nomi="arrow" [olcham]="18" /> }
+      {{ til.t('Kirish') }}
+    </button>
+    <p class="ikkilamchi kichik-matn izoh">{{ til.t('KirishIzoh') }}</p>
+  </form>
+</main>

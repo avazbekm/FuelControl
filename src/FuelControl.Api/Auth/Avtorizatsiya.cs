@@ -1,0 +1,66 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using FuelControl.Contracts;
+using FuelControl.Core.Modellar;
+using Microsoft.IdentityModel.Tokens;
+
+namespace FuelControl.Api.Auth;
+
+/// <summary>Biznes qoidasi buzilganda — ProblemDetails (o'zbekcha xabar) bilan qaytariladi.</summary>
+public sealed class BiznesXatosi(string xabar, int status = 400) : Exception(xabar)
+{
+    public int Status { get; } = status;
+}
+
+public static class FoydalanuvchiKengaytmalari
+{
+    public static int FoydalanuvchiId(this ClaimsPrincipal u) =>
+        int.Parse(u.FindFirstValue(JwtRegisteredClaimNames.Sub) ?? u.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    public static string Ism(this ClaimsPrincipal u) => u.FindFirstValue("ism") ?? "?";
+
+    public static bool Bor(this ClaimsPrincipal u, Ruxsat r) =>
+        u.Claims.Any(c => c.Type == "ruxsat" && c.Value == r.ToString());
+}
+
+public sealed class RuxsatTalabFilter(Ruxsat kerak) : IEndpointFilter
+{
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
+    {
+        if (!ctx.HttpContext.User.Bor(kerak))
+            return Results.Problem(statusCode: 403, title: "Ruxsat yo'q", detail: $"Bu amal uchun \"{kerak}\" ruxsati kerak.");
+        return await next(ctx);
+    }
+}
+
+public static class RuxsatFilterKengaytmasi
+{
+    public static RouteHandlerBuilder RuxsatKerak(this RouteHandlerBuilder b, Ruxsat r) =>
+        b.AddEndpointFilter(new RuxsatTalabFilter(r));
+}
+
+public sealed class TokenXizmati(IConfiguration konfiguratsiya)
+{
+    public const string Emitent = "FuelControl";
+    public static readonly TimeSpan Muddat = TimeSpan.FromHours(12);
+
+    public static SymmetricSecurityKey Kalit(IConfiguration k) =>
+        new(Encoding.UTF8.GetBytes(k["Jwt:Kalit"] ?? throw new InvalidOperationException("Jwt:Kalit sozlanmagan.")));
+
+    public (string Token, DateTime Muddati) Yarat(Foydalanuvchi f)
+    {
+        var muddati = DateTime.UtcNow.Add(Muddat);
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, f.Id.ToString()),
+            new("ism", f.ToliqIsm),
+            new(ClaimTypes.Role, f.Rol.ToString()),
+        };
+        claims.AddRange(f.Ruxsatlar.Select(r => new Claim("ruxsat", r.ToString())));
+
+        var token = new JwtSecurityToken(Emitent, Emitent, claims, expires: muddati,
+            signingCredentials: new SigningCredentials(Kalit(konfiguratsiya), SecurityAlgorithms.HmacSha256));
+        return (new JwtSecurityTokenHandler().WriteToken(token), muddati);
+    }
+}

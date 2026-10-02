@@ -1,0 +1,69 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ===== Yorug' rejim ===== -->
+    <SolidColorBrush x:Key="Fon"            Color="#F2F6FF" />
+    <SolidColorBrush x:Key="Matn"           Color="#0B1530" />
+    <SolidColorBrush x:Key="MatnIkkilamchi" Color="#4F607D" />
+    <SolidColorBrush x:Key="MatnYumshoq"    Color="#2E3D5C" />
+    <SolidColorBrush x:Key="IkonRang"       Color="#2E3D5C" />
+    <SolidColorBrush x:Key="AsosiyOch"      Color="#E9F0FF" />
+    <SolidColorBrush x:Key="Chiziq"         Color="#12142850" />
+    <SolidColorBrush x:Key="ShishaChegara"  Color="#D9FFFFFF" />
+    <SolidColorBrush x:Key="TileFon"        Color="#73FFFFFF" />
+    <SolidColorBrush x:Key="DialogFon"      Color="#FAFBFF" />
+    <SolidColorBrush x:Key="Parda"          Color="#BFEDF1FB" />
+    <SolidColorBrush x:Key="NaychaFon"      Color="#14142850" />
+    <SolidColorBrush x:Key="QatorHover"     Color="#59FFFFFF" />
+    <SolidColorBrush x:Key="UstunFon"       Color="#D9E5FF" />
+    <SolidColorBrush x:Key="TomchiChegara"  Color="#E6FFFFFF" />
+    <SolidColorBrush x:Key="KiritishChegara" Color="#C9D1DE" />
+    <SolidColorBrush x:Key="KiritishFokus"  Color="#CCFFFFFF" />
+    <SolidColorBrush x:Key="NavHover"       Color="#8CFFFFFF" />
+
+    <!-- Belgi ranglari -->
+    <SolidColorBrush x:Key="BadgeYashilFon" Color="#D9F5E6" /><SolidColorBrush x:Key="BadgeYashilMatn" Color="#0E7A4A" />
+    <SolidColorBrush x:Key="BadgeQizilFon"  Color="#FFDEDE" /><SolidColorBrush x:Key="BadgeQizilMatn"  Color="#B3261E" />
+    <SolidColorBrush x:Key="BadgeSariqFon"  Color="#FFEBC2" /><SolidColorBrush x:Key="BadgeSariqMatn"  Color="#8A5A00" />
+    <SolidColorBrush x:Key="BadgeKokFon"    Color="#DCE6FF" /><SolidColorBrush x:Key="BadgeKokMatn"    Color="#1B4FE0" />
+    <SolidColorBrush x:Key="BadgeKulrangFon" Color="#E8EDF5" /><SolidColorBrush x:Key="BadgeKulrangMatn" Color="#334155" />
+    <SolidColorBrush x:Key="Yashil"         Color="#0E7A4A" />
+    <SolidColorBrush x:Key="Qizil"          Color="#D7262B" />
+    <SolidColorBrush x:Key="Sariq"          Color="#8A5A00" />
+    <SolidColorBrush x:Key="KamomatFon"     Color="#FFE1E1" /><SolidColorBrush x:Key="KamomatChegara" Color="#FFB4B4" />
+    <SolidColorBrush x:Key="OrtiqchaFon"    Color="#D9F5E6" /><SolidColorBrush x:Key="OrtiqchaChegara" Color="#9FE3BF" />
+
+    <LinearGradientBrush x:Key="Shisha" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Offset="0" Color="#B8FFFFFF" />
+        <GradientStop Offset="1" Color="#6BFFFFFF" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TomchiShisha" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#EBFFFFFF" />
+        <GradientStop Offset="1" Color="#85FFFFFF" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TomchiTub" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0.45" Color="#0078A0FF" />
+        <GradientStop Offset="1" Color="#3878A0FF" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="TomchiQizil" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#F2FFECEC" />
+        <GradientStop Offset="1" Color="#B3FFD6D6" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="KiritishFon" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#B3FFFFFF" />
+        <GradientStop Offset="1" Color="#73FFFFFF" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="BadgeFon" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#E6FFFFFF" />
+        <GradientStop Offset="1" Color="#80FFFFFF" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="AvatarFon" StartPoint="0%,0%" EndPoint="0%,100%">
+        <GradientStop Offset="0" Color="#F2F6FF" />
+        <GradientStop Offset="1" Color="#D9E5FF" />
+    </LinearGradientBrush>
+
+    <!-- Mesh fon dog'lari -->
+    <RadialGradientBrush x:Key="MeshA"><GradientStop Offset="0" Color="#8C68A0FF" /><GradientStop Offset="1" Color="#0068A0FF" /></RadialGradientBrush>
+    <RadialGradientBrush x:Key="MeshB"><GradientStop Offset="0" Color="#80B08EFF" /><GradientStop Offset="1" Color="#00B08EFF" /></RadialGradientBrush>
+    <RadialGradientBrush x:Key="MeshC"><GradientStop Offset="0" Color="#7A48D6CE" /><GradientStop Offset="1" Color="#0048D6CE" /></RadialGradientBrush>
+    <RadialGradientBrush x:Key="MeshD"><GradientStop Offset="0" Color="#47FFBE78" /><GradientStop Offset="1" Color="#00FFBE78" /></RadialGradientBrush>
+</ResourceDictionary>

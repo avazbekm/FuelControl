@@ -1,0 +1,48 @@
+.ikon-doira.kichik { width: 26px; height: 26px; }
+.qizil-doira { background: var(--b-qizil-fon); color: var(--qizil); }
+
+/* 14 kunlik ustun grafik */
+.grafik { position: relative; padding-top: 22px; }
+.max-chiziq {
+  position: absolute; top: 0; left: 0; right: 0; font-size: 11px; color: var(--matn-2);
+  border-bottom: 1px dashed var(--chiziq); padding-bottom: 2px;
+}
+.ustunlar-q { display: flex; align-items: flex-end; gap: 2px; height: 190px; padding-top: 4px; }
+.ustun {
+  flex: 1; min-width: 0; height: 100%; position: relative; border: 0; background: none; padding: 0 1px; cursor: pointer;
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px;
+}
+.tayoq {
+  width: 100%; max-width: 28px; min-height: 2px; border-radius: 4px 4px 0 0;
+  background: var(--ustun); transition: background 0.15s;
+}
+.ustun.bugun .tayoq { background: var(--asosiy); }
+.ustun:hover .tayoq, .ustun.tanlangan .tayoq { background: var(--asosiy-toq); }
+.ustun.bugun:hover .tayoq { background: var(--asosiy-toq); }
+.kun { font-size: 11px; color: var(--matn-2); font-variant-numeric: tabular-nums; height: 14px; }
+.kun.yashir { visibility: hidden; }
+@media (min-width: 600px) { .kun.yashir { visibility: visible; } }
+.izohcha {
+  position: absolute; bottom: calc(100% - 30px); left: 50%; transform: translateX(-50%); z-index: 5;
+  padding: 8px 12px; border-radius: 14px; white-space: nowrap; font-size: 12px; text-align: left;
+  display: flex; flex-direction: column; gap: 2px; pointer-events: none; background: var(--dialog);
+}
+.izohcha.ong-tomon { left: auto; right: 0; transform: none; }
+.izohcha.chap-tomon { left: 0; transform: none; }
+
+/* To'lov ulushlari — 2px oraliqli stek */
+.stek { display: flex; gap: 2px; height: 14px; border-radius: 999px; overflow: hidden; margin: 4px 0 10px; }
+.stek > span { flex-basis: 0; min-width: 4px; }
+.bosh-stek { flex: 1; background: var(--naycha); }
+.nuqta { width: 10px; height: 10px; border-radius: 999px; flex: none; display: inline-block; }
+
+.yoq-qator .matnlar { gap: 6px; }
+.naycha { display: block; height: 6px; border-radius: 999px; background: var(--naycha); overflow: hidden; }
+.naycha > span { display: block; height: 100%; border-radius: 999px; background: var(--asosiy); }
+
+.avatar {
+  width: 36px; height: 36px; border-radius: 999px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center; font-weight: 700;
+  background: var(--asosiy-och); color: var(--asosiy);
+}
+.jonli { width: 8px; height: 8px; border-radius: 999px; background: var(--yashil); box-shadow: 0 0 0 4px var(--b-yashil-fon); }

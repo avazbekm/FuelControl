@@ -1,0 +1,41 @@
+# Ishga tushirish: deploy/ papkasida .env yarating (namuna: .env.example), keyin `docker compose up -d --build`.
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    restart: unless-stopped
+    environment:
+      Jwt__Kalit: ${JWT_KALIT:?JWT_KALIT kerak}
+      Seed__AdminParol: ${ADMIN_PAROL:-}
+      ConnectionStrings__Baza: Data Source=/data/fuelcontrol.db
+      Zaxira__Papka: /data/zaxira
+    volumes:
+      - fuelcontrol-data:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on: [api]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMEN: ${DOMEN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    depends_on: [caddy]
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?CLOUDFLARE_TUNNEL_TOKEN kerak}
+
+volumes:
+  fuelcontrol-data:
+  caddy-data:
+  caddy-config:

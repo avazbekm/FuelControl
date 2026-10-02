@@ -1,0 +1,189 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="using:FuelControl.Desktop.Controls"
+             xmlns:vm="using:FuelControl.Desktop.ViewModels"
+             xmlns:m="using:FuelControl.Desktop.Models"
+             xmlns:ctl="using:FuelControl.Desktop.Controls"
+             x:Class="FuelControl.Desktop.Views.BoshqaruvView"
+             x:DataType="vm:BoshqaruvViewModel">
+
+    <ScrollViewer>
+        <StackPanel Margin="28,24,28,28" Spacing="18">
+
+            <!-- Sarlavha -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="{l:T BoshqaruvPaneli}" Classes="sarlavha" />
+                    <TextBlock Text="{Binding Sana}" Classes="izoh" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Classes="ghost" Command="{Binding YangilashCommand}"><StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="refresh" Olcham="16" /><TextBlock Text="{l:T Yangilash}" /></StackPanel></Button>
+                    <Button Classes="primary" Command="{Binding $parent[Window].((vm:MainViewModel)DataContext).BugungiHisobotCommand}"><StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="download" Olcham="16" /><TextBlock Text="{l:T BugungiHisobot}" /></StackPanel></Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- KPI qatori -->
+            <UniformGrid Columns="4" ColumnSpacing="14">
+                <Border Classes="kpi">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{l:T BugungiSavdo, Katta=True}" Classes="nom" />
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding JamiSavdo}" Classes="qiymat" />
+                            <TextBlock Text="{l:T Som}" Classes="izoh" VerticalAlignment="Bottom" Margin="0,0,0,5" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding KechagigaNisbatan}" FontSize="12" FontWeight="SemiBold"
+                                   Classes.musbat="{Binding KechagidanKop}" Classes.manfiy="{Binding !KechagidanKop}" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="kpi">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{l:T SotilganYoqilgi, Katta=True}" Classes="nom" />
+                        <TextBlock Text="{Binding JamiLitr}" Classes="qiymat" />
+                        <TextBlock Classes="izoh"><Run Text="{Binding SotuvSoni}" /><Run Text=" " /><Run Text="{l:T TaSotuv}" /></TextBlock>
+                    </StackPanel>
+                </Border>
+                <Border Classes="kpi">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{l:T OchiqSmenalar, Katta=True}" Classes="nom" />
+                        <TextBlock Text="{Binding OchiqSmenalar}" Classes="qiymat" />
+                        <TextBlock Text="{l:T HozirIshlayotgan}" Classes="izoh" />
+                    </StackPanel>
+                </Border>
+                <Border Classes="kpi">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{l:T ShuOyKamomat, Katta=True}" Classes="nom" />
+                        <TextBlock Text="{Binding OyKamomat}" Classes="qiymat" Foreground="{DynamicResource Qizil}" />
+                        <TextBlock Classes="izoh"><Run Text="{l:T OylikSavdo}" /><Run Text=": " /><Run Text="{Binding OyJami}" /></TextBlock>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- O'rta qator: to'lov turlari + yoqilg'i + 14 kun -->
+            <Grid ColumnDefinitions="2*,2*,3*" ColumnSpacing="14">
+
+                <Border Grid.Column="0" Classes="card">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="{l:T TolovTurlariBugun}" Classes="kichikSarlavha" />
+                        <ItemsControl ItemsSource="{Binding Tolovlar}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:TolovQatori">
+                                    <StackPanel Spacing="6" Margin="0,0,0,12">
+                                        <Grid ColumnDefinitions="*,Auto,Auto">
+                                            <TextBlock Text="{Binding Nomi}" FontWeight="SemiBold" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Summa}" Classes="pul" Margin="0,0,10,0" />
+                                            <TextBlock Grid.Column="2" Text="{Binding Foiz}" Classes="izoh" Width="36" TextAlignment="Right" />
+                                        </Grid>
+                                        <ProgressBar Minimum="0" Maximum="1" Value="{Binding Ulush}" Height="10" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="card">
+                    <StackPanel Spacing="14">
+                        <TextBlock Text="{l:T YoqilgiTurlariBugun}" Classes="kichikSarlavha" />
+                        <ItemsControl ItemsSource="{Binding Yoqilgilar}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:YoqilgiQatori">
+                                    <StackPanel Spacing="6" Margin="0,0,0,12">
+                                        <Grid ColumnDefinitions="Auto,*,Auto">
+                                            <Border Width="10" Height="10" CornerRadius="5" Background="{Binding Rang}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Nomi}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Litr}" Classes="izoh" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Text="{Binding Summa}" Classes="pul" VerticalAlignment="Center" />
+                                        </Grid>
+                                        <ProgressBar Minimum="0" Maximum="1" Value="{Binding Ulush}" Height="10" Foreground="{Binding Rang}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Classes="card">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="{l:T Oxirgi14Kun}" Classes="kichikSarlavha" Margin="0,0,0,14" />
+                        <ItemsControl ItemsSource="{Binding OxirgiKunlar}" VerticalAlignment="Bottom">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1" ColumnSpacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:KunUstuni">
+                                    <StackPanel Spacing="6" VerticalAlignment="Bottom" ToolTip.Tip="{Binding Summa}">
+                                        <Border Height="{Binding Balandlik}" CornerRadius="999" VerticalAlignment="Bottom"
+                                                Classes="ustun" Classes.bugun="{Binding Bugun}">
+                                            <Border.Styles>
+                                                <Style Selector="Border.ustun">
+                                                    <Setter Property="Background" Value="{DynamicResource UstunFon}" />
+                                                    <Setter Property="BoxShadow" Value="0 4 10 0 #1A1C366E" />
+                                                </Style>
+                                                <Style Selector="Border.bugun">
+                                                    <Setter Property="Background" Value="{StaticResource TomchiKok}" />
+                                                    <Setter Property="BoxShadow" Value="0 8 18 0 #592F6BFF" />
+                                                </Style>
+                                            </Border.Styles>
+                                        </Border>
+                                        <TextBlock Text="{Binding Kun}" FontSize="11" Foreground="{DynamicResource MatnIkkilamchi}" HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- Pastki qator: operatorlar + oxirgi sotuvlar -->
+            <Grid ColumnDefinitions="2*,3*" ColumnSpacing="14">
+                <Border Grid.Column="0" Classes="card">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="{l:T OperatorlarBugun}" Classes="kichikSarlavha" />
+                        <ItemsControl ItemsSource="{Binding BugungiOperatorlar}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:OperatorKunQatori">
+                                    <Border Classes="tile" Margin="0,0,0,8">
+                                        <Grid ColumnDefinitions="40,*,Auto">
+                                            <Border Classes="avatar" Width="38" Height="38">
+                                                <TextBlock Text="{Binding Operator.BoshHarflar}" FontSize="13" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center" Spacing="2">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding Operator.ToliqIsm}" FontWeight="SemiBold" />
+                                                    <Border Classes="badge yashil" IsVisible="{Binding Ochiq}"><TextBlock Text="{l:T Smenada}" /></Border>
+                                                </StackPanel>
+                                                <TextBlock Classes="izoh"><Run Text="{Binding SotuvSoni}" /><Run Text=" " /><Run Text="{l:T TaSotuv}" /><Run Text="  ·  " /><Run Text="{Binding Litr}" /></TextBlock>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Text="{Binding Summa}" Classes="pul" VerticalAlignment="Center" FontSize="15" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Classes="card" Padding="20,20,20,8">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="{l:T OxirgiSotuvlar}" Classes="kichikSarlavha" />
+                        <DataGrid ItemsSource="{Binding OxirgiSotuvlar}" Height="380">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{l:T Vaqt}" Binding="{Binding Vaqt, StringFormat='HH:mm'}" Width="80" />
+                                <DataGridTextColumn Header="{l:T Operator}" Binding="{Binding Operator.ToliqIsm}" Width="*" />
+                                <DataGridTextColumn Header="{l:T Aparat}" Binding="{Binding Aparat.Raqam}" Width="80" />
+                                <DataGridTextColumn Header="{l:T Yoqilgi}" Binding="{Binding YoqilgiNomi}" Width="100" />
+                                <DataGridTextColumn Header="{l:T Litr}" Binding="{Binding Litr, StringFormat='0.00'}" Width="90" />
+                                <DataGridTextColumn Header="{l:T Summa}" Binding="{Binding Summa, StringFormat='#,0'}" Width="110" />
+                                <DataGridTextColumn Header="{l:T Tolov}" Binding="{Binding TolovNomi}" Width="100" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

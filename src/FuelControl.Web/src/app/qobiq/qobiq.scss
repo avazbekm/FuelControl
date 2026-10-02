@@ -1,0 +1,72 @@
+:host { display: block; min-height: 100dvh; }
+
+.banner {
+  position: sticky; top: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: calc(8px + env(safe-area-inset-top)) 16px 8px;
+  background: var(--b-qizil-fon); color: var(--b-qizil);
+  font-size: 13px; font-weight: 650;
+}
+
+main {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: calc(var(--tab-h) + 28px + env(safe-area-inset-bottom));
+}
+
+/* ---- Telefon: pastki tab-bar */
+.tablar {
+  position: fixed; z-index: 30;
+  left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom));
+  height: var(--tab-h); border-radius: 999px; padding: 6px;
+  display: flex; gap: 2px;
+}
+.tab {
+  flex: 1; min-width: 0; border: 0; background: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border-radius: 999px; color: var(--matn-2); font-size: 11px; font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+.tab span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px; }
+.tab.faol { color: var(--asosiy); background: var(--asosiy-och); }
+
+.yon { display: none; }
+
+/* ---- Keng ekran: yon menyu */
+@media (min-width: 900px) {
+  .tablar { display: none; }
+  main { margin-left: 272px; padding-bottom: 0; }
+  .banner { margin-left: 272px; }
+  .yon {
+    position: fixed; z-index: 30; top: 12px; bottom: 12px; left: 12px; width: 248px;
+    display: flex; flex-direction: column; gap: 6px; padding: 16px 12px;
+  }
+}
+
+.brend { display: flex; align-items: center; gap: 10px; padding: 4px 8px 16px; }
+.logo {
+  width: 40px; height: 40px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; background: linear-gradient(180deg, #5C8CFF, #2F6BFF);
+  box-shadow: 0 6px 16px rgba(47, 107, 255, 0.35), inset 0 1px 0 rgba(255,255,255,0.45);
+}
+.brend-nom { font-weight: 750; font-size: 17px; letter-spacing: -0.01em; }
+
+.yon nav { display: flex; flex-direction: column; gap: 2px; }
+.nav {
+  display: flex; align-items: center; gap: 12px; padding: 0 14px; min-height: 44px;
+  border-radius: 999px; color: var(--matn-3); font-weight: 580;
+  transition: background 0.15s;
+}
+.nav:hover { background: var(--qator-hover); }
+.nav.faol {
+  color: var(--asosiy); background: var(--tanlangan-segment);
+  box-shadow: 0 2px 10px rgba(30, 50, 110, 0.10), inset 0 1px 0 var(--shisha-nur);
+}
+
+.men { display: flex; align-items: center; gap: 10px; padding: 10px 4px 0; margin-top: 8px; border-top: 1px solid var(--chiziq); }
+.men .matnlar { flex: 1; min-width: 0; }
+.ism { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 999px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+  background: var(--asosiy-och); color: var(--asosiy);
+}
