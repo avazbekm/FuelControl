@@ -355,7 +355,7 @@ public sealed class Til : INotifyPropertyChanged
         ["RI_SotuvBekorQilish"] = ("Sabab yozib bekor qilish (o'chirilmaydi)", "Сабаб ёзиб бекор қилиш (ўчирилмайди)", "Отмена с указанием причины (не удаляется)"),
         ["R_AvansBerish"] = ("Avans / to'lov berish", "Аванс / тўлов бериш", "Выдача аванса / выплата"),
         ["RI_AvansBerish"] = ("Operator hisobiga pul yozish", "Оператор ҳисобига пул ёзиш", "Запись денег на счёт оператора"),
-        ["R_Eksport"] = ("Excel / PDF eksport", "Excel / PDF экспорт", "Экспорт в Excel / PDF"),
+        ["R_Eksport"] = ("Excel eksport", "Excel экспорт", "Экспорт в Excel"),
         ["RI_Eksport"] = ("Hisobotni faylga chiqarish", "Ҳисоботни файлга чиқариш", "Выгрузка отчёта в файл"),
 
         // ---- Audit
