@@ -80,6 +80,22 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "pages": {
+              "outputPath": {
+                "base": "dist/pages",
+                "browser": ""
+              },
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "public"
+                },
+                {
+                  "glob": "_headers",
+                  "input": "pages"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

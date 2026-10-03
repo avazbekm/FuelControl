@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "api": "openapi-typescript http://localhost:5000/openapi/v1.json -o src/app/api/schema.d.ts",
-    "lugat": "node scripts/lugat.mjs"
+    "lugat": "node scripts/lugat.mjs",
+    "build:pages": "ng build --configuration production,pages && node scripts/pages-sozlama.mjs"
   },
   "private": true,
   "packageManager": "npm@11.13.0",

@@ -2,6 +2,7 @@ import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import type { HubConnection } from '@microsoft/signalr';
 import { Subject } from 'rxjs';
 import { Auth } from './auth';
+import { Sozlama } from './sozlama';
 import type { Sotuv, Smena } from '../api/turlar';
 
 export type HubHodisa =
@@ -16,6 +17,7 @@ export type HubHodisa =
 @Injectable({ providedIn: 'root' })
 export class Aloqa {
   private readonly auth = inject(Auth);
+  private readonly sozlama = inject(Sozlama);
   readonly onlayn = signal(navigator.onLine);
   readonly hubHolati = signal<'uzilgan' | 'ulanmoqda' | 'ulangan'>('uzilgan');
   /** Banner: internet yo'q yoki hub qayta ulanmoqda. */
@@ -44,7 +46,8 @@ export class Aloqa {
     if (!this.auth.kirganmi()) return;
     if (!this.hub) {
       const hub = new HubConnectionBuilder()
-        .withUrl('/hub', { accessTokenFactory: () => this.auth.token() ?? '' })
+        // Token header/query orqali ketadi (cookie yo'q) — cross-origin'da withCredentials shart emas.
+        .withUrl(this.sozlama.yol('/hub'), { accessTokenFactory: () => this.auth.token() ?? '', withCredentials: false })
         .withAutomaticReconnect({ nextRetryDelayInMilliseconds: (c) => Math.min(30000, 1000 * 2 ** Math.min(c.previousRetryCount, 5)) })
         .configureLogging(LogLevel.Warning)
         .build();

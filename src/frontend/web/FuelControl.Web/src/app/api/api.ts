@@ -30,8 +30,22 @@ const auth: Middleware = {
   },
 };
 
-export const api = createClient<paths>({ baseUrl: location.origin });
-api.use(auth);
+const yarat = (baseUrl: string) => {
+  const c = createClient<paths>({ baseUrl });
+  c.use(auth);
+  return c;
+};
+
+/**
+ * API klienti. Standart — shu domen. Ilova boshlanishida sozlama.json'dan o'qilgan manzil bilan `apiManzilOrnat` qayta yaratadi
+ * (ESM live binding: `api` ni import qilganlar har chaqiruvda joriy qiymatni ko'radi — doim `api.GET(...)` shaklida ishlating).
+ */
+export let api = yarat(location.origin);
+
+/** Boshqa domendagi API (Cloudflare Pages) — `""` bo'lsa shu domen. */
+export function apiManzilOrnat(asos: string) {
+  api = yarat(asos || location.origin);
+}
 
 type Natija<D> = { data?: D; error?: unknown; response: Response };
 
