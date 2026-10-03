@@ -43,5 +43,7 @@
  "Tab_Hisobot": ["Hisobot", "Ҳисобот", "Отчёты"],
  "Tab_Smena": ["Smenalar", "Сменалар", "Смены"],
  "Tab_Operator": ["Operator", "Оператор", "Операторы"],
- "Tab_Hisobim": ["Hisobim", "Ҳисобим", "Мой счёт"]
+ "Tab_Hisobim": ["Hisobim", "Ҳисобим", "Мой счёт"],
+ "HammasiniKorsat": ["Hammasini ko'rsatish", "Ҳаммасини кўрсатиш", "Показать все"],
+ "Ornatish": ["O'rnatish", "Ўрнатиш", "Установить"]
 }

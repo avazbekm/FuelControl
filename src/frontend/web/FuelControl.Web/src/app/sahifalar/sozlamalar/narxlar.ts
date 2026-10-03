@@ -45,31 +45,43 @@ import { PALITRA, SozlamalarXizmati, butunSon } from './sozlamalar-xizmati';
         </div>
       </section>
 
-      <section class="shisha karta">
+      <section class="shisha karta tarix-karta">
         <h2>{{ til.t('NarxTarixi') }}</h2>
-        <!-- Keng ekran: jadval -->
-        <div class="faqat-keng">
-          <table class="jadval">
+        <!-- Keng ekran: jadval (karta balandligi cheklangan, ichida skroll) -->
+        <div class="faqat-keng tarix-skroll">
+          <table class="jadval tarix-jadval">
+            <colgroup><col style="width:21%" /><col style="width:24%" /><col style="width:16%" /><col style="width:16%" /><col style="width:23%" /></colgroup>
             <thead><tr><th>{{ til.t('Sana') }}</th><th>{{ til.t('Yoqilgi') }}</th><th class="o">{{ til.t('Eski') }}</th><th class="o">{{ til.t('Yangi') }}</th><th>{{ til.t('Kim') }}</th></tr></thead>
             <tbody>
               @for (n of x.narxTarixi(); track $index) {
-                <tr><td>{{ kun(n.vaqt) }}</td><td>{{ n.yoqilgi }}</td><td class="o">{{ pul(n.eskiNarx) }}</td><td class="o"><b>{{ pul(n.yangiNarx) }}</b></td><td class="kim">{{ n.kim }}</td></tr>
+                <tr>
+                  <td>{{ kun(n.vaqt) }}</td>
+                  <td [title]="n.yoqilgi">{{ n.yoqilgi }}</td>
+                  <td class="o">{{ pul(n.eskiNarx) }}</td>
+                  <td class="o"><b>{{ pul(n.yangiNarx) }}</b></td>
+                  <td [title]="n.kim">{{ n.kim }}</td>
+                </tr>
               } @empty { <tr><td colspan="5" class="bosh">{{ til.t('MalumotYoq') }}</td></tr> }
             </tbody>
           </table>
         </div>
-        <!-- Telefon: kartalar -->
-        <div class="faqat-tor royxat">
-          @for (n of x.narxTarixi(); track $index) {
-            <div class="element">
-              <span class="matnlar">
-                <span class="asosiy-matn">{{ n.yoqilgi }}</span>
-                <span class="ikkinchi son">{{ pul(n.eskiNarx) }} → <b>{{ pul(n.yangiNarx) }}</b></span>
-                <span class="ikkinchi">{{ n.kim }}</span>
-              </span>
-              <span class="ong ikkilamchi kichik-matn son">{{ kun(n.vaqt) }}</span>
-            </div>
-          } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+        <!-- Telefon: kartalar — oxirgi 10 ta, "Hammasini ko'rsatish" bilan to'liq -->
+        <div class="faqat-tor">
+          <div class="royxat">
+            @for (n of tarixKorinadigan(); track $index) {
+              <div class="element">
+                <span class="matnlar">
+                  <span class="asosiy-matn">{{ n.yoqilgi }}</span>
+                  <span class="ikkinchi son">{{ pul(n.eskiNarx) }} → <b>{{ pul(n.yangiNarx) }}</b></span>
+                  <span class="ikkinchi">{{ n.kim }}</span>
+                </span>
+                <span class="ong ikkilamchi kichik-matn son">{{ kun(n.vaqt) }}</span>
+              </div>
+            } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+          </div>
+          @if (!tarixHammasi() && x.narxTarixi().length > TARIX_TELEFON) {
+            <button type="button" class="tugma keng" (click)="tarixHammasi.set(true)">{{ til.t('HammasiniKorsat') }} ({{ x.narxTarixi().length }})</button>
+          }
         </div>
       </section>
     </div>
@@ -123,7 +135,14 @@ import { PALITRA, SozlamalarXizmati, butunSon } from './sozlamalar-xizmati';
     .amal .tugma { flex: 1 1 0; }
     @media (min-width: 520px) { .amal { flex-wrap: nowrap; } .amal .kiritish { flex: 1 1 110px; } .amal .tugma { flex: 0 0 auto; } }
     @media (min-width: 700px) { .amal { flex: 0 0 auto; } .amal .kiritish { flex: 0 0 140px; } }
-    .kim { max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+    /* Narx tarixi: keng ekranda karta balandligi cheklangan (ichida skroll), ustunlar qat'iy — "Kim" chetdan chiqmaydi. */
+    .tarix-karta { display: flex; flex-direction: column; }
+    .tarix-karta .faqat-tor .keng { margin-top: 8px; }
+    @media (min-width: 700px) { .tarix-karta { max-height: 520px; } }
+    .tarix-skroll { overflow: auto; min-height: 0; flex: 1 1 auto; margin: 0 -6px; padding: 0 6px; }
+    .tarix-jadval { table-layout: fixed; width: 100%; }
+    .tarix-jadval th, .tarix-jadval td { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 9px 6px; }
+    .tarix-jadval thead th { position: sticky; top: 0; z-index: 1; background: var(--fon); box-shadow: 0 1px 0 var(--chiziq); }
     .ranglar { display: flex; flex-wrap: wrap; gap: 4px; }
     .rang { width: 44px; height: 44px; border: 0; background: none; padding: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 999px; }
     .doira { width: 34px; height: 34px; border-radius: 999px; border: 3px solid transparent; display: inline-flex; align-items: center; justify-content: center; color: #fff; transition: transform 0.12s; }
@@ -140,6 +159,13 @@ export class NarxlarBolimi {
   protected readonly pul = pul;
   protected readonly kun = kun;
   protected readonly palitra = PALITRA;
+  protected readonly TARIX_TELEFON = 10;
+  /** Telefonda tarix uzun bo'lib ketmasin: oxirgi 10 ta, "Hammasini ko'rsatish" bosilsa — hammasi (API yangisini birinchi beradi). */
+  protected readonly tarixHammasi = signal(false);
+  protected readonly tarixKorinadigan = computed(() => {
+    const t = this.x.narxTarixi();
+    return this.tarixHammasi() ? t : t.slice(0, this.TARIX_TELEFON);
+  });
 
   /** Har yoqilg'i qatoridagi "Yangi narx" matni (id bo'yicha) — yuklanishlar kiritilayotgan matnni o'chirmaydi. */
   protected readonly yangiNarx = signal<Record<number, string>>({});
