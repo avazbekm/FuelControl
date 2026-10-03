@@ -1,0 +1,12 @@
+<Project>
+  <!--
+    Versiya uchun yagona manba. API, Desktop va testlar assembly versiyasini (Version/FileVersion/InformationalVersion)
+    shu yerdan oladi; installer (deploy/installer/build.ps1 → FuelControl.iss) ham shu faylni o'qiydi.
+    Yangi versiya: faqat <Version> ni o'zgartiring (va web/package.json "version" ni mos qiling).
+  -->
+  <PropertyGroup>
+    <Version>0.0.1</Version>
+    <!-- .NET SDK InformationalVersion'ga "+commit" qo'shmasin: 0.0.1 bo'lib qolsin. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+</Project>
