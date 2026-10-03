@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.6887863">
+  <!--
+    Visual Studio uchun: Solution Explorer'da web ko'rinadi, F5 → `npm start` (ng serve, 4200, proxy → API 5000).
+    `dotnet build FuelControl.slnx` esa web'ni build qilmaydi: PWA build'i — `npm run build` (yoki Docker).
+  -->
+  <PropertyGroup>
+    <ProjectName>FuelControl.Web</ProjectName>
+    <PackageJsonDirectory>.</PackageJsonDirectory>
+    <StartupCommand>npm start</StartupCommand>
+    <BuildCommand>npm run build</BuildCommand>
+    <ShouldRunBuildScript>false</ShouldRunBuildScript>
+  </PropertyGroup>
+
+  <!-- Buyruq satridan / CI'da npm install ham ishga tushmasin; VS ichida node_modules yo'q bo'lsa o'rnatadi. -->
+  <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' != 'true'">
+    <ShouldRunNpmInstall>false</ShouldRunNpmInstall>
+  </PropertyGroup>
+</Project>
