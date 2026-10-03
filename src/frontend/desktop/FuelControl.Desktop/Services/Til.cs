@@ -119,7 +119,7 @@ public sealed class Til : INotifyPropertyChanged
         ["Xato_AparatBand"] = ("Bu raqamli aparat allaqachon bor", "Бу рақамли апарат аллақачон бор", "Колонка с таким номером уже есть"),
         ["Xato_LoginBand"] = ("Bu login band", "Бу логин банд", "Этот логин занят"),
         ["PinTiklandi"] = ("PIN/parol yangilandi", "PIN/парол янгиланди", "PIN/пароль обновлён"),
-        ["ExcelPdf"] = ("Excel · PDF", "Excel · PDF", "Excel · PDF"),
+        ["ExcelPdf"] = ("Excel", "Excel", "Excel"),
         ["Lotin"] = ("O'zbek (lotin)", "Ўзбек (лотин)", "Узбекский (лат.)"),
         ["Kirill"] = ("O'zbek (kirill)", "Ўзбек (кирилл)", "Узбекский (кир.)"),
         ["Rus"] = ("Ruscha", "Русча", "Русский"),
