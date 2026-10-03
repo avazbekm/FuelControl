@@ -4,7 +4,10 @@
     <Project Path="src/backend/FuelControl.Core/FuelControl.Core.csproj" />
     <Project Path="src/backend/FuelControl.Api/FuelControl.Api.csproj" />
     <Project Path="src/frontend/desktop/FuelControl.Desktop/FuelControl.Desktop.csproj" />
-    <Project Path="src/frontend/web/FuelControl.Web/FuelControl.Web.esproj" />
+    <Project Path="src/frontend/web/FuelControl.Web/FuelControl.Web.esproj">
+      <Build />
+      <Deploy />
+    </Project>
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/FuelControl.Api.Tests/FuelControl.Api.Tests.csproj" />
