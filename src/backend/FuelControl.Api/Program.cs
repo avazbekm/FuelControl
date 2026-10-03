@@ -62,6 +62,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 });
 builder.Services.AddAuthorization();
 
+// CORS: Cors:Manbalar (string[]) — faqat shu aniq manbalar (AllowAnyOrigin emas). Bo'sh bo'lsa CORS yoqilmaydi.
+// Web alohida domenda (masalan, Cloudflare Pages) turganda API va /hub ga brauzer shu manbadan murojaat qiladi.
+var corsManbalar = (builder.Configuration.GetSection("Cors:Manbalar").Get<string[]>() ?? [])
+    .Select(x => x.Trim().TrimEnd('/')).Where(x => x.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
+if (corsManbalar.Length > 0)
+    builder.Services.AddCors(o => o.AddDefaultPolicy(p => p
+        .WithOrigins(corsManbalar).AllowAnyHeader().AllowAnyMethod().AllowCredentials()
+        .SetPreflightMaxAge(TimeSpan.FromHours(1))));
+
 var app = builder.Build();
 
 app.UseExceptionHandler(h => h.Run(async ctx =>
@@ -81,6 +90,9 @@ app.UseExceptionHandler(h => h.Run(async ctx =>
         .ExecuteAsync(ctx);
 }));
 app.UseStatusCodePages();
+
+// Autentifikatsiya va /hub dan oldin: preflight (OPTIONS) shu yerda 204 bilan tugaydi.
+if (corsManbalar.Length > 0) app.UseCors();
 
 // PWA (src/frontend/web/FuelControl.Web build → wwwroot). Hash marshrutlash — SPA fallback kerak emas.
 var turlar = new FileExtensionContentTypeProvider();
