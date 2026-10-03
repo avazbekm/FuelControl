@@ -12,3 +12,7 @@ zaxira-dev/
 zaxira-web/
 src/backend/FuelControl.Api/wwwroot/
 deploy/.env
+
+# Installer: yig'ish natijalari va yuklab olingan fayllar (deploy/installer/build.ps1)
+deploy/installer/Output/
+deploy/installer/build/
