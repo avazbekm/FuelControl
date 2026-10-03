@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json.Serialization;
 using FuelControl.Api.Auth;
 using FuelControl.Api.Data;
@@ -7,10 +8,39 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Serilog;
+using Serilog.Events;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    // Windows xizmati sifatida joriy papka C:\Windows\System32 bo'ladi: kontent ildizi — dastur papkasi
+    // (appsettings*.json va wwwroot shu yerda). Konsol/dev'da odatdagidek joriy papka.
+    ContentRootPath = WindowsServiceHelpers.IsWindowsService() ? AppContext.BaseDirectory : null,
+});
+builder.Host.UseWindowsService(o => o.ServiceName = "FuelControl");
+
+// appsettings.Local.json — administrator qo'lda tahrirlaydigan ixtiyoriy fayl (masalan, Cors:Manbalar).
+// O'rnatuvchi appsettings.Production.json ni har o'rnatishda qayta yozadi, Local.json ga esa tegmaydi.
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: false);
+
+// Fayl jurnali: Log:Papka berilsa (o'rnatuvchi %ProgramData%\FuelControl\logs ni beradi) — kunlik fayllar, 30 kun saqlanadi.
+// Windows xizmatida konsol yo'q, shuning uchun xizmat ishga tushmasa sababi shu yerda ko'rinadi.
+if (builder.Configuration["Log:Papka"] is { Length: > 0 } logPapka)
+{
+    builder.Logging.AddSerilog(new LoggerConfiguration()
+        .MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+        .MinimumLevel.Override("System", LogEventLevel.Warning)
+        .WriteTo.File(Path.Combine(logPapka, "fuelcontrol-.log"),
+            rollingInterval: RollingInterval.Day, retainedFileCountLimit: 30, shared: true,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+        .CreateLogger(), dispose: true);
+}
 
 builder.Services.AddDbContext<FuelControlDbContext>(o =>
     o.UseSqlite(builder.Configuration.GetConnectionString("Baza") ?? "Data Source=fuelcontrol.db"));
@@ -113,8 +143,9 @@ app.HisobotUlash();
 app.Services.GetRequiredService<ZaxiraXizmati>().Ulash(app);
 app.MapHub<SotuvHub>("/hub").RequireAuthorization();
 
-using (var scope = app.Services.CreateScope())
+try
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<FuelControlDbContext>();
     db.Database.Migrate();
     await db.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
@@ -123,6 +154,16 @@ using (var scope = app.Services.CreateScope())
         await SeedXizmati.DemoMalumot(db, app.Logger);
     await MaoshYozuvchi.Yoz(db);
 }
+catch (Exception e)
+{
+    // Xizmat shu yerda to'xtaydi: sababi jurnalda qolsin (Seed:AdminParol yo'qligi, baza fayliga ruxsat yo'qligi va h.k.).
+    app.Logger.LogCritical(e, "FuelControl API ishga tushmadi: bazani yoki boshlang'ich ma'lumotni tayyorlashda xato.");
+    throw;
+}
+
+app.Logger.LogInformation("FuelControl API tayyor. Versiya {Versiya}, muhit {Muhit}, kontent ildizi {Ildiz}",
+    typeof(Program).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "?",
+    app.Environment.EnvironmentName, app.Environment.ContentRootPath);
 
 app.Run();
 
