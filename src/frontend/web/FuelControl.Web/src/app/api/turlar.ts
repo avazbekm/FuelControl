@@ -25,3 +25,5 @@ export type HisobotQatori = Sxema['HisobotQatoriDto'];
 export type AuditYozuvi = Sxema['AuditYozuviDto'];
 export type HisobHarakati = Sxema['HisobHarakatiDto'];
 export type OperatorHisob = Sxema['OperatorHisobDto'];
+export type NarxTarixi = Sxema['NarxTarixiDto'];
+export type ZaxiraJavobi = Sxema['ZaxiraJavobiDto'];

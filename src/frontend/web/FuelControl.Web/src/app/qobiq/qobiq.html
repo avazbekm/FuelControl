@@ -86,6 +86,11 @@
           <span class="matnlar"><span class="asosiy-matn">{{ til.t('Sozlamalar') }}</span></span>
           <ikon nomi="chevronRight" [olcham]="18" />
         </a>
+        <!-- Telefonda yon menyu yo'q — chiqish shu yerda -->
+        <button type="button" class="element" (click)="auth.chiqish()">
+          <span class="ikon-doira"><ikon nomi="power" [olcham]="18" /></span>
+          <span class="matnlar"><span class="asosiy-matn">{{ til.t('Chiqish') }}</span></span>
+        </button>
       </div>
     </div>
   </div>

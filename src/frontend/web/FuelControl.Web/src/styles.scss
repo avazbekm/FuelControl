@@ -314,6 +314,17 @@ table.jadval { width: 100%; border-collapse: collapse; font-variant-numeric: tab
 @keyframes parda-kir { from { opacity: 0; } }
 @keyframes dialog-kir { from { transform: translateY(40px); opacity: 0; } }
 
+/* ---- Dialog ichidagi forma va yordamchi sinflar (Sozlamalar) */
+.forma-ustun { display: flex; flex-direction: column; gap: 14px; }
+.ikki-ustun { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.katta-yorliq { font-size: 12px; font-weight: 650; letter-spacing: 0.05em; text-transform: uppercase; color: var(--matn-2); }
+.plitka { padding: 12px 14px; border-radius: 18px; background: var(--kiritish-fon); border: 1px solid var(--shisha-chegara); min-width: 0; }
+.nuqta { width: 10px; height: 10px; border-radius: 999px; flex: none; display: inline-block; }
+/* Keng ekranda jadval, telefonda kartalar */
+.faqat-tor { display: block; }
+.faqat-keng { display: none; }
+@media (min-width: 700px) { .faqat-tor { display: none; } .faqat-keng { display: block; } }
+
 /* ---- Bildirishnoma */
 .bildirish {
   position: fixed; left: 50%; transform: translateX(-50%); z-index: 60;
