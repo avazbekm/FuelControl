@@ -23,7 +23,7 @@ import { SozlamalarXizmati } from './sozlamalar-xizmati';
             <h2 id="ap-sarlavha">{{ til.t('Aparatlar') }}</h2>
             <span class="karta-izoh">{{ til.t('Sozlama_AparatIzoh') }}</span>
           </div>
-          <button type="button" class="tugma asosiy" (click)="qosh()"><ikon nomi="plus" [olcham]="16" [qalinlik]="2.4" /> {{ til.t('AparatQoshish') }}</button>
+          <button type="button" class="tugma asosiy" [disabled]="yoqilgiYoq()" (click)="qosh()"><ikon nomi="plus" [olcham]="16" [qalinlik]="2.4" /> {{ til.t('AparatQoshish') }}</button>
         </div>
         <div class="aparat-panjara">
           @for (a of x.aparatlar(); track a.id) {
@@ -45,6 +45,13 @@ import { SozlamalarXizmati } from './sozlamalar-xizmati';
           <h2 id="ap-panel">{{ yangi() ? til.t('YangiAparat') : til.t('Aparat_Tahrirlash', raqam() ?? 0) }}</h2>
           <span class="karta-izoh">{{ til.t(yangi() ? 'Aparat_YangiIzoh' : 'Aparat_AuditgaYoziladi') }}</span>
         </div>
+        @if (yoqilgiYoq()) {
+          <div class="malumot-blok yoqilgi-yoq" role="status">
+            <ikon nomi="info" [olcham]="16" [qalinlik]="2" />
+            <span class="matn">{{ til.t('Bosh_YoqilgiYoq') }}</span>
+            <button type="button" class="tugma kichik asosiy" (click)="x.otish.set(0)">{{ til.t('YoqilgiNarxlari') }}</button>
+          </div>
+        }
         <form class="forma-ustun" (ngSubmit)="saqla()" autocomplete="off" novalidate>
           <div class="ikki-ustun juft-ustun">
             <div class="maydon">
@@ -77,7 +84,7 @@ import { SozlamalarXizmati } from './sozlamalar-xizmati';
           @if (xato()) { <div class="xato-matn" role="alert">{{ xato() }}</div> }
           <div class="amallar">
             <button type="button" class="tugma" (click)="bekor()">{{ til.t('BekorQilish') }}</button>
-            <button type="submit" class="tugma asosiy" [disabled]="band()">
+            <button type="submit" class="tugma asosiy" [disabled]="band() || yoqilgiYoq()">
               @if (band()) { <span class="aylanma"></span> } @else { <ikon nomi="check" [olcham]="16" [qalinlik]="2.4" /> } {{ til.t('Saqlash') }}
             </button>
           </div>
@@ -112,6 +119,9 @@ import { SozlamalarXizmati } from './sozlamalar-xizmati';
     .juft-ustun { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
     :host ::ng-deep .kiritish.qalin-matn { font-weight: 700; }
     .amallar { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding-top: 2px; }
+    .yoqilgi-yoq { flex-wrap: wrap; align-items: center; }
+    .yoqilgi-yoq .matn { flex: 1 1 220px; min-width: 0; }
+    .yoqilgi-yoq .tugma { flex: none; }
   `,
 })
 export class AparatlarBolimi {
@@ -140,6 +150,8 @@ export class AparatlarBolimi {
   }
 
   private readonly tanlangan = computed<AparatDto | null>(() => this.x.aparatlar().find((a) => a.id === this.tanlanganId()) ?? null);
+  /** Yoqilg'i turi yo'q bo'lsa aparat qo'shib bo'lmaydi (har aparat bitta yoqilg'iga bog'lanadi). */
+  protected readonly yoqilgiYoq = computed(() => this.x.yoqilgilar().length === 0);
   /** Pult yoki bak qoldig'i asl qiymatdan farq qilsa, tuzatish sababi majburiy. */
   protected readonly sababKerak = computed(() => {
     const a = this.tanlangan();
@@ -153,11 +165,17 @@ export class AparatlarBolimi {
       const r = this.x.aparatlar();
       untracked(() => {
         if (this.yangi()) return;
-        if (!r.length) { this.tanlanganId.set(null); return; }
+        // Aparat yo'q (toza o'rnatish) — tahrirlash paneli o'rniga darhol "Yangi aparat" formasi.
+        if (!r.length) { this.yangiRejim(); return; }
         const a = r.find((q) => q.id === this.tanlanganId()) ?? r[0];
         // Foydalanuvchi yozayotganda (boshqa qurilmadan yangilanish kelsa) kiritilgan qiymatlar o'chib ketmasin.
         if (a.id !== this.tanlanganId() || !this.ozgargan()) this.maydonlar(a);
       });
+    });
+    // Yangi aparat formasi ochiq turib yoqilg'ilar kelsa (yoki hali tanlanmagan bo'lsa) — birinchisi tanlanadi.
+    effect(() => {
+      const y = this.x.yoqilgilar();
+      untracked(() => { if (this.yangi() && y.length && !y.some((q) => q.id === this.yoqilgiId())) this.yoqilgiId.set(y[0].id); });
     });
   }
 
@@ -183,22 +201,26 @@ export class AparatlarBolimi {
   }
 
   protected qosh() {
+    this.yangiRejim();
+    this.panelgaOt();
+  }
+
+  private yangiRejim() {
     this.yangi.set(true);
     this.tanlanganId.set(null);
     this.raqam.set(Math.max(0, ...this.x.aparatlar().map((a) => a.raqam)) + 1);
     this.yoqilgiId.set(this.x.yoqilgilar()[0]?.id ?? 0);
-    this.pult.set(0);
-    this.bak.set(0);
+    // Bo'sh maydon (placeholder "0"): "0.00" qiymat ustiga yozilganda raqamlar qo'shilib ketardi ("1000" → "10000").
+    this.pult.set(null);
+    this.bak.set(null);
     this.sabab = '';
     this.xato.set(null);
     this.urindi.set(false);
-    this.panelgaOt();
   }
 
   protected bekor() {
-    this.yangi.set(false);
     const a = this.tanlangan() ?? this.x.aparatlar()[0];
-    if (a) this.maydonlar(a);
+    if (a) { this.yangi.set(false); this.maydonlar(a); } else this.yangiRejim();
   }
 
   /** Telefonda panel kartalar ostida — ko'rinishga keltiramiz. */
@@ -208,12 +230,14 @@ export class AparatlarBolimi {
 
   protected async saqla() {
     this.urindi.set(true);
+    if (this.yoqilgiYoq()) return this.xato.set(this.til.t('Bosh_YoqilgiYoq'));
     const raqam = this.raqam();
     const pult = this.pult();
     const bak = this.bak();
     if (!raqam || raqam <= 0 || !this.yoqilgiId()) return this.xato.set(this.til.t('Xato_Maydon'));
-    if (pult == null || pult < 0) return this.xato.set(this.til.t('Aparat_XatoPult'));
-    if (bak == null || bak < 0) return this.xato.set(this.til.t('Aparat_XatoBakManfiy'));
+    if (pult == null || bak == null) return this.xato.set(this.til.t('Xato_Maydon'));
+    if (pult < 0) return this.xato.set(this.til.t('Aparat_XatoPult'));
+    if (bak < 0) return this.xato.set(this.til.t('Aparat_XatoBakManfiy'));
     if (this.x.aparatlar().some((a) => a.raqam === raqam && a.id !== this.tanlanganId())) return this.xato.set(this.til.t('Aparat_XatoRaqamBand'));
     this.xato.set(null);
     this.band.set(true);

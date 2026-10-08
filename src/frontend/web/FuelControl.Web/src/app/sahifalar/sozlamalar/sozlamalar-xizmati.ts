@@ -51,6 +51,8 @@ export class SozlamalarXizmati {
   readonly joriySmena = signal<SmenaTafsilotDto | null>(null);
   readonly yuklandi = signal(false);
   readonly xato = signal<string | null>(null);
+  /** Bo'limlar (masalan, Aparatlar → "Yoqilg'i narxlari" tugmasi) sahifadan shu bo'limga o'tishni so'raydi; sahifa o'tib, qiymatni tozalaydi. */
+  readonly otish = signal<number | null>(null);
 
   async yukla() {
     const natijalar = await Promise.allSettled([

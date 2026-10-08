@@ -183,7 +183,7 @@ public partial class SmenalarViewModel : ObservableObject
     public string OchTerminal => Format.Pul(D?.OchishTerminal ?? 0);
     public string OchDepozit => Format.Pul(D?.OchishDepozit ?? 0);
 
-    private static string Plus(long n) => (n >= 0 ? "+" : "−") + Format.Pul(Math.Abs(n));
+    private static string Plus(long n) => n == 0 ? "0" : (n > 0 ? "+" : "−") + Format.Pul(Math.Abs(n));
     private static string Minus(long n) => (n > 0 ? "−" : n < 0 ? "+" : "") + Format.Pul(Math.Abs(n));
 
     /// <summary>Kutilgan naqd tarkibi (§1.6): qaytim + savdo + qaytgan nasiya − plastik − depozit farqi − nasiya − xarajat.</summary>

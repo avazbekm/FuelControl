@@ -51,6 +51,7 @@ public static class SmenaEndpointlari
         }).Produces<SmenaTafsilotDto>().ProducesProblem(404).ProducesProblem(403);
 
         // Uchala qoldiqni operator qo'lda kiritadi (oldingi smenadan olinmaydi). Ochiq smena bo'lsa 409 (bazada ham kafolat).
+        // Aparat yo'q bo'lsa (yangi Production bazasi) smena ochilmaydi: 400. Xabar (ProblemDetails.detail) foydalanuvchiga so'zma-so'z ko'rsatiladi.
         s.MapPost("/och", async (SmenaOchishDto so, HttpContext ctx, FuelControlDbContext db, IHubContext<SotuvHub> hub) =>
         {
             SmenaDto dto;
@@ -58,6 +59,7 @@ public static class SmenaEndpointlari
             {
                 dto = await Tranzaksiya.Bajar(db, async () =>
                 {
+                    if (!await db.Aparatlar.AnyAsync()) throw new BiznesXatosi("Smenani ochish uchun kamida bitta aparat kerak. Sozlamalar → Aparatlar bo'limida aparat qo'shing.");
                     if (await db.Smenalar.AnyAsync(x => x.Tugadi == null)) throw OchiqSmenaBor();
                     var smena = SmenaHisoblagich.Och(ctx.User.FoydalanuvchiId(), so.Qaytim, so.Terminal, so.Depozit, DateTime.UtcNow);
                     db.Smenalar.Add(smena);

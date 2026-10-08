@@ -175,7 +175,11 @@ public partial class SavdoViewModel : ObservableObject
     public bool NasiyaYozaOladi => Joriy.Bor(Ruxsat.NasiyaYozish);
     public bool QarzQaytdiOladi => Joriy.Bor(Ruxsat.QarzQaytdi) && Joriy.Bor(Ruxsat.Nasiyalar);
     public bool XarajatYozaOladi => Joriy.Bor(Ruxsat.XarajatYozish);
-    public bool BakKirimOladi => Joriy.Bor(Ruxsat.BakKirim);
+    public bool BakKirimOladi => Joriy.Bor(Ruxsat.BakKirim) && !AparatYoq;
+    /// <summary>Bo'sh baza (toza o'rnatish): aparat yo'q — smena ochilmaydi, yo'l-yo'riq ko'rsatiladi.</summary>
+    public bool AparatYoq => Malumot.Aparatlar.Count == 0;
+    public bool SozlamalarOchaOladi => Joriy.Bor(Ruxsat.Sozlamalar);
+    [RelayCommand] private void SozlamalargaOt() => Navigatsiya.Sozlamalar(1, MainViewModel.SSozlamalar);
     /// <summary>Operator faqat o'z smenasini yopadi; "boshliq" (Smenalar ruxsati) boshqa operatornikini ham.</summary>
     public bool YopaOladi => S is { } s && Joriy.Bor(Ruxsat.SmenaYopish) && (s.Operator.Id == Joriy.Id || Joriy.Boshliqmi);
     public bool OchaOladi => Joriy.Bor(Ruxsat.SmenaOchish);
@@ -210,7 +214,7 @@ public partial class SavdoViewModel : ObservableObject
         : "";
     public string AparatlarHolatiIzoh => OxirgiYopilgan is { } o ? Til.F("Savdo_SmenaYopilgandanKeyin", o.Id) : Til.T("Savdo_HozirgiHolat");
 
-    private bool OchishMumkin() => Malumot.AloqaBor && OchaOladi && !SmenaOchiq &&
+    private bool OchishMumkin() => Malumot.AloqaBor && OchaOladi && !SmenaOchiq && !AparatYoq &&
         Format.PulOl(OchQaytim) is not null && Format.PulOl(OchTerminal) is not null && Format.PulOl(OchDepozit) is not null;
 
     partial void OnOchQaytimChanged(string value) => SmenaOchCommand.NotifyCanExecuteChanged();
@@ -267,9 +271,9 @@ public partial class SavdoViewModel : ObservableObject
         : null;
 
     // O'ng panel (kassadagi naqd)
-    public string BQaytim => "+" + Format.Pul(S?.OchishQaytim ?? 0);
-    public string BSavdo => HammaKorsatkich ? "+" + Format.Pul(JamiSumma) : "—";
-    public string BQaytgan => "+" + Format.Pul(S?.QaytganNasiya ?? 0);
+    public string BQaytim => Qosh(S?.OchishQaytim ?? 0);
+    public string BSavdo => HammaKorsatkich ? Qosh(JamiSumma) : "—";
+    public string BQaytgan => Qosh(S?.QaytganNasiya ?? 0);
     public string BPlastik => Ayir(ShuSmenaPlastik);
     public string BDepozit => Ayir(DepozitFarqi);
     public string BNasiya => Ayir(S?.NasiyaJami);
@@ -284,7 +288,9 @@ public partial class SavdoViewModel : ObservableObject
     public string FarqMatn => Farq is { } f ? Format.Farq(f) : "";
     public string KamomatIzoh => Til.F("Yopish_OylikdanAyiriladi", S?.Operator.ToliqIsm ?? "");
 
-    private static string Ayir(long? n) => n is null ? "—" : n >= 0 ? "−" + Format.Pul(n.Value) : "+" + Format.Pul(-n.Value);
+    /// <summary>Ayiriladigan qator: musbat → "−X", manfiy → "+X", nol → "0" (ishorasiz).</summary>
+    private static string Ayir(long? n) => n switch { null => "—", 0 => "0", > 0 => "−" + Format.Pul(n.Value), _ => "+" + Format.Pul(-n.Value) };
+    private static string Qosh(long n) => n == 0 ? "0" : "+" + Format.Pul(n);
 
     partial void OnYopTerminalChanged(string value) => YopishHisobla();
     partial void OnYopDepozitChanged(string value) => YopishHisobla();

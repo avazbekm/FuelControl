@@ -236,6 +236,7 @@
           <h2 id="och-s" class="katta-sarlavha">{{ til.t('Savdo_SmenaniOchish') }}</h2>
           <p class="izoh-p">{{ til.t('Savdo_OchishIzoh') }}</p>
         </div>
+        @if (!aparatlar().length) { <aparat-yoq /> }
         @if (auth.bor('SmenaOchish')) {
           <form (ngSubmit)="smenaOch()" enterKeyingi autocomplete="off" class="ochish-forma" novalidate>
             <div class="plitka katta ochish-qator">
@@ -256,7 +257,7 @@
             @if (ochishXato()) { <div class="xato-matn" role="alert">{{ ochishXato() }}</div> }
             <div class="qator ora orala ochish-past">
               <span class="ochuvchi"><span class="avatar kichik">{{ harflar(auth.foydalanuvchi()?.toliqIsm) }}</span>{{ til.t('Savdo_OchishVaqti', auth.foydalanuvchi()?.toliqIsm, hozirSoat()) }}</span>
-              <button type="submit" class="tugma yashil katta" [disabled]="band() || !tayyorOchish()">
+              <button type="submit" class="tugma yashil katta" [disabled]="band() || !tayyorOchish() || !aparatlar().length">
                 @if (band()) { <span class="aylanma"></span> } @else { <ikon nomi="play" [olcham]="16" [qalinlik]="2" /> } {{ til.t('Savdo_SmenaniOchish') }}
               </button>
             </div>
@@ -289,6 +290,7 @@
           </section>
         }
 
+        @if (aparatlar().length) {
         <section class="shisha karta" aria-labelledby="holat-s">
           <h2 id="holat-s">{{ til.t('Savdo_AparatlarHolati') }}</h2>
           <span class="karta-izoh kichik-bosh">{{ oxirgi() ? til.t('Savdo_SmenaYopilgandanKeyin', oxirgi()!.smena.id) : til.t('Savdo_HozirgiHolat') }}</span>
@@ -301,6 +303,7 @@
             }
           </div>
         </section>
+        }
       </aside>
     </div>
   }

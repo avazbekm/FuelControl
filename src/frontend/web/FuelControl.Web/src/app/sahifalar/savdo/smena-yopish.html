@@ -144,8 +144,8 @@
       <section class="kassa-karta" aria-labelledby="kassa-s">
         <div class="qator"><span class="bosqich-raqam shaffof">4</span><h2 id="kassa-s">{{ til.t('Yopish_KassadagiNaqd') }}</h2></div>
         <dl>
-          <dt>{{ til.t('Yopish_QaytimOchishda') }}</dt><dd>+{{ pul(t.smena.ochishQaytim) }}</dd>
-          <dt>{{ til.t('Yopish_SavdoAparatlar') }}</dt><dd>{{ tayyorAparatlar() ? '+' + pul(jamiSavdo()) : '—' }}</dd>
+          <dt>{{ til.t('Yopish_QaytimOchishda') }}</dt><dd>{{ qosh(t.smena.ochishQaytim) }}</dd>
+          <dt>{{ til.t('Yopish_SavdoAparatlar') }}</dt><dd>{{ tayyorAparatlar() ? qosh(jamiSavdo()) : '—' }}</dd>
           <dt>{{ til.t('Savdo_QaytganNasiya') }}</dt><dd>{{ ishora(t.smena.qaytganNasiya) }}</dd>
           <dt>{{ til.t('Yopish_Plastik') }}</dt><dd>{{ plastikSmena() != null ? ayirma(plastikSmena()!) : '—' }}</dd>
           <dt>{{ til.t('Yopish_DepozitFarqi') }}</dt><dd>{{ depozitFarqi() != null ? ayirma(depozitFarqi()!) : '—' }}</dd>

@@ -152,7 +152,9 @@ export class SmenaYopishSahifa {
     return this.til.t('Savdo_SoatDaqiqa', h, m);
   }
   /** Kassa hisobi: chiqim "−", kirim "+" (dizayndagidek). */
-  protected ayirma(n: number): string { return n === 0 ? '0' : n > 0 ? '−' + pul(n) : '+' + pul(-n); }
+  protected ayirma(n: number): string { const r = Math.round(n); return r === 0 ? '0' : r > 0 ? '−' + pul(r) : '+' + pul(-r); }
+  /** Kirim: "+1 000"; nol (yoki yaxlitlanganda nol) — ishorasiz "0". */
+  protected qosh(n: number): string { const r = Math.round(n); return r === 0 ? '0' : r > 0 ? '+' + pul(r) : pul(r); }
 
   async yop() {
     const t = this.tafsilot();

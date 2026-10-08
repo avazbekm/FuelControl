@@ -8,14 +8,15 @@ function guruhla(butun: string): string {
 
 export function pul(n: number | null | undefined): string {
   if (n == null || !isFinite(n)) return '0';
-  const m = n < 0 ? '−' : '';
-  return m + guruhla(Math.round(Math.abs(n)).toString());
+  const r = Math.round(Math.abs(n));
+  // Yaxlitlanganda 0 bo'lsa (−0.3 va h.k.) ishorasiz "0".
+  return (n < 0 && r > 0 ? '−' : '') + guruhla(r.toString());
 }
 
 export function litr(n: number | null | undefined): string {
   if (n == null || !isFinite(n)) return '0.00';
-  const m = n < 0 ? '−' : '';
   const [b, k] = Math.abs(n).toFixed(2).split('.');
+  const m = n < 0 && (b !== '0' || k !== '00') ? '−' : '';
   return `${m}${guruhla(b)}.${k}`;
 }
 
@@ -100,7 +101,7 @@ export function davomiylikSD(boshi: string, oxiri: string | null): [number, numb
 
 /** Qo'shish/ayirish belgisi bilan: "+15 995 270" / "−7 330 000" / "0". */
 export function ishoraPul(n: number): string {
-  return n > 0 ? '+' + pul(n) : pul(n);
+  return n > 0 && Math.round(n) > 0 ? '+' + pul(n) : pul(n);
 }
 
 /** Litr, oxiridagi ".00" siz: 6840 → "6 840", 6428.2 → "6 428.20". */

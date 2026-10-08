@@ -10,6 +10,7 @@ import { davomiylikSD, harflar, ishoraPul, kunQisqa, litr, litrQisqa, pul, sana,
 import { telefonFormat } from '../../core/telefon';
 import type { AparatDto, NasiyaDto, NasiyalarXulosaDto, SmenaDto, SmenaTafsilotDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
+import { AparatYoq } from '../../ui/aparat-yoq';
 import { YoqilgiPill, MashinaRaqami } from '../../ui/belgilar';
 import { SonKiritish } from '../../ui/son-kiritish';
 import { EnterKeyingi } from '../../ui/enter-keyingi';
@@ -24,7 +25,7 @@ import { BakKirimDialog } from '../../ui/dialoglar/bak-kirim-dialog';
  */
 @Component({
   selector: 'savdo-sahifa',
-  imports: [RouterLink, FormsModule, Ikon, YoqilgiPill, MashinaRaqami, SonKiritish, EnterKeyingi, NasiyaDialog, QarzQaytdiDialog, XarajatDialog, BakKirimDialog],
+  imports: [RouterLink, FormsModule, Ikon, AparatYoq, YoqilgiPill, MashinaRaqami, SonKiritish, EnterKeyingi, NasiyaDialog, QarzQaytdiDialog, XarajatDialog, BakKirimDialog],
   templateUrl: './savdo.html',
   styleUrl: './savdo.scss',
 })

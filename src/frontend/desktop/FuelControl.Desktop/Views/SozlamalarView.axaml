@@ -102,6 +102,15 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="plus" Olcham="16" /><TextBlock Text="{l:T AparatQoshish}" /></StackPanel>
                             </Button>
                         </Grid>
+                        <Border Classes="ogoh" IsVisible="{Binding YoqilgiYoq}">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <ctl:Ikon Nomi="alert" Olcham="17" Rang="{DynamicResource OgohMatn}" VerticalAlignment="Top" Margin="0,1,0,0" />
+                                <TextBlock Grid.Column="1" Text="{l:T Bosh_YoqilgiYoq}" />
+                                <Button Grid.Column="2" VerticalAlignment="Center" Command="{Binding YoqilgiBolimigaOtCommand}">
+                                    <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="tag" Olcham="15" /><TextBlock Text="{l:T YoqilgiNarxlari}" /></StackPanel>
+                                </Button>
+                            </Grid>
+                        </Border>
                         <ItemsControl ItemsSource="{Binding AparatKartalari}" ClipToBounds="False">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate><UniformGrid Columns="2" ColumnSpacing="12" RowSpacing="12" /></ItemsPanelTemplate>

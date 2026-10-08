@@ -148,6 +148,7 @@ public partial class SozlamalarViewModel : ObservableObject
         OxirgiNusxa = Til.T("OxirgiNusxaIzoh");
         Sinxronla();
         Malumot.Ozgardi += Sinxronla;
+        Navigatsiya.SozlamaBolimSorovi += b => Bolim = b;
         Malumot.AloqaOzgardi += () =>
         {
             foreach (var c in new IRelayCommand[] { NarxniSaqlaCommand, YoqilginiSaqlaCommand, YoqilginiOchirCommand, AparatniSaqlaCommand,
@@ -163,9 +164,16 @@ public partial class SozlamalarViewModel : ObservableObject
 
     private static bool AloqaBor() => Malumot.AloqaBor;
 
+    /// <summary>Bo'sh baza: yoqilg'i yo'q — aparat qo'shib bo'lmaydi (aparat yoqilg'iga bog'lanadi).</summary>
+    public bool YoqilgiYoq => Malumot.Yoqilgilar.Count == 0;
+    private bool AparatQoshMumkin() => !YoqilgiYoq;
+    [RelayCommand] private void YoqilgiBolimigaOt() => Bolim = 0;
+
     /// <summary>Kesh o'zgarganda ro'yxatlarni yangilaydi — faqat haqiqatan o'zgarganini (kiritilayotgan matn va tanlov saqlanadi).</summary>
     private void Sinxronla()
     {
+        OnPropertyChanged(nameof(YoqilgiYoq));
+        AparatQoshCommand.NotifyCanExecuteChanged();
         var yImzo = string.Join("|", Malumot.Yoqilgilar.Select(y => $"{y.Id}:{y.Nomi}:{y.Narx}:{y.Rang}"));
         if (yImzo != _yoqilgiImzo)
         {
@@ -345,7 +353,7 @@ public partial class SozlamalarViewModel : ObservableObject
     }
 
     // ================= Aparatlar =================
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(AparatQoshMumkin))]
     private void AparatQosh()
     {
         AparatTahrir = null;
@@ -388,6 +396,8 @@ public partial class SozlamalarViewModel : ObservableObject
     {
         if (!int.TryParse(AparatRaqam.Trim(), out var raqam) || raqam <= 0 || AparatYoqilgi is null) { AparatXato = Til.T("Xato_Maydon"); return; }
         if (Malumot.Aparatlar.Any(a => a.Raqam == raqam && a.Id != AparatTahrir?.Id)) { AparatXato = Til.T("Aparat_XatoRaqamBand"); return; }
+        // Yangi aparatda boshlang'ich pult/bak jimgina 0 bo'lib ketmasin — haqiqiy ko'rsatkich kiritilishi shart (0 bo'lsa "0" yoziladi).
+        if (AparatTahrir is null && (AparatTotalLitr.Trim().Length == 0 || AparatBak.Trim().Length == 0)) { AparatXato = Til.T("Xato_Maydon"); return; }
         var pult = AparatTotalLitr.Trim().Length == 0 ? 0m : Format.KasrOl(AparatTotalLitr);
         var bak = AparatBak.Trim().Length == 0 ? 0m : Format.KasrOl(AparatBak);
         if (pult is null or < 0) { AparatXato = Til.T("Aparat_XatoPult"); return; }

@@ -9,7 +9,13 @@ namespace FuelControl.Api.Xizmatlar;
 
 public static class SeedXizmati
 {
-    public static async Task Boshlash(FuelControlDbContext db, IConfiguration konf, ILogger log)
+    /// <summary>
+    /// Birinchi ishga tushishda admin foydalanuvchini yaratadi. yoqilgiVaAparatlar = true bo'lsa (Development/Web/Testing) bo'sh bazaga
+    /// 3 ta namunaviy yoqilg'i va 5 ta aparat ham yoziladi; Production'da false: mijoz bazasida faqat admin bo'ladi, yoqilg'i va aparatlarni
+    /// (haqiqiy boshlang'ich pult ko'rsatkichlari bilan) admin Sozlamalar'da o'zi kiritadi — namunaviy aparatlarni o'chirib bo'lmaydi va
+    /// ularning TotalLitr=0 qiymati haqiqiy pultga mos kelmaydi.
+    /// </summary>
+    public static async Task Boshlash(FuelControlDbContext db, IConfiguration konf, ILogger log, bool yoqilgiVaAparatlar = true)
     {
         if (!await db.Foydalanuvchilar.AnyAsync())
         {
@@ -24,7 +30,7 @@ public static class SeedXizmati
             log.LogInformation("Admin foydalanuvchi yaratildi (login: admin).");
         }
 
-        if (!await db.Yoqilgilar.AnyAsync())
+        if (yoqilgiVaAparatlar && !await db.Yoqilgilar.AnyAsync())
         {
             db.Yoqilgilar.AddRange(
                 new YoqilgiTuri { Nomi = "AI-92", Narx = 12_200, Rang = "#2563EB" },

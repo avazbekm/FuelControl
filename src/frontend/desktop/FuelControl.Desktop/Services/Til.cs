@@ -276,6 +276,12 @@ public sealed class Til : INotifyPropertyChanged
         ["Savdo_JamiQarzdorlik"] = ("Jami qarzdorlik {0} · {1} ta mijoz", "Жами қарздорлик {0} · {1} та мижоз", "Общая задолженность {0} · клиентов: {1}"),
         ["Boshqaruv_NasiyaQarzdorligi"] = ("Nasiya qarzdorligi", "Насия қарздорлиги", "Задолженность по долгам"),
         ["Boshqaruv_OtganQarzQisqa"] = ("muddati o'tgan {0} · {1} ta", "муддати ўтган {0} · {1} та", "просрочено {0} · {1}"),
+        ["Bosh_AparatYoq"] = ("Hali aparat qo'shilmagan. Smena ochishdan oldin Sozlamalar'da yoqilg'i, keyin aparat (boshlang'ich pult ko'rsatkichi va bak qoldig'i bilan) qo'shilishi kerak — buni administrator sozlaydi.",
+                              "Ҳали апарат қўшилмаган. Смена очишдан олдин Созламалар'да ёқилғи, кейин апарат (бошланғич пульт кўрсаткичи ва бак қолдиғи билан) қўшилиши керак — буни администратор созлайди.",
+                              "Колонки ещё не добавлены. Перед открытием смены в Настройках нужно добавить топливо, затем колонку (с начальным показанием пульта и остатком бака) — это настраивает администратор."),
+        ["Bosh_YoqilgiYoq"] = ("Avval «Yoqilg'i narxlari» bo'limida yoqilg'i qo'shing — har bir aparat bitta yoqilg'iga bog'lanadi.",
+                               "Аввал «Ёқилғи нархлари» бўлимида ёқилғи қўшинг — ҳар бир апарат битта ёқилғига боғланади.",
+                               "Сначала добавьте топливо в разделе «Цены на топливо» — каждая колонка привязана к одному виду топлива."),
         ["Sozlama_AparatSoni"] = ("{0} ta aparat", "{0} та апарат", "Колонок: {0}"),
         ["Hisobot_KpiXarajatYozuv"] = ("{0} ta yozuv", "{0} та ёзув", "Записей: {0}"),
 

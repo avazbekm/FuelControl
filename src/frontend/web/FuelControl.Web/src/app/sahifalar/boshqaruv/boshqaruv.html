@@ -23,6 +23,8 @@
       <button type="button" class="tugma" (click)="yukla()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button>
     </div>
   } @else if (data(); as d) {
+    @if (!d.aparatlar.length) { <aparat-yoq /> }
+
     <!-- KPI -->
     <div class="kpi-qator">
       @if (oxirgi(); as o) {
@@ -35,7 +37,7 @@
                  [izoh]="d.oyOrtiqcha > 0 ? til.t('Boshqaruv_OrtiqchaIzoh', pul(d.oyOrtiqcha), ortiqchaSmenalar()) : til.t('Boshqaruv_OrtiqchaYoq')" />
       <a class="kpi-havola" routerLink="/nasiyalar" [attr.aria-label]="til.t('Boshqaruv_NasiyaQarzdorligi')">
         <kpi-karta [nom]="til.t('Boshqaruv_NasiyaQarzdorligi')" [qiymat]="pul(d.nasiyalar.faolQarz)" [birlik]="til.t('Som')"
-                   [qizilIzoh]="til.t('Boshqaruv_OtganQarzQisqa', pul(d.nasiyalar.muddatiOtgan), d.nasiyalar.muddatiOtganSoni)" />
+                   [qizilIzoh]="d.nasiyalar.muddatiOtganSoni > 0 ? til.t('Boshqaruv_OtganQarzQisqa', pul(d.nasiyalar.muddatiOtgan), d.nasiyalar.muddatiOtganSoni) : ''" />
       </a>
     </div>
 
@@ -66,7 +68,7 @@
               <span class="qator orala"><h2 id="joriy-s" class="joriy-h2">{{ til.t('Boshqaruv_SmenaYopiq') }}</h2><span class="pill kul">{{ til.t('Boshqaruv_Yopiq') }}</span></span>
               <span class="karta-izoh">{{ til.t('Boshqaruv_OchiqSmenaYoq') }}</span>
             </div>
-            @if (auth.bor('SmenaOchish') && auth.bor('Savdo')) {
+            @if (auth.bor('SmenaOchish') && auth.bor('Savdo') && d.aparatlar.length) {
               <a class="tugma yashil" routerLink="/savdo"><ikon nomi="play" [olcham]="14" [qalinlik]="2" /> {{ til.t('Boshqaruv_SmenaOchish') }}</a>
             }
           </div>
@@ -97,7 +99,7 @@
             <li class="bosh">{{ til.t('MalumotYoq') }}</li>
           }
         </ul>
-        @if (auth.bor('BakKirim')) {
+        @if (auth.bor('BakKirim') && d.aparatlar.length) {
           <button type="button" class="tugma" (click)="bakOchiq.set(true)"><ikon nomi="plus" [olcham]="16" [qalinlik]="2.4" /> {{ til.t('Bak_Kirim') }}</button>
         }
       </section>

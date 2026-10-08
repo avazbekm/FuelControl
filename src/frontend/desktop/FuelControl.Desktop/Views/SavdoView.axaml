@@ -397,6 +397,16 @@
                                 <TextBlock Text="{l:T Savdo_OchishIzoh}" Classes="izoh" FontSize="13" TextWrapping="Wrap" />
                             </StackPanel>
 
+                            <Border Classes="ogoh" IsVisible="{Binding AparatYoq}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <ctl:Ikon Nomi="alert" Olcham="17" Rang="{DynamicResource OgohMatn}" VerticalAlignment="Top" Margin="0,1,0,0" />
+                                    <TextBlock Grid.Column="1" Text="{l:T Bosh_AparatYoq}" />
+                                    <Button Grid.Column="2" VerticalAlignment="Center" IsVisible="{Binding SozlamalarOchaOladi}" Command="{Binding SozlamalargaOtCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="gear" Olcham="15" /><TextBlock Text="{l:T Sozlamalar}" /></StackPanel>
+                                    </Button>
+                                </Grid>
+                            </Border>
+
                             <Border Classes="malumot" IsVisible="{Binding OchishRuxsatiYoq}"><TextBlock Text="{l:T Savdo_OchishRuxsatYoq}" /></Border>
 
                             <StackPanel Spacing="14" IsVisible="{Binding OchaOladi}">
@@ -480,7 +490,7 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Classes="card" Padding="20,18">
+                        <Border Classes="card" Padding="20,18" IsVisible="{Binding !AparatYoq}">
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{l:T Savdo_AparatlarHolati}" FontSize="15" FontWeight="ExtraBold" />
                                 <TextBlock Text="{Binding AparatlarHolatiIzoh}" Classes="izoh" Margin="0,0,0,10" />

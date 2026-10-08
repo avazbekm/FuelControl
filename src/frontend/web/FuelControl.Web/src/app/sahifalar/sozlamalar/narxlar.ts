@@ -45,7 +45,7 @@ import { PALITRA, SozlamalarXizmati } from './sozlamalar-xizmati';
               </div>
             </div>
           } @empty {
-            <div class="bosh">{{ til.t('MalumotYoq') }}</div>
+            <div class="malumot-blok" role="status"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Bosh_YoqilgiYoq') }}</span></div>
           }
         </div>
       </section>

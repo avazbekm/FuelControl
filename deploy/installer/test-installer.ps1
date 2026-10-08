@@ -9,6 +9,7 @@
       1. noto'g'ri qiymatlarda o'rnatuvchi hech narsa o'rnatmay chiqadi;
       2. birinchi o'rnatish: fayllar, appsettings.Production.json (port, yo'llar, JWT kaliti, admin paroli), versiya;
       3. o'rnatilgan haqiqiy API Production rejimida (127.0.0.1:<port>) ishga tushadi: /openapi, "/" (PWA), admin login, jurnal;
+         toza baza: faqat admin (/me), yoqilg'i/aparat/smena/nasiya yo'q, aparatsiz smena ochib bo'lmaydi (demo ma'lumot yozilmaydi);
       4. yangilash: JWT kaliti saqlanadi, parol so'ralmaydi, appsettings.Local.json (CORS) saqlanadi, baza saqlanadi;
       5. faqat desktop; 6. tunnel komponenti (token bilan/tokensiz); 7. o'chirish: ma'lumotlar saqlanadi.
     Sinov vaqtinchalik papkada ishlaydi; muvaffaqiyatli tugasa u o'chiriladi. Xato bo'lsa o'rnatuvchi jurnallari qoladi.
@@ -160,6 +161,20 @@ try {
         $r = Login $p1 $pwd1
         Check ($null -ne $r -and $r.foydalanuvchi.login -eq 'admin') "admin login'i o'rnatishdagi (maxsus belgili) parol bilan ishladi"
         Check ($null -eq (Login $p1 'notogri-parol')) "noto'g'ri parol rad etildi"
+        # Toza o'rnatish (Production, baza yo'q): bazada faqat admin; demo, yoqilg'i, aparat, smena, nasiya yaratilmaydi.
+        $api = "http://127.0.0.1:$p1"; $hdr = @{ Authorization = "Bearer $($r.token)" }
+        $me = Invoke-RestMethod "$api/me" -Headers $hdr
+        Check (($me.login -eq 'admin') -and ($me.rol -eq 'Admin')) "/me = admin (Admin)"
+        Check (@(Invoke-RestMethod "$api/foydalanuvchilar" -Headers $hdr).Count -eq 1) "bazada bitta foydalanuvchi (admin)"
+        foreach ($yol in '/yoqilgilar', '/aparatlar', '/smenalar') {
+            Check ((Invoke-WebRequest "$api$yol" -Headers $hdr -UseBasicParsing).Content.Trim() -eq '[]') "toza baza: $yol bo'sh"
+        }
+        $nas = Invoke-RestMethod "$api/nasiyalar" -Headers $hdr
+        Check ((@($nas.royxat).Count -eq 0) -and ($nas.xulosa.faolQarz -eq 0)) "toza baza: /nasiyalar bo'sh"
+        Check ((Invoke-WebRequest "$api/smenalar/joriy" -Headers $hdr -UseBasicParsing).StatusCode -eq 204) "toza baza: ochiq smena yo'q (204)"
+        $och = $null
+        try { Invoke-RestMethod "$api/smenalar/och" -Method Post -Headers $hdr -ContentType 'application/json' -Body '{"qaytim":0,"terminal":0,"depozit":0}' | Out-Null } catch { $och = $_ }
+        Check ($och -and ([int]$och.Exception.Response.StatusCode -eq 400) -and ($och.ErrorDetails.Message -match 'kamida bitta aparat')) "aparatsiz smena ochilmaydi: 400 'kamida bitta aparat kerak'"
         $doc = $null; try { $doc = Invoke-WebRequest "http://127.0.0.1:$p1/scalar/v1" -UseBasicParsing } catch { }
         Check ($null -ne $doc) "Scalar hujjat sahifasi ochiladi"
     }

@@ -152,7 +152,8 @@ try
     db.Database.Migrate();
     await db.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
     await BazaKafolati.Tikla(db);
-    await SeedXizmati.Boshlash(db, builder.Configuration, app.Logger);
+    // Production (mijoz o'rnatuvchisi): faqat admin; yoqilg'i va aparatlarni admin Sozlamalar'da o'zi kiritadi.
+    await SeedXizmati.Boshlash(db, builder.Configuration, app.Logger, yoqilgiVaAparatlar: !app.Environment.IsProduction());
     // Demo ma'lumot (dizayn namunasi) faqat dev/web muhitida va faqat bo'sh bazada: Seed:DemoMalumot=true.
     if ((app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Web")) && builder.Configuration.GetValue<bool>("Seed:DemoMalumot"))
         await SeedXizmati.DemoMalumot(db, app.Logger);

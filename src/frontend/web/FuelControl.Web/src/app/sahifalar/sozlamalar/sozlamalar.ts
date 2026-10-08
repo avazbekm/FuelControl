@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { Auth } from '../../core/auth';
 import { BUILD_BELGISI } from '../../core/versiya';
 import { Til, TilKodi } from '../../core/til';
@@ -120,6 +120,9 @@ export class SozlamalarSahifa {
 
   protected readonly admin = computed(() => this.auth.bor('Sozlamalar'));
 
+  /** `?qism=aparatlar|yoqilgi` — shu bo'lim ochiladi (smena ochish uchun aparat yo'q bo'lganda Savdo/Boshqaruv'dan). */
+  readonly qism = input<string | undefined>();
+
   protected readonly tillar: { kod: TilKodi; kalit: string }[] = [{ kod: 'uz', kalit: 'Lotin' }, { kod: 'uzk', kalit: 'Kirill' }, { kod: 'ru', kalit: 'Rus' }];
   protected readonly rejimlar: { kod: TemaRejimi; kalit: string }[] = [
     { kod: 'yorug', kalit: 'Yorug' }, { kod: 'qorongi', kalit: 'Qorongi' }, { kod: 'tizim', kalit: 'Tizim' },
@@ -130,6 +133,15 @@ export class SozlamalarSahifa {
   protected readonly bolim = signal(this.saqlangan());
 
   constructor() {
+    effect(() => {
+      const q = this.qism();
+      if (q === 'aparatlar') untracked(() => this.tanla(1));
+      else if (q === 'yoqilgi') untracked(() => this.tanla(0));
+    });
+    effect(() => {
+      const i = this.x.otish();
+      if (i != null) untracked(() => { this.tanla(i); this.x.otish.set(null); });
+    });
     // Ruxsat berilganda (yoki sahifa ochilganda) ma'lumotlar bir marta yuklanadi.
     effect(() => { if (this.admin()) untracked(() => this.yukla()); });
     // Narx/aparat/smena boshqa qurilmadan o'zgarsa yoki aloqa tiklansa — ro'yxatlar yangilanadi.

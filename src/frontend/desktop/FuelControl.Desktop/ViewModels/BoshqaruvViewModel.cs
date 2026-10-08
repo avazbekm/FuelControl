@@ -76,7 +76,14 @@ public partial class BoshqaruvViewModel : ObservableObject
     [RelayCommand] private void BarchaSmenalar() => Navigatsiya.Och(MainViewModel.SSmenalar);
     [RelayCommand] private void SavdogaOt() => Navigatsiya.Och(MainViewModel.SSavdo);
     [RelayCommand] private void BakKirim() => Dialoglar.Bak.Och(null);
-    public bool BakKirimOladi => Malumot.JoriyFoydalanuvchi.Bor(Ruxsat.BakKirim);
+    public bool BakKirimOladi => Malumot.JoriyFoydalanuvchi.Bor(Ruxsat.BakKirim) && !AparatYoq;
+    public bool AparatYoq => Malumot.Aparatlar.Count == 0;
+    /// <summary>"Smenani ochish" (Savdo'ga o'tish) — aparat yo'q bo'lsa ma'nosiz, yashiriladi.</summary>
+    public bool SmenaOchishKorinsin => SavdogaOtaOladi && !AparatYoq;
+    /// <summary>Muddati o'tgan qarz bo'lmasa qizil qator ko'rsatilmaydi.</summary>
+    public bool OtganBor => (_d?.Nasiyalar.MuddatiOtganSoni ?? 0) > 0;
+    public bool SozlamalarOchaOladi => Malumot.JoriyFoydalanuvchi.Bor(Ruxsat.Sozlamalar);
+    [RelayCommand] private void SozlamalargaOt() => Navigatsiya.Sozlamalar(1, MainViewModel.SSozlamalar);
 
     /// <summary>"Yakshanba, 4-oktabr 2026" — joriy til lug'atidan.</summary>
     public string Sana

@@ -6,6 +6,7 @@ import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { hozirToshkent, kunOy, litrQisqa, toshkentdan } from '../../core/format';
 import type { AparatDto } from '../../api/model';
 import { Ikon } from '../ikon';
+import { AparatYoq } from '../aparat-yoq';
 import { Oyna } from '../oyna';
 import { EnterKeyingi } from '../enter-keyingi';
 import { SonKiritish } from '../son-kiritish';
@@ -13,10 +14,11 @@ import { SonKiritish } from '../son-kiritish';
 /** "Bakka kirim" dialogi (docs/dizayn/BakKirim): zavoddan kelgan yoqilg'i, litrda. Pult ko'rsatkichi o'zgarmaydi. */
 @Component({
   selector: 'bak-kirim-dialog',
-  imports: [FormsModule, Ikon, Oyna, SonKiritish, EnterKeyingi],
+  imports: [FormsModule, Ikon, Oyna, SonKiritish, EnterKeyingi, AparatYoq],
   template: `
     <oyna [(ochiq)]="ochiq" [sarlavha]="til.t('Bak_Kirim')" [tagsarlavha]="til.t('Bak_KirimIzoh')" ikon="truck" ikonRang="yashil">
       <form class="forma-ustun" enterKeyingi (ngSubmit)="saqla()" autocomplete="off" novalidate>
+        @if (aparatYuklandi() && !aparatlar().length) { <aparat-yoq /> }
         <div class="maydon">
           <label for="bk-aparat">{{ til.t('Bak_QaysiAparat') }}</label>
           <select id="bk-aparat" class="kiritish aparat-tanlov" name="aparat" [ngModel]="aparatId()" (ngModelChange)="aparatId.set(+$event)">
@@ -53,7 +55,7 @@ import { SonKiritish } from '../son-kiritish';
         @if (xato()) { <div class="xato-matn" role="alert">{{ xato() }}</div> }
         <div class="amallar">
           <button type="button" class="tugma" (click)="ochiq.set(false)">{{ til.t('BekorQilish') }}</button>
-          <button type="submit" class="tugma yashil" [disabled]="band()">
+          <button type="submit" class="tugma yashil" [disabled]="band() || !tanlangan()">
             @if (band()) { <span class="aylanma"></span> } @else { <ikon nomi="plus" [olcham]="16" [qalinlik]="2.4" /> } {{ til.t('Bak_KirimniSaqlash') }}
           </button>
         </div>
@@ -84,6 +86,8 @@ export class BakKirimDialog {
 
   protected readonly litrQisqa = litrQisqa;
   protected readonly aparatlar = signal<AparatDto[]>([]);
+  /** Aparatlar kelguncha "aparat yo'q" bloki ko'rsatilmaydi. */
+  protected readonly aparatYuklandi = signal(false);
   protected readonly aparatId = signal(0);
   protected readonly litr = signal<number | null>(null);
   protected hujjat = '';
@@ -110,13 +114,14 @@ export class BakKirimDialog {
   }
 
   private async boshlash(oldin: number | null) {
-    this.litr.set(null); this.hujjat = ''; this.xato.set(null);
+    this.litr.set(null); this.hujjat = ''; this.xato.set(null); this.aparatYuklandi.set(false);
     const h = hozirToshkent();
     this.vaqt = `${h.kun}T${h.soat}`;
     try {
       const r = await this.server.aparatlar();
       this.aparatlar.set(r);
       this.aparatId.set(oldin && r.some((a) => a.id === oldin) ? oldin : (r[0]?.id ?? 0));
+      this.aparatYuklandi.set(true);
     } catch (e) {
       this.xato.set(xatoMatni(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy')));
     }

@@ -8,6 +8,7 @@ import { jonliYangila } from '../../core/malumot';
 import { davomiylikSD, harflar, isoKun, ishoraPul, kunQisqa, litr, litrQisqa, pul, soat } from '../../core/format';
 import type { AparatDto, BoshqaruvDto, SmenaDto, SmenaTafsilotDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
+import { AparatYoq } from '../../ui/aparat-yoq';
 import { YoqilgiPill } from '../../ui/belgilar';
 import { BakKirimDialog } from '../../ui/dialoglar/bak-kirim-dialog';
 import { KpiKarta } from './kpi-karta';
@@ -15,7 +16,7 @@ import { KpiKarta } from './kpi-karta';
 /** Boshqaruv paneli (docs/dizayn/Boshqaruv): KPI, joriy smena, baklar, oxirgi 14 smena grafigi, to'lov turlari, oxirgi yopilgan smenalar. */
 @Component({
   selector: 'boshqaruv-sahifa',
-  imports: [RouterLink, Ikon, YoqilgiPill, KpiKarta, BakKirimDialog],
+  imports: [RouterLink, Ikon, AparatYoq, YoqilgiPill, KpiKarta, BakKirimDialog],
   templateUrl: './boshqaruv.html',
   styleUrl: './boshqaruv.scss',
 })

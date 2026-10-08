@@ -69,7 +69,7 @@
                     <StackPanel Spacing="6">
                         <TextBlock Text="{l:T Boshqaruv_NasiyaQarzdorligi, Katta=True}" Classes="nom" />
                         <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding JamiQarzdorlik}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
-                        <TextBlock Text="{Binding OtganIzoh}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource Qizil}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding OtganIzoh}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource Qizil}" TextTrimming="CharacterEllipsis" IsVisible="{Binding OtganBor}" />
                     </StackPanel>
                 </Border>
             </UniformGrid>
@@ -106,13 +106,22 @@
                                 <Border Classes="badge kulrang"><TextBlock Text="{l:T Boshqaruv_Yopiq}" /></Border>
                             </StackPanel>
                             <TextBlock Text="{l:T Boshqaruv_OchiqSmenaYoq}" Classes="izoh" FontSize="13" TextWrapping="Wrap" />
+                            <Border Classes="ogoh" IsVisible="{Binding AparatYoq}">
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                    <ctl:Ikon Nomi="alert" Olcham="17" Rang="{DynamicResource OgohMatn}" VerticalAlignment="Top" Margin="0,1,0,0" />
+                                    <TextBlock Grid.Column="1" Text="{l:T Bosh_AparatYoq}" />
+                                    <Button Grid.Column="2" VerticalAlignment="Center" IsVisible="{Binding SozlamalarOchaOladi}" Command="{Binding SozlamalargaOtCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="gear" Olcham="15" /><TextBlock Text="{l:T Sozlamalar}" /></StackPanel>
+                                    </Button>
+                                </Grid>
+                            </Border>
                             <Border Classes="ichki">
                                 <StackPanel Spacing="3">
                                     <TextBlock Text="{Binding OxirgiSmenaSarlavha}" FontWeight="Bold" />
                                     <TextBlock Text="{Binding OxirgiYopildi}" Classes="izoh" />
                                 </StackPanel>
                             </Border>
-                            <Button Classes="success" HorizontalAlignment="Left" IsVisible="{Binding SavdogaOtaOladi}" Command="{Binding SavdogaOtCommand}">
+                            <Button Classes="success" HorizontalAlignment="Left" IsVisible="{Binding SmenaOchishKorinsin}" Command="{Binding SavdogaOtCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="play" Olcham="14" Rang="White" /><TextBlock Text="{l:T Boshqaruv_SmenaOchish}" /></StackPanel>
                             </Button>
                         </StackPanel>
