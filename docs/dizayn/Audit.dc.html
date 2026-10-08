@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Audit jurnali</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1B4FE0}a:hover{color:#2F6BFF}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #2F6BFF;outline-offset:2px}
+input::placeholder{color:#7A879E}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: radial-gradient(900px 620px at 4% 0%, rgba(104,160,255,0.55), rgba(104,160,255,0) 70%), radial-gradient(820px 680px at 100% 6%, rgba(176,142,255,0.50), rgba(176,142,255,0) 70%), radial-gradient(980px 700px at 74% 100%, rgba(72,214,206,0.46), rgba(72,214,206,0) 70%), radial-gradient(720px 560px at 0% 100%, rgba(255,190,120,0.30), rgba(255,190,120,0) 70%), #F2F6FF;">
+
+  <div style="flex: 0 1 264px; min-width: 0; display: flex;">
+    <dc-import name="Menyu" faol="audit" ism="Administrator" rol="Admin" harflar="A" hint-size="264px,860px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 18px; padding: 6px 8px 28px;">
+
+    <header style="display: flex; flex-direction: column; gap: 6px; padding-top: 6px;">
+      <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Audit jurnali</h1>
+      <span style="font-size: 13px; color: #4F607D;">Barcha o'zgartiruvchi amallar. Yangi turlar: nasiya, qarz qaytdi, xarajat, bakka kirim, ko'rsatkich tuzatildi.</span>
+    </header>
+
+    <section aria-labelledby="jurnal-s" style="box-sizing: border-box; padding: 18px 20px 10px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+      <h2 id="jurnal-s" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); margin: -1px;">Yozuvlar</h2>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        <div style="flex: 1 1 280px; min-width: 0; position: relative; display: flex; align-items: center;">
+          <span style="position: absolute; left: 16px; display: inline-flex; color: #4F607D; pointer-events: none;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11A7 7 0 1 1 4 11A7 7 0 1 1 18 11 M20 20l-4-4"></path></svg>
+          </span>
+          <input type="search" aria-label="Qidirish" placeholder="Foydalanuvchi, amal yoki tafsilot" value="{{ qidiruv }}" onChange="{{ qidiruvOzgar }}" style="width: 100%; box-sizing: border-box; min-height: 44px; padding: 0 18px 0 44px; border-radius: 22px; font: inherit; font-size: 14px; color: #0B1530; background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.62)); border: 1px solid #C9D1DE; outline: none;">
+        </div>
+        <div role="group" aria-label="Amal turi" style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <sc-for list="{{ filtrlar }}" as="f" hint-placeholder-count="6">
+            <button type="button" aria-pressed="{{ f.bosilgan }}" onClick="{{ f.tanla }}" style="{{ f.uslub }}">{{ f.nomi }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <ul style="list-style: none; margin: 0; padding: 0;">
+        <sc-for list="{{ yozuvlar }}" as="y" hint-placeholder-count="10">
+          <li style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 4px; border-bottom: 1px solid rgba(18,20,40,0.07);">
+            <span style="width: 92px; flex: none; display: flex; flex-direction: column; gap: 2px; font-variant-numeric: tabular-nums;"><span style="font-size: 13.5px; font-weight: 700;">{{ y.vaqt }}</span><span style="font-size: 12px; color: #4F607D;">{{ y.sana }}</span></span>
+            <span style="width: 190px; flex: none; display: flex; align-items: center; gap: 10px; min-width: 0;">
+              <span style="width: 34px; height: 34px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #1B4FE0; background: linear-gradient(180deg, #F2F6FF, #D9E5FF);">{{ y.harflar }}</span>
+              <span style="font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ y.kim }}</span>
+            </span>
+            <span style="width: 170px; flex: none;"><span style="{{ y.belgiUslub }}">{{ y.amal }}</span></span>
+            <span style="flex: 1 1 280px; min-width: 0; font-size: 13.5px; line-height: 1.45; color: #2E3D5C; font-variant-numeric: tabular-nums;">{{ y.tafsilot }}</span>
+          </li>
+        </sc-for>
+      </ul>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    var filtr = s.filtr !== undefined ? s.filtr : "hammasi";
+    var qidiruv = s.qidiruv !== undefined ? s.qidiruv : "";
+    var b = "display: inline-flex; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap;";
+    var rang = {
+      smena: b + " background: #DCE6FF; color: #1B4FE0;",
+      nasiya: b + " background: #FFE9DA; color: #9A3412;",
+      xarajat: b + " background: #FFEBC2; color: #8A5A00;",
+      bak: b + " background: #D9F5E6; color: #0E7A4A;",
+      tuzatish: b + " background: #FFDEDE; color: #B3261E;",
+      hisob: b + " background: #E8EDF5; color: #334155;"
+    };
+    var barcha = [
+      { sana: "04.10.2026", vaqt: "12:40", kim: "Alisher Karimov", harflar: "AK", tur: "xarajat", amal: "Xarajat yozildi", tafsilot: "Boshliq naqd oldi · 1 500 000 · kassadan · smena #42" },
+      { sana: "04.10.2026", vaqt: "11:20", kim: "Alisher Karimov", harflar: "AK", tur: "nasiya", amal: "Qarz qaytdi", tafsilot: "Bobur Aliyev · 300 000 naqd · qolgan qarz 300 000" },
+      { sana: "04.10.2026", vaqt: "10:15", kim: "Alisher Karimov", harflar: "AK", tur: "xarajat", amal: "Xarajat yozildi", tafsilot: "Lampochka va tozalash vositasi · 85 000 · kassadan" },
+      { sana: "04.10.2026", vaqt: "09:47", kim: "Alisher Karimov", harflar: "AK", tur: "nasiya", amal: "Nasiya yozildi", tafsilot: "Farhod Ismoilov · 30 B 456 CA · 220 000 · 07.10 gacha" },
+      { sana: "04.10.2026", vaqt: "09:05", kim: "Alisher Karimov", harflar: "AK", tur: "nasiya", amal: "Nasiya yozildi", tafsilot: "Jasur To'xtayev · 01 A 777 BC · 350 000 · 11.10 gacha" },
+      { sana: "04.10.2026", vaqt: "08:02", kim: "Alisher Karimov", harflar: "AK", tur: "smena", amal: "Smena ochildi", tafsilot: "#42 · qaytim puli 100 000 · terminal 200 000 · depozit 1 250 000" },
+      { sana: "04.10.2026", vaqt: "08:02", kim: "Dilshod Rahimov", harflar: "DR", tur: "smena", amal: "Smena yopildi", tafsilot: "#41 · savdo 15 995 270 · 1 198.40 L · farq yo'q" },
+      { sana: "03.10.2026", vaqt: "16:30", kim: "Administrator", harflar: "A", tur: "bak", amal: "Bakka kirim", tafsilot: "5-aparat, Dizel · +8 000 L · bak 9 480 L bo'ldi · yuk xati 1176" },
+      { sana: "03.10.2026", vaqt: "09:12", kim: "Administrator", harflar: "A", tur: "tuzatish", amal: "Ko'rsatkich tuzatildi", tafsilot: "Smena #40 · 3-aparat yangi ko'rsatkich 62 949.60 dan 62 946.90 ga · sabab: yozishda xato" },
+      { sana: "02.10.2026", vaqt: "14:10", kim: "Administrator", harflar: "A", tur: "hisob", amal: "Avans berildi", tafsilot: "Alisher Karimov · 1 000 000 · naqd" }
+    ];
+    var variantlar = [
+      { k: "hammasi", nomi: "Hammasi" }, { k: "smena", nomi: "Smena" }, { k: "nasiya", nomi: "Nasiya" },
+      { k: "xarajat", nomi: "Xarajat" }, { k: "bak", nomi: "Bak" }, { k: "tuzatish", nomi: "Tuzatish" }
+    ];
+    var cAsos = "min-height: 44px; padding: 0 16px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;";
+    var filtrlar = variantlar.map(function (v) {
+      var faol = v.k === filtr;
+      return {
+        nomi: v.nomi,
+        bosilgan: faol ? "true" : "false",
+        uslub: cAsos + (faol
+          ? " color: #FFFFFF; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 6px 14px rgba(47,107,255,0.28);"
+          : " color: #2E3D5C; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);"),
+        tanla: function () { self.setState({ filtr: v.k }); }
+      };
+    });
+    var q = qidiruv.trim().toLowerCase();
+    var yozuvlar = barcha.filter(function (y) {
+      var mos = filtr === "hammasi" || y.tur === filtr;
+      var topildi = q === "" || (y.kim + " " + y.amal + " " + y.tafsilot).toLowerCase().indexOf(q) !== -1;
+      return mos && topildi;
+    }).map(function (y) {
+      return { sana: y.sana, vaqt: y.vaqt, kim: y.kim, harflar: y.harflar, amal: y.amal, tafsilot: y.tafsilot, belgiUslub: rang[y.tur] };
+    });
+    return {
+      filtrlar: filtrlar,
+      yozuvlar: yozuvlar,
+      qidiruv: qidiruv,
+      qidiruvOzgar: function (e) { self.setState({ qidiruv: e.target.value }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

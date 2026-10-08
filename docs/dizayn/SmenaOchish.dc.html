@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Smenani ochish</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1B4FE0}a:hover{color:#2F6BFF}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #2F6BFF;outline-offset:2px}
+input::placeholder{color:#7A879E}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: radial-gradient(900px 620px at 4% 0%, rgba(104,160,255,0.55), rgba(104,160,255,0) 70%), radial-gradient(820px 680px at 100% 6%, rgba(176,142,255,0.50), rgba(176,142,255,0) 70%), radial-gradient(980px 700px at 74% 100%, rgba(72,214,206,0.46), rgba(72,214,206,0) 70%), radial-gradient(720px 560px at 0% 100%, rgba(255,190,120,0.30), rgba(255,190,120,0) 70%), #F2F6FF;">
+
+  <div style="flex: 0 1 264px; min-width: 0; display: flex;">
+    <dc-import name="Menyu" faol="savdo" operator="{{ yes }}" ism="Dilshod Rahimov" rol="Operator" harflar="DR" hint-size="264px,860px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 18px; padding: 6px 8px 28px;">
+
+    <header style="display: flex; flex-direction: column; gap: 8px; padding-top: 6px;">
+      <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Savdo</h1>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        <span style="display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #E8EDF5; color: #334155;"><span style="width: 7px; height: 7px; border-radius: 999px; background: #64748B;"></span>Smena yopiq</span>
+        <span style="font-size: 13px; color: #4F607D;">Oxirgi smena #42 ni Alisher Karimov yopdi</span>
+      </div>
+    </header>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start;">
+
+      <section aria-labelledby="och-s" style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <h2 id="och-s" style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.3px;">Smenani ochish</h2>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.45; color: #4F607D;">Uchta qoldiqni hozirgi holat bo'yicha yozing. Ular oldingi smenadan avtomatik olinmaydi.</p>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 16px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 20px;">
+          <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: #E4ECFF; color: #2F6BFF;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z M15 12A3 3 0 1 1 9 12A3 3 0 1 1 15 12"></path></svg>
+          </span>
+          <div style="flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+            <label for="qaytim-k" style="font-size: 14.5px; font-weight: 700;">Kassadagi qaytim puli</label>
+            <span style="font-size: 12.5px; line-height: 1.4; color: #4F607D;">Oldingi smena qaytim uchun qoldirgan naqd</span>
+          </div>
+          <input id="qaytim-k" type="text" inputmode="numeric" autocomplete="off" placeholder="0" value="{{ qaytim }}" onChange="{{ qaytimOzgar }}" style="flex: 1 1 200px; min-width: 0; box-sizing: border-box; min-height: 52px; padding: 0 20px; border-radius: 26px; font: inherit; font-size: 20px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; color: #0B1530; background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.62)); border: 1px solid #C9D1DE; outline: none;">
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 16px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 20px;">
+          <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: #DDF4F7; color: #0E7C8A;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z M2 10h20"></path></svg>
+          </span>
+          <div style="flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+            <label for="terminal-k" style="font-size: 14.5px; font-weight: 700;">Terminaldagi summa · plastik</label>
+            <span style="font-size: 12.5px; line-height: 1.4; color: #4F607D;">Terminal 00:00 da nollanadi. Ekranda hozir ko'rsatayotgan summani yozing.</span>
+          </div>
+          <input id="terminal-k" type="text" inputmode="numeric" autocomplete="off" placeholder="0" value="{{ terminal }}" onChange="{{ terminalOzgar }}" style="flex: 1 1 200px; min-width: 0; box-sizing: border-box; min-height: 52px; padding: 0 20px; border-radius: 26px; font: inherit; font-size: 20px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; color: #0B1530; background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.62)); border: 1px solid #C9D1DE; outline: none;">
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 16px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 20px;">
+          <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: #ECE7FF; color: #5B3FE0;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 7V5H5a2 2 0 0 0 0 4h15v10H5a2 2 0 0 1-2-2V7 M16 14h.01"></path></svg>
+          </span>
+          <div style="flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+            <label for="depozit-k" style="font-size: 14.5px; font-weight: 700;">Depozit karta qoldig'i</label>
+            <span style="font-size: 12.5px; line-height: 1.4; color: #4F607D;">Zapravka bank kartasidagi hozirgi qoldiq</span>
+          </div>
+          <input id="depozit-k" type="text" inputmode="numeric" autocomplete="off" placeholder="0" value="{{ depozit }}" onChange="{{ depozitOzgar }}" style="flex: 1 1 200px; min-width: 0; box-sizing: border-box; min-height: 52px; padding: 0 20px; border-radius: 26px; font: inherit; font-size: 20px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; color: #0B1530; background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.62)); border: 1px solid #C9D1DE; outline: none;">
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding-top: 4px;">
+          <span style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #4F607D;">
+            <span style="width: 34px; height: 34px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #1B4FE0; background: linear-gradient(180deg, #F2F6FF, #D9E5FF);">DR</span>
+            Dilshod Rahimov · ochilish vaqti 08:04
+          </span>
+          <a href="Main.dc.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 54px; padding: 0 28px; box-sizing: border-box; border-radius: 999px; font-size: 16px; font-weight: 700; color: #FFFFFF; text-decoration: none; white-space: nowrap; background: linear-gradient(180deg, #22A468 0%, #0E7A4A 50%, #0B6B40 100%); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 24px rgba(14,122,74,0.30), inset 0 1px 0 rgba(255,255,255,0.45);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l14 8-14 8z"></path></svg>
+            Smenani ochish
+          </a>
+        </div>
+      </section>
+
+      <aside style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 18px;">
+
+        <section aria-labelledby="oxirgi-s" style="box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <h2 id="oxirgi-s" style="margin: 0; font-size: 15px; font-weight: 700;">Oxirgi smena #42</h2>
+            <span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #E8EDF5; color: #334155;">Yopilgan</span>
+          </div>
+          <span style="font-size: 12.5px; color: #4F607D; margin-top: -6px;">Alisher Karimov · 24 soat</span>
+          <dl style="margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; column-gap: 12px; font-size: 13.5px; font-variant-numeric: tabular-nums;">
+            <dt style="color: #4F607D;">Savdo</dt><dd style="margin: 0; font-weight: 800; text-align: right;">16 468 520</dd>
+            <dt style="color: #4F607D;">Sotilgan litr</dt><dd style="margin: 0; font-weight: 700; text-align: right;">1 236.80 L</dd>
+            <dt style="color: #4F607D;">Plastik</dt><dd style="margin: 0; font-weight: 700; text-align: right;">7 630 000</dd>
+            <dt style="color: #4F607D;">Depozit farqi</dt><dd style="margin: 0; font-weight: 700; text-align: right;">+2 160 000</dd>
+            <dt style="color: #4F607D;">Nasiya</dt><dd style="margin: 0; font-weight: 700; text-align: right;">570 000</dd>
+            <dt style="color: #4F607D;">Xarajatlar</dt><dd style="margin: 0; font-weight: 700; text-align: right;">1 585 000</dd>
+          </dl>
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #FFE1E1; border: 1px solid #FFB4B4;">
+            <span style="flex: 1; min-width: 0; font-size: 13px; line-height: 1.4;"><span style="font-weight: 800; color: #B3261E;">Kamomat</span> · Alisher Karimov oyligidan ayirildi</span>
+            <span style="font-size: 17px; font-weight: 800; color: #B3261E; font-variant-numeric: tabular-nums; white-space: nowrap;">−45 520</span>
+          </div>
+        </section>
+
+        <section aria-labelledby="holat-s" style="box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+          <h2 id="holat-s" style="margin: 0; font-size: 15px; font-weight: 700;">Aparatlar holati</h2>
+          <span style="font-size: 12.5px; color: #4F607D; margin-top: -4px;">Smena #42 yopilgandan keyin</span>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 14px; row-gap: 0; font-size: 13px; font-variant-numeric: tabular-nums;">
+            <span style="padding: 6px 0; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Aparat</span>
+            <span style="padding: 6px 0; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D; text-align: right;">Pult, L</span>
+            <span style="padding: 6px 0; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D; text-align: right;">Bak, L</span>
+
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); font-weight: 700;">1 · AI-92</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right;">184 642.30</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right; font-weight: 700;">6 428.20</span>
+
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); font-weight: 700;">2 · AI-92</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right;">97 655.40</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right; font-weight: 700;">2 969.60</span>
+
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); font-weight: 700;">3 · AI-95</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right;">63 296.70</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right; font-weight: 700;">3 941.50</span>
+
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); font-weight: 700;">4 · AI-95</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right;">41 990.25</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right; font-weight: 700;">1 872.50</span>
+
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); font-weight: 700;">5 · Dizel</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right;">120 873.60</span>
+            <span style="padding: 8px 0; border-top: 1px solid rgba(18,20,40,0.07); text-align: right; font-weight: 700;">9 166.40</span>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    return {
+      yes: true,
+      qaytim: s.qaytim !== undefined ? s.qaytim : "100 000",
+      terminal: s.terminal !== undefined ? s.terminal : "380 000",
+      depozit: s.depozit !== undefined ? s.depozit : "3 410 000",
+      qaytimOzgar: function (e) { self.setState({ qaytim: e.target.value }); },
+      terminalOzgar: function (e) { self.setState({ terminal: e.target.value }); },
+      depozitOzgar: function (e) { self.setState({ depozit: e.target.value }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

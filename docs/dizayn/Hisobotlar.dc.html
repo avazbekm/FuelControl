@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Hisobotlar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1B4FE0}a:hover{color:#2F6BFF}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #2F6BFF;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: radial-gradient(900px 620px at 4% 0%, rgba(104,160,255,0.55), rgba(104,160,255,0) 70%), radial-gradient(820px 680px at 100% 6%, rgba(176,142,255,0.50), rgba(176,142,255,0) 70%), radial-gradient(980px 700px at 74% 100%, rgba(72,214,206,0.46), rgba(72,214,206,0) 70%), radial-gradient(720px 560px at 0% 100%, rgba(255,190,120,0.30), rgba(255,190,120,0) 70%), #F2F6FF;">
+
+  <div style="flex: 0 1 264px; min-width: 0; display: flex;">
+    <dc-import name="Menyu" faol="hisobotlar" ism="Administrator" rol="Admin" harflar="A" hint-size="264px,860px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 18px; padding: 6px 8px 28px;">
+
+    <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; padding-top: 6px;">
+      <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Hisobotlar</h1>
+        <span style="font-size: 13px; color: #4F607D;">Davr: 01.10.2026 dan 04.10.2026 gacha · 3 ta yopilgan smena</span>
+      </div>
+      <button type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 700; color: #0B1530; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55)); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 6px 18px rgba(28,54,110,0.10), inset 0 1px 0 #FFFFFF;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z M9 11l6 6 M15 11l-6 6"></path></svg>
+        Excel
+      </button>
+    </header>
+
+    <!-- Filtrlar -->
+    <section aria-label="Filtrlar" style="box-sizing: border-box; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), inset 0 1px 0 rgba(255,255,255,0.9);">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px;">
+        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 150px; min-width: 0;">
+          <label for="dan-k" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Dan</label>
+          <input id="dan-k" type="date" value="2026-10-01" readonly style="min-height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 22px; font: inherit; font-size: 14px; color: #0B1530; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.65)); border: 1px solid #C9D1DE;">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 150px; min-width: 0;">
+          <label for="gacha-k" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Gacha</label>
+          <input id="gacha-k" type="date" value="2026-10-04" readonly style="min-height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 22px; font: inherit; font-size: 14px; color: #0B1530; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.65)); border: 1px solid #C9D1DE;">
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1 1 180px; min-width: 0;">
+          <label for="op-k" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Operator</label>
+          <select id="op-k" style="min-height: 44px; box-sizing: border-box; padding: 0 16px; border-radius: 22px; font: inherit; font-size: 14px; color: #0B1530; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.65)); border: 1px solid #C9D1DE;">
+            <option>Hammasi</option><option>Alisher Karimov</option><option>Dilshod Rahimov</option>
+          </select>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px; flex: 2 1 320px; min-width: 0;">
+          <span id="guruh-l" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Guruhlash</span>
+          <div role="group" aria-labelledby="guruh-l" style="display: flex; padding: 4px; gap: 4px; border-radius: 999px; background: rgba(20,40,80,0.08);">
+            <button type="button" aria-pressed="true" style="flex: 1; min-height: 44px; border: 0; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; color: #0B1530; cursor: pointer; background: rgba(255,255,255,0.97); box-shadow: 0 2px 8px rgba(30,50,110,0.14);">Smena</button>
+            <button type="button" aria-pressed="false" style="flex: 1; min-height: 44px; border: 0; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; color: #4F607D; cursor: pointer; background: transparent;">Kunlik</button>
+            <button type="button" aria-pressed="false" style="flex: 1; min-height: 44px; border: 0; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; color: #4F607D; cursor: pointer; background: transparent;">Oylik</button>
+            <button type="button" aria-pressed="false" style="flex: 1; min-height: 44px; border: 0; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; color: #4F607D; cursor: pointer; background: transparent;">Operator</button>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+        <span style="font-size: 12.5px; color: #4F607D; margin-right: 4px;">Tez davr</span>
+        <button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; color: #2E3D5C; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);">Kecha</button>
+        <button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; color: #2E3D5C; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);">Oxirgi 7 kun</button>
+        <button type="button" aria-pressed="true" style="min-height: 44px; padding: 0 16px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; color: #FFFFFF; cursor: pointer; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 6px 14px rgba(47,107,255,0.28);">Shu oy</button>
+        <button type="button" style="min-height: 44px; padding: 0 16px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; color: #2E3D5C; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);">O'tgan oy</button>
+        <span style="flex: 1 1 260px; font-size: 12.5px; color: #4F607D; text-align: right;">Kunlik guruhlashda smena ochilgan sanaga yoziladi</span>
+      </div>
+    </section>
+
+    <!-- KPI -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 12px;">
+      <sc-for list="{{ kpilar }}" as="k" hint-placeholder-count="8">
+        <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 22px; box-shadow: 0 14px 36px rgba(28,54,110,0.10), inset 0 1px 0 rgba(255,255,255,0.9);">
+          <span style="display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;"><span style="{{ k.nuqta }}"></span>{{ k.nomi }}</span>
+          <span style="{{ k.qiymatUslub }}">{{ k.qiymat }}</span>
+          <span style="font-size: 12px; color: #4F607D;">{{ k.izoh }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Smenalar jadvali -->
+    <section aria-labelledby="jadval-s" style="box-sizing: border-box; padding: 18px 16px 10px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+      <h2 id="jadval-s" style="margin: 0 4px 6px; font-size: 15px; font-weight: 700;">Smenalar bo'yicha</h2>
+      <div style="overflow-x: auto;">
+        <div style="min-width: 1040px; display: flex; flex-direction: column; font-variant-numeric: tabular-nums;">
+          <div style="display: grid; grid-template-columns: 96px minmax(120px, 1.3fr) repeat(9, minmax(76px, 1fr)); gap: 10px; padding: 0 10px 8px; border-bottom: 1px solid rgba(18,20,40,0.08); font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #4F607D;">
+            <span>Smena</span><span>Operator</span><span style="text-align: right;">Litr</span><span style="text-align: right;">Savdo</span><span style="text-align: right;">Plastik</span><span style="text-align: right;">Depozit</span><span style="text-align: right;">Nasiya</span><span style="text-align: right;">Qaytgan</span><span style="text-align: right;">Xarajat</span><span style="text-align: right;">Naqd</span><span style="text-align: right;">Farq</span>
+          </div>
+          <sc-for list="{{ smenalar }}" as="s" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 96px minmax(120px, 1.3fr) repeat(9, minmax(76px, 1fr)); gap: 10px; align-items: center; padding: 12px 10px; border-bottom: 1px solid rgba(18,20,40,0.07); font-size: 13.5px;">
+              <span style="display: flex; flex-direction: column; gap: 2px;"><span style="font-weight: 800;">{{ s.raqam }}</span><span style="font-size: 12px; color: #4F607D;">{{ s.sana }}</span></span>
+              <span>{{ s.operator }}</span>
+              <span style="text-align: right;">{{ s.litr }}</span>
+              <span style="text-align: right; font-weight: 800;">{{ s.savdo }}</span>
+              <span style="text-align: right;">{{ s.plastik }}</span>
+              <span style="text-align: right;">{{ s.depozit }}</span>
+              <span style="text-align: right;">{{ s.nasiya }}</span>
+              <span style="text-align: right;">{{ s.qaytgan }}</span>
+              <span style="text-align: right;">{{ s.xarajat }}</span>
+              <span style="text-align: right;">{{ s.naqd }}</span>
+              <span style="{{ s.farqUslub }}">{{ s.farq }}</span>
+            </div>
+          </sc-for>
+          <div style="display: grid; grid-template-columns: 96px minmax(120px, 1.3fr) repeat(9, minmax(76px, 1fr)); gap: 10px; align-items: center; padding: 14px 10px 6px; font-size: 13.5px; font-weight: 800;">
+            <span>Jami</span><span></span><span style="text-align: right;">3 640.10</span><span style="text-align: right; color: #1B4FE0;">48 590 420</span><span style="text-align: right;">22 030 000</span><span style="text-align: right;">5 735 900</span><span style="text-align: right;">1 910 000</span><span style="text-align: right;">450 000</span><span style="text-align: right;">1 980 000</span><span style="text-align: right;">18 914 520</span><span style="text-align: right; color: #B3261E;">−100 000</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Yoqilg'i va baklar -->
+    <section aria-labelledby="bak-s" style="box-sizing: border-box; padding: 18px 16px 10px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+      <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; margin: 0 4px 6px;">
+        <h2 id="bak-s" style="margin: 0; font-size: 15px; font-weight: 700;">Aparatlar va baklar</h2>
+        <span style="font-size: 12.5px; color: #4F607D;">Bak boshida + kirim − sotildi = bak oxirida, litrda</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <div style="min-width: 820px; display: flex; flex-direction: column; font-variant-numeric: tabular-nums;">
+          <div style="display: grid; grid-template-columns: minmax(150px, 1.3fr) repeat(5, minmax(100px, 1fr)); gap: 10px; padding: 0 10px 8px; border-bottom: 1px solid rgba(18,20,40,0.08); font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #4F607D;">
+            <span>Aparat</span><span style="text-align: right;">Bak boshida</span><span style="text-align: right;">Kirim</span><span style="text-align: right;">Sotildi</span><span style="text-align: right;">Bak oxirida</span><span style="text-align: right;">Savdo</span>
+          </div>
+          <sc-for list="{{ baklar }}" as="b" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: minmax(150px, 1.3fr) repeat(5, minmax(100px, 1fr)); gap: 10px; align-items: center; padding: 11px 10px; border-bottom: 1px solid rgba(18,20,40,0.07); font-size: 13.5px;">
+              <span style="display: flex; align-items: center; gap: 8px;"><span style="font-weight: 800;">{{ b.nomi }}</span><span style="{{ b.pill }}">{{ b.yoqilgi }}</span></span>
+              <span style="text-align: right;">{{ b.boshida }}</span>
+              <span style="text-align: right; color: #0E7A4A; font-weight: 600;">{{ b.kirim }}</span>
+              <span style="text-align: right;">{{ b.sotildi }}</span>
+              <span style="text-align: right; font-weight: 800;">{{ b.oxirida }}</span>
+              <span style="text-align: right; font-weight: 700;">{{ b.savdo }}</span>
+            </div>
+          </sc-for>
+          <div style="display: grid; grid-template-columns: minmax(150px, 1.3fr) repeat(5, minmax(100px, 1fr)); gap: 10px; align-items: center; padding: 14px 10px 6px; font-size: 13.5px; font-weight: 800;">
+            <span>Jami</span><span style="text-align: right;">13 255.10</span><span style="text-align: right; color: #0E7A4A;">+16 000</span><span style="text-align: right;">3 640.10</span><span style="text-align: right;">25 615.00</span><span style="text-align: right; color: #1B4FE0;">48 590 420</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1320}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var qiymatAsos = "font-size: 20px; font-weight: 800; letter-spacing: -0.3px; font-variant-numeric: tabular-nums; white-space: nowrap;";
+    function nuqta(r) { return r ? "width: 9px; height: 9px; flex: none; border-radius: 999px; background: " + r + ";" : "display: none;"; }
+    var kpilar = [
+      { nomi: "Jami savdo", qiymat: "48 590 420", izoh: "so'm · 3 smena", rang: "" },
+      { nomi: "Litr", qiymat: "3 640.10", izoh: "barcha aparatlar", rang: "" },
+      { nomi: "Naqd", qiymat: "18 914 520", izoh: "39%", rang: "#2F6BFF" },
+      { nomi: "Plastik", qiymat: "22 030 000", izoh: "45%", rang: "#19B5C9" },
+      { nomi: "Depozit", qiymat: "5 735 900", izoh: "12%", rang: "#7C5CFF" },
+      { nomi: "Nasiya", qiymat: "1 910 000", izoh: "qaytgan 450 000", rang: "#E8590C" },
+      { nomi: "Xarajat", qiymat: "1 980 000", izoh: "5 ta yozuv", rang: "" },
+      { nomi: "Kamomat", qiymat: "120 000", izoh: "ortiqcha 20 000", rang: "", qizil: true }
+    ].map(function (k) {
+      return {
+        nomi: k.nomi, qiymat: k.qiymat, izoh: k.izoh,
+        nuqta: nuqta(k.rang),
+        qiymatUslub: qiymatAsos + (k.qizil ? " color: #C42127;" : "")
+      };
+    });
+    var farqAsos = "text-align: right; font-weight: 700;";
+    var smenalar = [
+      { raqam: "#39", sana: "01.10", operator: "Dilshod Rahimov", litr: "1 205.60", savdo: "16 098 210", plastik: "7 290 000", depozit: "3 365 900", nasiya: "615 000", qaytgan: "0", xarajat: "310 000", naqd: "4 827 310", farq: "+20 000", rang: "#1B4FE0" },
+      { raqam: "#40", sana: "02.10", operator: "Alisher Karimov", litr: "1 236.10", savdo: "16 496 940", plastik: "7 410 000", depozit: "2 100 000", nasiya: "1 200 000", qaytgan: "450 000", xarajat: "1 620 000", naqd: "5 786 940", farq: "−120 000", rang: "#B3261E" },
+      { raqam: "#41", sana: "03.10", operator: "Dilshod Rahimov", litr: "1 198.40", savdo: "15 995 270", plastik: "7 330 000", depozit: "270 000", nasiya: "95 000", qaytgan: "0", xarajat: "50 000", naqd: "8 300 270", farq: "0", rang: "#0E7A4A" }
+    ].map(function (s) {
+      var n = {};
+      for (var k in s) { n[k] = s[k]; }
+      n.farqUslub = farqAsos + " color: " + s.rang + ";";
+      return n;
+    });
+    var pillAsos = "display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;";
+    var p92 = pillAsos + " background: #DCE7FD; color: #1D4ED8;";
+    var p95 = pillAsos + " background: #EDE5FE; color: #6D28D9;";
+    var pdz = pillAsos + " background: #FCEFC7; color: #854D0E;";
+    var baklar = [
+      { nomi: "1-aparat", yoqilgi: "AI-92", pill: p92, boshida: "3 017.70", kirim: "+5 000", sotildi: "1 177.70", oxirida: "6 840.00", savdo: "14 367 940" },
+      { nomi: "2-aparat", yoqilgi: "AI-92", pill: p92, boshida: "3 915.00", kirim: "0", sotildi: "700.00", oxirida: "3 215.00", savdo: "8 540 000" },
+      { nomi: "3-aparat", yoqilgi: "AI-95", pill: p95, boshida: "1 641.80", kirim: "+3 000", sotildi: "521.80", oxirida: "4 120.00", savdo: "8 087 900" },
+      { nomi: "4-aparat", yoqilgi: "AI-95", pill: p95, boshida: "2 239.00", kirim: "0", sotildi: "279.00", oxirida: "1 960.00", savdo: "4 324 500" },
+      { nomi: "5-aparat", yoqilgi: "Dizel", pill: pdz, boshida: "2 441.60", kirim: "+8 000", sotildi: "961.60", oxirida: "9 480.00", savdo: "13 270 080" }
+    ];
+    return { kpilar: kpilar, smenalar: smenalar, baklar: baklar };
+  }
+}
+</script>
+</body>
+</html>

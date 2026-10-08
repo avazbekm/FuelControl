@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Narx o'zgarishi, smena ochiq</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1B4FE0}a:hover{color:#2F6BFF}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #2F6BFF;outline-offset:2px}
+input::placeholder{color:#7A879E}
+</style>
+</helmet>
+<div style="width: 720px; height: 980px; box-sizing: border-box; padding: 32px; display: flex; align-items: center; justify-content: center; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: linear-gradient(rgba(237,241,251,0.55), rgba(237,241,251,0.55)), radial-gradient(520px 420px at 0% 0%, rgba(104,160,255,0.55), rgba(104,160,255,0) 70%), radial-gradient(480px 420px at 100% 10%, rgba(176,142,255,0.50), rgba(176,142,255,0) 70%), radial-gradient(560px 460px at 80% 100%, rgba(72,214,206,0.46), rgba(72,214,206,0) 70%), radial-gradient(420px 360px at 0% 100%, rgba(255,190,120,0.30), rgba(255,190,120,0) 70%), #F2F6FF;">
+  <section role="dialog" aria-modal="true" aria-labelledby="d-s" style="width: 100%; max-width: 620px; box-sizing: border-box; padding: 28px 30px; display: flex; flex-direction: column; gap: 16px; background: rgba(250,251,255,0.95); border: 1px solid rgba(255,255,255,0.95); border-radius: 32px; box-shadow: 0 30px 80px rgba(20,40,90,0.30), 0 2px 6px rgba(20,40,90,0.12);">
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: #DCE7FD; color: #1D4ED8;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z M7.5 7.5h.01"></path></svg>
+      </span>
+      <div style="flex: 1; min-width: 0;">
+        <h2 id="d-s" style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px;">Narxni o'zgartirish</h2>
+        <span style="font-size: 13px; color: #4F607D;">Sozlamalar · Yoqilg'i narxlari · AI-92</span>
+      </div>
+      <a href="SozlamalarAparatlar.dc.html" aria-label="Yopish" style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: #2E3D5C; text-decoration: none; background: rgba(20,40,80,0.06);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18"></path></svg>
+      </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 7px; min-width: 0;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Hozirgi narx</span>
+        <span style="min-height: 52px; box-sizing: border-box; padding: 0 20px; border-radius: 26px; display: flex; align-items: center; justify-content: flex-end; font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; color: #4F607D; background: rgba(20,40,80,0.05); border: 1px dashed #C9D1DE;">12 200</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 7px; min-width: 0;">
+        <label for="narx-k" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Yangi narx, so'm</label>
+        <input id="narx-k" type="text" inputmode="numeric" autocomplete="off" value="{{ yangiNarx }}" onChange="{{ narxOzgar }}" style="width: 100%; box-sizing: border-box; min-height: 52px; padding: 0 20px; border-radius: 26px; font: inherit; font-size: 20px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; color: #0B1530; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.75)); border: 1px solid #C9D1DE; outline: none;">
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 18px; background: #FFF4DB; border: 1px solid #F3D48A;">
+      <span style="color: #8A5A00; display: inline-flex; margin-top: 1px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4 M12 17h.01 M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></span>
+      <span style="display: flex; flex-direction: column; gap: 3px; font-size: 13px; line-height: 1.45; color: #4A3A12;">
+        <span style="font-size: 14px; font-weight: 800; color: #8A5A00;">Smena #42 ochiq</span>
+        <span>Narx o'zgarguncha sotilgan litr eski narxda hisoblanishi uchun AI-92 aparatlarining hozirgi pult ko'rsatkichini yozing.</span>
+      </span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <sc-for list="{{ aparatlar }}" as="a" hint-placeholder-count="2">
+        <div style="display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 20px; background: #FFFFFF; border: 1px solid rgba(20,40,80,0.10);">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;">
+            <span style="display: flex; align-items: center; gap: 8px; min-width: 150px;">
+              <span style="font-size: 15px; font-weight: 800;">{{ a.nomi }}</span>
+              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #DCE7FD; color: #1D4ED8;"><span style="width: 7px; height: 7px; border-radius: 999px; background: #2563EB;"></span>AI-92</span>
+            </span>
+            <span style="display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; color: #4F607D;">Smena boshida<span style="font-size: 14px; font-weight: 700; color: #2E3D5C; font-variant-numeric: tabular-nums;">{{ a.oldingi }}</span></span>
+            <input type="text" inputmode="decimal" autocomplete="off" aria-label="{{ a.label }}" value="{{ a.qiymat }}" onChange="{{ a.ozgar }}" style="{{ a.uslub }}">
+          </div>
+          <span style="font-size: 13px; color: #2E3D5C; font-variant-numeric: tabular-nums;">{{ a.natija }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div aria-live="polite" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 18px; background: #E9F0FF;">
+      <span style="display: flex; flex-direction: column; gap: 2px;">
+        <span style="font-size: 13.5px; font-weight: 700;">Eski narxda sotilgan</span>
+        <span style="font-size: 12.5px; color: #2E3D5C; font-variant-numeric: tabular-nums;">{{ jamiLitr }}</span>
+      </span>
+      <span style="font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap;">{{ jamiSumma }}</span>
+    </div>
+
+    <p style="margin: 0; font-size: 12.5px; line-height: 1.45; color: #4F607D;">Smena yopilganda bu aparatlar ikki qismda hisoblanadi: shu paytgacha 12 200 dan, keyin yangi narxdan.</p>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding-top: 2px;">
+      <a href="SozlamalarAparatlar.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; box-sizing: border-box; border-radius: 999px; font-size: 14px; font-weight: 700; color: #0B1530; text-decoration: none; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.7)); border: 1px solid rgba(20,40,80,0.12); box-shadow: 0 6px 18px rgba(28,54,110,0.10);">Bekor qilish</a>
+      <a href="SozlamalarAparatlar.dc.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 24px; box-sizing: border-box; border-radius: 999px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-decoration: none; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 10px 24px rgba(47,107,255,0.32), inset 0 1px 0 rgba(255,255,255,0.55);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>
+        Narxni saqlash
+      </a>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":980}}'>
+class Component extends DCLogic {
+  son(t) {
+    var v = String(t === undefined || t === null ? "" : t).replace(/[\s ]/g, "").replace(",", ".");
+    if (v === "" || !/^\d+(\.\d*)?$/.test(v)) return NaN;
+    return Number(v);
+  }
+  guruhla(s) { return s.replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  pul(n) { return this.guruhla(String(Math.round(Math.abs(n)))); }
+  litr(n) { var p = Math.abs(n).toFixed(2).split("."); return this.guruhla(p[0]) + "." + p[1]; }
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    var ESKI = 12200;
+    var qiymatlar = s.qiymatlar || ["184 401.10", "97 512.60"];
+    var manba = [
+      { nomi: "1-aparat", oldingi: 184230.50 },
+      { nomi: "2-aparat", oldingi: 97410.00 }
+    ];
+    var asos = "flex: 1 1 170px; min-width: 0; box-sizing: border-box; min-height: 46px; padding: 0 18px; border-radius: 23px; font: inherit; font-size: 16px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; color: #0B1530; outline: none;";
+    var oddiy = asos + " background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.75)); border: 1px solid #C9D1DE;";
+    var xatoU = asos + " background: #FFF5F5; border: 1.5px solid #D7262B;";
+    var jamiL = 0, jamiS = 0, hammasi = true;
+    var aparatlar = manba.map(function (a, i) {
+      var v = self.son(qiymatlar[i]);
+      var bor = !isNaN(v);
+      var xato = bor && v < a.oldingi;
+      var natija;
+      if (!bor) { natija = "Hozirgi ko'rsatkichni yozing"; hammasi = false; }
+      else if (xato) { natija = "Smena boshidagidan kichik bo'lishi mumkin emas"; hammasi = false; }
+      else {
+        var l = Math.round((v - a.oldingi) * 100) / 100;
+        var sm = Math.round(l * ESKI);
+        jamiL += l; jamiS += sm;
+        natija = "Sotilgan " + self.litr(l) + " L × 12 200 = " + self.pul(sm) + " so'm";
+      }
+      return {
+        nomi: a.nomi,
+        oldingi: self.litr(a.oldingi),
+        qiymat: qiymatlar[i],
+        label: a.nomi + ", hozirgi pult ko'rsatkichi",
+        uslub: xato ? xatoU : oddiy,
+        natija: natija,
+        ozgar: function (e) { var n = qiymatlar.slice(); n[i] = e.target.value; self.setState({ qiymatlar: n }); }
+      };
+    });
+    jamiL = Math.round(jamiL * 100) / 100;
+    return {
+      yangiNarx: s.yangiNarx !== undefined ? s.yangiNarx : "12 500",
+      narxOzgar: function (e) { self.setState({ yangiNarx: e.target.value }); },
+      aparatlar: aparatlar,
+      jamiLitr: hammasi ? self.litr(jamiL) + " L, narx 12 200" : "Ikkala ko'rsatkichni to'g'ri yozing",
+      jamiSumma: hammasi ? self.pul(jamiS) : "—"
+    };
+  }
+}
+</script>
+</body>
+</html>

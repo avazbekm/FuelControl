@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Yon menyu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<nav aria-label="Asosiy menyu" style="width: 264px; min-height: 860px; box-sizing: border-box; display: flex; flex-direction: column; gap: 2px; padding: 18px 14px 14px; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: linear-gradient(160deg, rgba(255,255,255,0.76), rgba(255,255,255,0.46)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+  <div style="display: flex; align-items: center; gap: 12px; padding: 0 6px 16px;">
+    <span style="width: 44px; height: 44px; flex: none; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; color: #FFFFFF; background: linear-gradient(135deg, #4C8DFF 0%, #3A6BFF 55%, #8B5CF6 100%); box-shadow: 0 12px 28px rgba(79,107,255,0.35);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16 M3 21h14 M15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V9l-2-2 M8 6h4v4H8z"></path></svg>
+    </span>
+    <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+      <span style="font-size: 17px; font-weight: 800; letter-spacing: -0.2px;">FuelControl</span>
+      <span style="font-size: 12.5px; color: #4F607D;">Shoxobcha nazorati</span>
+    </div>
+  </div>
+
+  <sc-for list="{{ menyu }}" as="m" hint-placeholder-count="8">
+    <a href="{{ m.href }}" aria-current="{{ m.joriy }}" style="{{ m.uslub }}">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ m.d }}"></path></svg>
+      <span style="flex: 1; min-width: 0;">{{ m.nomi }}</span>
+      <sc-if value="{{ m.belgi }}" hint-placeholder-val="{{ false }}">
+        <span aria-label="{{ m.belgiIzoh }}" style="{{ m.belgiUslub }}">{{ m.belgi }}</span>
+      </sc-if>
+    </a>
+  </sc-for>
+
+  <div style="flex-grow: 1; min-height: 24px;"></div>
+
+  <div style="display: flex; justify-content: center; gap: 6px;">
+    <button type="button" aria-pressed="true" style="min-width: 54px; min-height: 44px; padding: 0 14px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 6px 14px rgba(47,107,255,0.28), inset 0 1px 0 rgba(255,255,255,0.5);">UZ</button>
+    <button type="button" aria-pressed="false" style="min-width: 54px; min-height: 44px; padding: 0 14px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 600; color: #2E3D5C; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55)); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 4px 12px rgba(28,54,110,0.08);">ЎЗ</button>
+    <button type="button" aria-pressed="false" style="min-width: 54px; min-height: 44px; padding: 0 14px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 600; color: #2E3D5C; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55)); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 4px 12px rgba(28,54,110,0.08);">RU</button>
+  </div>
+
+  <button type="button" style="margin-top: 8px; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 600; color: #2E3D5C; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55)); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 4px 12px rgba(28,54,110,0.08);">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+    Qorong'i rejim
+  </button>
+
+  <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; padding: 7px 6px 7px 8px; border-radius: 999px; background: linear-gradient(160deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5)); border: 1px solid rgba(255,255,255,0.9); box-shadow: 0 8px 22px rgba(28,54,110,0.10);">
+    <span style="width: 36px; height: 36px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #1B4FE0; background: linear-gradient(180deg, #F2F6FF, #D9E5FF);">{{ harflar }}</span>
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px;">
+      <span style="font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ ism }}</span>
+      <span style="font-size: 12px; color: #4F607D;">{{ rol }}</span>
+    </div>
+    <button type="button" aria-label="Chiqish" style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: #2E3D5C; cursor: pointer; background: transparent; border: 0;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9 M6.3 6.3a8 8 0 1 0 11.4 0"></path></svg>
+    </button>
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 9px; padding: 12px 12px 0;">
+    <span style="width: 8px; height: 8px; flex: none; border-radius: 999px; background: #1EA66A; box-shadow: 0 0 0 4px rgba(30,166,106,0.18);"></span>
+    <span style="font-size: 12.5px; color: #4F607D;">Server bilan aloqa bor</span>
+  </div>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"faol":{"editor":"enum","options":["boshqaruv","savdo","smenalar","nasiyalar","hisobotlar","operatorlar","audit","sozlamalar"],"default":"savdo"},"operator":{"editor":"boolean","default":false},"ism":{"editor":null,"tsType":"string"},"rol":{"editor":null,"tsType":"string"},"harflar":{"editor":null,"tsType":"string"},"$preview":{"width":264,"height":860}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var faol = this.props.faol ?? "savdo";
+    var operator = this.props.operator ?? false;
+    var asos = "display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 0 14px 0 16px; margin: 1px 0; box-sizing: border-box; border-radius: 999px; text-decoration: none; font-size: 14px; font-weight: 600;";
+    var faolUslub = asos + " color: #FFFFFF; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 10px 24px rgba(47,107,255,0.30), inset 0 1px 0 rgba(255,255,255,0.55);";
+    var oddiyUslub = asos + " color: #2E3D5C; background: transparent; border: 1px solid transparent;";
+    var belgiAsos = "min-width: 22px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;";
+    var barcha = [
+      { k: "boshqaruv", nomi: "Boshqaruv", href: "Boshqaruv.dc.html", d: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z" },
+      { k: "savdo", nomi: "Savdo", href: "Main.dc.html", d: "M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16 M3 21h14 M15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V9l-2-2 M8 6h4v4H8z" },
+      { k: "smenalar", nomi: "Smenalar", href: "Smenalar.dc.html", d: "M21 12A9 9 0 1 1 3 12A9 9 0 1 1 21 12 M12 7v5l3 2" },
+      { k: "nasiyalar", nomi: "Nasiyalar", href: "Nasiyalar.dc.html", d: "M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z M5 19.5A1.5 1.5 0 0 0 6.5 21H19 M9 7h6 M9 11h6", belgi: "2", belgiIzoh: "2 ta muddati o'tgan qarz" },
+      { k: "hisobotlar", nomi: "Hisobotlar", href: "Hisobotlar.dc.html", d: "M6 3h8l4 4v14H6z M9 13h6 M9 17h6" },
+      { k: "operatorlar", nomi: "Operatorlar", href: "Operatorlar.dc.html", d: "M12.5 8A3.5 3.5 0 1 1 5.5 8A3.5 3.5 0 1 1 12.5 8 M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6 M19.5 9A2.5 2.5 0 1 1 14.5 9A2.5 2.5 0 1 1 19.5 9 M21 19c0-2.5-1.8-4.5-4-4.8" },
+      { k: "audit", nomi: "Audit jurnali", href: "Audit.dc.html", d: "M4 6h16 M4 12h16 M4 18h16" },
+      { k: "sozlamalar", nomi: "Sozlamalar", href: "SozlamalarAparatlar.dc.html", d: "M15 12A3 3 0 1 1 9 12A3 3 0 1 1 15 12 M12 2v3 M12 19v3 M2 12h3 M19 12h3 M4.9 4.9l2.1 2.1 M17 17l2.1 2.1 M4.9 19.1L7 17 M17 7l2.1-2.1" }
+    ];
+    var korinadi = operator ? barcha.filter(function (m) { return m.k === "savdo" || m.k === "nasiyalar"; }) : barcha;
+    var menyu = korinadi.map(function (m) {
+      var joriy = m.k === faol;
+      return {
+        k: m.k, nomi: m.nomi, href: m.href, d: m.d,
+        belgi: m.belgi || "", belgiIzoh: m.belgiIzoh || "",
+        joriy: joriy ? "page" : undefined,
+        uslub: joriy ? faolUslub : oddiyUslub,
+        belgiUslub: belgiAsos + (joriy ? " color: #B3261E; background: #FFFFFF;" : " color: #FFFFFF; background: #D7262B;")
+      };
+    });
+    return {
+      menyu: menyu,
+      ism: this.props.ism ?? "Administrator",
+      rol: this.props.rol ?? "Admin",
+      harflar: this.props.harflar ?? "A"
+    };
+  }
+}
+</script>
+</body>
+</html>

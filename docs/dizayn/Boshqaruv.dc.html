@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Boshqaruv paneli</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1B4FE0}a:hover{color:#2F6BFF}
+a:focus-visible,button:focus-visible{outline:2px solid #2F6BFF;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: radial-gradient(900px 620px at 4% 0%, rgba(104,160,255,0.55), rgba(104,160,255,0) 70%), radial-gradient(820px 680px at 100% 6%, rgba(176,142,255,0.50), rgba(176,142,255,0) 70%), radial-gradient(980px 700px at 74% 100%, rgba(72,214,206,0.46), rgba(72,214,206,0) 70%), radial-gradient(720px 560px at 0% 100%, rgba(255,190,120,0.30), rgba(255,190,120,0) 70%), #F2F6FF;">
+
+  <div style="flex: 0 1 264px; min-width: 0; display: flex;">
+    <dc-import name="Menyu" faol="boshqaruv" ism="Administrator" rol="Admin" harflar="A" hint-size="264px,860px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 18px; padding: 6px 8px 28px;">
+
+    <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; padding-top: 6px;">
+      <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Boshqaruv paneli</h1>
+        <span style="font-size: 13px; color: #4F607D;">Yakshanba, 4-oktabr 2026</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <button type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 700; color: #0B1530; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55)); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 6px 18px rgba(28,54,110,0.10), inset 0 1px 0 #FFFFFF;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7 M20 4v5h-5"></path></svg>
+          Yangilash
+        </button>
+        <a href="Hisobotlar.dc.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; box-sizing: border-box; border-radius: 999px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-decoration: none; white-space: nowrap; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 10px 24px rgba(47,107,255,0.32), inset 0 1px 0 rgba(255,255,255,0.55);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11 M7 10l5 5 5-5 M4 19h16"></path></svg>
+          Oylik hisobot
+        </a>
+      </div>
+    </header>
+
+    <!-- KPI -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+      <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Oxirgi smena savdosi</span>
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; white-space: nowrap;">15 995 270 <span style="font-size: 12.5px; font-weight: 600; color: #4F607D;">so'm</span></span>
+        <span style="font-size: 12.5px; color: #4F607D;">#41 · Dilshod Rahimov · 1 198.40 L</span>
+      </div>
+      <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Shu oy savdo</span>
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; white-space: nowrap;">48 590 420 <span style="font-size: 12.5px; font-weight: 600; color: #4F607D;">so'm</span></span>
+        <span style="font-size: 12.5px; color: #4F607D;">3 ta yopilgan smena · 3 640.10 L</span>
+      </div>
+      <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Shu oy kamomat</span>
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #C42127; font-variant-numeric: tabular-nums; white-space: nowrap;">120 000 <span style="font-size: 12.5px; font-weight: 600; color: #4F607D;">so'm</span></span>
+        <span style="font-size: 12.5px; color: #4F607D;">Ortiqcha 20 000 · 1 smenada</span>
+      </div>
+      <a href="Nasiyalar.dc.html" style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; color: #0B1530; text-decoration: none; background: linear-gradient(160deg, rgba(255,238,238,0.92), rgba(255,225,225,0.72)); border: 1px solid #FFB4B4; border-radius: 26px; box-shadow: 0 18px 48px rgba(120,30,30,0.10), inset 0 1px 0 rgba(255,255,255,0.8);">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Muddati o'tgan nasiya</span>
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #C42127; font-variant-numeric: tabular-nums; white-space: nowrap;">480 000 <span style="font-size: 12.5px; font-weight: 600; color: #4F607D;">so'm</span></span>
+        <span style="font-size: 12.5px; color: #4F607D;">2 ta mijoz · jami qarz 2 510 000</span>
+      </a>
+    </div>
+
+    <!-- Joriy smena + baklar -->
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: stretch;">
+
+      <section aria-labelledby="joriy-s" style="flex: 999 1 520px; min-width: 0; box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 14px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px;">
+          <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #1B4FE0; background: linear-gradient(180deg, #F2F6FF, #D9E5FF);">AK</span>
+          <div style="flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+            <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;"><h2 id="joriy-s" style="margin: 0; font-size: 16px; font-weight: 700;">Joriy smena #42 · Alisher Karimov</h2><span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #D9F5E6; color: #0E7A4A;">Smenada</span></span>
+            <span style="font-size: 12.5px; color: #4F607D;">04.10 08:02 dan · 9 soat 40 daqiqa</span>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+          <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 16px;">
+            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #4F607D;">Qaytim puli</span>
+            <span style="font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums;">100 000</span>
+          </div>
+          <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 16px;">
+            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #4F607D;">Terminal, ochishda</span>
+            <span style="font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums;">200 000</span>
+          </div>
+          <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 16px;">
+            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #4F607D;">Depozit, ochishda</span>
+            <span style="font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums;">1 250 000</span>
+          </div>
+          <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 16px;">
+            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #4F607D;">Nasiya · 2 ta</span>
+            <span style="font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums;">570 000</span>
+          </div>
+          <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 16px;">
+            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #4F607D;">Qaytgan nasiya</span>
+            <span style="font-size: 17px; font-weight: 800; color: #0E7A4A; font-variant-numeric: tabular-nums;">300 000</span>
+          </div>
+          <div style="padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.88); border-radius: 16px;">
+            <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: #4F607D;">Xarajat · 2 ta</span>
+            <span style="font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums;">1 585 000</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #E9F0FF; color: #1B3A8A; font-size: 13px; line-height: 1.45;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px;"><path d="M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z M12 11v5 M12 8h.01"></path></svg>
+          <span>Ochiq smenaning savdosi yopilganda pult ko'rsatkichlaridan hisoblanadi. Hozircha faqat nasiya va xarajatlar ko'rinadi.</span>
+        </div>
+      </section>
+
+      <section aria-labelledby="bak-s" style="flex: 1 1 340px; min-width: 0; box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+          <h2 id="bak-s" style="margin: 0; font-size: 15px; font-weight: 700;">Baklar qoldig'i</h2>
+          <span style="font-size: 12px; color: #4F607D;">04.10 08:02 holatiga</span>
+        </div>
+        <ul style="list-style: none; margin: 0; padding: 0;">
+          <li style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(18,20,40,0.07);">
+            <span style="width: 30px; font-size: 14px; font-weight: 800;">1</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #DCE7FD; color: #1D4ED8;">AI-92</span>
+            <span style="flex: 1; min-width: 0; font-size: 12px; color: #4F607D; text-align: right;">kirim 02.10</span>
+            <span style="min-width: 74px; text-align: right; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;">6 840 L</span>
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(18,20,40,0.07);">
+            <span style="width: 30px; font-size: 14px; font-weight: 800;">2</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #DCE7FD; color: #1D4ED8;">AI-92</span>
+            <span style="flex: 1; min-width: 0; font-size: 12px; color: #4F607D; text-align: right;">kirim 28.09</span>
+            <span style="min-width: 74px; text-align: right; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;">3 215 L</span>
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(18,20,40,0.07);">
+            <span style="width: 30px; font-size: 14px; font-weight: 800;">3</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #EDE5FE; color: #6D28D9;">AI-95</span>
+            <span style="flex: 1; min-width: 0; font-size: 12px; color: #4F607D; text-align: right;">kirim 01.10</span>
+            <span style="min-width: 74px; text-align: right; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;">4 120 L</span>
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(18,20,40,0.07);">
+            <span style="width: 30px; font-size: 14px; font-weight: 800;">4</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #EDE5FE; color: #6D28D9;">AI-95</span>
+            <span style="flex: 1; min-width: 0; font-size: 12px; color: #4F607D; text-align: right;">kirim 25.09</span>
+            <span style="min-width: 74px; text-align: right; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;">1 960 L</span>
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px; padding: 10px 0;">
+            <span style="width: 30px; font-size: 14px; font-weight: 800;">5</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #FCEFC7; color: #854D0E;">Dizel</span>
+            <span style="flex: 1; min-width: 0; font-size: 12px; color: #4F607D; text-align: right;">kirim 03.10</span>
+            <span style="min-width: 74px; text-align: right; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;">9 480 L</span>
+          </li>
+        </ul>
+        <a href="BakKirim.dc.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; box-sizing: border-box; border-radius: 999px; font-size: 14px; font-weight: 700; color: #0B1530; text-decoration: none; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55)); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 6px 18px rgba(28,54,110,0.10), inset 0 1px 0 #FFFFFF;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>
+          Bakka kirim
+        </a>
+      </section>
+    </div>
+
+    <!-- Grafik + to'lov taqsimoti -->
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: stretch;">
+
+      <section aria-labelledby="grafik-s" style="flex: 999 1 520px; min-width: 0; box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 14px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+          <h2 id="grafik-s" style="margin: 0; font-size: 15px; font-weight: 700;">Oxirgi 14 smena savdosi</h2>
+          <span style="font-size: 12px; color: #4F607D;">million so'm</span>
+        </div>
+        <div style="overflow-x: auto;">
+          <div style="min-width: 480px; height: 220px; display: flex; align-items: flex-end; gap: 8px; padding-top: 18px;">
+            <sc-for list="{{ ustunlar }}" as="u" hint-placeholder-count="14">
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px;">
+                <span style="font-size: 11px; font-weight: 700; color: #2E3D5C; font-variant-numeric: tabular-nums;">{{ u.qiymat }}</span>
+                <span style="{{ u.uslub }}"></span>
+                <span style="font-size: 11px; color: #4F607D; font-variant-numeric: tabular-nums;">{{ u.sana }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="tolov-s" style="flex: 1 1 340px; min-width: 0; box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 14px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <h2 id="tolov-s" style="margin: 0; font-size: 15px; font-weight: 700;">To'lov turlari · shu oy</h2>
+        <sc-for list="{{ tolovlar }}" as="t" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 7px;">
+            <span style="display: flex; align-items: center; gap: 8px; font-size: 13.5px;">
+              <span style="{{ t.nuqta }}"></span>
+              <span style="flex: 1; min-width: 0; font-weight: 600;">{{ t.nomi }}</span>
+              <span style="font-weight: 800; font-variant-numeric: tabular-nums;">{{ t.summa }}</span>
+              <span style="width: 40px; text-align: right; font-size: 12.5px; color: #4F607D; font-variant-numeric: tabular-nums;">{{ t.foiz }}</span>
+            </span>
+            <span style="height: 10px; border-radius: 999px; background: rgba(20,40,80,0.08); display: flex; overflow: hidden;"><span style="{{ t.chiziq }}"></span></span>
+          </div>
+        </sc-for>
+      </section>
+    </div>
+
+    <!-- Oxirgi smenalar -->
+    <section aria-labelledby="smena-s" style="box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <h2 id="smena-s" style="margin: 0; font-size: 15px; font-weight: 700;">Oxirgi yopilgan smenalar</h2>
+        <a href="Smenalar.dc.html" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13.5px; font-weight: 700; text-decoration: none;">Barcha smenalar
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14 M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
+      <div style="overflow-x: auto;">
+        <div style="min-width: 680px; display: flex; flex-direction: column; font-variant-numeric: tabular-nums;">
+          <div style="display: grid; grid-template-columns: 70px minmax(150px, 1.4fr) minmax(130px, 1fr) minmax(100px, 0.8fr) minmax(120px, 1fr) minmax(130px, 1fr); gap: 12px; padding: 0 4px 8px; border-bottom: 1px solid rgba(18,20,40,0.08); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">
+            <span>Smena</span><span>Operator</span><span>Vaqt</span><span style="text-align: right;">Litr</span><span style="text-align: right;">Savdo</span><span style="text-align: right;">Farq</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 70px minmax(150px, 1.4fr) minmax(130px, 1fr) minmax(100px, 0.8fr) minmax(120px, 1fr) minmax(130px, 1fr); gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1px solid rgba(18,20,40,0.07); font-size: 14px;">
+            <span style="font-weight: 800;">#41</span><span>Dilshod Rahimov</span><span style="color: #4F607D;">03.10 · 24 soat</span><span style="text-align: right;">1 198.40</span><span style="text-align: right; font-weight: 800;">15 995 270</span><span style="text-align: right;"><span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #D9F5E6; color: #0E7A4A;">Farq yo'q</span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 70px minmax(150px, 1.4fr) minmax(130px, 1fr) minmax(100px, 0.8fr) minmax(120px, 1fr) minmax(130px, 1fr); gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1px solid rgba(18,20,40,0.07); font-size: 14px;">
+            <span style="font-weight: 800;">#40</span><span>Alisher Karimov</span><span style="color: #4F607D;">02.10 · 24 soat</span><span style="text-align: right;">1 236.10</span><span style="text-align: right; font-weight: 800;">16 496 940</span><span style="text-align: right;"><span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #FFDEDE; color: #B3261E;">Kamomat −120 000</span></span>
+          </div>
+          <div style="display: grid; grid-template-columns: 70px minmax(150px, 1.4fr) minmax(130px, 1fr) minmax(100px, 0.8fr) minmax(120px, 1fr) minmax(130px, 1fr); gap: 12px; align-items: center; padding: 12px 4px; font-size: 14px;">
+            <span style="font-weight: 800;">#39</span><span>Dilshod Rahimov</span><span style="color: #4F607D;">01.10 · 24 soat</span><span style="text-align: right;">1 205.60</span><span style="text-align: right; font-weight: 800;">16 098 210</span><span style="text-align: right;"><span style="padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #DCE6FF; color: #1B4FE0;">Ortiqcha +20 000</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var qiymatlar = [
+      ["20.09", 15.2], ["21.09", 16.8], ["22.09", 14.9], ["23.09", 15.6], ["24.09", 17.1], ["25.09", 16.2], ["26.09", 15.4],
+      ["27.09", 16.9], ["28.09", 15.8], ["29.09", 16.4], ["30.09", 15.1], ["01.10", 16.1], ["02.10", 16.5], ["03.10", 16.0]
+    ];
+    var eng = 17.1, past = 13.0;
+    var ustunlar = qiymatlar.map(function (q, i) {
+      var balandlik = Math.round(30 + (q[1] - past) / (eng - past) * 120);
+      var oxirgi = i === qiymatlar.length - 1;
+      return {
+        sana: q[0],
+        qiymat: q[1].toFixed(1),
+        uslub: "width: 100%; max-width: 30px; height: " + balandlik + "px; border-radius: 999px; " + (oxirgi
+          ? "background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); box-shadow: 0 8px 18px rgba(47,107,255,0.35);"
+          : "background: #D9E5FF; box-shadow: 0 4px 10px rgba(28,54,110,0.10);")
+      };
+    });
+    var tolovlar = [
+      { nomi: "Plastik", summa: "22 030 000", foiz: "45%", ulush: 45, rang: "#19B5C9" },
+      { nomi: "Naqd", summa: "18 914 520", foiz: "39%", ulush: 39, rang: "#2F6BFF" },
+      { nomi: "Depozit", summa: "5 735 900", foiz: "12%", ulush: 12, rang: "#7C5CFF" },
+      { nomi: "Nasiya", summa: "1 910 000", foiz: "4%", ulush: 4, rang: "#E8590C" }
+    ].map(function (t) {
+      return {
+        nomi: t.nomi, summa: t.summa, foiz: t.foiz,
+        nuqta: "width: 10px; height: 10px; flex: none; border-radius: 999px; background: " + t.rang + ";",
+        chiziq: "width: " + t.ulush + "%; height: 100%; border-radius: 999px; background: " + t.rang + ";"
+      };
+    });
+    return { ustunlar: ustunlar, tolovlar: tolovlar };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+# FuelControl — Smena hisobi (yangi savdo modeli) topshirig'i
+
+Sana: 2026-10-04. Muvofiqlashtiruvchi: **fc** sessiyasi. Ijrochilar: **fc-backend**, **fc-web**, **fc-desktop**.
+Bu hujjat `docs/backend-topshiriq.md` va `docs/web-topshiriq.md` dagi **sotuv modelini almashtiradi**. Qolgan qoidalar (uslub, auth, i18n, portlar) o'z kuchida.
+
+## 0. Manbalar
+
+- **Dizayn (majburiy):** https://claude.ai/artifact/PpJUbfMwuZv3gajh9ws5ak — 17 ta artboard, Liquid Glass. Mahalliy nusxa: `docs/dizayn/*.dc.html` (oddiy HTML, inline style — rang, o'lcham, matnlarni shu yerdan oling).
+  - `Main` — Savdo, ochiq smena · `SmenaYopish` — yopish jadvali (jonli hisob, formulani shu yerdagi skriptdan ham ko'ring) · `SmenaOchish` — ochish formasi
+  - Dialoglar: `NasiyaQoshish`, `NasiyaQaytdi`, `XarajatQoshish`, `BakKirim`, `NarxOzgarishi`
+  - Sahifalar: `Boshqaruv`, `Nasiyalar` (yangi), `Smenalar`, `Hisobotlar`, `Operatorlar`, `Audit`, `SozlamalarAparatlar`, `SozlamalarRuxsatlar`; `Menyu` — yon menyu
+- Namuna raqamlar dizaynda bir-biriga mos (smena #39–#42). Seed/demo ma'lumotni shu raqamlarga yaqin qilsangiz, solishtirish oson.
+
+## 1. Biznes qoidalari (mijoz bilan kelishilgan)
+
+1. **Har bir sotuv kiritilmaydi.** Sotuv kiritish, offline navbat, sotuvni tahrirlash/bekor qilish — **butunlay olib tashlanadi**.
+2. **Smena = bir sutka**, bitta operator hamma aparatlarga qaraydi → **bir vaqtda butun shoxobchada faqat bitta ochiq smena** (bazada ham kafolatlansin).
+3. **Smena ochish** (faqat qo'lda): operator 3 ta qiymatni **qo'lda** yozadi, oldingi smenadan avtomatik **olinmaydi**:
+   - `Qaytim` — kassada qaytim uchun qolgan naqd (50 000 / 100 000 kabi);
+   - `Terminal` — terminal ekranidagi joriy summa (terminal 00:00 da o'zini nollaydi, ertalabki summa oldingi smenaga tegishli);
+   - `Depozit` — zapravkaning umumiy bank kartasidagi qoldiq (kartasi yo'q xaridorlar ilova orqali shu kartaga tashlaydi).
+4. **Smena davomida:**
+   - **Nasiya** (bir nechta): mijoz ismi, telefon, mashina raqami, summa, muddat (sana), izoh. Muddati o'tganlari ajratib ko'rsatiladi.
+   - **Qarz qaytdi**: to'liq yoki qisman; usul Naqd/Plastik/Depozit. Operator smena ichida yozsa — smena hisobiga **kirim** bo'ladi. Boshliq smenadan tashqari yopsa — smena hisobiga ta'sir qilmaydi.
+   - **Xarajat** (bir nechta): summa, nima uchun, manba Kassa yoki Depozit karta. Boshliq kassadan naqd olib ketsa ham xarajat sifatida yoziladi.
+   - Ochiq smenada xato yozilgan nasiya/xarajat/qaytishni muallif yoki boshliq o'chira oladi (audit bilan).
+5. **Smena yopish:** har aparat uchun pultdagi umumiy litr ("Total, L"); yopishdagi terminal summasi (**bitta raqam** = tungi nollash chekidagi summa + nollashdan keyingi savdo); depozit karta qoldig'i; sanalgan naqd; izoh (ixtiyoriy).
+6. **Formula** (server — yagona haqiqat manbai, klientlar jonli ko'rsatish uchun aynan shuni hisoblaydi):
+   - har aparat segmenti: `Litr = Oxiri − Boshi` (2 xona), `Summa = round(Litr × Narx)` so'mgacha (MidpointRounding.AwayFromZero)
+   - `Savdo = Σ Summa`, `JamiLitr = Σ Litr`
+   - `Plastik = YopishTerminal − OchishTerminal`
+   - `DepozitFarqi = YopishDepozit − OchishDepozit` (**manfiy bo'lishi mumkin**: tekshiruv paytida naqd olinib, depozit kartadan terminal orqali yechiladi — bu kamomat emas)
+   - `NasiyaJami` = shu smenada yozilgan nasiyalar; `QaytganNasiya` = shu smena hisobiga yozilgan qaytishlar (har qanday usulda); `XarajatJami` = shu smenadagi barcha xarajatlar (Kassa **va** Depozit)
+   - **`Kutilgan = Qaytim + Savdo + QaytganNasiya − Plastik − DepozitFarqi − NasiyaJami − XarajatJami`**
+   - `Farq = SanalganNaqd − Kutilgan`. Manfiy → operator hisobiga `Kamomat` harakati (oylikdan ayiriladi). Musbat → `Ortiqcha` harakati. Izoh: `Smena #N`.
+   - Tekshiruv: dizayndagi namuna — savdo 16 468 520, plastik 7 830 000 − 200 000, depozit 3 410 000 − 1 250 000, nasiya 570 000, qaytgan 300 000, xarajat 1 585 000, qaytim 100 000 → kutilgan **4 923 520**; sanalgan 4 878 000 → kamomat **45 520**. Bu holat Core testida bo'lsin.
+7. **Validatsiya:** yangi pult ko'rsatkichi oldingisidan **kichik bo'lsa saqlanmaydi** (faqat aparatlar uchun; terminal va depozit kamayishi mumkin). Barcha faol aparatlar ko'rsatkichi majburiy. Pul maydonlari ≥ 0.
+8. **Yopilgandan keyin:** aparat `TotalLitr` = yangi ko'rsatkich; aparat bakidan sotilgan litr ayiriladi.
+9. **Bak:** har aparatning o'z baki. Kirim **litrda** (zavoddan kelgan). Qoldiq = kirimlar − sotilgan. Aparat yaratishda boshlang'ich bak qoldig'i kiritiladi. Qo'lda tuzatish faqat Sozlamalarda, sabab bilan, auditga.
+10. **Narx o'zgarishi ochiq smenada:** o'sha yoqilg'i aparatlarining hozirgi pult ko'rsatkichi **majburiy so'raladi**; shu paytgacha bo'lgan litr eski narxda alohida segment bo'lib yoziladi, qolgani yopishda yangi narxda. (Smena yopilganda bitta aparatda 2 segment bo'lishi mumkin.)
+11. **Ko'rsatkichni tuzatish** (sotuv tahririning o'rnini egallaydi): faqat `KorsatkichTuzatish` ruxsati bilan, **faqat oxirgi yopilgan smena** uchun, sabab majburiy. Smena qayta hisoblanadi, kamomat/ortiqcha farqi uchun tuzatuvchi harakat yoziladi, bak va `TotalLitr` delta bo'yicha tuzatiladi, keyingi (ochiq) smenaning boshlang'ich ko'rsatkichi ham yangilanadi. Auditga eski/yangi qiymat.
+12. **Kunlik hisobot:** smena ochilgan sanaga yoziladi.
+13. **Nomlash:** "Click" hamma joyda **"Depozit"**. Terminal = "Plastik".
+14. Pul — `long` so'm, litr — `decimal(18,2)`, vaqt bazada UTC, ko'rsatishda Toshkent.
+
+## 2. Ruxsatlar
+
+`enum Ruxsat`: `Boshqaruv, Savdo, SmenaOchish, SmenaYopish, Smenalar, Nasiyalar, NasiyaYozish, QarzQaytdi, XarajatYozish, BakKirim, KorsatkichTuzatish, Hisobotlar, Eksport, Operatorlar, AvansBerish, Audit, Sozlamalar`.
+Olib tashlanadi: `SotuvKiritish` (→ `Savdo`), `SotuvTahrirlash`, `SotuvBekorQilish`.
+Standart: **Operator** = Savdo, Nasiyalar, SmenaOchish, SmenaYopish, NasiyaYozish, QarzQaytdi, XarajatYozish. **Boshliq** = hammasi, Sozlamalar'dan tashqari. **Admin** = hammasi.
+Bazadagi mavjud foydalanuvchilar ruxsatlari migratsiyada moslashtirilsin (SotuvKiritish → Savdo; operatorlarga yangi standartlar qo'shilsin).
+
+## 3. Contracts (shartnoma — nomlar va shakl **majburiy**)
+
+Faqat fc-backend o'zgartiradi. Qo'shimcha maydon qo'shish mumkin (oxiriga), nomini o'zgartirish yoki olib tashlash — faqat fc orqali kelishib.
+
+```csharp
+public enum TolovTuri { Naqd, Plastik, Depozit }          // Click → Depozit
+public enum XarajatManbai { Kassa, Depozit }
+public enum NasiyaHolati { Faol, MuddatiOtgan, Yopilgan }
+public enum HisobotGuruhi { Smena, Kun, Oy, Operator }
+// SotuvHolati — olib tashlanadi. HarakatTuri — o'zgarmaydi.
+
+// --- Aparat / bak ---
+public sealed record AparatDto(int Id, int Raqam, int YoqilgiTuriId, string YoqilgiNomi, decimal TotalLitr,
+    decimal BakQoldiq, DateTime? OxirgiKirimVaqti, decimal? OxirgiKirimLitr);
+public sealed record AparatYaratishDto(int Raqam, int YoqilgiTuriId, decimal BoshlangichTotalLitr, decimal BoshlangichBakQoldiq);
+public sealed record AparatTahrirlashDto(int Raqam, int YoqilgiTuriId, decimal? TotalLitr = null, decimal? BakQoldiq = null, string? Sabab = null);
+public sealed record BakKirimYaratishDto(decimal Litr, DateTime? Vaqt, string? Hujjat);
+public sealed record BakKirimDto(int Id, int AparatId, int AparatRaqam, decimal Litr, decimal QoldiqOldin, decimal QoldiqKeyin,
+    DateTime Vaqt, string? Hujjat, string KimYozdi);
+
+// --- Yoqilg'i (narx ochiq smenada o'zgarsa Korsatkichlar majburiy) ---
+public sealed record YoqilgiTahrirlashDto(string Nomi, long Narx, string Rang, AparatKorsatkichDto[]? Korsatkichlar = null);
+
+// --- Smena ---
+public sealed record SmenaDto(
+    int Id, int OperatorId, string OperatorIsmi, DateTime Boshlandi, DateTime? Tugadi,
+    long OchishQaytim, long OchishTerminal, long OchishDepozit,
+    long? YopishTerminal, long? YopishDepozit, long? SanalganNaqd,
+    decimal JamiLitr, long Savdo, long Plastik, long DepozitFarqi,
+    long NasiyaJami, long QaytganNasiya, long XarajatJami,
+    long Kutilgan, long Farq, string? Izoh);
+// Ochiq smenada: JamiLitr/Savdo/Plastik/DepozitFarqi/Kutilgan/Farq = 0; NasiyaJami/QaytganNasiya/XarajatJami — joriy yig'indilar.
+
+public sealed record SmenaKorsatkichDto(int AparatId, int AparatRaqam, string YoqilgiNomi,
+    decimal Boshi, decimal Oxiri, long Narx, decimal Litr, long Summa, bool NarxOzgarishida);
+public sealed record SmenaTafsilotDto(SmenaDto Smena, SmenaKorsatkichDto[] Korsatkichlar,
+    NasiyaDto[] Nasiyalar, NasiyaQaytishiDto[] Qaytishlar, XarajatDto[] Xarajatlar);
+public sealed record SmenaQisqaDto(int Id, DateOnly Sana, string OperatorIsmi, long Savdo, decimal Litr, long Farq);
+
+public sealed record SmenaOchishDto(long Qaytim, long Terminal, long Depozit);
+public sealed record AparatKorsatkichDto(int AparatId, decimal Qiymat);
+public sealed record SmenaYopishDto(AparatKorsatkichDto[] Korsatkichlar, long Terminal, long Depozit, long SanalganNaqd, string? Izoh);
+public sealed record KorsatkichTuzatishDto(int AparatId, decimal Qiymat, string Sabab);
+
+// --- Nasiya ---
+public sealed record NasiyaDto(int Id, int SmenaId, string OperatorIsmi, string MijozIsmi, string Telefon, string MashinaRaqami,
+    long Summa, long Qaytgan, long Qoldiq, DateOnly Muddat, NasiyaHolati Holati, int MuddatgachaKun,
+    DateTime Yozildi, DateTime? Yopildi, string? Izoh);          // MuddatgachaKun: Muddat − bugun (Toshkent), manfiy = o'tgan
+public sealed record NasiyaYaratishDto(string MijozIsmi, string Telefon, string MashinaRaqami, long Summa, DateOnly Muddat, string? Izoh);
+public sealed record NasiyaQaytishiYaratishDto(long Summa, TolovTuri Usul, bool SmenaHisobiga, string? Izoh);
+public sealed record NasiyaQaytishiDto(int Id, int NasiyaId, string MijozIsmi, int? SmenaId, long Summa, TolovTuri Usul,
+    DateTime Vaqt, string KimYozdi, string? Izoh);
+public sealed record NasiyaTafsilotDto(NasiyaDto Nasiya, NasiyaQaytishiDto[] Qaytishlar);
+public sealed record NasiyalarXulosaDto(long FaolQarz, int FaolSoni, long MuddatiOtgan, int MuddatiOtganSoni,
+    long OyBerilgan, int OyBerilganSoni, long OyQaytgan, int OyQaytganSoni);
+public sealed record NasiyalarDto(NasiyalarXulosaDto Xulosa, NasiyaDto[] Royxat);
+
+// --- Xarajat ---
+public sealed record XarajatDto(int Id, int SmenaId, long Summa, string Sabab, XarajatManbai Manba, DateTime Vaqt, string KimYozdi);
+public sealed record XarajatYaratishDto(long Summa, string Sabab, XarajatManbai Manba);
+
+// --- Hisobot ---
+public sealed record HisobotQatoriDto(string Guruh, DateOnly? Sana, string? OperatorIsmi, int SmenaSoni, decimal Litr,
+    long Savdo, long Plastik, long Depozit, long Nasiya, long QaytganNasiya, long Xarajat, long NaqdSavdo,
+    long Kamomat, long Ortiqcha, bool Jami);
+// Guruh tilga bog'liq emas: smena → "41", kun → "yyyy-MM-dd", oy → "yyyy-MM", operator → ism.
+// NaqdSavdo = Savdo − Plastik − Depozit(farqi) − Nasiya.
+public sealed record HisobotAparatDto(int AparatId, int Raqam, string YoqilgiNomi,
+    decimal BakBoshida, decimal Kirim, decimal Sotildi, decimal BakOxirida, long Savdo);
+public sealed record HisobotDto(HisobotQatoriDto[] Qatorlar, HisobotQatoriDto Jami, HisobotAparatDto[] Aparatlar, long Avans);
+
+// --- Boshqaruv ---
+public sealed record TolovTaqsimotiDto(long Naqd, long Plastik, long Depozit, long Nasiya);
+public sealed record BoshqaruvDto(SmenaDto? JoriySmena, SmenaDto? OxirgiYopilgan,
+    long OySavdo, decimal OyLitr, int OySmenaSoni, long OyKamomat, long OyOrtiqcha,
+    NasiyalarXulosaDto Nasiyalar, AparatDto[] Aparatlar,
+    SmenaQisqaDto[] OxirgiSmenalar,        // 14 ta yopilgan, eskisidan yangisiga
+    TolovTaqsimotiDto OyTolovlar, SmenaDto[] OxirgiYopilganlar);   // 3 ta
+
+// --- Audit (additiv) ---
+public sealed record AuditYozuviDto(int Id, DateTime Vaqt, string Kim, string Amal, string Tafsilot, string Tur);
+// Tur: "smena" | "nasiya" | "xarajat" | "bak" | "tuzatish" | "hisob" | "sozlama" | "kirish"
+```
+
+Olib tashlanadi: `SotuvDto`, `SotuvYaratishDto`, `SotuvTahrirlashDto`, `SotuvBekorQilishDto`, eski `SmenaYopishDto`/`SmenaDto` shakli, `BoshqaruvBugunDto` va uning qismlari.
+
+## 4. API
+
+| Metod va yo'l | Tana / javob | Ruxsat va qoidalar |
+|---|---|---|
+| `GET /smenalar?dan&gacha&operatorId` | `SmenaDto[]` | Smenalar; operator faqat o'zinikini ko'radi |
+| `GET /smenalar/joriy` | `SmenaTafsilotDto` yoki 204 | ochiq smena (butun shoxobcha bo'yicha) |
+| `GET /smenalar/{id}` | `SmenaTafsilotDto` | Smenalar yoki o'z smenasi |
+| `POST /smenalar/och` | `SmenaOchishDto` → `SmenaDto` | SmenaOchish; ochiq smena bo'lsa 409 |
+| `POST /smenalar/{id}/yop` | `SmenaYopishDto` → `SmenaDto` | SmenaYopish; operator faqat o'zinikini; §1.6–1.8 |
+| `PUT /smenalar/{id}/korsatkich` | `KorsatkichTuzatishDto` → `SmenaTafsilotDto` | KorsatkichTuzatish; §1.11 |
+| `GET /nasiyalar?holat=faol\|otgan\|yopilgan&q=` | `NasiyalarDto` | Nasiyalar; `q` — ism/telefon/raqam |
+| `GET /nasiyalar/{id}` | `NasiyaTafsilotDto` | Nasiyalar |
+| `POST /nasiyalar` | `NasiyaYaratishDto` → `NasiyaDto` | NasiyaYozish; ochiq smena majburiy |
+| `POST /nasiyalar/{id}/qaytish` | `NasiyaQaytishiYaratishDto` → `NasiyaDto` | QarzQaytdi; summa ≤ qoldiq; `SmenaHisobiga=true` bo'lsa ochiq smena majburiy |
+| `DELETE /nasiyalar/{id}`, `DELETE /nasiyalar/qaytishlar/{id}` | 204 | faqat ochiq smenada, muallif yoki boshliq |
+| `GET /xarajatlar?smenaId&dan&gacha` | `XarajatDto[]` | Smenalar yoki o'z smenasi |
+| `POST /xarajatlar` | `XarajatYaratishDto` → `XarajatDto` | XarajatYozish; ochiq smena majburiy |
+| `DELETE /xarajatlar/{id}` | 204 | faqat ochiq smenada, muallif yoki boshliq |
+| `GET /aparatlar` | `AparatDto[]` | kirgan har kim |
+| `POST /aparatlar/{id}/kirim` | `BakKirimYaratishDto` → `AparatDto` | BakKirim |
+| `GET /bak-kirimlar?aparatId&dan&gacha` | `BakKirimDto[]` | Hisobotlar yoki BakKirim |
+| `PUT /aparatlar/{id}` | `AparatTahrirlashDto` | Sozlamalar; TotalLitr/BakQoldiq o'zgarsa `Sabab` majburiy |
+| `PUT /yoqilgilar/{id}` | `YoqilgiTahrirlashDto` | Sozlamalar; ochiq smenada narx o'zgarsa, o'sha yoqilg'i aparatlari ko'rsatkichi bo'lmasa 400 (ProblemDetails `extensions.kerakliAparatlar: int[]`) |
+| `GET /hisobot?dan&gacha&operatorId&guruh=smena\|kun\|oy\|operator` | `HisobotDto` | Hisobotlar; faqat yopilgan smenalar |
+| `GET /boshqaruv` | `BoshqaruvDto` | Boshqaruv (`/boshqaruv/bugun` olib tashlanadi) |
+| `GET /audit?q&tur&dan&gacha` | `AuditYozuviDto[]` | Audit |
+
+Olib tashlanadi: barcha `/sotuvlar` yo'llari. `/operatorlar/{id}/hisob` saqlanadi, oylik savdo endi yopilgan smenalardan.
+**SignalR** `/hub`: `SmenaOzgardi`, `NasiyaOzgardi`, `XarajatOzgardi`, `AparatOzgardi`, `NarxOzgardi` (+ mavjud `QaytaUlan`). `SotuvQoshildi`/`SotuvOzgardi` olib tashlanadi.
+**Audit** amallari (tur bilan): Smena ochildi/yopildi, Nasiya yozildi/o'chirildi, Qarz qaytdi, Xarajat yozildi/o'chirildi, Bakka kirim, Ko'rsatkich tuzatildi, Narx o'zgardi, Aparat tahrirlandi va mavjudlari.
+
+## 5. Ma'lumotlar bazasi
+
+- Yangi jadvallar: `SmenaKorsatkichlari` (SmenaId, AparatId, Tartib, Boshi, Oxiri, Narx, Litr, Summa, NarxOzgarishida, Vaqt), `Nasiyalar`, `NasiyaQaytishlari`, `Xarajatlar`, `BakKirimlari`. `Aparat` + `BakQoldiq`. `Smena` — §3 dagi maydonlar. `AuditYozuvi` + `Tur`.
+- `Sotuvlar`/`SotuvTolovlari` va eski smena ustunlari olib tashlanadi. **Yangi migratsiya** (eskilarini tahrir qilmang): o'rnatuvchi 0.0.1 bazasidan ham to'g'ri o'tsin. Dev bazani qayta yaratish mumkin.
+- Bitta ochiq smena — bazada ham kafolat (masalan, ifodali partial unique index).
+- Seed (Development, DemoMalumot): 2 operator, 5 aparat va bak qoldiqlari, bir nechta yopilgan smena, nasiyalar (muddati o'tgan bilan), xarajat va kirimlar — dizayndagi raqamlarga yaqin.
+
+## 6. Vazifalar
+
+### fc-backend
+1. **B1 — shartnoma:** `Contracts` (§3), `Ruxsat` enum, endpoint imzolari. Tugashi bilan fc'ga qisqa xabar — web va desktop shundan generatsiya qiladi.
+2. **B2 — Core:** modellari va `SmenaHisoblagich` (formula), segmentlar, bak, tuzatish. **Testlar:** §1.6 namunasi; tekshiruv holati (depozit manfiy); depozitdan xarajat (kassaga ta'siri 0); qaytishning 3 usuli; narx o'zgarishi bilan 2 segment; kichik ko'rsatkich rad etiladi; tuzatishdan keyin kamomat farqi harakati.
+3. **B3 — Api:** migratsiya, endpointlar, validatsiya, audit, SignalR, seed. **Testlar:** ochish/yopish, ikkinchi ochiq smena 409, ruxsatlar 403, nasiya muddati o'tgani, kirim, narx o'zgarishi 400 va to'g'ri holat, tuzatish, hisobot va boshqaruv yig'indilari.
+4. `dotnet build` va `dotnet test` xatosiz (`--artifacts-path` scratchpad'da). API :5000 da ishga tushib, `/openapi/v1.json` yangi shakl bilan ochilsin.
+
+### fc-web (Angular PWA)
+1. Backend B1 tayyor bo'lguncha: dizayn bo'yicha UI'ni mock ma'lumot bilan quring; sotuv sahifasi, offline navbat (IndexedDB) va sotuv tahririni olib tashlang; "Click" → "Depozit".
+2. Ekranlar (dizayndagidek): Savdo (ochiq smena / ochish formasi / **yopish jadvali — formulani jonli hisoblaydi, server natijasi bilan bir xil**), dialoglar (nasiya, qarz qaytdi, xarajat, bakka kirim, narx o'zgarishi), **Nasiyalar** (yangi), Boshqaruv, Smenalar (ko'rsatkichlar va pul hisobi bilan tafsilot, boshliq uchun tuzatish), Hisobotlar (yangi ustunlar + aparat/bak jadvali + Excel), Operatorlar, Audit (tur filtri), Sozlamalar (aparat bak maydoni, narx o'zgarishi ko'rsatkichlar bilan, yangi ruxsatlar).
+3. **Telefon (390 px):** yopish jadvali har aparat uchun karta bo'lib chiqsin, jadval emas. Pastki tab-bar ruxsatga qarab.
+4. B1 dan keyin `npm run api` bilan klientni qayta generatsiya qiling va ulang. SignalR yangi hodisalar.
+5. Yangi lug'at kalitlari `lugat-web.json` ga (3 til). Kalit nomlarini desktop bilan bir xil qiling — keyin fc-desktop `Til.cs` ga ko'chiradi.
+6. `ng build` xatosiz, 390×844 va 1440 da skrinshot bilan tekshirish (headless Edge).
+
+### fc-desktop (Avalonia) — sessiya ochilgach
+1. Backend B1 dan keyin `Contracts` o'zgaradi — desktop build vaqtincha buzilishi kutiladi; B1 xabaridan keyin moslang.
+2. `SotuvView` → yangi Savdo (ochiq/yopiq holat, ochish formasi), yopish ko'rinishi, dialoglar, **NasiyalarView** + menyu bandi, Boshqaruv/Smenalar/Hisobot/Operatorlar/Audit/Sozlamalar yangilash, `SotuvTahrirViewModel` va sotuv dialoglarini olib tashlash, `Til.cs` yangi kalitlar (3 til), Excel eksport yangi hisobot shaklida, `Malumot.cs` kesh va SignalR yangi hodisalar.
+3. Tekshirish: Avalonia.Headless harness skrinshotlari (oldingidek), `%AppData%` va `Documents` ni keyin tozalang.
+
+## 7. B1 dan keyin kelishilgan aniqliklar (2026-10-04, majburiy)
+
+1. **"Oldingi" ko'rsatkich** (yopish jadvali va narx o'zgarishi dialogi): aparatda ochiq smenada qayd etilgan segment bo'lsa — oxirgisining `Oxiri`, aks holda `AparatDto.TotalLitr`. `TotalLitr` va bak qoldig'i faqat smena yopilganda o'zgaradi.
+2. **Ochiq smenadagi segmentlar:** `SmenaTafsilotDto.Korsatkichlar` ochiq smenada faqat narx o'zgarishida qayd etilgan segmentlarni beradi (`NarxOzgarishida = true`). Klient jonli savdoni shunday hisoblaydi: qayd etilgan segmentlar `Summa`/`Litr` yig'indisi + har aparat uchun `(yangi − oldingi) × joriy narx` (`YoqilgiTuriDto.Narx`). Ochiq smenada `SmenaDto.Savdo` = 0. Yopilgan smenada `Korsatkichlar` — barcha segmentlar.
+3. **SignalR:** `SmenaOzgardi`, `NasiyaOzgardi`, `XarajatOzgardi`, `AparatOzgardi`, `NarxOzgardi` yuki — o'zgargan yozuv DTO'si. Klient buni **"qayta yuklash" signali** deb biladi (smena uchun `GET /smenalar/joriy`), DTO'ni ro'yxatga o'zi qo'shmaydi. O'chirishda ham shu hodisa keladi.
+4. **"Boshliq" API'da** = `Smenalar` ruxsati bor foydalanuvchi: boshqalar yozgan nasiya/qaytish/xarajatni o'chira oladi va boshqa operator smenasini yopa oladi. Qolganlar faqat o'z yozuvini.
+5. **O'chirish:** qaytishi bor nasiya o'chirilmaydi (409, avval qaytishlar o'chiriladi). Qaytish faqat uning smenasi ochiq bo'lsa o'chiriladi; smenaga bog'lanmagan qaytishni faqat boshliq o'chiradi.
+6. **Hisobot:** `guruh` berilmasa = smena; noma'lum qiymat 400. `Sana` — smena va kun qatorlarida, oy/operator qatorlarida null. `OperatorIsmi` — faqat smena qatorlarida. Boshqaruv va hisobot faqat yopilgan smenalardan.
+7. **Nasiyalar xulosasi:** `FaolQarz`/`FaolSoni` qoldig'i bor barcha nasiyalar, muddati o'tganlar ham kiradi. `Oy*` — joriy Toshkent oyi.
+8. `GET /smenalar/joriy` va `GET /aparatlar` — kirgan har kim; `GET /bak-kirimlar` — Hisobotlar yoki BakKirim.
+9. **Segmentlar:** narx o'zgarishida litr 0 bo'lsa segment yozilmaydi; yopishda har aparatga kamida bitta qator (litr 0 bo'lsa ham). `NarxOzgarishida = true` faqat narx o'zgarishida qayd etilgan eski narxdagi segmentda.
+10. **Nasiya validatsiyasi:** mijoz ismi, summa > 0 va muddat majburiy; telefon yoki mashina raqamidan **kamida bittasi** majburiy; muddat yozilayotgan kundan oldin bo'lmaydi. `holat=faol` — qarzi bor hammasi (muddati o'tganlar ham), `otgan` — faqat muddati o'tganlar, `yopilgan` — qoldig'i 0; parametr berilmasa — hammasi.
+11. **Bak manfiy:** smena yopilganda bak qoldig'i manfiyga tushsa ham smena yopiladi (kirim yozilmay qolgan bo'lishi mumkin) — UI manfiy qoldiqni qizil ko'rsatadi. Qo'lda tuzatishda manfiy qiymat taqiqlanadi.
+12. **Hisobotdagi bak jadvali:** Sotildi va Savdo — davrdagi yopilgan smenalardan; BakOxirida — davr oxiridagi qoldiq; BakBoshida = BakOxirida − Kirim + Sotildi. Operator filtri bak jadvaliga ta'sir qilmaydi, faqat qatorlar va Jami'ga.
+13. **Shartnomaga additiv qo'shimchalar (2026-10-05):** `NasiyaDto`, `NasiyaQaytishiDto`, `XarajatDto` oxiriga `int MuallifId` qo'shiladi, klient "o'z yozuvi"ni ism bo'yicha emas, shu bo'yicha tekshiradi. `HisobotQatoriDto` oxiriga `int XarajatSoni` qo'shiladi. Yangi endpoint `GET /smenalar/oxirgi` oxirgi yopilgan smenani `SmenaTafsilotDto` ko'rinishida qaytaradi yoki 204 beradi, ruxsati `/smenalar/joriy` bilan bir xil.
+14. **Ruxsatlar sahifasi:** o'zgarishlar avval qoralama bo'ladi, faqat "Ruxsatlarni saqlash" tugmasi bilan yuboriladi.
+15. **Dev muhit:** demo ma'lumot `Seed:DemoMalumot=true` bo'lsa Development **va** Web muhitida, faqat bo'sh bazada yoziladi. Dev bazani (:5000) faqat fc qayta yaratadi. Web o'zining :5100 dagi bazasida, desktop :5000 da sinaydi. Bir vaqtda faqat bitta ochiq smena bo'lgani uchun ular bir bazada sinamaydi.
+16. **Demo ma'lumot dizayn bilan aynan mos bo'ladi:** har smena qatori `Hisobotlar.dc.html` dagi kabi, har aparat litri `Hisobotlar.dc.html` va `Smenalar.dc.html` dagi kabi. Nasiyalar `Nasiyalar.dc.html` dagi smenalarga bog'lanadi. Barcha yopilgan demo smenalarda aparat segmentlari bor va bak tarixi izchil.
+
+## 8. Qo'shimchalar (2026-10-06, foydalanuvchi sinovidan keyin)
+
+1. **Telefon formati hamma joyda `+998 XX XXX XX XX`.**
+   - Kiritishda maydon `+998 ` bilan boshlanadi va bu prefiksni o'chirib bo'lmaydi. Foydalanuvchi faqat 9 raqam yozadi, bo'shliqlar yozish paytida o'zi qo'yiladi.
+   - Istalgan ko'rinishdagi qiymatni joylashtirish ham ishlaydi: raqam bo'lmagan belgilar olib tashlanadi, boshidagi `998` tushiriladi.
+   - Ko'rsatishda ham hamma joyda shu format.
+   - Server telefonni saqlashdan oldin normallashtiradi va doim `+998 XX XXX XX XX` ko'rinishida qaytaradi. Telefon berilgan bo'lsa, `998` dan keyin aynan 9 raqam bo'lishi shart, aks holda 400. Telefon yoki mashina raqamidan bittasi majburiyligi o'zgarmaydi. Bazadagi mavjud telefonlar migratsiyada shu formatga keltiriladi.
+2. **Mavjud mijozni topish va avtomatik to'ldirish.**
+   - Yangi endpoint: `GET /nasiyalar/mijozlar?q=` → `MijozTaklifDto[]`, eng ko'pi 8 ta. Ruxsat: `NasiyaYozish`, `QarzQaytdi` yoki `Nasiyalar`.
+   - `public sealed record MijozTaklifDto(string MijozIsmi, string Telefon, string MashinaRaqami, int NasiyaSoni, long FaolQarz, DateOnly OxirgiNasiya);`
+   - Mijozlar nasiya yozuvlaridan yig'iladi. Telefon bo'lsa telefon bo'yicha, bo'lmasa ism va mashina raqami bo'yicha guruhlanadi.
+   - Nasiya yozish dialogida ism, telefon yoki mashina raqami yozilayotganda takliflar ro'yxati chiqadi. Har bir taklifda ism, telefon, raqam va faol qarz ko'rinadi. Tanlansa, uchala maydon to'ladi.
+   - Telefon to'liq kiritilib, mavjud mijozga to'g'ri kelsa, bo'sh maydonlar o'zi to'ladi va "Mavjud mijoz · faol qarz X" izohi chiqadi.
+3. **Qidiruv qoidasi** `GET /nasiyalar?q=` va `/nasiyalar/mijozlar?q=` uchun bir xil:
+   - **Ism.** Katta-kichik harf farqlanmaydi. Apostroflar (`'`, `‘`, `’`, `` ` ``, `ʻ`, `ʼ`, `´`) solishtirishda **butunlay tashlab yuboriladi**, shuning uchun "Toxtayev", "To'xtayev" va "TO`XTAYEV" bir-birini topadi. So'z boshi ham, ichidagi qism ham mos keladi, shuning uchun o'xshash ismlar chiqadi.
+   - **Telefon.** Faqat raqamlar solishtiriladi, `+998`, bo'shliq va chiziqlar e'tiborga olinmaydi. Kamida 3 raqam yozilsa qidiradi.
+   - **Mashina raqami.** Bo'shliqlarsiz va katta harfda solishtiriladi.
+   - **Tartib.** Avval aynan va boshidan mos kelganlar, keyin qolganlari, yangisi oldinda.
+   - **Qarz qaytdi.** Dialogdagi qidiruv ham shu qoidaga bo'ysunadi, telefon raqami bilan ham topiladi.
+4. **Enter bilan keyingi maydonga o'tish.**
+   - Smena yopishda N-aparat ko'rsatkichida Enter bosilsa, fokus N+1-aparatga o'tadi. Oxirgi aparatdan keyin tartib shunday: terminal, depozit, sanalgan naqd, "Smenani yopish" tugmasi.
+   - Tugma Enter bilan o'zi bosilmaydi, faqat fokus oladi.
+   - Smena ochish formasi va narx o'zgarishi dialogida ham shu tartib ishlaydi.
+5. **Web yangilanishi.** Yangi versiya chiqqanda PWA eski keshlangan nusxada qolib ketmasligi kerak. Yangilanish aniqlansa, "Yangi versiya" xabari chiqadi va bir bosishda sahifa qayta yuklanadi, yoki yangi versiya avtomatik faollashadi.
+
+## 9. Ish tartibi
+
+- Faqat o'z papkangizga tegasiz: backend `src/backend` + `tests`, web `src/frontend/web`, desktop `src/frontend/desktop`. `docs/` — faqat fc.
+- Shartnomani o'zgartirish kerak bo'lsa — avval fc'ga yozing, o'zingiz o'zgartirmang.
+- Portlar: backend API :5000 (Development, dev.db); web o'z API'si :5100 (env Web); test API :5199. Build va test — `--artifacts-path <scratchpad>` (ishlayotgan API bin'ni qulflaydi). Boshqa sessiya jarayonini to'xtatmang.
+- **Commit qilmang** — fc ko'rib chiqib, foydalanuvchi bilan kelishib commit qiladi.
+- Har bosqich oxirida fc'ga qisqa hisobot: nima qilindi, qanday tekshirildi (buyruq va natija), ochiq savollar. Noaniq joyda taxmin qilmay fc'dan so'rang.

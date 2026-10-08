@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Sozlamalar, ruxsatlar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1B4FE0}a:hover{color:#2F6BFF}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #2F6BFF;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: radial-gradient(900px 620px at 4% 0%, rgba(104,160,255,0.55), rgba(104,160,255,0) 70%), radial-gradient(820px 680px at 100% 6%, rgba(176,142,255,0.50), rgba(176,142,255,0) 70%), radial-gradient(980px 700px at 74% 100%, rgba(72,214,206,0.46), rgba(72,214,206,0) 70%), radial-gradient(720px 560px at 0% 100%, rgba(255,190,120,0.30), rgba(255,190,120,0) 70%), #F2F6FF;">
+
+  <div style="flex: 0 1 264px; min-width: 0; display: flex;">
+    <dc-import name="Menyu" faol="sozlamalar" ism="Administrator" rol="Admin" harflar="A" hint-size="264px,860px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 18px; padding: 6px 8px 28px;">
+
+    <header style="display: flex; flex-direction: column; gap: 14px; padding-top: 6px;">
+      <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Sozlamalar</h1>
+      <nav aria-label="Sozlamalar bo'limlari" style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <a href="NarxOzgarishi.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: #2E3D5C; text-decoration: none; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);">Yoqilg'i narxlari</a>
+        <a href="SozlamalarAparatlar.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: #2E3D5C; text-decoration: none; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);">Aparatlar</a>
+        <a href="SozlamalarRuxsatlar.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: #2E3D5C; text-decoration: none; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);">Foydalanuvchilar</a>
+        <a href="SozlamalarRuxsatlar.dc.html" aria-current="page" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: #FFFFFF; text-decoration: none; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 6px 14px rgba(47,107,255,0.28);">Ruxsatlar</a>
+        <a href="SozlamalarAparatlar.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: #2E3D5C; text-decoration: none; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);">Zaxira nusxa</a>
+      </nav>
+    </header>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start;">
+
+      <section aria-labelledby="f-s" style="flex: 1 1 300px; min-width: 0; box-sizing: border-box; padding: 18px 14px; display: flex; flex-direction: column; gap: 8px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <h2 id="f-s" style="margin: 0 6px 4px; font-size: 15px; font-weight: 700;">Foydalanuvchilar</h2>
+        <sc-for list="{{ foydalanuvchilar }}" as="f" hint-placeholder-count="3">
+          <button type="button" aria-pressed="{{ f.bosilgan }}" onClick="{{ f.tanla }}" style="{{ f.uslub }}">
+            <span style="width: 38px; height: 38px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #1B4FE0; background: linear-gradient(180deg, #F2F6FF, #D9E5FF);">{{ f.harflar }}</span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; text-align: left;">
+              <span style="font-size: 14px; font-weight: 700;">{{ f.ism }}</span>
+              <span style="font-size: 12.5px; color: #4F607D;">{{ f.rol }}</span>
+            </span>
+          </button>
+        </sc-for>
+      </section>
+
+      <section aria-labelledby="r-s" style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 20px; display: flex; flex-direction: column; gap: 16px; background: linear-gradient(160deg, rgba(255,255,255,0.78), rgba(255,255,255,0.5)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.9); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
+          <div style="display: flex; flex-direction: column; gap: 3px;">
+            <h2 id="r-s" style="margin: 0; font-size: 19px; font-weight: 800;">{{ joriy.ism }}</h2>
+            <span style="font-size: 13px; color: #4F607D;">{{ joriy.izoh }}</span>
+          </div>
+          <button type="button" onClick="{{ standart }}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 700; color: #0B1530; cursor: pointer; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55)); border: 1px solid rgba(20,40,80,0.12);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7 M20 4v5h-5"></path></svg>
+            Rol bo'yicha tiklash
+          </button>
+        </div>
+
+        <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px;">
+          <legend style="padding: 0 0 8px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Bo'limlar</legend>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px;">
+            <sc-for list="{{ bolimlar }}" as="b" hint-placeholder-count="8">
+              <label style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; box-sizing: border-box; border-radius: 16px; cursor: pointer; background: rgba(255,255,255,0.6); border: 1px solid rgba(20,40,80,0.08); font-size: 14px; font-weight: 600;">
+                <input type="checkbox" checked="{{ b.belgi }}" onChange="{{ b.almashtir }}" style="width: 20px; height: 20px; flex: none; margin: 0; accent-color: #2F6BFF;">
+                <span style="flex: 1; min-width: 0;">{{ b.nomi }}</span>
+                <sc-if value="{{ b.yangi }}" hint-placeholder-val="{{ false }}"><span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #DCE6FF; color: #1B4FE0;">Yangi</span></sc-if>
+              </label>
+            </sc-for>
+          </div>
+        </fieldset>
+
+        <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px;">
+          <legend style="padding: 0 0 8px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Amallar</legend>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;">
+            <sc-for list="{{ amallar }}" as="a" hint-placeholder-count="9">
+              <label style="display: flex; align-items: flex-start; gap: 12px; min-height: 56px; padding: 12px 14px; box-sizing: border-box; border-radius: 16px; cursor: pointer; background: rgba(255,255,255,0.6); border: 1px solid rgba(20,40,80,0.08);">
+                <input type="checkbox" checked="{{ a.belgi }}" onChange="{{ a.almashtir }}" style="width: 20px; height: 20px; flex: none; margin: 1px 0 0; accent-color: #2F6BFF;">
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                  <span style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700;">{{ a.nomi }}<sc-if value="{{ a.yangi }}" hint-placeholder-val="{{ false }}"><span style="padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #DCE6FF; color: #1B4FE0;">Yangi</span></sc-if></span>
+                  <span style="font-size: 12.5px; line-height: 1.4; color: #4F607D;">{{ a.izoh }}</span>
+                </span>
+              </label>
+            </sc-for>
+          </div>
+        </fieldset>
+
+        <div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #FFF4DB; border: 1px solid #F3D48A; color: #4A3A12; font-size: 13px; line-height: 1.45;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px; color: #8A5A00;"><path d="M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z M12 11v5 M12 8h.01"></path></svg>
+          <span>Olib tashlandi: Sotuv kiritish, Sotuvni tahrirlash, Sotuvni bekor qilish. Ularning o'rnini smena yopish va ko'rsatkichni tuzatish egalladi.</span>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 24px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 700; color: #FFFFFF; cursor: pointer; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 10px 24px rgba(47,107,255,0.32), inset 0 1px 0 rgba(255,255,255,0.55);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg>
+            Ruxsatlarni saqlash
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1160}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    var tanlangan = s.tanlangan !== undefined ? s.tanlangan : 1;
+    var odamlar = [
+      { ism: "Administrator", rol: "Admin", harflar: "A", turi: "admin" },
+      { ism: "Alisher Karimov", rol: "Operator", harflar: "AK", turi: "operator" },
+      { ism: "Dilshod Rahimov", rol: "Operator", harflar: "DR", turi: "operator" }
+    ];
+    var bolimRoyxat = [
+      { k: "boshqaruv", nomi: "Boshqaruv" }, { k: "savdo", nomi: "Savdo" }, { k: "smenalar", nomi: "Smenalar" },
+      { k: "nasiyalar", nomi: "Nasiyalar", yangi: true }, { k: "hisobotlar", nomi: "Hisobotlar" },
+      { k: "operatorlar", nomi: "Operatorlar" }, { k: "audit", nomi: "Audit" }, { k: "sozlamalar", nomi: "Sozlamalar" }
+    ];
+    var amalRoyxat = [
+      { k: "smenaOchish", nomi: "Smena ochish", izoh: "Uchta boshlang'ich qoldiqni kiritib smena ochadi" },
+      { k: "smenaYopish", nomi: "Smena yopish", izoh: "Pult ko'rsatkichlari, plastik, depozit va naqdni kiritib yopadi" },
+      { k: "nasiyaYozish", nomi: "Nasiya yozish", izoh: "Qarzga yoqilg'i berilganini yozadi", yangi: true },
+      { k: "qarzQaytdi", nomi: "Qarz qaytdi", izoh: "Qaytgan qarzni to'liq yoki qisman yopadi", yangi: true },
+      { k: "xarajat", nomi: "Xarajat yozish", izoh: "Boshliq aytgan to'lovlarni yozadi", yangi: true },
+      { k: "bakKirim", nomi: "Bakka kirim", izoh: "Zavoddan kelgan yoqilg'ini bakka qo'shadi", yangi: true },
+      { k: "tuzatish", nomi: "Ko'rsatkichni tuzatish", izoh: "Yopilgan smenadagi xato ko'rsatkichni sabab bilan tuzatadi", yangi: true },
+      { k: "avans", nomi: "Avans berish", izoh: "Operatorga avans yoki maosh to'lovini yozadi" },
+      { k: "eksport", nomi: "Eksport", izoh: "Hisobotlarni Excel faylga chiqaradi" }
+    ];
+    var standartlar = {
+      operator: ["savdo", "nasiyalar", "smenaOchish", "smenaYopish", "nasiyaYozish", "qarzQaytdi", "xarajat"],
+      admin: bolimRoyxat.map(function (b) { return b.k; }).concat(amalRoyxat.map(function (a) { return a.k; }))
+    };
+    var joriy = odamlar[tanlangan];
+    var kalit = "r" + tanlangan;
+    var tanlovlar = s[kalit] || standartlar[joriy.turi];
+    function bormi(k) { return tanlovlar.indexOf(k) !== -1; }
+    function almashtir(k) {
+      return function () {
+        var yangi = bormi(k) ? tanlovlar.filter(function (x) { return x !== k; }) : tanlovlar.concat([k]);
+        var o = {}; o[kalit] = yangi; self.setState(o);
+      };
+    }
+    var fAsos = "display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 12px; box-sizing: border-box; border-radius: 18px; font: inherit; color: #0B1530; cursor: pointer;";
+    var foydalanuvchilar = odamlar.map(function (o, i) {
+      var faol = i === tanlangan;
+      return {
+        ism: o.ism, rol: o.rol, harflar: o.harflar,
+        bosilgan: faol ? "true" : "false",
+        uslub: fAsos + (faol ? " background: #E9F0FF; border: 2px solid #2F6BFF;" : " background: transparent; border: 1px solid transparent;"),
+        tanla: function () { self.setState({ tanlangan: i }); }
+      };
+    });
+    return {
+      foydalanuvchilar: foydalanuvchilar,
+      joriy: { ism: joriy.ism, izoh: joriy.rol + " · " + tanlovlar.length + " ta ruxsat" },
+      bolimlar: bolimRoyxat.map(function (b) { return { nomi: b.nomi, yangi: !!b.yangi, belgi: bormi(b.k), almashtir: almashtir(b.k) }; }),
+      amallar: amalRoyxat.map(function (a) { return { nomi: a.nomi, izoh: a.izoh, yangi: !!a.yangi, belgi: bormi(a.k), almashtir: almashtir(a.k) }; }),
+      standart: function () { var o = {}; o[kalit] = standartlar[joriy.turi]; self.setState(o); }
+    };
+  }
+}
+</script>
+</body>
+</html>

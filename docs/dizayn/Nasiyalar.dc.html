@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Nasiyalar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1B4FE0}a:hover{color:#2F6BFF}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #2F6BFF;outline-offset:2px}
+input::placeholder{color:#7A879E}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: radial-gradient(900px 620px at 4% 0%, rgba(104,160,255,0.55), rgba(104,160,255,0) 70%), radial-gradient(820px 680px at 100% 6%, rgba(176,142,255,0.50), rgba(176,142,255,0) 70%), radial-gradient(980px 700px at 74% 100%, rgba(72,214,206,0.46), rgba(72,214,206,0) 70%), radial-gradient(720px 560px at 0% 100%, rgba(255,190,120,0.30), rgba(255,190,120,0) 70%), #F2F6FF;">
+
+  <div style="flex: 0 1 264px; min-width: 0; display: flex;">
+    <dc-import name="Menyu" faol="nasiyalar" ism="Administrator" rol="Admin" harflar="A" hint-size="264px,860px"></dc-import>
+  </div>
+
+  <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 18px; padding: 6px 8px 28px;">
+
+    <header style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px; padding-top: 6px;">
+      <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Nasiyalar</h1>
+        <span style="font-size: 13px; color: #4F607D;">Qarzga yoqilg'i olgan mijozlar va qaytarish muddatlari</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <a href="NasiyaQaytdi.dc.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; box-sizing: border-box; border-radius: 999px; font-size: 14px; font-weight: 700; color: #0B1530; text-decoration: none; white-space: nowrap; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.55)); border: 1px solid rgba(255,255,255,0.95); box-shadow: 0 6px 18px rgba(28,54,110,0.10), inset 0 1px 0 #FFFFFF;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5 M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg>
+          Qarz qaytdi
+        </a>
+        <a href="NasiyaQoshish.dc.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 20px; box-sizing: border-box; border-radius: 999px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-decoration: none; white-space: nowrap; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 10px 24px rgba(47,107,255,0.32), inset 0 1px 0 rgba(255,255,255,0.55);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>
+          Nasiya yozish
+        </a>
+      </div>
+    </header>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px;">
+      <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Faol qarz</span>
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; white-space: nowrap;">2 510 000 <span style="font-size: 12.5px; font-weight: 600; color: #4F607D;">so'm</span></span>
+        <span style="font-size: 12.5px; color: #4F607D;">7 ta mijoz</span>
+      </div>
+      <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; background: linear-gradient(160deg, rgba(255,238,238,0.92), rgba(255,225,225,0.72)); border: 1px solid #FFB4B4; border-radius: 26px; box-shadow: 0 18px 48px rgba(120,30,30,0.10), inset 0 1px 0 rgba(255,255,255,0.8);">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Muddati o'tgan</span>
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #C42127; font-variant-numeric: tabular-nums; white-space: nowrap;">480 000 <span style="font-size: 12.5px; font-weight: 600; color: #4F607D;">so'm</span></span>
+        <span style="font-size: 12.5px; color: #4F607D;">2 ta mijoz</span>
+      </div>
+      <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Shu oy berilgan</span>
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; white-space: nowrap;">2 480 000 <span style="font-size: 12.5px; font-weight: 600; color: #4F607D;">so'm</span></span>
+        <span style="font-size: 12.5px; color: #4F607D;">6 ta nasiya</span>
+      </div>
+      <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; min-width: 0; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), inset 0 1px 0 rgba(255,255,255,0.9);">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Shu oy qaytgan</span>
+        <span style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #0E7A4A; font-variant-numeric: tabular-nums; white-space: nowrap;">750 000 <span style="font-size: 12.5px; font-weight: 600; color: #4F607D;">so'm</span></span>
+        <span style="font-size: 12.5px; color: #4F607D;">2 ta to'lov</span>
+      </div>
+    </div>
+
+    <section aria-labelledby="royxat-s" style="box-sizing: border-box; padding: 18px 20px 10px; display: flex; flex-direction: column; gap: 12px; background: linear-gradient(160deg, rgba(255,255,255,0.74), rgba(255,255,255,0.44)); -webkit-backdrop-filter: blur(26px) saturate(180%); backdrop-filter: blur(26px) saturate(180%); border: 1px solid rgba(255,255,255,0.85); border-radius: 26px; box-shadow: 0 18px 48px rgba(28,54,110,0.12), 0 1px 2px rgba(28,54,110,0.06), inset 0 1px 0 rgba(255,255,255,0.9);">
+      <h2 id="royxat-s" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); margin: -1px;">Nasiyalar ro'yxati</h2>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        <div role="group" aria-label="Filtr" style="display: flex; flex-wrap: wrap; gap: 8px;">
+          <sc-for list="{{ filtrlar }}" as="f" hint-placeholder-count="4">
+            <button type="button" aria-pressed="{{ f.bosilgan }}" onClick="{{ f.tanla }}" style="{{ f.uslub }}">{{ f.nomi }}<span style="{{ f.sonUslub }}">{{ f.soni }}</span></button>
+          </sc-for>
+        </div>
+        <div style="flex: 1 1 260px; min-width: 0; position: relative; display: flex; align-items: center;">
+          <span style="position: absolute; left: 16px; display: inline-flex; color: #4F607D; pointer-events: none;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 11A7 7 0 1 1 4 11A7 7 0 1 1 18 11 M20 20l-4-4"></path></svg>
+          </span>
+          <input type="search" aria-label="Qidirish" placeholder="Ism, telefon yoki mashina raqami" value="{{ qidiruv }}" onChange="{{ qidiruvOzgar }}" style="width: 100%; box-sizing: border-box; min-height: 44px; padding: 0 18px 0 44px; border-radius: 22px; font: inherit; font-size: 14px; color: #0B1530; background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.62)); border: 1px solid #C9D1DE; outline: none;">
+        </div>
+      </div>
+
+      <div style="overflow-x: auto; margin: 0 -6px; padding: 0 6px;">
+        <div style="min-width: 940px; display: flex; flex-direction: column;">
+          <div style="display: grid; grid-template-columns: minmax(190px, 1.6fr) minmax(110px, 0.9fr) minmax(130px, 1fr) minmax(90px, 0.75fr) minmax(90px, 0.75fr) minmax(100px, 0.8fr) minmax(130px, 1fr) 112px; gap: 12px; padding: 4px 4px 8px; border-bottom: 1px solid rgba(18,20,40,0.08); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">
+            <span>Mijoz</span><span>Mashina</span><span>Yozilgan</span><span style="text-align: right;">Qarz</span><span style="text-align: right;">Qaytgan</span><span style="text-align: right;">Qoldiq</span><span>Muddat</span><span></span>
+          </div>
+          <sc-for list="{{ qatorlar }}" as="q" hint-placeholder-count="8">
+            <div style="{{ q.qatorUslub }}">
+              <span style="display: flex; flex-direction: column; gap: 3px; min-width: 0;">
+                <span style="font-size: 14px; font-weight: 700;">{{ q.ism }}</span>
+                <span style="font-size: 12.5px; color: #4F607D; font-variant-numeric: tabular-nums;">{{ q.tel }}</span>
+              </span>
+              <span><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 7px 1px 5px; border: 1.5px solid #0B1530; border-radius: 5px; background: #FFFFFF; color: #0B1530; font-size: 11.5px; font-weight: 700; letter-spacing: 0.4px; white-space: nowrap;"><span style="padding-right: 5px; border-right: 1.5px solid #0B1530;">{{ q.hudud }}</span>{{ q.raqam }}</span></span>
+              <span style="display: flex; flex-direction: column; gap: 3px; font-size: 12.5px; color: #4F607D;"><span style="font-size: 13.5px; color: #0B1530; font-variant-numeric: tabular-nums;">{{ q.sana }}</span>{{ q.kim }}</span>
+              <span style="text-align: right; font-size: 14px; font-variant-numeric: tabular-nums;">{{ q.summa }}</span>
+              <span style="text-align: right; font-size: 14px; color: #0E7A4A; font-variant-numeric: tabular-nums;">{{ q.qaytgan }}</span>
+              <span style="text-align: right; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums;">{{ q.qoldiq }}</span>
+              <span style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;"><span style="font-size: 13.5px; font-variant-numeric: tabular-nums;">{{ q.muddat }}</span><span style="{{ q.belgiUslub }}">{{ q.belgi }}</span></span>
+              <span style="display: flex; justify-content: flex-end;">
+                <sc-if value="{{ q.faol }}" hint-placeholder-val="{{ true }}">
+                  <a href="NasiyaQaytdi.dc.html" aria-label="{{ q.amalIzoh }}" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 14px; box-sizing: border-box; border-radius: 999px; font-size: 13px; font-weight: 700; color: #1B4FE0; text-decoration: none; background: rgba(255,255,255,0.8); border: 1px solid rgba(47,107,255,0.28);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5 M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg>
+                    Qaytdi
+                  </a>
+                </sc-if>
+              </span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    var filtr = s.filtr !== undefined ? s.filtr : "hammasi";
+    var qidiruv = s.qidiruv !== undefined ? s.qidiruv : "";
+    var b = "padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap;";
+    var belgilar = {
+      otgan: b + " background: #FFDEDE; color: #B3261E;",
+      yaqin: b + " background: #FFEBC2; color: #8A5A00;",
+      faol: b + " background: #DCE6FF; color: #1B4FE0;",
+      yopilgan: b + " background: #D9F5E6; color: #0E7A4A;"
+    };
+    var barcha = [
+      { ism: "Sherzod Qodirov", tel: "+998 99 410 22 11", hudud: "40", raqam: "C 919 DA", sana: "21.09", kim: "#29 · Alisher K.", summa: 180000, qaytgan: 0, muddat: "28.09.2026", holat: "otgan", belgi: "6 kun o'tdi" },
+      { ism: "Bobur Aliyev", tel: "+998 97 700 80 90", hudud: "01", raqam: "H 202 MA", sana: "23.09", kim: "#31 · Dilshod R.", summa: 600000, qaytgan: 300000, muddat: "30.09.2026", holat: "otgan", belgi: "4 kun o'tdi" },
+      { ism: "Komil Saidov", tel: "+998 94 222 31 31", hudud: "01", raqam: "M 345 OA", sana: "03.10", kim: "#41 · Dilshod R.", summa: 95000, qaytgan: 0, muddat: "05.10.2026", holat: "yaqin", belgi: "Ertaga" },
+      { ism: "Farhod Ismoilov", tel: "+998 93 555 12 34", hudud: "30", raqam: "B 456 CA", sana: "04.10", kim: "#42 · Alisher K.", summa: 220000, qaytgan: 0, muddat: "07.10.2026", holat: "yaqin", belgi: "3 kun qoldi" },
+      { ism: "Jasur To'xtayev", tel: "+998 90 123 45 67", hudud: "01", raqam: "A 777 BC", sana: "04.10", kim: "#42 · Alisher K.", summa: 350000, qaytgan: 0, muddat: "11.10.2026", holat: "faol", belgi: "7 kun qoldi" },
+      { ism: "Nodir Xasanov", tel: "+998 88 640 07 07", hudud: "01", raqam: "D 128 EA", sana: "01.10", kim: "#39 · Dilshod R.", summa: 165000, qaytgan: 0, muddat: "15.10.2026", holat: "faol", belgi: "11 kun qoldi" },
+      { ism: "Rustam Ergashev", tel: "+998 90 909 30 30", hudud: "01", raqam: "345 KBA", sana: "02.10", kim: "#40 · Alisher K.", summa: 1200000, qaytgan: 0, muddat: "02.11.2026", holat: "faol", belgi: "29 kun qoldi" },
+      { ism: "Ulug'bek Nazarov", tel: "+998 91 333 44 55", hudud: "01", raqam: "K 515 KA", sana: "01.10", kim: "#39 · Dilshod R.", summa: 450000, qaytgan: 450000, muddat: "08.10.2026", holat: "yopilgan", belgi: "Yopilgan 02.10" }
+    ];
+    function pul(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+    var faolSoni = barcha.filter(function (x) { return x.holat !== "yopilgan"; }).length;
+    var otganSoni = barcha.filter(function (x) { return x.holat === "otgan"; }).length;
+    var yopilganSoni = barcha.filter(function (x) { return x.holat === "yopilgan"; }).length;
+    var variantlar = [
+      { k: "hammasi", nomi: "Hammasi", soni: barcha.length },
+      { k: "faol", nomi: "Faol", soni: faolSoni },
+      { k: "otgan", nomi: "Muddati o'tgan", soni: otganSoni },
+      { k: "yopilgan", nomi: "Yopilgan", soni: yopilganSoni }
+    ];
+    var cAsos = "display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 8px 0 16px; border-radius: 999px; font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;";
+    var filtrlar = variantlar.map(function (v) {
+      var faol = v.k === filtr;
+      return {
+        nomi: v.nomi, soni: String(v.soni),
+        bosilgan: faol ? "true" : "false",
+        uslub: cAsos + (faol
+          ? " color: #FFFFFF; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255,255,255,0.55); box-shadow: 0 6px 14px rgba(47,107,255,0.28);"
+          : " color: #2E3D5C; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.6)); border: 1px solid rgba(255,255,255,0.95);"),
+        sonUslub: "min-width: 26px; height: 26px; padding: 0 8px; box-sizing: border-box; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;" + (faol ? " background: rgba(255,255,255,0.25); color: #FFFFFF;" : " background: rgba(20,40,80,0.08); color: #2E3D5C;"),
+        tanla: function () { self.setState({ filtr: v.k }); }
+      };
+    });
+    var q = qidiruv.trim().toLowerCase();
+    var qatorAsos = "display: grid; grid-template-columns: minmax(190px, 1.6fr) minmax(110px, 0.9fr) minmax(130px, 1fr) minmax(90px, 0.75fr) minmax(90px, 0.75fr) minmax(100px, 0.8fr) minmax(130px, 1fr) 112px; gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1px solid rgba(18,20,40,0.07);";
+    var qatorlar = barcha.filter(function (x) {
+      var mos = filtr === "hammasi" || (filtr === "faol" && x.holat !== "yopilgan") || x.holat === filtr;
+      var topildi = q === "" || (x.ism + " " + x.tel + " " + x.hudud + " " + x.raqam).toLowerCase().indexOf(q) !== -1;
+      return mos && topildi;
+    }).map(function (x) {
+      return {
+        ism: x.ism, tel: x.tel, hudud: x.hudud, raqam: x.raqam, sana: x.sana, kim: x.kim,
+        summa: pul(x.summa), qaytgan: x.qaytgan ? pul(x.qaytgan) : "0", qoldiq: pul(x.summa - x.qaytgan),
+        muddat: x.muddat, belgi: x.belgi, belgiUslub: belgilar[x.holat],
+        faol: x.holat !== "yopilgan",
+        amalIzoh: x.ism + " qarzi qaytdi",
+        qatorUslub: qatorAsos + (x.holat === "otgan" ? " background: rgba(255,222,222,0.45); border-radius: 14px;" : (x.holat === "yopilgan" ? " background: rgba(20,40,80,0.035); border-radius: 14px;" : ""))
+      };
+    });
+    return {
+      filtrlar: filtrlar,
+      qatorlar: qatorlar,
+      qidiruv: qidiruv,
+      qidiruvOzgar: function (e) { self.setState({ qidiruv: e.target.value }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

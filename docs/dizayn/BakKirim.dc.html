@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>Bakka kirim</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#1B4FE0}a:hover{color:#2F6BFF}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #2F6BFF;outline-offset:2px}
+input::placeholder{color:#7A879E}
+</style>
+</helmet>
+<div style="width: 720px; height: 880px; box-sizing: border-box; padding: 32px; display: flex; align-items: center; justify-content: center; font-family: Inter, 'Segoe UI', system-ui, sans-serif; color: #0B1530; background: linear-gradient(rgba(237,241,251,0.55), rgba(237,241,251,0.55)), radial-gradient(520px 420px at 0% 0%, rgba(104,160,255,0.55), rgba(104,160,255,0) 70%), radial-gradient(480px 420px at 100% 10%, rgba(176,142,255,0.50), rgba(176,142,255,0) 70%), radial-gradient(560px 460px at 80% 100%, rgba(72,214,206,0.46), rgba(72,214,206,0) 70%), radial-gradient(420px 360px at 0% 100%, rgba(255,190,120,0.30), rgba(255,190,120,0) 70%), #F2F6FF;">
+  <section role="dialog" aria-modal="true" aria-labelledby="d-s" style="width: 100%; max-width: 600px; box-sizing: border-box; padding: 28px 30px; display: flex; flex-direction: column; gap: 16px; background: rgba(250,251,255,0.95); border: 1px solid rgba(255,255,255,0.95); border-radius: 32px; box-shadow: 0 30px 80px rgba(20,40,90,0.30), 0 2px 6px rgba(20,40,90,0.12);">
+
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: #D9F5E6; color: #0E7A4A;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h12v10H2z M14 10h4l3 3v3h-7 M6.5 19a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3z M17.5 19a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3z"></path></svg>
+      </span>
+      <div style="flex: 1; min-width: 0;">
+        <h2 id="d-s" style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.3px;">Bakka kirim</h2>
+        <span style="font-size: 13px; color: #4F607D;">Zavoddan kelgan yoqilg'i, litrda</span>
+      </div>
+      <a href="Main.dc.html" aria-label="Yopish" style="width: 44px; height: 44px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: #2E3D5C; text-decoration: none; background: rgba(20,40,80,0.06);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12 M18 6L6 18"></path></svg>
+      </a>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 7px;">
+      <label for="aparat-k" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Qaysi aparat baki</label>
+      <select id="aparat-k" value="{{ tanlangan }}" onChange="{{ aparatOzgar }}" style="width: 100%; box-sizing: border-box; min-height: 46px; padding: 0 18px; border-radius: 23px; font: inherit; font-size: 15px; font-weight: 600; color: #0B1530; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.75)); border: 1px solid #C9D1DE; outline: none;">
+        <option value="0">1-aparat · AI-92</option>
+        <option value="1">2-aparat · AI-92</option>
+        <option value="2">3-aparat · AI-95</option>
+        <option value="3">4-aparat · AI-95</option>
+        <option value="4">5-aparat · Dizel</option>
+      </select>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+      <div style="padding: 14px 16px; border-radius: 18px; background: #F2F6FF; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Hozirgi qoldiq</span>
+        <span style="font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap;">{{ hozirgi }} <span style="font-size: 13px; font-weight: 600; color: #4F607D;">L</span></span>
+        <span style="font-size: 12px; color: #4F607D;">{{ oxirgi }}</span>
+      </div>
+      <div aria-live="polite" style="padding: 14px 16px; border-radius: 18px; background: rgba(217,245,230,0.75); border: 1px solid #9FE3BF; display: flex; flex-direction: column; gap: 3px;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #0E6B42;">Kirimdan keyin</span>
+        <span style="font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap;">{{ keyin }} <span style="font-size: 13px; font-weight: 600; color: #4F607D;">L</span></span>
+        <span style="font-size: 12px; color: #2E3D5C;">Pult ko'rsatkichi o'zgarmaydi</span>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 7px;">
+      <label for="litr-k" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Kelgan miqdor, litr</label>
+      <input id="litr-k" type="text" inputmode="decimal" autocomplete="off" placeholder="0" value="{{ litr }}" onChange="{{ litrOzgar }}" style="width: 100%; box-sizing: border-box; min-height: 60px; padding: 0 22px; border-radius: 30px; font: inherit; font-size: 26px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; color: #0B1530; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.75)); border: 1px solid #C9D1DE; outline: none;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 7px; min-width: 0;">
+        <label for="hujjat-k" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Hujjat raqami yoki izoh</label>
+        <input id="hujjat-k" type="text" autocomplete="off" placeholder="Yuk xati raqami" value="{{ hujjat }}" onChange="{{ hujjatOzgar }}" style="width: 100%; box-sizing: border-box; min-height: 46px; padding: 0 18px; border-radius: 23px; font: inherit; font-size: 15px; color: #0B1530; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.75)); border: 1px solid #C9D1DE; outline: none;">
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 7px; min-width: 0;">
+        <label for="vaqt-k" style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4F607D;">Kelgan vaqt</label>
+        <input id="vaqt-k" type="datetime-local" value="{{ vaqt }}" onChange="{{ vaqtOzgar }}" style="width: 100%; box-sizing: border-box; min-height: 46px; padding: 0 16px; border-radius: 23px; font: inherit; font-size: 15px; color: #0B1530; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.75)); border: 1px solid #C9D1DE; outline: none;">
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #E9F0FF; color: #1B3A8A; font-size: 13px; line-height: 1.45;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 1px;"><path d="M12 21a9 9 0 1 0 0-18a9 9 0 0 0 0 18z M12 11v5 M12 8h.01"></path></svg>
+      <span>Bak qoldig'i kirimda ko'payadi, har smena yopilganda sotilgan litrga kamayadi. Kirim auditga yoziladi.</span>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding-top: 2px;">
+      <a href="Main.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 22px; box-sizing: border-box; border-radius: 999px; font-size: 14px; font-weight: 700; color: #0B1530; text-decoration: none; background: linear-gradient(180deg, #FFFFFF, rgba(255,255,255,0.7)); border: 1px solid rgba(20,40,80,0.12); box-shadow: 0 6px 18px rgba(28,54,110,0.10);">Bekor qilish</a>
+      <a href="Main.dc.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 24px; box-sizing: border-box; border-radius: 999px; font-size: 14px; font-weight: 700; color: #FFFFFF; text-decoration: none; background: linear-gradient(180deg, #22A468 0%, #0E7A4A 50%, #0B6B40 100%); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 24px rgba(14,122,74,0.30), inset 0 1px 0 rgba(255,255,255,0.45);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>
+        Kirimni saqlash
+      </a>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":880}}'>
+class Component extends DCLogic {
+  son(t) {
+    var v = String(t === undefined || t === null ? "" : t).replace(/[\s ]/g, "").replace(",", ".");
+    if (v === "" || !/^\d+(\.\d*)?$/.test(v)) return NaN;
+    return Number(v);
+  }
+  litrMatn(n) {
+    var p = n.toFixed(2).split(".");
+    var butun = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return p[1] === "00" ? butun : butun + "." + p[1];
+  }
+  renderVals() {
+    var self = this;
+    var s = this.state || {};
+    var baklar = [
+      { qoldiq: 6840, oxirgi: "Oxirgi kirim 02.10 · +5 000 L" },
+      { qoldiq: 3215, oxirgi: "Oxirgi kirim 28.09 · +4 000 L" },
+      { qoldiq: 4120, oxirgi: "Oxirgi kirim 01.10 · +3 000 L" },
+      { qoldiq: 1960, oxirgi: "Oxirgi kirim 25.09 · +3 000 L" },
+      { qoldiq: 9480, oxirgi: "Oxirgi kirim 03.10 · +8 000 L" }
+    ];
+    var tanlangan = s.tanlangan !== undefined ? s.tanlangan : "0";
+    var bak = baklar[Number(tanlangan)] || baklar[0];
+    var litr = s.litr !== undefined ? s.litr : "5 000";
+    var v = self.son(litr);
+    return {
+      tanlangan: tanlangan,
+      hozirgi: self.litrMatn(bak.qoldiq),
+      oxirgi: bak.oxirgi,
+      keyin: isNaN(v) ? "—" : self.litrMatn(bak.qoldiq + v),
+      litr: litr,
+      hujjat: s.hujjat !== undefined ? s.hujjat : "Yuk xati 1187",
+      vaqt: s.vaqt !== undefined ? s.vaqt : "2026-10-04T14:30",
+      aparatOzgar: function (e) { self.setState({ tanlangan: e.target.value }); },
+      litrOzgar: function (e) { self.setState({ litr: e.target.value }); },
+      hujjatOzgar: function (e) { self.setState({ hujjat: e.target.value }); },
+      vaqtOzgar: function (e) { self.setState({ vaqt: e.target.value }); }
+    };
+  }
+}
+</script>
+</body>
+</html>
