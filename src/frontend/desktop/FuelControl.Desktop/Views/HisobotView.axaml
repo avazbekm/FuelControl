@@ -28,10 +28,10 @@
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="28,22,28,28" Spacing="18">
-            <Grid ColumnDefinitions="*,Auto">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                 <StackPanel Spacing="6">
-                    <TextBlock Text="{l:T Hisobotlar}" Classes="sarlavha" FontSize="28" />
-                    <TextBlock Text="{Binding DavrMatni}" Classes="izoh" FontSize="13" />
+                    <TextBlock Text="{l:T Hisobotlar}" Classes="sarlavha" FontSize="28" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding DavrMatni}" Classes="izoh" FontSize="13" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
                 <Button Grid.Column="1" VerticalAlignment="Bottom" IsVisible="{Binding EksportKorinsin}" Command="{Binding ExcelCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="excel" Olcham="15" /><TextBlock Text="{l:T Hisobot_Excel}" /></StackPanel>
@@ -41,7 +41,7 @@
             <!-- Filtrlar -->
             <Border Classes="card" Padding="20,16">
                 <StackPanel Spacing="12">
-                    <Grid ColumnDefinitions="*,*,1.1*,Auto" ColumnSpacing="14">
+                    <Grid ColumnDefinitions="*,*,1.2*" ColumnSpacing="14">
                         <StackPanel>
                             <TextBlock Text="{l:T Hisobot_Dan, Katta=True}" Classes="yorliq" />
                             <CalendarDatePicker SelectedDate="{Binding Dan}" HorizontalAlignment="Stretch" MinHeight="44" CornerRadius="22" SelectedDateFormat="Custom" CustomDateFormatString="dd.MM.yyyy" />
@@ -53,10 +53,12 @@
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="{l:T Hisobot_Operator, Katta=True}" Classes="yorliq" />
                             <ComboBox ItemsSource="{Binding OperatorFiltri}" SelectedItem="{Binding TanlanganOperator}" HorizontalAlignment="Stretch" MinHeight="44" CornerRadius="22">
-                                <ComboBox.ItemTemplate><DataTemplate x:DataType="m:Foydalanuvchi"><TextBlock Text="{Binding ToliqIsm}" /></DataTemplate></ComboBox.ItemTemplate>
+                                <ComboBox.ItemTemplate><DataTemplate x:DataType="m:Foydalanuvchi"><TextBlock Text="{Binding ToliqIsm}" TextTrimming="CharacterEllipsis" /></DataTemplate></ComboBox.ItemTemplate>
                             </ComboBox>
                         </StackPanel>
-                        <StackPanel Grid.Column="3">
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
+                        <StackPanel>
                             <TextBlock Text="{l:T Hisobot_Guruhlash, Katta=True}" Classes="yorliq" />
                             <Border Classes="segmentYoli">
                                 <UniformGrid Columns="4" MinWidth="400">
@@ -67,56 +69,54 @@
                                 </UniformGrid>
                             </Border>
                         </StackPanel>
+                        <TextBlock Grid.Column="1" Text="{l:T Hisobot_KunlikIzoh}" Classes="izoh" VerticalAlignment="Bottom" Margin="0,0,0,12" TextWrapping="Wrap" />
                     </Grid>
-                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
+                    <WrapPanel ItemSpacing="8" LineSpacing="8">
                             <TextBlock Text="{l:T Hisobot_TezDavr}" Classes="izoh" FontSize="13" VerticalAlignment="Center" Margin="0,0,4,0" />
                             <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TezKecha}" Content="{l:T Hisobot_TezKecha}" Command="{Binding TezTanlaCommand}" CommandParameter="kecha" />
                             <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding Tez7}" Content="{l:T Hisobot_Tez7Kun}" Command="{Binding TezTanlaCommand}" CommandParameter="hafta" />
                             <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TezOy}" Content="{l:T Hisobot_TezShuOy}" Command="{Binding TezTanlaCommand}" CommandParameter="oy" />
                             <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TezOtgan}" Content="{l:T Hisobot_TezOtganOy}" Command="{Binding TezTanlaCommand}" CommandParameter="otganOy" />
-                        </StackPanel>
-                        <TextBlock Grid.Column="2" Text="{l:T Hisobot_KunlikIzoh}" Classes="izoh" VerticalAlignment="Center" />
-                    </Grid>
+                    </WrapPanel>
                 </StackPanel>
             </Border>
 
             <!-- KPI -->
-            <UniformGrid Columns="6" ColumnSpacing="14" RowSpacing="14">
-                <Border Classes="kpi kichik"><StackPanel Spacing="4"><TextBlock Text="{l:T Hisobot_KpiJamiSavdo, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiSavdo}" Classes="qiymat" /><TextBlock Text="{Binding JamiSavdoIzoh}" Classes="izoh" /></StackPanel></Border>
-                <Border Classes="kpi kichik"><StackPanel Spacing="4"><TextBlock Text="{l:T Hisobot_KpiLitr, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiLitr}" Classes="qiymat" /><TextBlock Text="{l:T Hisobot_KpiBarchaAparatlar}" Classes="izoh" /></StackPanel></Border>
+            <ctl:Moslashuvchan ElementEni="160" MaksUstun="4" ColumnSpacing="14" RowSpacing="14">
+                <Border Classes="kpi kichik"><StackPanel Spacing="4"><TextBlock Text="{l:T Hisobot_KpiJamiSavdo, Katta=True}" Classes="nom" /><Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding JamiSavdo}" Classes="qiymat" /></Viewbox><TextBlock Text="{Binding JamiSavdoIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
+                <Border Classes="kpi kichik"><StackPanel Spacing="4"><TextBlock Text="{l:T Hisobot_KpiLitr, Katta=True}" Classes="nom" /><Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding JamiLitr}" Classes="qiymat" /></Viewbox><TextBlock Text="{l:T Hisobot_KpiBarchaAparatlar}" Classes="izoh" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
                 <Border Classes="kpi kichik"><StackPanel Spacing="4">
                     <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="8" Height="8" Fill="#2F6BFF" VerticalAlignment="Center" /><TextBlock Text="{l:T Hisobot_KpiNaqd, Katta=True}" Classes="nom" /></StackPanel>
-                    <TextBlock Text="{Binding JamiNaqd}" Classes="qiymat" /><TextBlock Text="{Binding NaqdFoiz}" Classes="izoh" /></StackPanel></Border>
+                    <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding JamiNaqd}" Classes="qiymat" /></Viewbox><TextBlock Text="{Binding NaqdFoiz}" Classes="izoh" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
                 <Border Classes="kpi kichik"><StackPanel Spacing="4">
                     <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="8" Height="8" Fill="#19B5C9" VerticalAlignment="Center" /><TextBlock Text="{l:T Hisobot_KpiPlastik, Katta=True}" Classes="nom" /></StackPanel>
-                    <TextBlock Text="{Binding JamiPlastik}" Classes="qiymat" /><TextBlock Text="{Binding PlastikFoiz}" Classes="izoh" /></StackPanel></Border>
+                    <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding JamiPlastik}" Classes="qiymat" /></Viewbox><TextBlock Text="{Binding PlastikFoiz}" Classes="izoh" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
                 <Border Classes="kpi kichik"><StackPanel Spacing="4">
                     <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="8" Height="8" Fill="#7C5CFF" VerticalAlignment="Center" /><TextBlock Text="{l:T Hisobot_KpiDepozit, Katta=True}" Classes="nom" /></StackPanel>
-                    <TextBlock Text="{Binding JamiDepozit}" Classes="qiymat" /><TextBlock Text="{Binding DepozitFoiz}" Classes="izoh" /></StackPanel></Border>
+                    <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding JamiDepozit}" Classes="qiymat" /></Viewbox><TextBlock Text="{Binding DepozitFoiz}" Classes="izoh" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
                 <Border Classes="kpi kichik"><StackPanel Spacing="4">
                     <StackPanel Orientation="Horizontal" Spacing="6"><Ellipse Width="8" Height="8" Fill="#E8590C" VerticalAlignment="Center" /><TextBlock Text="{l:T Hisobot_KpiNasiya, Katta=True}" Classes="nom" /></StackPanel>
-                    <TextBlock Text="{Binding JamiNasiya}" Classes="qiymat" /><TextBlock Text="{Binding QaytganIzoh}" Classes="izoh" /></StackPanel></Border>
-                <Border Classes="kpi kichik"><StackPanel Spacing="4"><TextBlock Text="{l:T Hisobot_KpiXarajat, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiXarajat}" Classes="qiymat" /><TextBlock Text="{Binding XarajatIzoh}" Classes="izoh" /></StackPanel></Border>
-                <Border Classes="kpi kichik"><StackPanel Spacing="4"><TextBlock Text="{l:T Hisobot_KpiKamomat, Katta=True}" Classes="nom" /><TextBlock Text="{Binding JamiKamomat}" Classes="qiymat" Foreground="{DynamicResource Qizil}" /><TextBlock Text="{Binding OrtiqchaIzoh}" Classes="izoh" /></StackPanel></Border>
-            </UniformGrid>
+                    <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding JamiNasiya}" Classes="qiymat" /></Viewbox><TextBlock Text="{Binding QaytganIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
+                <Border Classes="kpi kichik"><StackPanel Spacing="4"><TextBlock Text="{l:T Hisobot_KpiXarajat, Katta=True}" Classes="nom" /><Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding JamiXarajat}" Classes="qiymat" /></Viewbox><TextBlock Text="{Binding XarajatIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
+                <Border Classes="kpi kichik"><StackPanel Spacing="4"><TextBlock Text="{l:T Hisobot_KpiKamomat, Katta=True}" Classes="nom" /><Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding JamiKamomat}" Classes="qiymat" Foreground="{DynamicResource Qizil}" /></Viewbox><TextBlock Text="{Binding OrtiqchaIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" /></StackPanel></Border>
+            </ctl:Moslashuvchan>
 
             <!-- Asosiy jadval -->
             <Border Classes="card" Padding="20,18">
                 <StackPanel Spacing="6">
                     <TextBlock Text="{Binding JadvalSarlavha}" Classes="kichikSarlavha" Margin="0,0,0,8" />
                     <Grid ColumnDefinitions="1.1*,1.4*,*,1.15*,1.1*,1.1*,*,*,1.05*,1.1*,*" ColumnSpacing="10" Margin="4,0">
-                        <TextBlock Text="{Binding GuruhSarlavha}" Classes="jadvalSarlavha" />
-                        <TextBlock Grid.Column="1" Text="{Binding IkkinchiSarlavha}" Classes="jadvalSarlavha" />
-                        <TextBlock Grid.Column="2" Text="{l:T Hisobot_ColLitr, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="3" Text="{l:T Hisobot_ColSavdo, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="4" Text="{l:T Hisobot_ColPlastik, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="5" Text="{l:T Hisobot_ColDepozit, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="6" Text="{l:T Hisobot_ColNasiya, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="7" Text="{l:T Hisobot_ColQaytgan, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="8" Text="{l:T Hisobot_ColXarajat, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="9" Text="{l:T Hisobot_ColNaqd, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="10" Text="{l:T Hisobot_ColFarq, Katta=True}" Classes="jadvalSarlavha ong" />
+                        <TextBlock Text="{Binding GuruhSarlavha}" Classes="jadvalSarlavha" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="1" Text="{Binding IkkinchiSarlavha}" Classes="jadvalSarlavha" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="2" Text="{l:T Hisobot_ColLitr, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="3" Text="{l:T Hisobot_ColSavdo, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="4" Text="{l:T Hisobot_ColPlastik, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="5" Text="{l:T Hisobot_ColDepozit, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="6" Text="{l:T Hisobot_ColNasiya, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="7" Text="{l:T Hisobot_ColQaytgan, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="8" Text="{l:T Hisobot_ColXarajat, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="9" Text="{l:T Hisobot_ColNaqd, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="10" Text="{l:T Hisobot_ColFarq, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
                     </Grid>
                     <TextBlock Text="{l:T Hisobot_Bosh}" Classes="izoh" Margin="4,12" IsVisible="{Binding Bosh}" />
                     <ItemsControl ItemsSource="{Binding Qatorlar}">
@@ -129,16 +129,16 @@
                                             <TextBlock Text="{Binding Izoh}" Classes="izoh" FontSize="12" IsVisible="{Binding IzohBor}" />
                                         </StackPanel>
                                         <TextBlock Grid.Column="1" Text="{Binding Ikkinchi}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Grid.Column="2" Text="{Binding Litr}" Classes="ong" />
-                                        <TextBlock Grid.Column="3" Text="{Binding Savdo}" Classes="ong" FontWeight="ExtraBold" />
-                                        <TextBlock Grid.Column="4" Text="{Binding Plastik}" Classes="ong" />
-                                        <TextBlock Grid.Column="5" Text="{Binding Depozit}" Classes="ong" />
-                                        <TextBlock Grid.Column="6" Text="{Binding Nasiya}" Classes="ong" />
-                                        <TextBlock Grid.Column="7" Text="{Binding Qaytgan}" Classes="ong" />
-                                        <TextBlock Grid.Column="8" Text="{Binding Xarajat}" Classes="ong" />
-                                        <TextBlock Grid.Column="9" Text="{Binding Naqd}" Classes="ong" />
-                                        <TextBlock Grid.Column="10" Text="{Binding Farq}" Classes="ong" FontWeight="ExtraBold"
-                                                   Classes.manfiy="{Binding FarqManfiy}" Classes.musbat="{Binding FarqNol}" Classes.kok="{Binding FarqMusbat}" />
+                                        <Viewbox Grid.Column="2" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Litr}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="3" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Savdo}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                                        <Viewbox Grid.Column="4" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Plastik}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="5" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Depozit}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="6" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Nasiya}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="7" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Qaytgan}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="8" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Xarajat}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="9" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Naqd}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="10" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Farq}" Classes="ong" FontWeight="ExtraBold"
+                                                   Classes.manfiy="{Binding FarqManfiy}" Classes.musbat="{Binding FarqNol}" Classes.kok="{Binding FarqMusbat}" /></Viewbox>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -147,16 +147,16 @@
                     <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,1,0,0" Padding="4,12,4,0" IsVisible="{Binding JamiBor}">
                         <Grid Classes="hisobotQator" ColumnDefinitions="1.1*,1.4*,*,1.15*,1.1*,1.1*,*,*,1.05*,1.1*,*" ColumnSpacing="10" DataContext="{Binding JamiQator}" x:DataType="vm:HisobotQatori">
                             <TextBlock Text="{l:T Jami}" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="2" Text="{Binding Litr}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="3" Text="{Binding Savdo}" Classes="ong" FontWeight="ExtraBold" Foreground="{DynamicResource ChiziqliMatn}" />
-                            <TextBlock Grid.Column="4" Text="{Binding Plastik}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="5" Text="{Binding Depozit}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="6" Text="{Binding Nasiya}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="7" Text="{Binding Qaytgan}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="8" Text="{Binding Xarajat}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="9" Text="{Binding Naqd}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="10" Text="{Binding Farq}" Classes="ong" FontWeight="ExtraBold"
-                                       Classes.manfiy="{Binding FarqManfiy}" Classes.musbat="{Binding FarqNol}" Classes.kok="{Binding FarqMusbat}" />
+                            <Viewbox Grid.Column="2" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Litr}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="3" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Savdo}" Classes="ong" FontWeight="ExtraBold" Foreground="{DynamicResource ChiziqliMatn}" /></Viewbox>
+                            <Viewbox Grid.Column="4" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Plastik}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="5" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Depozit}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="6" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Nasiya}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="7" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Qaytgan}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="8" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Xarajat}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="9" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Naqd}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="10" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Farq}" Classes="ong" FontWeight="ExtraBold"
+                                       Classes.manfiy="{Binding FarqManfiy}" Classes.musbat="{Binding FarqNol}" Classes.kok="{Binding FarqMusbat}" /></Viewbox>
                         </Grid>
                     </Border>
                 </StackPanel>
@@ -171,27 +171,27 @@
                     </Grid>
                     <Border Classes="malumot" Padding="14,8" IsVisible="{Binding OperatorTanlangan}" Margin="0,0,0,6"><TextBlock Text="{l:T Hisobot_BakOperatorgaBogliqEmas}" FontSize="12.5" /></Border>
                     <Grid ColumnDefinitions="1.6*,*,*,*,*,*" ColumnSpacing="10" Margin="4,0">
-                        <TextBlock Text="{l:T Hisobot_ColAparat, Katta=True}" Classes="jadvalSarlavha" />
-                        <TextBlock Grid.Column="1" Text="{l:T Hisobot_ColBakBoshida, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="2" Text="{l:T Hisobot_ColKirim, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="3" Text="{l:T Hisobot_ColSotildi, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="4" Text="{l:T Hisobot_ColBakOxirida, Katta=True}" Classes="jadvalSarlavha ong" />
-                        <TextBlock Grid.Column="5" Text="{l:T Hisobot_ColSavdo, Katta=True}" Classes="jadvalSarlavha ong" />
+                        <TextBlock Text="{l:T Hisobot_ColAparat, Katta=True}" Classes="jadvalSarlavha" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="1" Text="{l:T Hisobot_ColBakBoshida, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="2" Text="{l:T Hisobot_ColKirim, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="3" Text="{l:T Hisobot_ColSotildi, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="4" Text="{l:T Hisobot_ColBakOxirida, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="5" Text="{l:T Hisobot_ColSavdo, Katta=True}" Classes="jadvalSarlavha ong" TextTrimming="CharacterEllipsis" />
                     </Grid>
                     <ItemsControl ItemsSource="{Binding Aparatlar}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:HisobotAparatQatori">
                                 <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,1,0,0" Padding="4,10">
                                     <Grid Classes="hisobotQator" ColumnDefinitions="1.6*,*,*,*,*,*" ColumnSpacing="10">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="{Binding Nomi}" FontWeight="ExtraBold" />
-                                            <Border Classes="yoqilgi" Background="{Binding Yoqilgi.Fon}"><TextBlock Text="{Binding Yoqilgi.Nomi}" Foreground="{Binding Yoqilgi.Matn}" /></Border>
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="1" Text="{Binding Boshida}" Classes="ong" />
-                                        <TextBlock Grid.Column="2" Text="{Binding Kirim}" Classes="ong" Foreground="{DynamicResource Yashil}" FontWeight="SemiBold" />
-                                        <TextBlock Grid.Column="3" Text="{Binding Sotildi}" Classes="ong" />
-                                        <TextBlock Grid.Column="4" Text="{Binding Oxirida}" Classes="ong" FontWeight="ExtraBold" Classes.manfiy="{Binding OxiriManfiy}" />
-                                        <TextBlock Grid.Column="5" Text="{Binding Savdo}" Classes="ong" />
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                            <TextBlock Text="{Binding Nomi}" FontWeight="ExtraBold" VerticalAlignment="Center" />
+                                            <Border Grid.Column="1" Classes="yoqilgi" Background="{Binding Yoqilgi.Fon}" HorizontalAlignment="Left"><TextBlock Text="{Binding Yoqilgi.Nomi}" Foreground="{Binding Yoqilgi.Matn}" TextTrimming="CharacterEllipsis" /></Border>
+                                        </Grid>
+                                        <Viewbox Grid.Column="1" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Boshida}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="2" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Kirim}" Classes="ong" Foreground="{DynamicResource Yashil}" FontWeight="SemiBold" /></Viewbox>
+                                        <Viewbox Grid.Column="3" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Sotildi}" Classes="ong" /></Viewbox>
+                                        <Viewbox Grid.Column="4" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Oxirida}" Classes="ong" FontWeight="ExtraBold" Classes.manfiy="{Binding OxiriManfiy}" /></Viewbox>
+                                        <Viewbox Grid.Column="5" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Savdo}" Classes="ong" /></Viewbox>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
@@ -200,11 +200,11 @@
                     <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,1,0,0" Padding="4,12,4,0">
                         <Grid Classes="hisobotQator" ColumnDefinitions="1.6*,*,*,*,*,*" ColumnSpacing="10">
                             <TextBlock Text="{l:T Jami}" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="1" Text="{Binding ABoshida}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="2" Text="{Binding AKirim}" Classes="ong" FontWeight="ExtraBold" Foreground="{DynamicResource Yashil}" />
-                            <TextBlock Grid.Column="3" Text="{Binding ASotildi}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="4" Text="{Binding AOxirida}" Classes="ong" FontWeight="ExtraBold" />
-                            <TextBlock Grid.Column="5" Text="{Binding ASavdo}" Classes="ong" FontWeight="ExtraBold" Foreground="{DynamicResource ChiziqliMatn}" />
+                            <Viewbox Grid.Column="1" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding ABoshida}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="2" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding AKirim}" Classes="ong" FontWeight="ExtraBold" Foreground="{DynamicResource Yashil}" /></Viewbox>
+                            <Viewbox Grid.Column="3" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding ASotildi}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="4" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding AOxirida}" Classes="ong" FontWeight="ExtraBold" /></Viewbox>
+                            <Viewbox Grid.Column="5" StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding ASavdo}" Classes="ong" FontWeight="ExtraBold" Foreground="{DynamicResource ChiziqliMatn}" /></Viewbox>
                         </Grid>
                     </Border>
                 </StackPanel>

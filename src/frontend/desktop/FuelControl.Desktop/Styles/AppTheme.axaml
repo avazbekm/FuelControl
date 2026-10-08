@@ -112,7 +112,14 @@
         <Setter Property="CornerRadius" Value="32" />
         <Setter Property="Padding" Value="30" />
         <Setter Property="VerticalAlignment" Value="Center" />
+        <!-- Kichik ekranda oyna chetiga tegmasin; baland kontent ScrollViewer.dialogIchi ichida aylanadi -->
+        <Setter Property="Margin" Value="24" />
         <Setter Property="BoxShadow" Value="0 30 80 0 #4D14285A, 0 2 6 0 #1F14285A" />
+    </Style>
+    <!-- Dialog ichidagi aylantirish: aylantirish chizig'i dialog padding'iga tushadi, kontentni yopmaydi -->
+    <Style Selector="ScrollViewer.dialogIchi">
+        <Setter Property="Margin" Value="0,0,-22,0" />
+        <Setter Property="Padding" Value="0,0,22,0" />
     </Style>
     <Style Selector="Border.chiziq">
         <Setter Property="Height" Value="1" />

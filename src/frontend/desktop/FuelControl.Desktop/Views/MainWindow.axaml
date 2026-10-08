@@ -11,7 +11,7 @@
         x:DataType="vm:MainViewModel"
         Icon="/Assets/fuelcontrol.ico"
         Title="FuelControl"
-        Width="1400" Height="860" MinWidth="1180" MinHeight="700"
+        Width="1400" Height="860" MinWidth="1180" MinHeight="620"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Foreground="{DynamicResource Matn}"
@@ -60,7 +60,7 @@
 
             <!-- Suzib turgan shisha yon menyu (yig'iladigan) -->
             <Border Grid.Column="0" Classes="card" Width="{Binding MenyuKengligi}" Margin="20,20,0,20" Padding="14,18,14,14">
-                <DockPanel LastChildFill="False">
+                <DockPanel>
 
                     <!-- Logo + yig'ish tugmasi -->
                     <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,Auto" Margin="6,0,0,16">
@@ -78,52 +78,6 @@
                     <Button DockPanel.Dock="Top" Classes="ikon" Command="{Binding MenyuniYigCommand}" IsVisible="{Binding MenyuYigilgan}"
                             HorizontalAlignment="Center" Margin="0,0,0,10" ToolTip.Tip="{l:T MenyuniOch}">
                         <ctl:Ikon Nomi="chevronsRight" Olcham="18" />
-                    </Button>
-
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding BoshqaruvSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiBoshqaruv}" Command="{Binding SahifaniOchCommand}" CommandParameter="0" ToolTip.Tip="{l:T Boshqaruv}">
-                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="grid" Olcham="19" /><TextBlock Text="{l:T Boshqaruv}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
-                    </Button>
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding SavdoSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiSavdo}" Command="{Binding SahifaniOchCommand}" CommandParameter="1" ToolTip.Tip="{l:T Savdo}">
-                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="pump" Olcham="19" /><TextBlock Text="{l:T Savdo}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
-                    </Button>
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding SmenalarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiSmenalar}" Command="{Binding SahifaniOchCommand}" CommandParameter="2" ToolTip.Tip="{l:T Smenalar}">
-                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="clock" Olcham="19" /><TextBlock Text="{l:T Smenalar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
-                    </Button>
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding NasiyalarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiNasiyalar}" Command="{Binding SahifaniOchCommand}" CommandParameter="7" ToolTip.Tip="{l:T Nasiyalar}">
-                        <Panel>
-                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" IsVisible="{Binding MenyuOchiq}">
-                                <ctl:Ikon Nomi="book" Olcham="19" />
-                                <TextBlock Grid.Column="1" Text="{l:T Nasiyalar}" />
-                                <Border Grid.Column="2" Classes="menyuBelgi" Classes.faol="{Binding NasiyalarSahifasi}" IsVisible="{Binding MuddatiOtganBor}" ToolTip.Tip="{Binding MuddatiOtganIzoh}">
-                                    <TextBlock Text="{Binding MuddatiOtganSoni}" />
-                                </Border>
-                            </Grid>
-                            <Panel IsVisible="{Binding MenyuYigilgan}">
-                                <ctl:Ikon Nomi="book" Olcham="19" />
-                                <Border Width="9" Height="9" CornerRadius="5" Background="#D7262B" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-3,-5,0"
-                                        IsVisible="{Binding MuddatiOtganBor}" />
-                            </Panel>
-                        </Panel>
-                    </Button>
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding HisobotSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiHisobot}" Command="{Binding SahifaniOchCommand}" CommandParameter="3" ToolTip.Tip="{l:T Hisobotlar}">
-                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="file" Olcham="19" /><TextBlock Text="{l:T Hisobotlar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
-                    </Button>
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding OperatorlarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiOperatorlar}" Command="{Binding SahifaniOchCommand}" CommandParameter="4" ToolTip.Tip="{l:T Operatorlar}">
-                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="users" Olcham="19" /><TextBlock Text="{l:T Operatorlar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
-                    </Button>
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding AuditSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiAudit}" Command="{Binding SahifaniOchCommand}" CommandParameter="6" ToolTip.Tip="{l:T AuditJurnali}">
-                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="list" Olcham="19" /><TextBlock Text="{l:T AuditJurnali}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
-                    </Button>
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding SozlamalarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiSozlamalar}" Command="{Binding SahifaniOchCommand}" CommandParameter="5" ToolTip.Tip="{l:T Sozlamalar}">
-                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="gear" Olcham="19" /><TextBlock Text="{l:T Sozlamalar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
                     </Button>
 
                     <!-- Pastki qism: rejim + foydalanuvchi -->
@@ -183,6 +137,57 @@
                             </StackPanel>
                         </Panel>
                     </StackPanel>
+
+                    <!-- Bo'limlar: past ekranda (yoki yig'ilgan menyuda) sig'masa aylanadi, pastki qismni bosib ketmaydi -->
+                    <ScrollViewer HorizontalScrollBarVisibility="Disabled" Margin="-14,-6,-14,4">
+                        <StackPanel Margin="14,6,14,6">
+                        <Button Classes="nav" Classes.faol="{Binding BoshqaruvSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                                IsVisible="{Binding KoradiBoshqaruv}" Command="{Binding SahifaniOchCommand}" CommandParameter="0" ToolTip.Tip="{l:T Boshqaruv}">
+                            <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="grid" Olcham="19" /><TextBlock Text="{l:T Boshqaruv}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                        </Button>
+                        <Button Classes="nav" Classes.faol="{Binding SavdoSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                                IsVisible="{Binding KoradiSavdo}" Command="{Binding SahifaniOchCommand}" CommandParameter="1" ToolTip.Tip="{l:T Savdo}">
+                            <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="pump" Olcham="19" /><TextBlock Text="{l:T Savdo}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                        </Button>
+                        <Button Classes="nav" Classes.faol="{Binding SmenalarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                                IsVisible="{Binding KoradiSmenalar}" Command="{Binding SahifaniOchCommand}" CommandParameter="2" ToolTip.Tip="{l:T Smenalar}">
+                            <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="clock" Olcham="19" /><TextBlock Text="{l:T Smenalar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                        </Button>
+                        <Button Classes="nav" Classes.faol="{Binding NasiyalarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                                IsVisible="{Binding KoradiNasiyalar}" Command="{Binding SahifaniOchCommand}" CommandParameter="7" ToolTip.Tip="{l:T Nasiyalar}">
+                            <Panel>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" IsVisible="{Binding MenyuOchiq}">
+                                    <ctl:Ikon Nomi="book" Olcham="19" />
+                                    <TextBlock Grid.Column="1" Text="{l:T Nasiyalar}" />
+                                    <Border Grid.Column="2" Classes="menyuBelgi" Classes.faol="{Binding NasiyalarSahifasi}" IsVisible="{Binding MuddatiOtganBor}" ToolTip.Tip="{Binding MuddatiOtganIzoh}">
+                                        <TextBlock Text="{Binding MuddatiOtganSoni}" />
+                                    </Border>
+                                </Grid>
+                                <Panel IsVisible="{Binding MenyuYigilgan}">
+                                    <ctl:Ikon Nomi="book" Olcham="19" />
+                                    <Border Width="9" Height="9" CornerRadius="5" Background="#D7262B" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-3,-5,0"
+                                            IsVisible="{Binding MuddatiOtganBor}" />
+                                </Panel>
+                            </Panel>
+                        </Button>
+                        <Button Classes="nav" Classes.faol="{Binding HisobotSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                                IsVisible="{Binding KoradiHisobot}" Command="{Binding SahifaniOchCommand}" CommandParameter="3" ToolTip.Tip="{l:T Hisobotlar}">
+                            <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="file" Olcham="19" /><TextBlock Text="{l:T Hisobotlar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                        </Button>
+                        <Button Classes="nav" Classes.faol="{Binding OperatorlarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                                IsVisible="{Binding KoradiOperatorlar}" Command="{Binding SahifaniOchCommand}" CommandParameter="4" ToolTip.Tip="{l:T Operatorlar}">
+                            <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="users" Olcham="19" /><TextBlock Text="{l:T Operatorlar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                        </Button>
+                        <Button Classes="nav" Classes.faol="{Binding AuditSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                                IsVisible="{Binding KoradiAudit}" Command="{Binding SahifaniOchCommand}" CommandParameter="6" ToolTip.Tip="{l:T AuditJurnali}">
+                            <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="list" Olcham="19" /><TextBlock Text="{l:T AuditJurnali}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                        </Button>
+                        <Button Classes="nav" Classes.faol="{Binding SozlamalarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                                IsVisible="{Binding KoradiSozlamalar}" Command="{Binding SahifaniOchCommand}" CommandParameter="5" ToolTip.Tip="{l:T Sozlamalar}">
+                            <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="gear" Olcham="19" /><TextBlock Text="{l:T Sozlamalar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                        </Button>
+                        </StackPanel>
+                    </ScrollViewer>
                 </DockPanel>
             </Border>
 
@@ -208,6 +213,7 @@
         <!-- ============ Umumiy xabar (xato / ma'lumot) — eng ustida ============ -->
         <Border Classes="parda" IsVisible="{Binding BildirishOchiq}">
             <Border Classes="dialog" Width="460">
+                <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="16">
                     <StackPanel Orientation="Horizontal" Spacing="12">
                         <Border Width="38" Height="38" CornerRadius="19" Background="{DynamicResource BadgeQizilFon}" IsVisible="{Binding BildirishXato}">
@@ -221,6 +227,7 @@
                     <TextBlock Text="{Binding BildirishMatni}" TextWrapping="Wrap" FontSize="14" />
                     <Button Classes="primary" HorizontalAlignment="Right" MinWidth="120" Content="{l:T Yopish}" Command="{Binding BildirishniYopCommand}" IsDefault="True" />
                 </StackPanel>
+                </ScrollViewer>
             </Border>
         </Border>
     </Panel>

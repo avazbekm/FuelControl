@@ -27,9 +27,9 @@
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="28,22,28,28" Spacing="18">
-            <Grid ColumnDefinitions="*,Auto">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                 <StackPanel Spacing="6">
-                    <TextBlock Text="{l:T Boshqaruv_Sarlavha}" Classes="sarlavha" FontSize="28" />
+                    <TextBlock Text="{l:T Boshqaruv_Sarlavha}" Classes="sarlavha" FontSize="28" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding Sana}" Classes="izoh" FontSize="13" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
@@ -43,36 +43,36 @@
             </Grid>
 
             <!-- KPI -->
-            <UniformGrid Columns="4" ColumnSpacing="18">
+            <ctl:Moslashuvchan ElementEni="190" MaksUstun="4" ColumnSpacing="18" RowSpacing="18">
                 <Border Classes="kpi">
                     <StackPanel Spacing="6">
                         <TextBlock Text="{l:T Boshqaruv_OxirgiSmenaSavdosi, Katta=True}" Classes="nom" />
-                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OxirgiSavdo}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
-                        <TextBlock Text="{Binding OxirgiIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
+                        <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OxirgiSavdo}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel></Viewbox>
+                        <TextBlock Text="{Binding OxirgiIzoh}" Classes="izoh" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
                 <Border Classes="kpi">
                     <StackPanel Spacing="6">
                         <TextBlock Text="{l:T Boshqaruv_OySavdo, Katta=True}" Classes="nom" />
-                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OySavdo}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
-                        <TextBlock Text="{Binding OyIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
+                        <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OySavdo}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel></Viewbox>
+                        <TextBlock Text="{Binding OyIzoh}" Classes="izoh" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
                 <Border Classes="kpi">
                     <StackPanel Spacing="6">
                         <TextBlock Text="{l:T ShuOyKamomat, Katta=True}" Classes="nom" />
-                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OyKamomat}" FontSize="28" FontWeight="ExtraBold" Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /><TextBlock Text=" " Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /></StackPanel>
-                        <TextBlock Text="{Binding OrtiqchaIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
+                        <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OyKamomat}" FontSize="28" FontWeight="ExtraBold" Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /><TextBlock Text=" " Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /></StackPanel></Viewbox>
+                        <TextBlock Text="{Binding OrtiqchaIzoh}" Classes="izoh" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
                 <Border Classes="kpi">
                     <StackPanel Spacing="6">
                         <TextBlock Text="{l:T Boshqaruv_NasiyaQarzdorligi, Katta=True}" Classes="nom" />
-                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding JamiQarzdorlik}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
+                        <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><StackPanel Orientation="Horizontal"><TextBlock Text="{Binding JamiQarzdorlik}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel></Viewbox>
                         <TextBlock Text="{Binding OtganIzoh}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource Qizil}" TextTrimming="CharacterEllipsis" IsVisible="{Binding OtganBor}" />
                     </StackPanel>
                 </Border>
-            </UniformGrid>
+            </ctl:Moslashuvchan>
 
             <!-- Joriy smena + baklar -->
             <Grid ColumnDefinitions="*,340" ColumnSpacing="18">
@@ -82,34 +82,34 @@
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                                 <Border Classes="avatar" Width="42" Height="42"><TextBlock Text="{Binding JoriyHarflar}" FontSize="14" /></Border>
                                 <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" Spacing="10">
-                                        <TextBlock Text="{Binding JoriySarlavha}" FontSize="16" FontWeight="ExtraBold" VerticalAlignment="Center" />
-                                        <Border Classes="badge yashil"><TextBlock Text="{l:T Boshqaruv_Smenada}" /></Border>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding JoriyIzoh}" Classes="izoh" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <TextBlock Text="{Binding JoriySarlavha}" FontSize="16" FontWeight="ExtraBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        <Border Grid.Column="1" Classes="badge yashil" VerticalAlignment="Center"><TextBlock Text="{l:T Boshqaruv_Smenada}" /></Border>
+                                    </Grid>
+                                    <TextBlock Text="{Binding JoriyIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Grid>
-                            <UniformGrid Columns="4" ColumnSpacing="12" RowSpacing="12">
+                            <ctl:Moslashuvchan ElementEni="150" MaksUstun="3">
                                 <Border Classes="miniKpi"><StackPanel Spacing="3"><TextBlock Text="{l:T Boshqaruv_QaytimPuli, Katta=True}" Classes="yorliq" Margin="0" FontSize="10.5" TextWrapping="Wrap" /><TextBlock Text="{Binding JQaytim}" FontSize="17" FontWeight="ExtraBold" /></StackPanel></Border>
                                 <Border Classes="miniKpi"><StackPanel Spacing="3"><TextBlock Text="{l:T Boshqaruv_TerminalOchishda, Katta=True}" Classes="yorliq" Margin="0" FontSize="10.5" TextWrapping="Wrap" /><TextBlock Text="{Binding JTerminal}" FontSize="17" FontWeight="ExtraBold" /></StackPanel></Border>
                                 <Border Classes="miniKpi"><StackPanel Spacing="3"><TextBlock Text="{l:T Boshqaruv_DepozitOchishda, Katta=True}" Classes="yorliq" Margin="0" FontSize="10.5" TextWrapping="Wrap" /><TextBlock Text="{Binding JDepozit}" FontSize="17" FontWeight="ExtraBold" /></StackPanel></Border>
                                 <Border Classes="miniKpi"><StackPanel Spacing="3"><TextBlock Text="{Binding JNasiyaYorliq}" Classes="yorliq" Margin="0" FontSize="10.5" TextWrapping="Wrap" /><TextBlock Text="{Binding JNasiya}" FontSize="17" FontWeight="ExtraBold" /></StackPanel></Border>
                                 <Border Classes="miniKpi"><StackPanel Spacing="3"><TextBlock Text="{l:T Boshqaruv_QaytganNasiya, Katta=True}" Classes="yorliq" Margin="0" FontSize="10.5" TextWrapping="Wrap" /><TextBlock Text="{Binding JQaytgan}" FontSize="17" FontWeight="ExtraBold" Foreground="{DynamicResource Yashil}" /></StackPanel></Border>
                                 <Border Classes="miniKpi"><StackPanel Spacing="3"><TextBlock Text="{Binding JXarajatYorliq}" Classes="yorliq" Margin="0" FontSize="10.5" TextWrapping="Wrap" /><TextBlock Text="{Binding JXarajat}" FontSize="17" FontWeight="ExtraBold" /></StackPanel></Border>
-                            </UniformGrid>
-                            <Border Classes="malumot"><TextBlock Text="{l:T Boshqaruv_OchiqSmenaIzoh}" /></Border>
+                            </ctl:Moslashuvchan>
+                            <Border Classes="malumot"><TextBlock Text="{l:T Boshqaruv_OchiqSmenaIzoh}" TextWrapping="Wrap" /></Border>
                         </StackPanel>
 
                         <StackPanel Spacing="14" IsVisible="{Binding JoriyYoq}">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
+                            <WrapPanel ItemSpacing="10" LineSpacing="6">
                                 <TextBlock Text="{l:T Boshqaruv_SmenaYopiq}" FontSize="16" FontWeight="ExtraBold" VerticalAlignment="Center" />
-                                <Border Classes="badge kulrang"><TextBlock Text="{l:T Boshqaruv_Yopiq}" /></Border>
-                            </StackPanel>
+                                <Border Classes="badge kulrang" VerticalAlignment="Center"><TextBlock Text="{l:T Boshqaruv_Yopiq}" /></Border>
+                            </WrapPanel>
                             <TextBlock Text="{l:T Boshqaruv_OchiqSmenaYoq}" Classes="izoh" FontSize="13" TextWrapping="Wrap" />
                             <Border Classes="ogoh" IsVisible="{Binding AparatYoq}">
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <ctl:Ikon Nomi="alert" Olcham="17" Rang="{DynamicResource OgohMatn}" VerticalAlignment="Top" Margin="0,1,0,0" />
-                                    <TextBlock Grid.Column="1" Text="{l:T Bosh_AparatYoq}" />
+                                    <TextBlock Grid.Column="1" Text="{l:T Bosh_AparatYoq}" TextWrapping="Wrap" />
                                     <Button Grid.Column="2" VerticalAlignment="Center" IsVisible="{Binding SozlamalarOchaOladi}" Command="{Binding SozlamalargaOtCommand}">
                                         <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="gear" Olcham="15" /><TextBlock Text="{l:T Sozlamalar}" /></StackPanel>
                                     </Button>
@@ -117,8 +117,8 @@
                             </Border>
                             <Border Classes="ichki">
                                 <StackPanel Spacing="3">
-                                    <TextBlock Text="{Binding OxirgiSmenaSarlavha}" FontWeight="Bold" />
-                                    <TextBlock Text="{Binding OxirgiYopildi}" Classes="izoh" />
+                                    <TextBlock Text="{Binding OxirgiSmenaSarlavha}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding OxirgiYopildi}" Classes="izoh" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </Border>
                             <Button Classes="success" HorizontalAlignment="Left" IsVisible="{Binding SmenaOchishKorinsin}" Command="{Binding SavdogaOtCommand}">
@@ -130,9 +130,9 @@
 
                 <Border Grid.Column="1" Classes="card" Padding="20,18">
                     <StackPanel Spacing="10">
-                        <Grid ColumnDefinitions="*,Auto">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                             <TextBlock Text="{l:T Boshqaruv_BaklarQoldigi}" Classes="kichikSarlavha" />
-                            <TextBlock Grid.Column="1" Text="{Binding BakHolati}" Classes="izoh" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding BakHolati}" Classes="izoh" VerticalAlignment="Center" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
                         </Grid>
                         <ItemsControl ItemsSource="{Binding Baklar}">
                             <ItemsControl.ItemTemplate>
@@ -140,8 +140,8 @@
                                     <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,0,0,1" Padding="0,9">
                                         <Grid ColumnDefinitions="30,Auto,*,Auto" ColumnSpacing="10">
                                             <TextBlock Text="{Binding Raqam}" FontWeight="ExtraBold" VerticalAlignment="Center" />
-                                            <Border Grid.Column="1" Classes="yoqilgi" Background="{Binding Yoqilgi.Fon}"><TextBlock Text="{Binding Yoqilgi.Nomi}" Foreground="{Binding Yoqilgi.Matn}" /></Border>
-                                            <TextBlock Grid.Column="2" Text="{Binding Kirim}" Classes="izoh" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            <Border Grid.Column="1" Classes="yoqilgi" MaxWidth="120" Background="{Binding Yoqilgi.Fon}"><TextBlock Text="{Binding Yoqilgi.Nomi}" Foreground="{Binding Yoqilgi.Matn}" TextTrimming="CharacterEllipsis" /></Border>
+                                            <TextBlock Grid.Column="2" Text="{Binding Kirim}" Classes="izoh" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Grid.Column="3" Text="{Binding Qoldiq}" FontWeight="ExtraBold" FontSize="15" VerticalAlignment="Center" Classes.manfiy="{Binding Manfiy}" />
                                         </Grid>
                                     </Border>
@@ -159,8 +159,8 @@
             <Grid ColumnDefinitions="*,340" ColumnSpacing="18">
                 <Border Classes="card" Padding="20,18">
                     <StackPanel Spacing="12">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="{l:T Boshqaruv_OxirgiSmenalarSavdosi}" Classes="kichikSarlavha" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <TextBlock Text="{l:T Boshqaruv_OxirgiSmenalarSavdosi}" Classes="kichikSarlavha" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{l:T Boshqaruv_MillionSom}" Classes="izoh" />
                         </Grid>
                         <ItemsControl ItemsSource="{Binding Ustunlar}" Height="210" Margin="0,8,0,0">
@@ -191,7 +191,7 @@
                                     <StackPanel Spacing="7" Margin="0,0,0,14">
                                         <Grid ColumnDefinitions="Auto,*,Auto,44" ColumnSpacing="8">
                                             <Ellipse Width="9" Height="9" Fill="{Binding Rang}" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Nomi}" FontWeight="SemiBold" FontSize="13.5" />
+                                            <TextBlock Grid.Column="1" Text="{Binding Nomi}" FontWeight="SemiBold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Grid.Column="2" Text="{Binding Summa}" FontWeight="ExtraBold" FontSize="13.5" />
                                             <TextBlock Grid.Column="3" Text="{Binding Foiz}" Classes="izoh" HorizontalAlignment="Right" />
                                         </Grid>
@@ -207,8 +207,8 @@
             <!-- Oxirgi yopilgan smenalar -->
             <Border Classes="card" Padding="20,18">
                 <StackPanel Spacing="8">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="{l:T Boshqaruv_OxirgiYopilganSmenalar}" Classes="kichikSarlavha" VerticalAlignment="Center" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <TextBlock Text="{l:T Boshqaruv_OxirgiYopilganSmenalar}" Classes="kichikSarlavha" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         <Button Grid.Column="1" Classes="link" FontSize="13.5" FontWeight="SemiBold" Content="{l:T Boshqaruv_BarchaSmenalar}"
                                 IsVisible="{Binding SmenalarniKoradi}" Command="{Binding BarchaSmenalarCommand}" />
                     </Grid>
@@ -226,8 +226,8 @@
                                 <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,1,0,0" Padding="4,11">
                                     <Grid ColumnDefinitions="80,*,*,120,140,180" ColumnSpacing="12">
                                         <TextBlock Text="{Binding Raqam}" FontWeight="ExtraBold" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="1" Text="{Binding S.OperatorIsmi}" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="2" Text="{Binding Vaqt}" Foreground="{DynamicResource MatnYumshoq}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding S.OperatorIsmi}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Vaqt}" Foreground="{DynamicResource MatnYumshoq}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Grid.Column="3" Text="{Binding Litr}" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="4" Text="{Binding Savdo}" FontWeight="ExtraBold" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                         <Border Grid.Column="5" Classes="badge" ctl:Klass.Nomi="{Binding FarqKlassi}" HorizontalAlignment="Right"><TextBlock Text="{Binding FarqMatn}" /></Border>

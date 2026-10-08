@@ -30,6 +30,7 @@
         <!-- ===================== Nasiya yozish ===================== -->
         <Border Classes="parda" DataContext="{Binding NasiyaDialog}" x:DataType="vm:NasiyaDialogVM" IsVisible="{Binding Ochiq}">
             <Border Classes="dialog smena">
+                <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                         <Border Classes="ikonDoira" Background="{DynamicResource BadgeOlovFon}">
@@ -71,8 +72,8 @@
                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="8,6">
                                                 <Border Classes="avatar" Width="32" Height="32"><TextBlock Text="{Binding Harflar}" FontSize="11.5" /></Border>
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                                    <TextBlock Text="{Binding M.MijozIsmi}" FontWeight="Bold" FontSize="13.5" />
-                                                    <TextBlock Text="{Binding Izoh}" Classes="izoh" />
+                                                    <TextBlock Text="{Binding M.MijozIsmi}" FontWeight="Bold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Izoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
                                                 <Border Grid.Column="2" Classes="badge" ctl:Klass.Nomi="{Binding QarzKlassi}" VerticalAlignment="Center"><TextBlock Text="{Binding Qarz}" /></Border>
                                             </Grid>
@@ -112,12 +113,14 @@
                         <Button Classes="primary" MinWidth="110" Content="{l:T Saqlash}" Command="{Binding SaqlaCommand}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
         </Border>
 
         <!-- ===================== Qarz qaytdi ===================== -->
         <Border Classes="parda" DataContext="{Binding QaytishDialog}" x:DataType="vm:QaytishDialogVM" IsVisible="{Binding Ochiq}">
             <Border Classes="dialog smena">
+                <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                         <Border Classes="ikonDoira" Background="{DynamicResource BadgeYashilFon}">
@@ -145,8 +148,8 @@
                                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                                 <Border Classes="avatar" Width="34" Height="34"><TextBlock Text="{Binding Harflar}" FontSize="12" /></Border>
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                                    <TextBlock Text="{Binding N.MijozIsmi}" FontWeight="Bold" />
-                                                    <TextBlock Text="{Binding Izoh}" Classes="izoh" />
+                                                    <TextBlock Text="{Binding N.MijozIsmi}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                                    <TextBlock Text="{Binding Izoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
                                                 </StackPanel>
                                                 <TextBlock Grid.Column="2" Text="{Binding Qoldiq}" FontWeight="ExtraBold" FontSize="15" VerticalAlignment="Center" />
                                             </Grid>
@@ -164,11 +167,11 @@
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                                     <Border Classes="avatar" Width="40" Height="40"><TextBlock Text="{Binding Harflar}" FontSize="13" /></Border>
                                     <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Tanlangan.MijozIsmi}" FontWeight="ExtraBold" FontSize="15" />
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock Text="{Binding Tanlangan.MijozIsmi}" FontWeight="ExtraBold" FontSize="15" TextTrimming="CharacterEllipsis" />
+                                        <WrapPanel ItemSpacing="6" LineSpacing="4">
                                             <TextBlock Text="{Binding TelefonMatn}" Classes="izoh" VerticalAlignment="Center" />
                                             <Border Classes="davlatRaqam"><TextBlock Text="{Binding Tanlangan.MashinaRaqami}" /></Border>
-                                        </StackPanel>
+                                        </WrapPanel>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                         <Border Classes="badge" Classes.qizil="{Binding MuddatOtgan}" Classes.kok="{Binding !MuddatOtgan}"><TextBlock Text="{Binding KunBelgi}" /></Border>
@@ -176,12 +179,12 @@
                                     </StackPanel>
                                 </Grid>
                                 <UniformGrid Columns="4" ColumnSpacing="8">
-                                    <Border Classes="miniTile"><StackPanel Spacing="2"><TextBlock Text="{l:T Nasiya_Qarz, Katta=True}" Classes="yorliq" Margin="0" FontSize="10" /><TextBlock Text="{Binding Qarz}" FontWeight="ExtraBold" FontSize="15" /></StackPanel></Border>
-                                    <Border Classes="miniTile"><StackPanel Spacing="2"><TextBlock Text="{l:T Nasiya_Qaytgan, Katta=True}" Classes="yorliq" Margin="0" FontSize="10" /><TextBlock Text="{Binding Qaytgan}" FontWeight="ExtraBold" FontSize="15" /></StackPanel></Border>
-                                    <Border Classes="miniTile"><StackPanel Spacing="2"><TextBlock Text="{l:T Nasiya_Qoldiq, Katta=True}" Classes="yorliq" Margin="0" FontSize="10" /><TextBlock Text="{Binding Qoldiq}" FontWeight="ExtraBold" FontSize="15" /></StackPanel></Border>
+                                    <Border Classes="miniTile"><StackPanel Spacing="2"><TextBlock Text="{l:T Nasiya_Qarz, Katta=True}" Classes="yorliq" Margin="0" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" /><Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding Qarz}" FontWeight="ExtraBold" FontSize="15" /></Viewbox></StackPanel></Border>
+                                    <Border Classes="miniTile"><StackPanel Spacing="2"><TextBlock Text="{l:T Nasiya_Qaytgan, Katta=True}" Classes="yorliq" Margin="0" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" /><Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding Qaytgan}" FontWeight="ExtraBold" FontSize="15" /></Viewbox></StackPanel></Border>
+                                    <Border Classes="miniTile"><StackPanel Spacing="2"><TextBlock Text="{l:T Nasiya_Qoldiq, Katta=True}" Classes="yorliq" Margin="0" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" /><Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding Qoldiq}" FontWeight="ExtraBold" FontSize="15" /></Viewbox></StackPanel></Border>
                                     <Border Classes="miniTile" Classes.otgan="{Binding MuddatOtgan}">
                                         <Border.Styles><Style Selector="Border.miniTile.otgan"><Setter Property="Background" Value="{DynamicResource KamomatFon}" /></Style></Border.Styles>
-                                        <StackPanel Spacing="2"><TextBlock Text="{l:T Nasiya_MuddatYorliq, Katta=True}" Classes="yorliq" Margin="0" FontSize="10" /><TextBlock Text="{Binding MuddatMatn}" FontWeight="ExtraBold" FontSize="15" Classes.manfiy="{Binding MuddatOtgan}" /></StackPanel>
+                                        <StackPanel Spacing="2"><TextBlock Text="{l:T Nasiya_MuddatYorliq, Katta=True}" Classes="yorliq" Margin="0" FontSize="10" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" /><Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding MuddatMatn}" FontWeight="ExtraBold" FontSize="15" Classes.manfiy="{Binding MuddatOtgan}" /></Viewbox></StackPanel>
                                     </Border>
                                 </UniformGrid>
                                 <TextBlock Text="{Binding YozilganSatr}" Classes="izoh" TextWrapping="Wrap" />
@@ -224,12 +227,14 @@
                         <Button Classes="primary" MinWidth="110" Content="{l:T Saqlash}" Command="{Binding SaqlaCommand}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
         </Border>
 
         <!-- ===================== Xarajat yozish ===================== -->
         <Border Classes="parda" DataContext="{Binding XarajatDialog}" x:DataType="vm:XarajatDialogVM" IsVisible="{Binding Ochiq}">
             <Border Classes="dialog smena">
+                <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                         <Border Classes="ikonDoira" Background="{DynamicResource BadgeSariqFon}">
@@ -270,12 +275,14 @@
                         <Button Classes="primary" MinWidth="110" Content="{l:T Saqlash}" Command="{Binding SaqlaCommand}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
         </Border>
 
         <!-- ===================== Bakka kirim ===================== -->
         <Border Classes="parda" DataContext="{Binding BakDialog}" x:DataType="vm:BakKirimDialogVM" IsVisible="{Binding Ochiq}">
             <Border Classes="dialog smena">
+                <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                         <Border Classes="ikonDoira" Background="{DynamicResource BadgeYashilFon}">
@@ -332,12 +339,14 @@
                         <Button Classes="success" Content="{l:T Bak_KirimniSaqlash}" Command="{Binding SaqlaCommand}" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
         </Border>
 
         <!-- ===================== Narx o'zgarishi ===================== -->
         <Border Classes="parda" DataContext="{Binding NarxDialog}" x:DataType="vm:NarxDialogVM" IsVisible="{Binding Ochiq}">
             <Border Classes="dialog smena" Width="620">
+                <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                         <Border Classes="ikonDoira" Background="{DynamicResource BadgeKokFon}">
@@ -377,13 +386,13 @@
                                 <DataTemplate x:DataType="vm:NarxAparatQatori">
                                     <Border Classes="ichki" Margin="0,0,0,10" Padding="16,14">
                                         <StackPanel Spacing="8">
-                                            <Grid ColumnDefinitions="Auto,Auto,*,220" ColumnSpacing="10">
+                                            <Grid ColumnDefinitions="Auto,*,Auto,190" ColumnSpacing="10">
                                                 <TextBlock Text="{Binding Nomi}" FontSize="15" FontWeight="ExtraBold" VerticalAlignment="Center" />
-                                                <Border Grid.Column="1" Classes="yoqilgi" Background="{Binding Yoqilgi.Fon}">
-                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <Border Grid.Column="1" Classes="yoqilgi" Background="{Binding Yoqilgi.Fon}" HorizontalAlignment="Left">
+                                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
                                                         <Ellipse Width="7" Height="7" Fill="{Binding Yoqilgi.Nuqta}" VerticalAlignment="Center" />
-                                                        <TextBlock Text="{Binding Yoqilgi.Nomi}" Foreground="{Binding Yoqilgi.Matn}" />
-                                                    </StackPanel>
+                                                        <TextBlock Grid.Column="1" Text="{Binding Yoqilgi.Nomi}" Foreground="{Binding Yoqilgi.Matn}" TextTrimming="CharacterEllipsis" />
+                                                    </Grid>
                                                 </Border>
                                                 <StackPanel Grid.Column="2" Spacing="1" VerticalAlignment="Center" HorizontalAlignment="Right">
                                                     <TextBlock Text="{Binding OldingiYorliq}" Classes="izoh" FontSize="12" />
@@ -391,7 +400,7 @@
                                                 </StackPanel>
                                                 <TextBox Grid.Column="3" Classes="pult" Classes.xato="{Binding Xato}" Text="{Binding Qiymat}" PlaceholderText="0.00" ctl:EnterTartib.Guruh="narx" />
                                             </Grid>
-                                            <TextBlock Text="{Binding Izoh}" FontSize="12.5" Foreground="{DynamicResource MatnYumshoq}" Classes.xatoMatn="{Binding Xato}" />
+                                            <TextBlock Text="{Binding Izoh}" FontSize="12.5" Foreground="{DynamicResource MatnYumshoq}" Classes.xatoMatn="{Binding Xato}" TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -415,12 +424,14 @@
                         <Button Classes="primary" Content="{l:T Narx_Saqlash}" Command="{Binding SaqlaCommand}" ctl:EnterTartib.Guruh="narx" />
                     </StackPanel>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
         </Border>
 
         <!-- ===================== Tasdiq ===================== -->
         <Border Classes="parda" IsVisible="{Binding TasdiqOchiq}">
             <Border Classes="dialog" Width="460">
+                <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="16">
                     <TextBlock Classes="sarlavha" FontSize="20" Text="{Binding TasdiqSarlavha}" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding TasdiqMatni}" TextWrapping="Wrap" FontSize="14" LineHeight="21" />
@@ -429,6 +440,7 @@
                         <Button Classes="primary" Classes.danger="{Binding TasdiqXavfli}" Content="{Binding TasdiqTugma}" Command="{Binding TasdiqJavobCommand}" CommandParameter="1" IsDefault="True" />
                     </StackPanel>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
         </Border>
     </Panel>
