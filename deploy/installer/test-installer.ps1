@@ -24,9 +24,10 @@
 .PARAMETER SkipTunnel
     O'rnatuvchi cloudflared'siz yig'ilgan bo'lsa (build.ps1 -SkipCloudflared), tunnel sinovini o'tkazib yuboradi.
 .PARAMETER OldSetup
-    Avvalgi versiya o'rnatuvchisi (masalan, Output\FuelControl-Setup-0.0.1.exe). Berilsa, mijoz qurilmasidagi reja sinaladi:
-    eski versiyani o'rnatish -> o'chirish (ma'lumot papkasi SAQLANADI) -> yangisini shu papkaga o'rnatish (eski baza qoladi,
-    yangi parol e'tiborga olinmaydi) -> ma'lumot papkasini o'chirib toza o'rnatish (bazada faqat admin).
+    Avvalgi versiya o'rnatuvchisi (joriy API shaklidagi reliz, >= 0.1.0; masalan, Output\FuelControl-Setup-0.1.0.exe). Berilsa, mijoz
+    qurilmasidagi reja sinaladi: eski versiya o'rnatiladi va unda ma'lumot yaratiladi (yoqilg'i, aparat, operator, nasiya, yopilgan smena)
+    -> o'chiriladi (ma'lumot papkasi SAQLANADI) -> yangisi /ADMINPAROL'siz o'rnatiladi (eski parol, operator va yaratilgan ma'lumot joyida,
+    desktop sozlama.json va yorliqlar to'g'ri) -> /ADMINPAROL berilsa ham e'tiborga olinmaydi -> ma'lumot papkasi o'chirilib toza o'rnatiladi.
 .PARAMETER KeepFiles
     Muvaffaqiyatli tugaganda ham ish papkasini o'chirmaydi.
 
@@ -88,13 +89,21 @@ function Start-Api([string] $app, [int] $port) {
 # Faqat shu sinov ishga tushirgan jarayon to'xtatiladi (boshqa API'larga tegilmaydi).
 function Stop-Api { if ($script:apiProc -and -not $script:apiProc.HasExited) { Stop-Process -Id $script:apiProc.Id -Force; $script:apiProc.WaitForExit(10000) | Out-Null }; $script:apiProc = $null }
 
-# JSON massiv elementlari soni. Invoke-RestMethod bo'sh massivni $null qilib qaytaradi va @($null).Count = 1 bo'ladi, shuning uchun xom matn parse qilinadi.
-function Count-Json([int] $port, [string] $token, [string] $path) {
-    @((Invoke-WebRequest "http://127.0.0.1:$port$path" -Headers @{ Authorization = "Bearer $token" } -UseBasicParsing).Content | ConvertFrom-Json).Count
+# GET -> JSON obyektlar (massiv elementlari alohida, bo'sh massiv - hech narsa). Invoke-RestMethod bo'sh massivni $null qilib qaytaradi va
+# @($null).Count = 1 bo'ladi, shuning uchun xom matn parse qilinadi.
+function Get-Json([int] $port, [string] $token, [string] $path) {
+    (Invoke-WebRequest "http://127.0.0.1:$port$path" -Headers @{ Authorization = "Bearer $token" } -UseBasicParsing).Content | ConvertFrom-Json
 }
 
-function Login([int] $port, [string] $pwd) {
-    $body = @{ login = 'admin'; parolYokiPin = $pwd } | ConvertTo-Json
+function Count-Json([int] $port, [string] $token, [string] $path) { @(Get-Json $port $token $path).Count }
+
+function Post-Json([int] $port, [string] $token, [string] $path, $body) {
+    Invoke-RestMethod "http://127.0.0.1:$port$path" -Method Post -Headers @{ Authorization = "Bearer $token" } -ContentType 'application/json; charset=utf-8' `
+        -Body ([Text.Encoding]::UTF8.GetBytes(($body | ConvertTo-Json -Depth 6)))
+}
+
+function Login([int] $port, [string] $pwd, [string] $login = 'admin') {
+    $body = @{ login = $login; parolYokiPin = $pwd } | ConvertTo-Json
     try { Invoke-RestMethod "http://127.0.0.1:$port/auth/login" -Method Post -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body)) } catch { $null }
 }
 
@@ -270,48 +279,94 @@ try {
     Check (-not (Test-Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{$appId}_is1")) "ro'yxatdan o'tish yozuvi (HKCU) o'chdi"
 
     if ($OldSetup) {
-        "== 8. Mijoz rejasi: eski versiya ($(Split-Path $OldSetup -Leaf)) -> o'chirish -> (ma'lumot papkasi saqlanadi) -> yangisi; keyin toza o'rnatish =="
+        "== 8. Mijoz rejasi: eski versiya ($(Split-Path $OldSetup -Leaf)) o'rnatiladi va unda ma'lumot yaratiladi -> o'chiriladi -> baza qoladi -> yangisi /ADMINPAROL'siz o'rnatiladi =="
         if (-not (Test-Path -LiteralPath $OldSetup)) { throw "OldSetup topilmadi: $OldSetup" }
-        $app6 = "$T\app6"; $data6 = "$T\data6"; $eskiParol = 'EskiParol123'; $yangiParol = 'YangiParol456'
-        $baza = @("/DIR=$app6", "/DATADIR=$data6", "/PORT=$p4", '/COMPONENTS=server,desktop', '/TASKS=')
-        $code = Run-Setup ($baza + "/ADMINPAROL=$eskiParol") 'old-install' $OldSetup
+        $app6 = "$T\app6"; $data6 = "$T\data6"; $eskiParol = 'EskiParol123'; $yangiParol = 'YangiParol456'; $opLogin = 'sinov-op'; $opParol = '2468'
+        $api6 = "http://127.0.0.1:$p4"
+        $baza = @("/DIR=$app6", "/DATADIR=$data6", "/PORT=$p4", '/COMPONENTS="server,desktop"')     # mijoz buyrug'i shakli
+        $tasks8 = if ($hadLnk) { '/TASKS=' } else { '/TASKS="desktopicon"' }
+        $menyu = [Environment]::GetFolderPath('Programs')
+        $code = Run-Setup ($baza + $tasks8 + "/ADMINPAROL=$eskiParol") 'old-install' $OldSetup
         Check ($code -eq 0) "eski versiya o'rnatildi (kod $code)"
         $up = Start-Api $app6 $p4
-        Check $up "eski versiya API'si ishga tushdi (eski baza yaratildi)"
+        Check $up "eski versiya API'si ishga tushdi (baza yaratildi)"
         $r = Login $p4 $eskiParol
         Check ($null -ne $r) "eski versiya: admin kirdi"
-        $eskiAparat = if ($r) { Count-Json $p4 $r.token '/aparatlar' } else { 0 }
-        $eskiYoqilgi = if ($r) { Count-Json $p4 $r.token '/yoqilgilar' } else { 0 }
-        Check (($eskiAparat -gt 0) -and ($eskiYoqilgi -gt 0)) "eski bazada namunaviy yoqilg'i ($eskiYoqilgi ta) va aparatlar ($eskiAparat ta) bor"
+        if ($r) {
+            # Mijozdagi holat: foydalanuvchi, yoqilg'i, aparat, bitta yopilgan smena va nasiya (barchasi eski versiyada yaratiladi).
+            $yoq = Post-Json $p4 $r.token '/yoqilgilar' @{ nomi = 'Sinov AI-92'; narx = 12345; rang = '#2563EB' }
+            $apr = Post-Json $p4 $r.token '/aparatlar' @{ raqam = 91; yoqilgiTuriId = $yoq.id; boshlangichTotalLitr = [decimal]184642.30; boshlangichBakQoldiq = [decimal]5000 }
+            [void](Post-Json $p4 $r.token '/foydalanuvchilar' @{ toliqIsm = 'Sinov Operator'; login = $opLogin; rol = 'Operator'; oylikMaosh = 4000000; parolYokiPin = $opParol })
+            $sm = Post-Json $p4 $r.token '/smenalar/och' @{ qaytim = 100000; terminal = 50000; depozit = 200000 }
+            $muddat = [DateTime]::UtcNow.AddHours(5).AddDays(10).ToString('yyyy-MM-dd')
+            [void](Post-Json $p4 $r.token '/nasiyalar' @{ mijozIsmi = 'Sinov Mijoz'; telefon = '90 123 45 67'; mashinaRaqami = '01 A 777 BC'; summa = 200000; muddat = $muddat; izoh = $null })
+            $kors = @(Get-Json $p4 $r.token '/aparatlar' | ForEach-Object { @{ aparatId = $_.id; qiymat = [decimal]$_.totalLitr + $(if ($_.id -eq $apr.id) { [decimal]100 } else { [decimal]0 }) } })
+            $yop = Post-Json $p4 $r.token "/smenalar/$($sm.id)/yop" @{ korsatkichlar = $kors; terminal = 50000; depozit = 200000; sanalganNaqd = 1134500; izoh = $null }
+            Check (($yop.savdo -eq 1234500) -and ($yop.farq -eq 0)) "eski versiyada yaratildi: yoqilg'i, aparat 91, operator, nasiya, yopilgan smena (savdo $($yop.savdo), farq $($yop.farq))"
+        }
         Stop-Api
         Uninstall-One $app6
         Check (-not (Test-Path "$app6\unins000.exe")) "eski versiya o'chirildi"
-        Check (Test-Path "$data6\fuelcontrol.db") "o'chirishdan keyin eski baza SAQLANDI (ma'lumot papkasini o'zingiz o'chirasiz)"
+        Check (Test-Path "$data6\fuelcontrol.db") "o'chirishdan keyin baza SAQLANDI"
+        Check (-not (Test-Path -LiteralPath (Join-Path $menyu 'FuelControl.lnk'))) "o'chirishda Start menyu yorlig'i ketdi"
+        if (-not $hadLnk) { Check (-not (Test-Path -LiteralPath $lnk)) "o'chirishda ish stoli yorlig'i ketdi" }
 
-        '-- 8a. Ma''lumot papkasini o''chirmasdan yangisini o''rnatish: eski baza qoladi, yangi parol e''tiborga olinmaydi --'
-        $code = Run-Setup ($baza + "/ADMINPAROL=$yangiParol") 'new-over-data'
+        '-- 8a. Mijoz buyrug''i: yangi versiya /ADMINPAROL''siz, baza joyida --'
+        $code = Run-Setup ($baza + $tasks8) 'new-over-data'
         Check ($code -eq 0) "yangi versiya o'rnatildi (kod $code)"
-        Check ($null -eq (Json "$app6\Server\appsettings.Production.json").Seed) "baza bor: AdminParol konfiguratsiyaga yozilmadi"
+        Check ($null -eq (Json "$app6\Server\appsettings.Production.json").Seed) "AdminParol konfiguratsiyada yo'q (baza bor)"
+        Check ((Json "$app6\Server\appsettings.Production.json").Urls -eq "http://0.0.0.0:$p4") "port /PORT bo'yicha: http://0.0.0.0:$p4"
+        Check ((Json "$app6\Desktop\sozlama.json").ServerManzili -eq "http://localhost:$p4") "desktop sozlama.json = http://localhost:$p4"
+        Check ((Test-Path -LiteralPath (Join-Path $menyu 'FuelControl.lnk')) -and (Test-Path -LiteralPath (Join-Path $menyu 'FuelControl Web.lnk'))) "Start menyu yorliqlari (FuelControl, FuelControl Web) qayta yaratildi"
+        if (-not $hadLnk) { Check (Test-Path -LiteralPath $lnk) "ish stoli yorlig'i FuelControl.lnk qayta yaratildi" }
+        Check ((Get-Item "$app6\Server\FuelControl.Api.exe").VersionInfo.ProductVersion -eq $Version) "o'rnatilgan API versiyasi $Version"
         $up = Start-Api $app6 $p4
         Check $up "yangi API eski bazada ishga tushdi (migratsiyalar qo'llandi)"
         if ($up) {
             $r = Login $p4 $eskiParol
             Check ($null -ne $r) "eski admin paroli ishlaydi"
-            Check ($null -eq (Login $p4 $yangiParol)) "yangi parol ISHLAMAYDI (shuning uchun toza o'rnatishda ma'lumot papkasini o'chirish shart)"
+            Check ($null -ne (Login $p4 $opParol $opLogin)) "eski operator ($opLogin) o'z paroli bilan kiradi"
             if ($r) {
-                Check (((Count-Json $p4 $r.token '/aparatlar') -eq $eskiAparat) -and ((Count-Json $p4 $r.token '/yoqilgilar') -eq $eskiYoqilgi)) "eski yoqilg'i va aparatlar joyida ($eskiYoqilgi / $eskiAparat ta)"
-                foreach ($yol in '/smenalar', '/nasiyalar', '/boshqaruv', '/hisobot', '/xarajatlar') {
-                    $kod = try { (Invoke-WebRequest "http://127.0.0.1:$p4$yol" -Headers @{ Authorization = "Bearer $($r.token)" } -UseBasicParsing).StatusCode } catch { 0 }
-                    Check ($kod -eq 200) "migratsiya qilingan bazada yangi jadvallar ishlaydi: GET $yol -> $kod"
+                $tk = $r.token
+                $y = @(Get-Json $p4 $tk '/yoqilgilar')
+                Check (($y.Count -eq 1) -and ($y[0].nomi -eq 'Sinov AI-92') -and ($y[0].narx -eq 12345)) "yoqilg'i joyida: Sinov AI-92, narx 12345"
+                $a = @(Get-Json $p4 $tk '/aparatlar')
+                Check (($a.Count -eq 1) -and ($a[0].raqam -eq 91) -and ([decimal]$a[0].totalLitr -eq [decimal]184742.30) -and ($a[0].bakQoldiq -eq 4900)) "aparat joyida: 91-aparat, total 184742.30, bak 4900 (smena yopilgandan keyingi holat)"
+                Check ((Count-Json $p4 $tk '/foydalanuvchilar') -eq 2) "foydalanuvchilar joyida: admin + $opLogin"
+                $s = @(Get-Json $p4 $tk '/smenalar')
+                Check (($s.Count -eq 1) -and ($s[0].savdo -eq 1234500) -and ($s[0].farq -eq 0) -and ($null -ne $s[0].tugadi)) "yopilgan smena joyida: savdo 1 234 500, farq 0"
+                if ($s.Count -eq 1) {
+                    $d = Get-Json $p4 $tk "/smenalar/$($s[0].id)"
+                    Check ((@($d.korsatkichlar).Count -eq 1) -and ([decimal]$d.korsatkichlar[0].boshi -eq [decimal]184642.30) -and ([decimal]$d.korsatkichlar[0].litr -eq [decimal]100)) "smena tafsiloti ochiladi: segment 184642.30 -> 184742.30, 100 litr"
+                }
+                $n = Get-Json $p4 $tk '/nasiyalar'
+                Check ((@($n.royxat).Count -eq 1) -and ($n.royxat[0].telefon -eq '+998 90 123 45 67') -and ($n.royxat[0].qoldiq -eq 200000)) "nasiya joyida: +998 90 123 45 67, qoldiq 200000"
+                Check ((Invoke-WebRequest "$api6/smenalar/joriy" -Headers @{ Authorization = "Bearer $tk" } -UseBasicParsing).StatusCode -eq 204) "ochiq smena yo'q (204)"
+                foreach ($yol in '/boshqaruv', '/hisobot', '/xarajatlar') {
+                    $kod = try { (Invoke-WebRequest "$api6$yol" -Headers @{ Authorization = "Bearer $tk" } -UseBasicParsing).StatusCode } catch { 0 }
+                    Check ($kod -eq 200) "GET $yol -> $kod"
                 }
             }
         }
         Stop-Api
         Uninstall-One $app6
 
-        '-- 8b. Ma''lumot papkasini o''chirib toza o''rnatish: bazada faqat admin --'
+        '-- 8b. Baza bor bo''lsa /ADMINPAROL berilsa ham e''tiborga olinmaydi --'
+        $code = Run-Setup ($baza + $tasks8 + "/ADMINPAROL=$yangiParol") 'new-over-data-pwd'
+        Check ($code -eq 0) "qayta o'rnatish /ADMINPAROL bilan (kod $code)"
+        Check ($null -eq (Json "$app6\Server\appsettings.Production.json").Seed) "baza bor: AdminParol konfiguratsiyaga yozilmadi"
+        $up = Start-Api $app6 $p4
+        Check $up "API ishga tushdi"
+        if ($up) {
+            Check ($null -ne (Login $p4 $eskiParol)) "eski admin paroli ishlaydi"
+            Check ($null -eq (Login $p4 $yangiParol)) "yangi parol ISHLAMAYDI (toza o'rnatish uchun ma'lumot papkasini o'chirish shart)"
+        }
+        Stop-Api
+        Uninstall-One $app6
+
+        '-- 8c. Ma''lumot papkasini o''chirib toza o''rnatish: bazada faqat admin --'
         Remove-Item -LiteralPath $data6 -Recurse -Force
-        $code = Run-Setup ($baza + "/ADMINPAROL=$yangiParol") 'new-clean'
+        $code = Run-Setup ($baza + $tasks8 + "/ADMINPAROL=$yangiParol") 'new-clean'
         Check ($code -eq 0) "toza o'rnatish (kod $code)"
         $up = Start-Api $app6 $p4
         Check $up "yangi API toza bazada ishga tushdi"
@@ -319,16 +374,18 @@ try {
             $r = Login $p4 $yangiParol
             Check ($null -ne $r) "yangi admin paroli ishlaydi"
             Check ($null -eq (Login $p4 $eskiParol)) "eski parol ishlamaydi"
+            Check ($null -eq (Login $p4 $opParol $opLogin)) "eski operator yo'q"
             if ($r) {
                 $hdr = @{ Authorization = "Bearer $($r.token)" }
                 foreach ($yol in '/yoqilgilar', '/aparatlar', '/smenalar') {
-                    Check ((Invoke-WebRequest "http://127.0.0.1:$p4$yol" -Headers $hdr -UseBasicParsing).Content.Trim() -eq '[]') "toza o'rnatish: $yol bo'sh"
+                    Check ((Invoke-WebRequest "$api6$yol" -Headers $hdr -UseBasicParsing).Content.Trim() -eq '[]') "toza o'rnatish: $yol bo'sh"
                 }
                 Check ((Count-Json $p4 $r.token '/foydalanuvchilar') -eq 1) "toza o'rnatish: bitta foydalanuvchi (admin)"
             }
         }
         Stop-Api
     }
+
 }
 catch { "!!! ISTISNO: $($_.Exception.Message)"; $_.InvocationInfo.PositionMessage; $_.ScriptStackTrace; $script:fail++ }
 finally {
