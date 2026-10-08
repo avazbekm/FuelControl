@@ -23,6 +23,10 @@
     Sinov uchun birinchi port; BasePort..BasePort+3 band bo'lmasligi kerak.
 .PARAMETER SkipTunnel
     O'rnatuvchi cloudflared'siz yig'ilgan bo'lsa (build.ps1 -SkipCloudflared), tunnel sinovini o'tkazib yuboradi.
+.PARAMETER OldSetup
+    Avvalgi versiya o'rnatuvchisi (masalan, Output\FuelControl-Setup-0.0.1.exe). Berilsa, mijoz qurilmasidagi reja sinaladi:
+    eski versiyani o'rnatish -> o'chirish (ma'lumot papkasi SAQLANADI) -> yangisini shu papkaga o'rnatish (eski baza qoladi,
+    yangi parol e'tiborga olinmaydi) -> ma'lumot papkasini o'chirib toza o'rnatish (bazada faqat admin).
 .PARAMETER KeepFiles
     Muvaffaqiyatli tugaganda ham ish papkasini o'chirmaydi.
 
@@ -35,6 +39,7 @@ param(
     [string] $WorkDir = (Join-Path ([IO.Path]::GetTempPath()) 'fuelcontrol-installer-test'),
     [int] $BasePort = 5090,
     [switch] $SkipTunnel,
+    [string] $OldSetup,
     [switch] $KeepFiles
 )
 
@@ -49,19 +54,21 @@ $T = $WorkDir
 if ((Split-Path $T -Leaf) -notmatch 'fuelcontrol') { throw "WorkDir nomida 'fuelcontrol' bo'lishi shart (tasodifan boshqa papkani o'chirmaslik uchun): $T" }
 
 $script:fail = 0
+$script:total = 0
 $script:apiProc = $null
 $env:ASPNETCORE_ENVIRONMENT = 'Production'; $env:DOTNET_ENVIRONMENT = 'Production'
 
 function Fresh([string] $p) { if (Test-Path -LiteralPath $p) { [IO.Directory]::Delete($p, $true) }; [void](New-Item -ItemType Directory -Force -Path $p) }
 function Check($cond, [string] $msg) {
+    $script:total++
     $ok = if ($cond -is [array]) { @($cond).Count -gt 0 } else { [bool] $cond }
     if ($ok) { "  OK    $msg" } else { "  XATO  $msg"; $script:fail++ }
 }
 function Json([string] $path) { Get-Content -LiteralPath $path -Raw | ConvertFrom-Json }
 
-function Run-Setup([string[]] $Extra, [string] $LogName) {
+function Run-Setup([string[]] $Extra, [string] $LogName, [string] $Exe = $Setup) {
     $a = $Extra + @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/CURRENTUSER', '/NOSYSTEM=1', "/LOG=$T\$LogName.log")
-    (Start-Process -FilePath $Setup -ArgumentList $a -Wait -PassThru).ExitCode
+    (Start-Process -FilePath $Exe -ArgumentList $a -Wait -PassThru).ExitCode
 }
 
 function Start-Api([string] $app, [int] $port) {
@@ -81,16 +88,21 @@ function Start-Api([string] $app, [int] $port) {
 # Faqat shu sinov ishga tushirgan jarayon to'xtatiladi (boshqa API'larga tegilmaydi).
 function Stop-Api { if ($script:apiProc -and -not $script:apiProc.HasExited) { Stop-Process -Id $script:apiProc.Id -Force; $script:apiProc.WaitForExit(10000) | Out-Null }; $script:apiProc = $null }
 
+# JSON massiv elementlari soni. Invoke-RestMethod bo'sh massivni $null qilib qaytaradi va @($null).Count = 1 bo'ladi, shuning uchun xom matn parse qilinadi.
+function Count-Json([int] $port, [string] $token, [string] $path) {
+    @((Invoke-WebRequest "http://127.0.0.1:$port$path" -Headers @{ Authorization = "Bearer $token" } -UseBasicParsing).Content | ConvertFrom-Json).Count
+}
+
 function Login([int] $port, [string] $pwd) {
     $body = @{ login = 'admin'; parolYokiPin = $pwd } | ConvertTo-Json
     try { Invoke-RestMethod "http://127.0.0.1:$port/auth/login" -Method Post -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body)) } catch { $null }
 }
 
-function Uninstall-All {
-    foreach ($a in @("$T\app1", "$T\app2", "$T\app3", "$T\app4")) {
-        if (Test-Path "$a\unins000.exe") { Start-Process -FilePath "$a\unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' -Wait | Out-Null }
-    }
+function Uninstall-One([string] $dir) {
+    if (Test-Path "$dir\unins000.exe") { Start-Process -FilePath "$dir\unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' -Wait | Out-Null }
 }
+
+function Uninstall-All { foreach ($n in 1..6) { Uninstall-One "$T\app$n" } }
 
 # ---------- xavfsizlik: haqiqiy o'rnatilgan FuelControl'ni buzmaslik; portlar band emas ----------
 $iss = Get-Content -LiteralPath (Join-Path $Installer 'FuelControl.iss') -Raw
@@ -165,7 +177,7 @@ try {
         $api = "http://127.0.0.1:$p1"; $hdr = @{ Authorization = "Bearer $($r.token)" }
         $me = Invoke-RestMethod "$api/me" -Headers $hdr
         Check (($me.login -eq 'admin') -and ($me.rol -eq 'Admin')) "/me = admin (Admin)"
-        Check (@(Invoke-RestMethod "$api/foydalanuvchilar" -Headers $hdr).Count -eq 1) "bazada bitta foydalanuvchi (admin)"
+        Check ((Count-Json $p1 $r.token '/foydalanuvchilar') -eq 1) "bazada bitta foydalanuvchi (admin)"
         foreach ($yol in '/yoqilgilar', '/aparatlar', '/smenalar') {
             Check ((Invoke-WebRequest "$api$yol" -Headers $hdr -UseBasicParsing).Content.Trim() -eq '[]') "toza baza: $yol bo'sh"
         }
@@ -219,6 +231,22 @@ try {
     Check ((Json "$app2\Desktop\sozlama.json").ServerManzili -eq "http://127.0.0.1:$p2") "sozlama.json: oxirgi / olib tashlandi"
     Check (-not (Test-Path $data2)) "ma'lumot papkasi yaratilmadi (server yo'q)"
 
+    '== 5b. Mijozdagi jim buyruq shakli (qo''shtirnoqli /COMPONENTS va /TASKS; server bilan /SERVERURL e''tiborga olinmaydi) =='
+    $app5 = "$T\app5"; $data5 = "$T\data5"
+    $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'FuelControl.lnk'
+    $hadLnk = Test-Path -LiteralPath $lnk      # foydalanuvchining oldindan bor yorlig'ini buzmaslik uchun
+    $tasks = if ($hadLnk) { '/TASKS=' } else { '/TASKS="desktopicon"' }
+    $code = Run-Setup @("/DIR=$app5", "/DATADIR=$data5", '/COMPONENTS="server,desktop"', $tasks, "/PORT=$p1", '/ADMINPAROL=KuchliParol1', '/SERVERURL=http://boshqa-kompyuter:9999') 'install6'
+    Check ($code -eq 0) "mijoz buyrug'i: chiqish kodi 0 (kod $code)"
+    Check (@(Get-Content "$T\install6.log" | Where-Object { $_ -like '*/COMPONENTS="server,desktop"*' }).Count -gt 0) "buyruq satrida /COMPONENTS=""server,desktop"" qo'shtirnoqli keldi"
+    Check ((Test-Path "$app5\Server\FuelControl.Api.exe") -and (Test-Path "$app5\Desktop\FuelControl.exe") -and -not (Test-Path "$app5\Tunnel")) "server + desktop o'rnatildi, Tunnel yo'q"
+    Check ((Json "$app5\Desktop\sozlama.json").ServerManzili -eq "http://localhost:$p1") "server tanlanganda /SERVERURL e'tiborga olinmadi: sozlama.json = http://localhost:$p1"
+    Check ((Json "$app5\Server\appsettings.Production.json").Urls -eq "http://0.0.0.0:$p1") "port /PORT bo'yicha: http://0.0.0.0:$p1"
+    if ($hadLnk) { '  (ish stolida FuelControl.lnk oldindan bor - desktopicon sinovi o''tkazib yuborildi)' }
+    else { Check (Test-Path -LiteralPath $lnk) "desktopicon vazifasi: ish stolida FuelControl.lnk yaratildi" }
+    Uninstall-One $app5
+    if (-not $hadLnk) { Check (-not (Test-Path -LiteralPath $lnk)) "o'chirishda ish stoli yorlig'i ham o'chdi" }
+
     $app3 = "$T\app3"; $app4 = "$T\app4"
     if ($SkipTunnel) { "== 6. Tunnel komponenti: o'tkazib yuborildi (-SkipTunnel) ==" }
     else {
@@ -240,6 +268,67 @@ try {
     Check (-not (Test-Path "$app1\unins000.exe")) "uninstaller o'zini o'chirdi"
     Check ((Test-Path "$data1\fuelcontrol.db") -and (Test-Path "$data1\logs") -and (Test-Path "$data1\zaxira")) "ma'lumotlar SAQLANDI (baza, jurnal, zaxira)"
     Check (-not (Test-Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{$appId}_is1")) "ro'yxatdan o'tish yozuvi (HKCU) o'chdi"
+
+    if ($OldSetup) {
+        "== 8. Mijoz rejasi: eski versiya ($(Split-Path $OldSetup -Leaf)) -> o'chirish -> (ma'lumot papkasi saqlanadi) -> yangisi; keyin toza o'rnatish =="
+        if (-not (Test-Path -LiteralPath $OldSetup)) { throw "OldSetup topilmadi: $OldSetup" }
+        $app6 = "$T\app6"; $data6 = "$T\data6"; $eskiParol = 'EskiParol123'; $yangiParol = 'YangiParol456'
+        $baza = @("/DIR=$app6", "/DATADIR=$data6", "/PORT=$p4", '/COMPONENTS=server,desktop', '/TASKS=')
+        $code = Run-Setup ($baza + "/ADMINPAROL=$eskiParol") 'old-install' $OldSetup
+        Check ($code -eq 0) "eski versiya o'rnatildi (kod $code)"
+        $up = Start-Api $app6 $p4
+        Check $up "eski versiya API'si ishga tushdi (eski baza yaratildi)"
+        $r = Login $p4 $eskiParol
+        Check ($null -ne $r) "eski versiya: admin kirdi"
+        $eskiAparat = if ($r) { Count-Json $p4 $r.token '/aparatlar' } else { 0 }
+        $eskiYoqilgi = if ($r) { Count-Json $p4 $r.token '/yoqilgilar' } else { 0 }
+        Check (($eskiAparat -gt 0) -and ($eskiYoqilgi -gt 0)) "eski bazada namunaviy yoqilg'i ($eskiYoqilgi ta) va aparatlar ($eskiAparat ta) bor"
+        Stop-Api
+        Uninstall-One $app6
+        Check (-not (Test-Path "$app6\unins000.exe")) "eski versiya o'chirildi"
+        Check (Test-Path "$data6\fuelcontrol.db") "o'chirishdan keyin eski baza SAQLANDI (ma'lumot papkasini o'zingiz o'chirasiz)"
+
+        '-- 8a. Ma''lumot papkasini o''chirmasdan yangisini o''rnatish: eski baza qoladi, yangi parol e''tiborga olinmaydi --'
+        $code = Run-Setup ($baza + "/ADMINPAROL=$yangiParol") 'new-over-data'
+        Check ($code -eq 0) "yangi versiya o'rnatildi (kod $code)"
+        Check ($null -eq (Json "$app6\Server\appsettings.Production.json").Seed) "baza bor: AdminParol konfiguratsiyaga yozilmadi"
+        $up = Start-Api $app6 $p4
+        Check $up "yangi API eski bazada ishga tushdi (migratsiyalar qo'llandi)"
+        if ($up) {
+            $r = Login $p4 $eskiParol
+            Check ($null -ne $r) "eski admin paroli ishlaydi"
+            Check ($null -eq (Login $p4 $yangiParol)) "yangi parol ISHLAMAYDI (shuning uchun toza o'rnatishda ma'lumot papkasini o'chirish shart)"
+            if ($r) {
+                Check (((Count-Json $p4 $r.token '/aparatlar') -eq $eskiAparat) -and ((Count-Json $p4 $r.token '/yoqilgilar') -eq $eskiYoqilgi)) "eski yoqilg'i va aparatlar joyida ($eskiYoqilgi / $eskiAparat ta)"
+                foreach ($yol in '/smenalar', '/nasiyalar', '/boshqaruv', '/hisobot', '/xarajatlar') {
+                    $kod = try { (Invoke-WebRequest "http://127.0.0.1:$p4$yol" -Headers @{ Authorization = "Bearer $($r.token)" } -UseBasicParsing).StatusCode } catch { 0 }
+                    Check ($kod -eq 200) "migratsiya qilingan bazada yangi jadvallar ishlaydi: GET $yol -> $kod"
+                }
+            }
+        }
+        Stop-Api
+        Uninstall-One $app6
+
+        '-- 8b. Ma''lumot papkasini o''chirib toza o''rnatish: bazada faqat admin --'
+        Remove-Item -LiteralPath $data6 -Recurse -Force
+        $code = Run-Setup ($baza + "/ADMINPAROL=$yangiParol") 'new-clean'
+        Check ($code -eq 0) "toza o'rnatish (kod $code)"
+        $up = Start-Api $app6 $p4
+        Check $up "yangi API toza bazada ishga tushdi"
+        if ($up) {
+            $r = Login $p4 $yangiParol
+            Check ($null -ne $r) "yangi admin paroli ishlaydi"
+            Check ($null -eq (Login $p4 $eskiParol)) "eski parol ishlamaydi"
+            if ($r) {
+                $hdr = @{ Authorization = "Bearer $($r.token)" }
+                foreach ($yol in '/yoqilgilar', '/aparatlar', '/smenalar') {
+                    Check ((Invoke-WebRequest "http://127.0.0.1:$p4$yol" -Headers $hdr -UseBasicParsing).Content.Trim() -eq '[]') "toza o'rnatish: $yol bo'sh"
+                }
+                Check ((Count-Json $p4 $r.token '/foydalanuvchilar') -eq 1) "toza o'rnatish: bitta foydalanuvchi (admin)"
+            }
+        }
+        Stop-Api
+    }
 }
 catch { "!!! ISTISNO: $($_.Exception.Message)"; $_.InvocationInfo.PositionMessage; $_.ScriptStackTrace; $script:fail++ }
 finally {
@@ -248,6 +337,7 @@ finally {
 }
 
 ""
+"Tekshiruvlar: $($script:total - $script:fail)/$($script:total) o'tdi"
 if ($script:fail -eq 0) {
     'HAMMASI O''TDI'
     if (-not $KeepFiles) { try { [IO.Directory]::Delete($T, $true) } catch { Write-Warning "Ish papkasini o'chirib bo'lmadi: $T" } }
