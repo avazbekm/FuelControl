@@ -1,0 +1,94 @@
+:host { display: block; line-height: normal; }
+.sahifa-bosh .sarlavha { gap: 6px; }
+
+.kpi-qator { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+@media (max-width: 520px) { .kpi-qator { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+
+/* ---- Ro'yxat kartasi */
+.royxat-karta { padding: 18px 20px 10px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.asboblar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.asboblar .chiplar { gap: 8px; }
+@media (max-width: 520px) {
+  .asboblar .chiplar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .filtr { justify-content: space-between; padding: 0 8px 0 12px; font-size: 13px; white-space: nowrap; }
+}
+
+.filtr {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 8px 0 16px; border-radius: 999px; cursor: pointer;
+  font-size: 13.5px; font-weight: 600; color: var(--matn-3);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.6)); border: 1px solid rgba(255, 255, 255, 0.95);
+}
+:host-context(:root[data-theme="dark"]) .filtr { background: var(--tugma-fon); border-color: var(--tugma-chegara); color: var(--tugma-matn); }
+@media (prefers-color-scheme: dark) { :host-context(:root:not([data-theme="light"])) .filtr { background: var(--tugma-fon); border-color: var(--tugma-chegara); color: var(--tugma-matn); } }
+.filtr.tanlangan {
+  color: #fff; background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); border: 1px solid rgba(255, 255, 255, 0.55); box-shadow: 0 6px 14px rgba(47, 107, 255, 0.28);
+}
+.filtr .son-belgi {
+  min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; background: rgba(20, 40, 80, 0.08); color: var(--matn-3);
+}
+.filtr.tanlangan .son-belgi { background: rgba(255, 255, 255, 0.25); color: #fff; }
+
+.qidiruv-oram { flex: 1 1 260px; min-width: 0; position: relative; display: flex; align-items: center; }
+.qidiruv-ikon { position: absolute; left: 16px; display: inline-flex; color: var(--matn-2); pointer-events: none; }
+.qidiruv {
+  width: 100%; min-height: 44px; padding: 0 18px 0 44px; border-radius: 22px; font-size: 14px; color: var(--matn);
+  background: var(--kiritish-fon); border: 1px solid var(--kiritish-chegara); outline: none;
+}
+.qidiruv:focus { border-color: var(--asosiy); box-shadow: 0 0 0 4px rgba(47, 107, 255, 0.15); }
+@media (pointer: coarse) { .qidiruv { font-size: 16px; } }
+
+/* ---- Jadval (keng ekran) */
+.jadval-oram { overflow-x: auto; margin: 0 -6px; padding: 0 6px; }
+.jadval-ichi { min-width: 940px; display: flex; flex-direction: column; }
+.qator-grid {
+  display: grid; gap: 12px; align-items: center; padding: 12px 4px;
+  grid-template-columns: minmax(190px, 1.6fr) minmax(110px, 0.9fr) minmax(130px, 1fr) minmax(90px, 0.75fr) minmax(90px, 0.75fr) minmax(100px, 0.8fr) minmax(130px, 1fr) 112px;
+  border-bottom: 1px solid var(--chiziq);
+}
+.qator-grid.bosh-qator { padding: 4px 4px 8px; border-bottom: 1px solid rgba(18, 20, 40, 0.08); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--matn-2); }
+.o { text-align: right; }
+.satr { cursor: pointer; font-variant-numeric: tabular-nums; }
+.satr:hover { background: var(--qator-hover); border-radius: 14px; }
+.satr.otgan { background: color-mix(in srgb, var(--kamomat-fon) 45%, transparent); border-radius: 14px; }
+.satr.yopilgan { background: color-mix(in srgb, var(--matn) 3.5%, transparent); border-radius: 14px; }
+.satr:focus-visible { outline: 2px solid var(--asosiy); outline-offset: -2px; border-radius: 14px; }
+.ustun { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.mijoz .ism { font-size: 14px; font-weight: 700; }
+.mijoz .tel { font-size: 12.5px; color: var(--matn-2); font-variant-numeric: tabular-nums; }
+.yozildi { font-size: 12.5px; color: var(--matn-2); }
+.yozildi .sana, .muddat .sana { font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.yozildi .sana { color: var(--matn); }
+.muddat { align-items: flex-start; gap: 4px; }
+.son { font-size: 14px; font-variant-numeric: tabular-nums; }
+.yashil-matn { color: #0E7A4A; }
+:host-context(:root[data-theme="dark"]) .yashil-matn { color: var(--yashil); }
+@media (prefers-color-scheme: dark) { :host-context(:root:not([data-theme="light"])) .yashil-matn { color: var(--yashil); } }
+.qoldiq { font-size: 15px; font-weight: 800; }
+.amal { display: flex; justify-content: flex-end; }
+
+.qaytdi {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+  font-size: 13px; font-weight: 700; color: var(--asosiy-toq); background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(47, 107, 255, 0.28);
+}
+:host-context(:root[data-theme="dark"]) .qaytdi { background: var(--tugma-fon); }
+@media (prefers-color-scheme: dark) { :host-context(:root:not([data-theme="light"])) .qaytdi { background: var(--tugma-fon); } }
+.qaytdi:hover { background: #fff; }
+
+/* ---- Telefon: kartalar */
+.kartalar { display: flex; flex-direction: column; gap: 10px; padding-bottom: 8px; }
+.nk {
+  display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 20px; cursor: pointer;
+  background: var(--plitka-fon); border: 1px solid var(--plitka-chegara);
+}
+.nk.otgan { background: color-mix(in srgb, var(--kamomat-fon) 60%, transparent); border-color: var(--kamomat-chegara); }
+.nk.yopilgan { opacity: 0.8; }
+.nk-tepa { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.nk-qoldiq { align-items: flex-end; text-align: right; gap: 2px; }
+.nk-qoldiq .qoldiq { font-size: 18px; }
+.nk-orta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.nk-tafsilot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: 14px; font-weight: 600; }
+.nk-tafsilot > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.nk-tafsilot .yorliq { font-size: 10.5px; letter-spacing: 0.8px; }
+.nk-past { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.nk-past .qaytdi { flex: none; }

@@ -81,7 +81,7 @@ public static class FoydalanuvchiEndpointlari
                 ParolXeshi = ParolXeshlash.Xeshla(s.ParolYokiPin), Ruxsatlar = RuxsatXizmati.Standart(s.Rol).ToList(),
             };
             db.Foydalanuvchilar.Add(f);
-            Audit.Yoz(db, ctx.User.Ism(), "Foydalanuvchi yaratildi", $"{f.ToliqIsm} ({f.Login}), rol {f.Rol}");
+            Audit.Yoz(db, ctx.User.Ism(), "Foydalanuvchi yaratildi", $"{f.ToliqIsm} ({f.Login}), rol {f.Rol}", AuditTurlari.Sozlama);
             await db.SaveChangesAsync();
             await hub.Bildir(Bolimlar.Foydalanuvchilar);
             return Results.Created($"/foydalanuvchilar/{f.Id}", f.Dto());
@@ -107,7 +107,7 @@ public static class FoydalanuvchiEndpointlari
             f.ToliqIsm = s.ToliqIsm.Trim(); f.Rol = s.Rol; f.Faol = s.Faol; f.OylikMaosh = s.OylikMaosh;
             Audit.Yoz(db, ctx.User.Ism(), "Foydalanuvchi o'zgartirildi",
                 $"{f.ToliqIsm} ({f.Login}), rol {f.Rol}, faol {f.Faol}, maosh {f.OylikMaosh}" +
-                (rolOzgardi ? $"; ruxsatlar standartga qaytarildi: {string.Join(',', f.Ruxsatlar)}" : ""));
+                (rolOzgardi ? $"; ruxsatlar standartga qaytarildi: {string.Join(',', f.Ruxsatlar)}" : ""), AuditTurlari.Sozlama);
             await db.SaveChangesAsync();
             kesh.Unut(id);
             // Guruh a'zoligi ulanish paytida belgilangan — rol/faollik o'zgarsa ulanishlarni uzamiz (qayta ulanishda yangilanadi).
@@ -123,7 +123,7 @@ public static class FoydalanuvchiEndpointlari
             var eski = f.Ruxsatlar.ToList();
             f.Ruxsatlar = s.Ruxsatlar.Distinct().ToList();
             Audit.Yoz(db, ctx.User.Ism(), "Ruxsatlar o'zgartirildi",
-                $"{f.ToliqIsm}: {string.Join(',', eski)} → {string.Join(',', f.Ruxsatlar)}");
+                $"{f.ToliqIsm}: {string.Join(',', eski)} → {string.Join(',', f.Ruxsatlar)}", AuditTurlari.Sozlama);
             await db.SaveChangesAsync();
             kesh.Unut(id);
             if (!eski.ToHashSet().SetEquals(f.Ruxsatlar)) await ulanishlar.Uz(id);
@@ -137,7 +137,7 @@ public static class FoydalanuvchiEndpointlari
             var f = await db.Foydalanuvchilar.FindAsync(id) ?? throw new BiznesXatosi("Foydalanuvchi topilmadi.", 404);
             f.ParolXeshi = ParolXeshlash.Xeshla(s.YangiParolYokiPin);
             KirishXizmati.Muvaffaqiyatli(f);
-            Audit.Yoz(db, ctx.User.Ism(), "Parol/PIN almashtirildi", f.ToliqIsm);
+            Audit.Yoz(db, ctx.User.Ism(), "Parol/PIN almashtirildi", f.ToliqIsm, AuditTurlari.Kirish);
             await db.SaveChangesAsync();
             return Results.NoContent();
         }).RuxsatKerak(Ruxsat.Sozlamalar).Produces(204);

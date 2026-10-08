@@ -1,0 +1,124 @@
+<div class="sahifa">
+  <header class="sahifa-bosh">
+    <div class="sarlavha">
+      <h1>{{ til.t('Nasiyalar') }}</h1>
+      <span class="sarlavha-izoh">{{ til.t('Nasiyalar_Izoh') }}</span>
+    </div>
+    <div class="amallar">
+      @if (auth.bor('QarzQaytdi')) {
+        <button type="button" class="tugma" [disabled]="!qaytishMumkin()" (click)="qaytishOch(null)"><ikon nomi="undo" [olcham]="16" [qalinlik]="2" /> {{ til.t('Nasiya_QarzQaytdi') }}</button>
+      }
+      @if (auth.bor('NasiyaYozish')) {
+        <button type="button" class="tugma asosiy" [disabled]="!yozishMumkin()" (click)="nasiyaOchiq.set(true)"><ikon nomi="plus" [olcham]="16" [qalinlik]="2.4" /> {{ til.t('Nasiya_Yozish') }}</button>
+      }
+    </div>
+  </header>
+  @if (smenaKerak()) {
+    <div class="malumot-blok"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Nasiyalar_SmenaKerak') }}</span></div>
+  }
+
+  @if (!yuklandi()) {
+    <div class="kpi-qator">
+      @for (i of [1, 2, 3, 4]; track i) { <div class="skelet" style="height: 108px; border-radius: 26px"></div> }
+    </div>
+    <div class="skelet" style="height: 320px; border-radius: 26px"></div>
+  } @else if (xato()) {
+    <div class="shisha karta bosh">
+      {{ xato() }}<br /><br />
+      <button type="button" class="tugma" (click)="yukla()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button>
+    </div>
+  } @else {
+    @if (xulosa(); as x) {
+      <div class="kpi-qator">
+        <kpi-karta [nom]="til.t('Nasiyalar_FaolQarz')" [qiymat]="pul(x.faolQarz)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_MijozSoni', x.faolSoni)" />
+        <kpi-karta [nom]="til.t('Nasiyalar_MuddatiOtgan')" [qiymat]="pul(x.muddatiOtgan)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_MijozSoni', x.muddatiOtganSoni)" ton="qizil" [qizilKarta]="true" />
+        <kpi-karta [nom]="til.t('Nasiyalar_OyBerilgan')" [qiymat]="pul(x.oyBerilgan)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_NasiyaSoni', x.oyBerilganSoni)" />
+        <kpi-karta [nom]="til.t('Nasiyalar_OyQaytgan')" [qiymat]="pul(x.oyQaytgan)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_TolovSoni', x.oyQaytganSoni)" ton="yashil" />
+      </div>
+    }
+
+    <section class="shisha royxat-karta" [attr.aria-label]="til.t('Nasiyalar_Royxati')">
+      <div class="asboblar">
+        <div class="chiplar" role="group" [attr.aria-label]="til.t('Nasiyalar_Filtr')">
+          @for (f of filtrlar(); track f.k) {
+            <button type="button" class="filtr" [class.tanlangan]="filtr() === f.k" [attr.aria-pressed]="filtr() === f.k" (click)="filtr.set(f.k)">
+              {{ til.t(f.kalit) }}<span class="son-belgi">{{ f.soni }}</span>
+            </button>
+          }
+        </div>
+        <div class="qidiruv-oram">
+          <span class="qidiruv-ikon"><ikon nomi="search" [olcham]="17" [qalinlik]="2" /></span>
+          <input class="qidiruv" type="search" [attr.aria-label]="til.t('Nasiya_Qidiruv')" [placeholder]="til.t(tor() ? 'Nasiyalar_QidiruvQisqa' : 'Nasiya_Qidiruv')" [value]="qidiruv()" (input)="qidiruv.set($any($event.target).value)" autocomplete="off" />
+        </div>
+      </div>
+
+      <!-- Keng ekran: jadval -->
+      <div class="faqat-keng jadval-oram">
+        <div class="jadval-ichi">
+          <div class="qator-grid bosh-qator" role="row">
+            <span>{{ til.t('Nasiyalar_Mijoz') }}</span><span>{{ til.t('Nasiyalar_Mashina') }}</span><span>{{ til.t('Nasiyalar_Yozilgan') }}</span>
+            <span class="o">{{ til.t('Nasiya_Qarz') }}</span><span class="o">{{ til.t('Nasiya_Qaytgan') }}</span><span class="o">{{ til.t('Nasiya_Qoldiq') }}</span>
+            <span>{{ til.t('Nasiya_MuddatYorliq') }}</span><span></span>
+          </div>
+          @for (n of royxat(); track n.id) {
+            <div class="qator-grid satr" [class.otgan]="n.holati === 'MuddatiOtgan'" [class.yopilgan]="n.holati === 'Yopilgan'" role="button" tabindex="0"
+                 (click)="tafsilotOch(n.id)" (keydown.enter)="tafsilotOch(n.id)">
+              <span class="ustun mijoz"><span class="ism">{{ n.mijozIsmi }}</span><span class="tel">{{ tel(n.telefon) }}</span></span>
+              <span><mashina-raqami [qiymat]="n.mashinaRaqami" /></span>
+              <span class="ustun yozildi"><span class="sana">{{ yozilgan(n) }}</span>#{{ n.smenaId }} · {{ qisqaIsm(n.operatorIsmi) }}</span>
+              <span class="o son">{{ pul(n.summa) }}</span>
+              <span class="o son yashil-matn">{{ pul(n.qaytgan) }}</span>
+              <span class="o son qoldiq">{{ pul(n.qoldiq) }}</span>
+              <span class="ustun muddat"><span class="sana">{{ kunToliq(n.muddat) }}</span><span class="pill" [class]="belgiRang(n)">{{ belgiMatn(n) }}</span></span>
+              <span class="amal">
+                @if (n.holati !== 'Yopilgan' && qaytishMumkin()) {
+                  <button type="button" class="qaytdi" [attr.aria-label]="til.t('Nasiyalar_QaytdiAria', n.mijozIsmi)" (click)="$event.stopPropagation(); qaytishOch(n.id)">
+                    <ikon nomi="undo" [olcham]="14" [qalinlik]="2" /> {{ til.t('Nasiyalar_Qaytdi') }}
+                  </button>
+                }
+              </span>
+            </div>
+          } @empty {
+            <div class="bosh">{{ til.t('Nasiyalar_Yoq') }}</div>
+          }
+        </div>
+      </div>
+
+      <!-- Telefon: kartalar -->
+      <div class="faqat-tor"><div class="kartalar">
+        @for (n of royxat(); track n.id) {
+          <div class="nk" [class.otgan]="n.holati === 'MuddatiOtgan'" [class.yopilgan]="n.holati === 'Yopilgan'" role="button" tabindex="0"
+               (click)="tafsilotOch(n.id)" (keydown.enter)="tafsilotOch(n.id)">
+            <div class="nk-tepa">
+              <span class="ustun mijoz"><span class="ism">{{ n.mijozIsmi }}</span><span class="tel">{{ tel(n.telefon) }}</span></span>
+              <span class="ustun nk-qoldiq"><span class="yorliq">{{ til.t('Nasiya_Qoldiq') }}</span><span class="qoldiq son">{{ pul(n.qoldiq) }}</span></span>
+            </div>
+            <div class="nk-orta">
+              <mashina-raqami [qiymat]="n.mashinaRaqami" />
+              <span class="pill" [class]="belgiRang(n)">{{ belgiMatn(n) }}</span>
+            </div>
+            <div class="nk-tafsilot son">
+              <span><span class="yorliq">{{ til.t('Nasiya_Qarz') }}</span>{{ pul(n.summa) }}</span>
+              <span><span class="yorliq">{{ til.t('Nasiya_Qaytgan') }}</span><span class="yashil-matn">{{ pul(n.qaytgan) }}</span></span>
+              <span><span class="yorliq">{{ til.t('Nasiya_MuddatYorliq') }}</span>{{ kunOy(n.muddat) }}</span>
+            </div>
+            <div class="nk-past">
+              <span class="ikkilamchi kichik-matn">{{ til.t('Nasiyalar_YozilganQisqa', yozilgan(n), n.smenaId, qisqaIsm(n.operatorIsmi)) }}</span>
+              @if (n.holati !== 'Yopilgan' && qaytishMumkin()) {
+                <button type="button" class="qaytdi" [attr.aria-label]="til.t('Nasiyalar_QaytdiAria', n.mijozIsmi)" (click)="$event.stopPropagation(); qaytishOch(n.id)">
+                  <ikon nomi="undo" [olcham]="14" [qalinlik]="2" /> {{ til.t('Nasiyalar_Qaytdi') }}
+                </button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="bosh">{{ til.t('Nasiyalar_Yoq') }}</div>
+        }
+      </div></div>
+    </section>
+  }
+</div>
+
+<nasiya-dialog [(ochiq)]="nasiyaOchiq" (saqlandi)="yukla(true)" />
+<qarz-qaytdi-dialog [(ochiq)]="qaytishOchiq" [nasiyaId]="qaytishId()" (saqlandi)="yukla(true)" />
+<nasiya-tafsilot-dialog [(ochiq)]="tafsilotOchiq" [nasiyaId]="tafsilotId()" [joriy]="joriy()" (ozgardi)="yukla(true)" (qaytdi)="tafsilotdanQaytish($event)" />

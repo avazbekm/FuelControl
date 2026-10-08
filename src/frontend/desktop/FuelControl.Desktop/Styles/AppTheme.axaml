@@ -57,6 +57,7 @@
         <Setter Property="FontWeight" Value="ExtraBold" />
     </Style>
     <Style Selector="Border.kpi TextBlock.nom">
+        <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
@@ -143,6 +144,10 @@
     <Style Selector="Border.badge.kok TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeKokMatn}" /></Style>
     <Style Selector="Border.badge.kulrang"><Setter Property="Background" Value="{DynamicResource BadgeKulrangFon}" /></Style>
     <Style Selector="Border.badge.kulrang TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeKulrangMatn}" /></Style>
+    <Style Selector="Border.badge.olov"><Setter Property="Background" Value="{DynamicResource BadgeOlovFon}" /></Style>
+    <Style Selector="Border.badge.olov TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeOlovMatn}" /></Style>
+    <Style Selector="Border.badge.binafsha"><Setter Property="Background" Value="{DynamicResource BadgeBinafshaFon}" /></Style>
+    <Style Selector="Border.badge.binafsha TextBlock"><Setter Property="Foreground" Value="{DynamicResource BadgeBinafshaMatn}" /></Style>
 
     <!-- ===== Matnlar ===== -->
     <Style Selector="TextBlock.sarlavha">
@@ -159,6 +164,7 @@
         <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
     </Style>
     <Style Selector="TextBlock.yorliq">
+        <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
@@ -278,5 +284,141 @@
     </Style>
     <Style Selector="DataGridRow:selected:pointerover /template/ Rectangle#BackgroundRectangle">
         <Setter Property="Fill" Value="#262F6BFF" />
+    </Style>
+    <!-- ===== Smena hisobi: qutilar va kiritish o'lchamlari ===== -->
+    <Style Selector="Border.malumot">
+        <Setter Property="Background" Value="{DynamicResource MalumotFon}" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="20,12" />
+    </Style>
+    <Style Selector="Border.malumot TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MalumotMatn}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="LineHeight" Value="19" />
+    </Style>
+    <Style Selector="Border.ogoh">
+        <Setter Property="Background" Value="{DynamicResource OgohFon}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource OgohChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Padding" Value="24,14" />
+    </Style>
+    <Style Selector="Border.ogoh TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource OgohMatn}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="Border.yashilTile">
+        <Setter Property="Background" Value="{DynamicResource YashilTileFon}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource YashilTileChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="12,10" />
+    </Style>
+    <Style Selector="Border.qizilTile">
+        <Setter Property="Background" Value="{DynamicResource KamomatFon}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource KamomatChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="Padding" Value="12,10" />
+    </Style>
+    <Style Selector="Border.ichki">
+        <Setter Property="Background" Value="{DynamicResource IchkiTile}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ShishaChegara}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="20" />
+        <Setter Property="Padding" Value="18,16" />
+    </Style>
+    <Style Selector="Border.miniTile">
+        <Setter Property="Background" Value="{DynamicResource MalumotFon}" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="12,9" />
+    </Style>
+    <Style Selector="Border.segmentYoli">
+        <Setter Property="Background" Value="{DynamicResource SegmentFon}" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+    <Style Selector="Border.ikonDoira">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="44" />
+        <Setter Property="CornerRadius" Value="999" />
+    </Style>
+    <Style Selector="Border.qadam">
+        <Setter Property="Width" Value="28" />
+        <Setter Property="Height" Value="28" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Background" Value="{StaticResource OrbKok}" />
+    </Style>
+    <Style Selector="Border.qadam TextBlock">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <!-- Mashina raqami (davlat raqami ko'rinishi) -->
+    <Style Selector="Border.davlatRaqam">
+        <Setter Property="BorderBrush" Value="{DynamicResource Matn}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="6,0" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.davlatRaqam TextBlock">
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="LetterSpacing" Value="0.5" />
+    </Style>
+    <!-- Yoqilg'i belgisi (nuqta + nom) -->
+    <Style Selector="Border.yoqilgi">
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="10,3" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="Border.yoqilgi TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style Selector="TextBox.orta">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+        <Setter Property="MinHeight" Value="52" />
+        <Setter Property="CornerRadius" Value="26" />
+        <Setter Property="Padding" Value="20,0" />
+        <Setter Property="TextAlignment" Value="Right" />
+    </Style>
+    <Style Selector="TextBox.dialogKatta">
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="ExtraBold" />
+        <Setter Property="MinHeight" Value="60" />
+        <Setter Property="CornerRadius" Value="30" />
+        <Setter Property="Padding" Value="22,0" />
+        <Setter Property="TextAlignment" Value="Right" />
+    </Style>
+    <Style Selector="TextBox.pult">
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="MinHeight" Value="44" />
+        <Setter Property="CornerRadius" Value="22" />
+        <Setter Property="TextAlignment" Value="Right" />
+    </Style>
+    <Style Selector="TextBox.xato /template/ Border#PART_BorderElement, TextBox.xato:focus /template/ Border#PART_BorderElement, TextBox.xato:pointerover /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="#D7262B" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="Background" Value="{DynamicResource XatoFon}" />
+    </Style>
+    <Style Selector="TextBlock.xatoMatn">
+        <Setter Property="Foreground" Value="{DynamicResource Qizil}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.qator">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{DynamicResource MatnYumshoq}" />
     </Style>
 </Styles>

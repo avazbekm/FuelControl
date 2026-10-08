@@ -1,0 +1,300 @@
+<div class="sahifa smenalar">
+
+  @if (faqatTafsilot()) {
+    <!-- Telefon: tanlangan smena alohida ko'rinishda -->
+    <div class="orqaga-qator">
+      <button type="button" class="tugma kichik" (click)="orqaga()"><ikon nomi="back" [olcham]="16" [qalinlik]="2" /> {{ til.t('Smenalar') }}</button>
+    </div>
+  } @else {
+    <header class="sahifa-bosh">
+      <div class="sarlavha">
+        <h1>{{ til.t('Smenalar') }}</h1>
+        <span class="sarlavha-izoh">{{ joriySarlavhaIzoh() }}</span>
+      </div>
+      <div class="filtr" role="group" [attr.aria-label]="til.t('Smenalar_Davr')">
+        @for (d of davrlar; track d.kod) {
+          <button type="button" class="chip" [class.tanlangan]="davr() === d.kod" [attr.aria-pressed]="davr() === d.kod" (click)="davrTanla(d.kod)">{{ til.t(d.kalit) }}</button>
+        }
+        @if (operatorlar().length) {
+          <select class="kiritish operator-tanlov" [attr.aria-label]="til.t('Smenalar_Operator')" (change)="operatorTanla($any($event.target).value)">
+            <option value="">{{ til.t('Smenalar_BarchaOperatorlar') }}</option>
+            @for (o of operatorlar(); track o.id) { <option [value]="o.id">{{ o.ism }}</option> }
+          </select>
+        }
+      </div>
+    </header>
+
+    <div class="kpi-qator">
+      <div class="shisha kpi-karta">
+        <span class="yorliq">{{ til.t('Smenalar_KpiOchiq') }}</span>
+        <span class="kpi-qiymat yashil">{{ joriy() ? 1 : 0 }}</span>
+        <span class="kpi-izoh">{{ ochiqIzoh() }}</span>
+      </div>
+      <div class="shisha kpi-karta">
+        <span class="yorliq">{{ til.t(kpiSoniKalit()) }}</span>
+        <span class="kpi-qiymat">{{ smenalar().length }}</span>
+        <span class="kpi-izoh">{{ til.t('Smenalar_KpiSoniIzoh', yopilganlar().length, ochiqSoni()) }}</span>
+      </div>
+      <div class="shisha kpi-karta">
+        <span class="yorliq">{{ til.t(kpiKamomatKalit()) }}</span>
+        <span class="kpi-qiymat son" [class.qizil-matn]="kamomat() > 0">{{ pul(kamomat()) }}</span>
+        <span class="kpi-izoh">{{ til.t('Smenalar_KpiKamomatIzoh', pul(ortiqcha())) }}</span>
+      </div>
+    </div>
+  }
+
+  @if (xato()) {
+    <div class="shisha karta bosh">
+      {{ xato() }}<br /><br />
+      <button type="button" class="tugma" (click)="yangila()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button>
+    </div>
+  }
+
+  <div class="ikki-ustun-s">
+
+    <!-- Ro'yxat -->
+    @if (!faqatTafsilot()) {
+      <section class="shisha royxat-karta" aria-labelledby="sm-royxat-s">
+        <h2 id="sm-royxat-s">{{ royxatSarlavha() }}</h2>
+
+        <!-- Keng ekran: jadval -->
+        <div class="faqat-keng jadval-skroll">
+          <div class="sm-jadval">
+            <div class="sm-qator sm-bosh">
+              <span>{{ til.t('Smenalar_ColRaqam') }}</span><span>{{ til.t('Smenalar_Operator') }}</span><span>{{ til.t('Smenalar_ColOchildi') }}</span>
+              <span class="o">{{ til.t('Smenalar_ColLitr') }}</span><span class="o">{{ til.t('Smenalar_ColSavdo') }}</span><span class="o">{{ til.t('Smenalar_ColFarq') }}</span>
+            </div>
+            @for (r of smenalar(); track r.id) {
+              <button type="button" class="sm-qator sm-tanla" [class.tanlangan]="tanlanganId() === r.id" [attr.aria-current]="tanlanganId() === r.id ? 'true' : null" (click)="tanla(r.id)">
+                <span class="raqam">{{ r.id }}</span>
+                <span>{{ r.operatorIsmi }}</span>
+                <span>{{ kunSoat(r.boshlandi) }}</span>
+                @if (r.tugadi) {
+                  <span class="o">{{ litr(r.jamiLitr) }}</span>
+                  <span class="o savdo">{{ pul(r.savdo) }}</span>
+                  <span class="o farq" [class]="farqSinf(r.farq)">{{ farqMatn(r.farq) }}</span>
+                } @else {
+                  <span class="o ikkilamchi">—</span>
+                  <span class="o ikkilamchi">{{ til.t('Smenalar_Yopilmagan') }}</span>
+                  <span class="o"><span class="pill yashil">{{ til.t('Smenalar_Ochiq') }}</span></span>
+                }
+              </button>
+            } @empty {
+              <div class="bosh">{{ yuklandi() ? til.t('Smenalar_Bosh') : til.t('Yuklanmoqda') }}</div>
+            }
+          </div>
+        </div>
+
+        <!-- Telefon: kartalar -->
+        <div class="faqat-tor sm-kartalar">
+          @for (r of smenalar(); track r.id) {
+            <button type="button" class="sm-karta" [class.tanlangan]="tanlanganId() === r.id" (click)="tanla(r.id)">
+              <span class="ust">
+                <span class="raqam">#{{ r.id }}</span>
+                <span class="bosh-joy op">{{ r.operatorIsmi }}</span>
+                @if (r.tugadi) { <span class="farq" [class]="farqSinf(r.farq)">{{ farqMatn(r.farq) }}</span> } @else { <span class="pill yashil">{{ til.t('Smenalar_Ochiq') }}</span> }
+              </span>
+              <span class="past">
+                <span class="ikkilamchi">{{ kunSoat(r.boshlandi) }}</span>
+                @if (r.tugadi) { <span class="savdo">{{ pul(r.savdo) }} <small>· {{ litr(r.jamiLitr) }} L</small></span> } @else { <span class="ikkilamchi">{{ til.t('Smenalar_Yopilmagan') }}</span> }
+              </span>
+            </button>
+          } @empty {
+            <div class="bosh">{{ yuklandi() ? til.t('Smenalar_Bosh') : til.t('Yuklanmoqda') }}</div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Tafsilot -->
+    @if (s(); as sm) {
+      <section class="shisha tafsilot-karta" aria-labelledby="sm-taf-s">
+        <div class="taf-bosh">
+          <div class="taf-matn">
+            <h2 id="sm-taf-s">{{ til.t('Smenalar_Smena', sm.id) }}</h2>
+            <span class="sarlavha-izoh">{{ sarlavhaIzoh(sm) }}</span>
+          </div>
+          @if (sm.tugadi) { <span class="pill katta">{{ til.t('Smenalar_Yopilgan') }}</span> } @else { <span class="pill yashil katta">{{ til.t('Smenalar_Ochiq') }}</span> }
+        </div>
+
+        @if (ochiq()) {
+          <div class="malumot-blok"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Smenalar_OchiqIzoh') }}</span></div>
+          <div class="pul-blok">
+            <span class="yorliq">{{ til.t('Smenalar_OchishdagiQoldiqlar') }}</span>
+            <dl class="hisob">
+              <dt>{{ til.t('Smenalar_Qaytim') }}</dt><dd>{{ pul(sm.ochishQaytim) }}</dd>
+              <dt>{{ til.t('Smenalar_Terminal') }}</dt><dd>{{ pul(sm.ochishTerminal) }}</dd>
+              <dt>{{ til.t('Smenalar_DepozitKarta') }}</dt><dd>{{ pul(sm.ochishDepozit) }}</dd>
+            </dl>
+          </div>
+        }
+
+        @if (aparatQatorlari().length) {
+          <div class="apt-blok">
+            <span class="yorliq">{{ til.t('Smenalar_Aparatlar') }}</span>
+
+            <!-- Keng ekran: jadval -->
+            <div class="faqat-keng jadval-skroll">
+              <div class="apt-jadval">
+                <div class="apt-qator apt-bosh">
+                  <span>{{ til.t('Smenalar_Aparat') }}</span><span class="o">{{ til.t('Smenalar_Oldingi') }}</span><span class="o">{{ til.t('Smenalar_Yangi') }}</span>
+                  <span class="o">{{ til.t('Smenalar_Litr') }}</span><span class="o">{{ til.t('Smenalar_Summa') }}</span>
+                </div>
+                @for (q of aparatQatorlari(); track q.aparatId) {
+                  @for (g of q.segmentlar; track $index) {
+                    <div class="apt-qator">
+                      <span class="nom"><b>{{ q.raqam }} · {{ q.yoqilgi }}</b>@if (q.segmentlar.length > 1) { <small>× {{ pul(g.narx) }}</small> }</span>
+                      <span class="o oldingi">{{ litr(g.boshi) }}</span>
+                      <span class="o oldingi">{{ litr(g.oxiri) }}</span>
+                      <span class="o qalin">{{ litr(g.litr) }}</span>
+                      <span class="o qalin">{{ pul(g.summa) }}</span>
+                    </div>
+                  }
+                }
+                @if (sm.tugadi) {
+                  <div class="apt-qator apt-jami">
+                    <span>{{ til.t('Jami') }}</span><span></span><span></span>
+                    <span class="o">{{ litr(sm.jamiLitr) }}</span><span class="o asosiy-rang">{{ pul(sm.savdo) }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Telefon: har aparat uchun karta -->
+            <div class="faqat-tor apt-kartalar">
+              @for (q of aparatQatorlari(); track q.aparatId) {
+                <div class="plitka apt-karta">
+                  <div class="qator ora">
+                    <b>{{ til.t('Aparat_Raqami', q.raqam) }}</b><span class="pill kok">{{ q.yoqilgi }}</span>
+                  </div>
+                  @for (g of q.segmentlar; track $index) {
+                    <dl class="mini">
+                      @if (q.segmentlar.length > 1) { <dt class="narx-sarlavha">× {{ pul(g.narx) }}</dt><dd></dd> }
+                      <dt>{{ til.t('Smenalar_Oldingi') }}</dt><dd>{{ litr(g.boshi) }}</dd>
+                      <dt>{{ til.t('Smenalar_Yangi') }}</dt><dd>{{ litr(g.oxiri) }}</dd>
+                      <dt>{{ til.t('Smenalar_Litr') }}</dt><dd class="qalin">{{ litr(g.litr) }}</dd>
+                      <dt>{{ til.t('Smenalar_Summa') }}</dt><dd class="qalin">{{ pul(g.summa) }}</dd>
+                    </dl>
+                  }
+                </div>
+              }
+              @if (sm.tugadi) {
+                <div class="qator ora apt-jami-tor">
+                  <b>{{ til.t('Jami') }}</b><span class="son"><b>{{ litr(sm.jamiLitr) }}</b> L · <b class="asosiy-rang">{{ pul(sm.savdo) }}</b></span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (sm.tugadi) {
+          <div class="pul-blok">
+            <span class="yorliq">{{ til.t('Smenalar_PulHisobi') }}</span>
+            <dl class="hisob">
+              @for (h of hisobSatrlari(); track $index) {
+                <dt [class.qalin]="h.qalin" [class.ust-chiziq]="h.ustChiziq">{{ h.yorliq }}</dt>
+                <dd [class.qalin]="h.qalin" [class.ust-chiziq]="h.ustChiziq">{{ h.qiymat }}</dd>
+              }
+            </dl>
+            @if (sm.farq === 0) {
+              <div class="farq-blok yashil-blok"><ikon nomi="check" [olcham]="18" [qalinlik]="2.4" /> {{ til.t('Smenalar_FarqYoq') }}</div>
+            } @else if (sm.farq < 0) {
+              <div class="farq-blok qizil-blok">
+                <span class="matn"><b>{{ til.t('Smenalar_Kamomat') }}</b> · {{ til.t('Smenalar_KamomatIzoh', sm.operatorIsmi) }}</span>
+                <b class="summa">{{ ishoraPul(sm.farq) }}</b>
+              </div>
+            } @else {
+              <div class="farq-blok kok-blok">
+                <span class="matn"><b>{{ til.t('Smenalar_Ortiqcha') }}</b> · {{ til.t('Smenalar_OrtiqchaIzoh', sm.operatorIsmi) }}</span>
+                <b class="summa">{{ ishoraPul(sm.farq) }}</b>
+              </div>
+            }
+            @if (sm.izoh) { <span class="yordam-matn">{{ til.t('Smenalar_Izoh') }}: {{ sm.izoh }}</span> }
+          </div>
+        }
+
+        <!-- Nasiya, qaytgan qarz, xarajatlar -->
+        @if (yozuvBor()) {
+          <div class="yozuvlar">
+            @if (tafsilot(); as t) {
+              @if (t.nasiyalar.length) {
+                <div class="yozuv-guruh">
+                  <span class="yorliq">{{ til.t('Smenalar_Nasiyalar') }} · {{ t.nasiyalar.length }}</span>
+                  <ul>
+                    @for (n of t.nasiyalar; track n.id) {
+                      <li>
+                        <span class="matn"><span class="nomi">{{ n.mijozIsmi }}</span><span class="izoh">{{ n.mashinaRaqami }} · {{ nasiyaMuddat(n) }}</span></span>
+                        <span class="summa">{{ pul(n.summa) }}</span>
+                        @if (ochirishMumkin()) {
+                          <button type="button" class="ochir" [class.tasdiq]="ochirTasdiq() === 'nasiya:' + n.id" [attr.aria-label]="til.t('Smenalar_Ochirish')" (click)="ochirSoragan('nasiya', n.id)">
+                            @if (ochirTasdiq() === 'nasiya:' + n.id) { {{ til.t('Smenalar_OchirishTasdiq') }} } @else { <ikon nomi="x" [olcham]="14" [qalinlik]="2.4" /> }
+                          </button>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+              @if (t.qaytishlar.length) {
+                <div class="yozuv-guruh">
+                  <span class="yorliq">{{ til.t('Smenalar_Qaytishlar') }} · {{ t.qaytishlar.length }}</span>
+                  <ul>
+                    @for (q of t.qaytishlar; track q.id) {
+                      <li>
+                        <span class="matn"><span class="nomi">{{ q.mijozIsmi }}</span><span class="izoh">{{ tolovNomi(q) }} · {{ yozuvVaqti(q.vaqt) }}</span></span>
+                        <span class="summa yashil">+{{ pul(q.summa) }}</span>
+                        @if (ochirishMumkin()) {
+                          <button type="button" class="ochir" [class.tasdiq]="ochirTasdiq() === 'qaytish:' + q.id" [attr.aria-label]="til.t('Smenalar_Ochirish')" (click)="ochirSoragan('qaytish', q.id)">
+                            @if (ochirTasdiq() === 'qaytish:' + q.id) { {{ til.t('Smenalar_OchirishTasdiq') }} } @else { <ikon nomi="x" [olcham]="14" [qalinlik]="2.4" /> }
+                          </button>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+              @if (t.xarajatlar.length) {
+                <div class="yozuv-guruh">
+                  <span class="yorliq">{{ til.t('Smenalar_Xarajatlar') }} · {{ t.xarajatlar.length }}</span>
+                  <ul>
+                    @for (x of t.xarajatlar; track x.id) {
+                      <li>
+                        <span class="matn"><span class="nomi">{{ x.sabab }}</span><span class="izoh">{{ yozuvVaqti(x.vaqt) }} · {{ xarajatManba(x) }}</span></span>
+                        <span class="summa">{{ pul(x.summa) }}</span>
+                        @if (ochirishMumkin()) {
+                          <button type="button" class="ochir" [class.tasdiq]="ochirTasdiq() === 'xarajat:' + x.id" [attr.aria-label]="til.t('Smenalar_Ochirish')" (click)="ochirSoragan('xarajat', x.id)">
+                            @if (ochirTasdiq() === 'xarajat:' + x.id) { {{ til.t('Smenalar_OchirishTasdiq') }} } @else { <ikon nomi="x" [olcham]="14" [qalinlik]="2.4" /> }
+                          </button>
+                        }
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            }
+          </div>
+        }
+
+        @if (sm.tugadi && (tuzatishMumkin() || auth.bor('Eksport'))) {
+          <div class="amallar-qator">
+            @if (tuzatishMumkin()) {
+              <button type="button" class="tugma" (click)="tuzatishOchiq.set(true)"><ikon nomi="edit" [olcham]="16" [qalinlik]="2" /> {{ til.t('Smenalar_Tuzatish') }}</button>
+            }
+            @if (auth.bor('Eksport')) {
+              <button type="button" class="tugma" [disabled]="eksportBand()" (click)="excel()"><ikon nomi="excel" [olcham]="16" [qalinlik]="2" /> {{ til.t('Smenalar_Excel') }}</button>
+            }
+          </div>
+          @if (tuzatishMumkin()) { <span class="yordam-matn">{{ til.t('Smenalar_TuzatishIzoh') }}</span> }
+        }
+      </section>
+    } @else if (tafsilotYuklanmoqda()) {
+      <section class="shisha tafsilot-karta"><div class="skelet" style="height: 320px"></div></section>
+    } @else if (!tor() && yuklandi()) {
+      <section class="shisha tafsilot-karta bosh">{{ til.t('Smenalar_Tanlang') }}</section>
+    }
+  </div>
+</div>
+
+@if (tafsilot(); as t) {
+  <tuzatish-dialog [(ochiq)]="tuzatishOchiq" [tafsilot]="t" (tuzatildi)="tuzatildi($event)" />
+}

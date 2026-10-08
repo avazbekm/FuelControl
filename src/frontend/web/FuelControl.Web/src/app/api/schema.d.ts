@@ -131,6 +131,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/bak-kirimlar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    aparatId?: number;
+                    dan?: string;
+                    gacha?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["BakKirimDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/hisobot": {
         parameters: {
             query?: never;
@@ -161,6 +200,15 @@ export interface paths {
                         "application/json": components["schemas"]["HisobotDto"];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
             };
         };
         put?: never;
@@ -171,7 +219,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/boshqaruv/bugun": {
+    "/boshqaruv": {
         parameters: {
             query?: never;
             header?: never;
@@ -193,7 +241,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["BoshqaruvBugunDto"];
+                        "application/json": components["schemas"]["BoshqaruvDto"];
                     };
                 };
             };
@@ -217,6 +265,7 @@ export interface paths {
             parameters: {
                 query?: {
                     q?: string;
+                    tur?: string;
                     dan?: string;
                     gacha?: string;
                     limit?: number;
@@ -234,6 +283,15 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["AuditYozuviDto"][];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
             };
@@ -622,6 +680,33 @@ export interface paths {
                         "application/json": components["schemas"]["YoqilgiTuriDto"];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
             };
         };
         post?: never;
@@ -700,6 +785,33 @@ export interface paths {
                         "application/json": components["schemas"]["AparatDto"];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
             };
         };
         delete?: never;
@@ -740,9 +852,95 @@ export interface paths {
                         "application/json": components["schemas"]["AparatDto"];
                     };
                 };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
             };
         };
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/aparatlar/{id}/kirim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["BakKirimYaratishDto"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AparatDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         delete?: never;
         options?: never;
         head?: never;
@@ -788,6 +986,90 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/smenalar/joriy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SmenaTafsilotDto"];
+                    };
+                };
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/smenalar/oxirgi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SmenaTafsilotDto"];
+                    };
+                };
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/smenalar/{id}": {
         parameters: {
             query?: never;
@@ -815,47 +1097,23 @@ export interface paths {
                         "application/json": components["schemas"]["SmenaTafsilotDto"];
                     };
                 };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/smenalar/joriy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
+                /** @description Forbidden */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SmenaDto"];
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
-                /** @description No Content */
-                204: {
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
-                    content?: never;
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
                 };
             };
         };
@@ -883,7 +1141,11 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SmenaOchishDto"];
+                };
+            };
             responses: {
                 /** @description Created */
                 201: {
@@ -892,6 +1154,24 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["SmenaDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
             };
@@ -935,77 +1215,40 @@ export interface paths {
                         "application/json": components["schemas"]["SmenaDto"];
                     };
                 };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/sotuvlar": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    dan?: string;
-                    gacha?: string;
-                    operatorId?: number;
-                    smenaId?: number;
-                    holati?: components["schemas"]["SotuvHolati"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
+                /** @description Bad Request */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SotuvDto"][];
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SotuvYaratishDto"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
+                /** @description Forbidden */
+                403: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SotuvDto"];
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
-                /** @description Created */
-                201: {
+                /** @description Not Found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SotuvDto"];
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
             };
@@ -1016,7 +1259,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sotuvlar/{id}": {
+    "/smenalar/{id}/korsatkich": {
         parameters: {
             query?: never;
             header?: never;
@@ -1035,7 +1278,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["SotuvTahrirlashDto"];
+                    "application/json": components["schemas"]["KorsatkichTuzatishDto"];
                 };
             };
             responses: {
@@ -1045,7 +1288,34 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SotuvDto"];
+                        "application/json": components["schemas"]["SmenaTafsilotDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
             };
@@ -1057,7 +1327,224 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sotuvlar/{id}/bekor": {
+    "/nasiyalar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    holat?: string;
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NasiyalarDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["NasiyaYaratishDto"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NasiyaDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/nasiyalar/mijozlar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    q?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MijozTaklifDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/nasiyalar/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NasiyaTafsilotDto"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/nasiyalar/{id}/qaytish": {
         parameters: {
             query?: never;
             header?: never;
@@ -1077,7 +1564,7 @@ export interface paths {
             };
             requestBody: {
                 content: {
-                    "application/json": components["schemas"]["SotuvBekorQilishDto"];
+                    "application/json": components["schemas"]["NasiyaQaytishiYaratishDto"];
                 };
             };
             responses: {
@@ -1087,12 +1574,252 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SotuvDto"];
+                        "application/json": components["schemas"]["NasiyaDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
                     };
                 };
             };
         };
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/nasiyalar/qaytishlar/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/xarajatlar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    smenaId?: number;
+                    dan?: string;
+                    gacha?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["XarajatDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["XarajatYaratishDto"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["XarajatDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/xarajatlar/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
         options?: never;
         head?: never;
         patch?: never;
@@ -1192,6 +1919,18 @@ export interface components {
             yoqilgiNomi: string;
             /** Format: double */
             totalLitr: number;
+            /** Format: double */
+            bakQoldiq: number;
+            /** Format: date-time */
+            oxirgiKirimVaqti: null | string;
+            /** Format: double */
+            oxirgiKirimLitr: null | number;
+        };
+        AparatKorsatkichDto: {
+            /** Format: int32 */
+            aparatId: number;
+            /** Format: double */
+            qiymat: number;
         };
         AparatTahrirlashDto: {
             /** Format: int32 */
@@ -1200,6 +1939,9 @@ export interface components {
             yoqilgiTuriId: number;
             /** Format: double */
             totalLitr?: null | number;
+            /** Format: double */
+            bakQoldiq?: null | number;
+            sabab?: null | string;
         };
         AparatYaratishDto: {
             /** Format: int32 */
@@ -1208,6 +1950,8 @@ export interface components {
             yoqilgiTuriId: number;
             /** Format: double */
             boshlangichTotalLitr: number;
+            /** Format: double */
+            boshlangichBakQoldiq: number;
         };
         AuditEksportDto: {
             turi: string;
@@ -1221,30 +1965,51 @@ export interface components {
             kim: string;
             amal: string;
             tafsilot: string;
+            tur: string;
         };
-        BoshqaruvBugunDto: {
-            kpi: components["schemas"]["BoshqaruvKpiDto"];
-            tolovUlushlari: components["schemas"]["TolovUlushiDto"][];
-            yoqilgiUlushlari: components["schemas"]["YoqilgiUlushiDto"][];
-            oxirgiKunlar: components["schemas"]["KunlikDto"][];
-            operatorlar: components["schemas"]["OperatorQisqaDto"][];
-            oxirgiSotuvlar: components["schemas"]["SotuvDto"][];
-        };
-        BoshqaruvKpiDto: {
-            /** Format: int64 */
-            bugungiSumma: number;
+        BakKirimDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            aparatId: number;
+            /** Format: int32 */
+            aparatRaqam: number;
             /** Format: double */
-            bugungiLitr: number;
-            /** Format: int32 */
-            sotuvSoni: number;
-            /** Format: int32 */
-            ochiqSmenalar: number;
+            litr: number;
+            /** Format: double */
+            qoldiqOldin: number;
+            /** Format: double */
+            qoldiqKeyin: number;
+            /** Format: date-time */
+            vaqt: string;
+            hujjat: null | string;
+            kimYozdi: string;
+        };
+        BakKirimYaratishDto: {
+            /** Format: double */
+            litr: number;
+            /** Format: date-time */
+            vaqt: null | string;
+            hujjat: null | string;
+        };
+        BoshqaruvDto: {
+            joriySmena: null | components["schemas"]["SmenaDto"];
+            oxirgiYopilgan: null | components["schemas"]["SmenaDto"];
             /** Format: int64 */
-            kechagiSumma: number;
-            /** Format: int64 */
-            oyJami: number;
+            oySavdo: number;
+            /** Format: double */
+            oyLitr: number;
+            /** Format: int32 */
+            oySmenaSoni: number;
             /** Format: int64 */
             oyKamomat: number;
+            /** Format: int64 */
+            oyOrtiqcha: number;
+            nasiyalar: components["schemas"]["NasiyalarXulosaDto"];
+            aparatlar: components["schemas"]["AparatDto"][];
+            oxirgiSmenalar: components["schemas"]["SmenaQisqaDto"][];
+            oyTolovlar: components["schemas"]["TolovTaqsimotiDto"];
+            oxirgiYopilganlar: components["schemas"]["SmenaDto"][];
         };
         FoydalanuvchiDto: {
             /** Format: int32 */
@@ -1294,40 +2059,67 @@ export interface components {
             izoh: string;
             kimYozdi: string;
         };
+        HisobotAparatDto: {
+            /** Format: int32 */
+            aparatId: number;
+            /** Format: int32 */
+            raqam: number;
+            yoqilgiNomi: string;
+            /** Format: double */
+            bakBoshida: number;
+            /** Format: double */
+            kirim: number;
+            /** Format: double */
+            sotildi: number;
+            /** Format: double */
+            bakOxirida: number;
+            /** Format: int64 */
+            savdo: number;
+        };
         HisobotDto: {
             qatorlar: components["schemas"]["HisobotQatoriDto"][];
             jami: components["schemas"]["HisobotQatoriDto"];
+            aparatlar: components["schemas"]["HisobotAparatDto"][];
+            /** Format: int64 */
+            avans: number;
         };
         HisobotQatoriDto: {
             guruh: string;
-            yoqilgi: null | string;
+            /** Format: date */
+            sana: null | string;
+            operatorIsmi: null | string;
+            /** Format: int32 */
+            smenaSoni: number;
             /** Format: double */
             litr: number;
             /** Format: int64 */
-            summa: number;
-            /** Format: int64 */
-            naqd: number;
+            savdo: number;
             /** Format: int64 */
             plastik: number;
             /** Format: int64 */
-            click: number;
-            /** Format: int32 */
-            soni: number;
+            depozit: number;
+            /** Format: int64 */
+            nasiya: number;
+            /** Format: int64 */
+            qaytganNasiya: number;
+            /** Format: int64 */
+            xarajat: number;
+            /** Format: int64 */
+            naqdSavdo: number;
             /** Format: int64 */
             kamomat: number;
             /** Format: int64 */
-            avans: number;
-            /** Format: int32 */
-            bekorSoni: number;
+            ortiqcha: number;
             jami: boolean;
+            /** Format: int32 */
+            xarajatSoni: number;
         };
-        KunlikDto: {
-            /** Format: date */
-            sana: string;
-            /** Format: int64 */
-            summa: number;
+        KorsatkichTuzatishDto: {
+            /** Format: int32 */
+            aparatId: number;
             /** Format: double */
-            litr: number;
+            qiymat: number;
+            sabab: string;
         };
         LoginJavobiDto: {
             token: string;
@@ -1339,6 +2131,17 @@ export interface components {
             login: string;
             parolYokiPin: string;
         };
+        MijozTaklifDto: {
+            mijozIsmi: string;
+            telefon: string;
+            mashinaRaqami: string;
+            /** Format: int32 */
+            nasiyaSoni: number;
+            /** Format: int64 */
+            faolQarz: number;
+            /** Format: date */
+            oxirgiNasiya: string;
+        };
         NarxTarixiDto: {
             /** Format: date-time */
             vaqt: string;
@@ -1348,6 +2151,97 @@ export interface components {
             /** Format: int64 */
             yangiNarx: number;
             kim: string;
+        };
+        NasiyaDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            smenaId: number;
+            operatorIsmi: string;
+            mijozIsmi: string;
+            telefon: string;
+            mashinaRaqami: string;
+            /** Format: int64 */
+            summa: number;
+            /** Format: int64 */
+            qaytgan: number;
+            /** Format: int64 */
+            qoldiq: number;
+            /** Format: date */
+            muddat: string;
+            holati: components["schemas"]["NasiyaHolati"];
+            /** Format: int32 */
+            muddatgachaKun: number;
+            /** Format: date-time */
+            yozildi: string;
+            /** Format: date-time */
+            yopildi: null | string;
+            izoh: null | string;
+            /** Format: int32 */
+            muallifId: number;
+        };
+        /** @enum {unknown} */
+        NasiyaHolati: "Faol" | "MuddatiOtgan" | "Yopilgan";
+        NasiyalarDto: {
+            xulosa: components["schemas"]["NasiyalarXulosaDto"];
+            royxat: components["schemas"]["NasiyaDto"][];
+        };
+        NasiyalarXulosaDto: {
+            /** Format: int64 */
+            faolQarz: number;
+            /** Format: int32 */
+            faolSoni: number;
+            /** Format: int64 */
+            muddatiOtgan: number;
+            /** Format: int32 */
+            muddatiOtganSoni: number;
+            /** Format: int64 */
+            oyBerilgan: number;
+            /** Format: int32 */
+            oyBerilganSoni: number;
+            /** Format: int64 */
+            oyQaytgan: number;
+            /** Format: int32 */
+            oyQaytganSoni: number;
+        };
+        NasiyaQaytishiDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            nasiyaId: number;
+            mijozIsmi: string;
+            /** Format: int32 */
+            smenaId: null | number;
+            /** Format: int64 */
+            summa: number;
+            usul: components["schemas"]["TolovTuri"];
+            /** Format: date-time */
+            vaqt: string;
+            kimYozdi: string;
+            izoh: null | string;
+            /** Format: int32 */
+            muallifId: number;
+        };
+        NasiyaQaytishiYaratishDto: {
+            /** Format: int64 */
+            summa: number;
+            usul: components["schemas"]["TolovTuri"];
+            smenaHisobiga: boolean;
+            izoh: null | string;
+        };
+        NasiyaTafsilotDto: {
+            nasiya: components["schemas"]["NasiyaDto"];
+            qaytishlar: components["schemas"]["NasiyaQaytishiDto"][];
+        };
+        NasiyaYaratishDto: {
+            mijozIsmi: string;
+            telefon: string;
+            mashinaRaqami: string;
+            /** Format: int64 */
+            summa: number;
+            /** Format: date */
+            muddat: string;
+            izoh: null | string;
         };
         OperatorHisobDto: {
             /** Format: int32 */
@@ -1365,18 +2259,6 @@ export interface components {
             oySmenalar: number;
             harakatlar: components["schemas"]["HisobHarakatiDto"][];
         };
-        OperatorQisqaDto: {
-            /** Format: int32 */
-            operatorId: number;
-            ism: string;
-            /** Format: int64 */
-            bugungiSumma: number;
-            /** Format: double */
-            bugungiLitr: number;
-            /** Format: int32 */
-            sotuvSoni: number;
-            smenaOchiqmi: boolean;
-        };
         PinOrnatishDto: {
             yangiParolYokiPin: string;
         };
@@ -1391,7 +2273,7 @@ export interface components {
         /** @enum {unknown} */
         Rol: "Operator" | "Boshliq" | "Admin";
         /** @enum {unknown} */
-        Ruxsat: "Boshqaruv" | "SotuvKiritish" | "SmenaOchish" | "SmenaYopish" | "Smenalar" | "Hisobotlar" | "Eksport" | "Operatorlar" | "AvansBerish" | "SotuvBekorQilish" | "SotuvTahrirlash" | "Audit" | "Sozlamalar";
+        Ruxsat: "Boshqaruv" | "Savdo" | "SmenaOchish" | "SmenaYopish" | "Smenalar" | "Nasiyalar" | "NasiyaYozish" | "QarzQaytdi" | "XarajatYozish" | "BakKirim" | "KorsatkichTuzatish" | "Hisobotlar" | "Eksport" | "Operatorlar" | "AvansBerish" | "Audit" | "Sozlamalar";
         RuxsatlarOrnatishDto: {
             ruxsatlar: components["schemas"]["Ruxsat"][];
         };
@@ -1406,110 +2288,134 @@ export interface components {
             /** Format: date-time */
             tugadi: null | string;
             /** Format: int64 */
-            kutilganNaqd: number;
+            ochishQaytim: number;
             /** Format: int64 */
-            kutilganPlastik: number;
+            ochishTerminal: number;
             /** Format: int64 */
-            kutilganClick: number;
+            ochishDepozit: number;
+            /** Format: int64 */
+            yopishTerminal: null | number;
+            /** Format: int64 */
+            yopishDepozit: null | number;
+            /** Format: int64 */
+            sanalganNaqd: null | number;
             /** Format: double */
             jamiLitr: number;
-            /** Format: int32 */
-            sotuvSoni: number;
             /** Format: int64 */
-            topshirilganNaqd: null | number;
-            /** Format: int64 */
-            topshirilganPlastik: null | number;
-            /** Format: int64 */
-            topshirilganClick: null | number;
-            /** Format: int64 */
-            farq: number;
-            /** Format: int64 */
-            kamomat: number;
-            /** Format: int64 */
-            ortiqcha: number;
-            izoh: null | string;
-        };
-        SmenaTafsilotDto: {
-            smena: components["schemas"]["SmenaDto"];
-            sotuvlar: components["schemas"]["SotuvDto"][];
-        };
-        SmenaYopishDto: {
-            /** Format: int64 */
-            naqd: number;
+            savdo: number;
             /** Format: int64 */
             plastik: number;
             /** Format: int64 */
-            click: number;
+            depozitFarqi: number;
+            /** Format: int64 */
+            nasiyaJami: number;
+            /** Format: int64 */
+            qaytganNasiya: number;
+            /** Format: int64 */
+            xarajatJami: number;
+            /** Format: int64 */
+            kutilgan: number;
+            /** Format: int64 */
+            farq: number;
             izoh: null | string;
         };
-        SotuvBekorQilishDto: {
-            sabab: string;
-        };
-        SotuvDto: {
-            /** Format: int32 */
-            id: number;
-            /** Format: int32 */
-            smenaId: number;
-            /** Format: int32 */
-            operatorId: number;
-            operatorIsmi: string;
+        SmenaKorsatkichDto: {
             /** Format: int32 */
             aparatId: number;
             /** Format: int32 */
-            aparatRaqami: number;
+            aparatRaqam: number;
             yoqilgiNomi: string;
+            /** Format: double */
+            boshi: number;
+            /** Format: double */
+            oxiri: number;
             /** Format: int64 */
             narx: number;
             /** Format: double */
             litr: number;
             /** Format: int64 */
             summa: number;
+            narxOzgarishida: boolean;
+        };
+        SmenaOchishDto: {
+            /** Format: int64 */
+            qaytim: number;
+            /** Format: int64 */
+            terminal: number;
+            /** Format: int64 */
+            depozit: number;
+        };
+        SmenaQisqaDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: date */
+            sana: string;
+            operatorIsmi: string;
+            /** Format: int64 */
+            savdo: number;
+            /** Format: double */
+            litr: number;
+            /** Format: int64 */
+            farq: number;
+        };
+        SmenaTafsilotDto: {
+            smena: components["schemas"]["SmenaDto"];
+            korsatkichlar: components["schemas"]["SmenaKorsatkichDto"][];
+            nasiyalar: components["schemas"]["NasiyaDto"][];
+            qaytishlar: components["schemas"]["NasiyaQaytishiDto"][];
+            xarajatlar: components["schemas"]["XarajatDto"][];
+        };
+        SmenaYopishDto: {
+            korsatkichlar: components["schemas"]["AparatKorsatkichDto"][];
+            /** Format: int64 */
+            terminal: number;
+            /** Format: int64 */
+            depozit: number;
+            /** Format: int64 */
+            sanalganNaqd: number;
+            izoh: null | string;
+        };
+        TolovTaqsimotiDto: {
+            /** Format: int64 */
+            naqd: number;
+            /** Format: int64 */
+            plastik: number;
+            /** Format: int64 */
+            depozit: number;
+            /** Format: int64 */
+            nasiya: number;
+        };
+        /** @enum {unknown} */
+        TolovTuri: "Naqd" | "Plastik" | "Depozit";
+        XarajatDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            smenaId: number;
+            /** Format: int64 */
+            summa: number;
+            sabab: string;
+            manba: components["schemas"]["XarajatManbai"];
             /** Format: date-time */
             vaqt: string;
-            tolovlar: components["schemas"]["TolovDto"][];
-            holati: components["schemas"]["SotuvHolati"];
-            bekorSababi: null | string;
-            bekorQilgan: null | string;
+            kimYozdi: string;
+            /** Format: int32 */
+            muallifId: number;
         };
         /** @enum {unknown} */
-        SotuvHolati: "Faol" | "BekorQilingan";
-        SotuvTahrirlashDto: {
-            /** Format: int32 */
-            aparatId: number;
+        XarajatManbai: "Kassa" | "Depozit";
+        XarajatYaratishDto: {
             /** Format: int64 */
             summa: number;
-            tolovlar: components["schemas"]["TolovDto"][];
             sabab: string;
-        };
-        SotuvYaratishDto: {
-            /** Format: int32 */
-            aparatId: number;
-            /** Format: double */
-            litr: null | number;
-            /** Format: int64 */
-            summa: null | number;
-            tolovlar: null | components["schemas"]["TolovDto"][];
-            /** Format: uuid */
-            idempotencyKey: string;
-            tolovTuri?: null | components["schemas"]["TolovTuri"];
-        };
-        TolovDto: {
-            turi: components["schemas"]["TolovTuri"];
-            /** Format: int64 */
-            summa: number;
-        };
-        /** @enum {unknown} */
-        TolovTuri: "Naqd" | "Plastik" | "Click";
-        TolovUlushiDto: {
-            turi: components["schemas"]["TolovTuri"];
-            /** Format: int64 */
-            summa: number;
+            manba: components["schemas"]["XarajatManbai"];
         };
         YoqilgiTahrirlashDto: {
             nomi: string;
             /** Format: int64 */
             narx: number;
             rang: string;
+            korsatkichlar?: null | components["schemas"]["AparatKorsatkichDto"][];
         };
         YoqilgiTuriDto: {
             /** Format: int32 */
@@ -1519,14 +2425,6 @@ export interface components {
             narx: number;
             rang: string;
             aparatgaBiriktirilgan: boolean;
-        };
-        YoqilgiUlushiDto: {
-            nomi: string;
-            rang: string;
-            /** Format: double */
-            litr: number;
-            /** Format: int64 */
-            summa: number;
         };
         YoqilgiYaratishDto: {
             nomi: string;

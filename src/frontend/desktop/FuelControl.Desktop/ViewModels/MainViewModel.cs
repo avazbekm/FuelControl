@@ -11,13 +11,13 @@ public partial class MainViewModel : ObservableObject
 {
     public LoginViewModel Login { get; }
     public BoshqaruvViewModel Boshqaruv { get; } = new();
-    public SotuvViewModel Sotuv { get; } = new();
+    public SavdoViewModel Savdo { get; } = new();
     public SmenalarViewModel Smenalar { get; } = new();
+    public NasiyalarViewModel Nasiyalar { get; } = new();
     public HisobotViewModel Hisobot { get; } = new();
     public OperatorlarViewModel Operatorlar { get; } = new();
     public SozlamalarViewModel Sozlamalar { get; } = new();
     public AuditViewModel Audit { get; } = new();
-    public SotuvTahrirViewModel SotuvTahrir { get; } = new();
 
     [ObservableProperty] private bool _kirilgan;
     [ObservableProperty] private Foydalanuvchi _joriy = Malumot.JoriyFoydalanuvchi;
@@ -30,15 +30,38 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand] private void BildirishniYop() => BildirishOchiq = false;
 
+    // Tasdiq dialogi (Bildirish.Tasdiqla)
+    [ObservableProperty] private bool _tasdiqOchiq;
+    [ObservableProperty] private string _tasdiqSarlavha = "";
+    [ObservableProperty] private string _tasdiqMatni = "";
+    [ObservableProperty] private string _tasdiqTugma = "";
+    [ObservableProperty] private bool _tasdiqXavfli;
+    private System.Threading.Tasks.TaskCompletionSource<bool>? _tasdiq;
+
+    [RelayCommand] private void TasdiqJavob(string ha)
+    {
+        TasdiqOchiq = false;
+        var t = _tasdiq; _tasdiq = null;
+        t?.TrySetResult(ha == "1");
+    }
+
+    // Smena hisobi dialoglari (istalgan sahifadan ochiladi)
+    public NasiyaDialogVM NasiyaDialog => Dialoglar.Nasiya;
+    public QaytishDialogVM QaytishDialog => Dialoglar.Qaytish;
+    public XarajatDialogVM XarajatDialog => Dialoglar.Xarajat;
+    public BakKirimDialogVM BakDialog => Dialoglar.Bak;
+    public NarxDialogVM NarxDialog => Dialoglar.Narx;
+
     /// <summary>Yon menyudagi indikator: SignalR ulanishi holati.</summary>
-    public bool AloqaBor => Malumot.AloqaBor;
-    public bool AloqaYoq => !Malumot.AloqaBor;
+    public bool AloqaBor => Malumot.Holat == Malumot.AloqaHolati.Bor;
+    public bool AloqaUlanmoqda => Malumot.Holat == Malumot.AloqaHolati.Ulanmoqda;
+    public bool AloqaYoq => Malumot.Holat == Malumot.AloqaHolati.Yoq;
 
     // Yon menyu: yig'ilgan rejimda faqat ikonkalar qoladi
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MenyuKengligi), nameof(MenyuOchiq))]
     private bool _menyuYigilgan;
-    public double MenyuKengligi => MenyuYigilgan ? 92 : 252;
+    public double MenyuKengligi => MenyuYigilgan ? 92 : 264;
     public bool MenyuOchiq => !MenyuYigilgan;
 
     [ObservableProperty] private bool _qorongiRejim;
@@ -46,31 +69,38 @@ public partial class MainViewModel : ObservableObject
     public Til Til => Til.Joriy;
     public string JoriyRolNomi => Joriy.RolNomi;
 
+    /// <summary>Menyudagi "Nasiyalar" belgisi: muddati o'tgan qarzlar soni (0 bo'lsa ko'rinmaydi).</summary>
+    public int MuddatiOtganSoni => Malumot.MuddatiOtganSoni;
+    public bool MuddatiOtganBor => MuddatiOtganSoni > 0;
+    public string MuddatiOtganIzoh => Til.F("MuddatiOtganQarzlarSoni", MuddatiOtganSoni);
+
+    public const int SBoshqaruv = 0, SSavdo = 1, SSmenalar = 2, SHisobot = 3, SOperatorlar = 4, SSozlamalar = 5, SAudit = 6, SNasiyalar = 7;
+
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(BoshqaruvSahifasi), nameof(SotuvSahifasi), nameof(SmenalarSahifasi),
+    [NotifyPropertyChangedFor(nameof(BoshqaruvSahifasi), nameof(SavdoSahifasi), nameof(SmenalarSahifasi), nameof(NasiyalarSahifasi),
         nameof(HisobotSahifasi), nameof(OperatorlarSahifasi), nameof(SozlamalarSahifasi), nameof(AuditSahifasi))]
     private int _sahifa;
 
-    public bool BoshqaruvSahifasi => Sahifa == 0;
-    public bool SotuvSahifasi => Sahifa == 1;
-    public bool SmenalarSahifasi => Sahifa == 2;
-    public bool HisobotSahifasi => Sahifa == 3;
-    public bool OperatorlarSahifasi => Sahifa == 4;
-    public bool SozlamalarSahifasi => Sahifa == 5;
-    public bool AuditSahifasi => Sahifa == 6;
+    public bool BoshqaruvSahifasi => Sahifa == SBoshqaruv;
+    public bool SavdoSahifasi => Sahifa == SSavdo;
+    public bool SmenalarSahifasi => Sahifa == SSmenalar;
+    public bool NasiyalarSahifasi => Sahifa == SNasiyalar;
+    public bool HisobotSahifasi => Sahifa == SHisobot;
+    public bool OperatorlarSahifasi => Sahifa == SOperatorlar;
+    public bool SozlamalarSahifasi => Sahifa == SSozlamalar;
+    public bool AuditSahifasi => Sahifa == SAudit;
 
     // Ruxsatlarga qarab menyu bo'limlari
     public bool KoradiBoshqaruv => Joriy.Bor(Ruxsat.Boshqaruv);
-    public bool KoradiSotuv => Joriy.Bor(Ruxsat.SotuvKiritish);
+    public bool KoradiSavdo => Joriy.Bor(Ruxsat.Savdo);
     public bool KoradiSmenalar => Joriy.Bor(Ruxsat.Smenalar);
+    public bool KoradiNasiyalar => Joriy.Bor(Ruxsat.Nasiyalar);
     public bool KoradiHisobot => Joriy.Bor(Ruxsat.Hisobotlar);
     public bool KoradiOperatorlar => Joriy.Bor(Ruxsat.Operatorlar);
     public bool KoradiAudit => Joriy.Bor(Ruxsat.Audit);
     public bool KoradiSozlamalar => Joriy.Bor(Ruxsat.Sozlamalar);
     public bool KoradiEksport => Joriy.Bor(Ruxsat.Eksport);
     public bool KoradiAvans => Joriy.Bor(Ruxsat.AvansBerish);
-    public bool KoradiBekorQilish => Joriy.Bor(Ruxsat.SotuvBekorQilish);
-    public bool KoradiSotuvTahrirlash => Joriy.Bor(Ruxsat.SotuvTahrirlash);
 
     public MainViewModel()
     {
@@ -83,21 +113,31 @@ public partial class MainViewModel : ObservableObject
             Kirilgan = true;
         });
         Malumot.Ozgardi += RuxsatlarniYangila;
-        Malumot.AloqaOzgardi += () => { OnPropertyChanged(nameof(AloqaBor)); OnPropertyChanged(nameof(AloqaYoq)); };
+        Malumot.AloqaOzgardi += () => { OnPropertyChanged(nameof(AloqaBor)); OnPropertyChanged(nameof(AloqaUlanmoqda)); OnPropertyChanged(nameof(AloqaYoq)); };
         Malumot.MajburiyChiqish += sabab => _ = ChiqishAsync(sabab);
         Bildirish.Korsatildi += (sarlavha, matn, xato) =>
         {
             BildirishSarlavha = sarlavha; BildirishMatni = matn; BildirishXato = xato;
             BildirishOchiq = true;
         };
+        Bildirish.TasdiqSoraldi += (sarlavha, matn, tugma, xavfli, t) =>
+        {
+            _tasdiq?.TrySetResult(false);
+            _tasdiq = t;
+            TasdiqSarlavha = sarlavha; TasdiqMatni = matn; TasdiqTugma = tugma; TasdiqXavfli = xavfli;
+            TasdiqOchiq = true;
+        };
         Til.Ozgardi += () => OnPropertyChanged(string.Empty);
+        // Boshqa sahifadan (Boshqaruv, Savdo) "Barcha nasiyalar" / "Barcha smenalar" kabi o'tishlar.
+        Navigatsiya.Sorov += s => { if (SahifaRuxsatli(s)) Sahifa = s; };
     }
 
     private async System.Threading.Tasks.Task ChiqishAsync(string? sabab)
     {
         if (!Kirilgan) return;
         Kirilgan = false;
-        SotuvTahrir.Ochiq = false;
+        foreach (var d in new DialogVM[] { Dialoglar.Nasiya, Dialoglar.Qaytish, Dialoglar.Xarajat, Dialoglar.Bak, Dialoglar.Narx }) d.Ochiq = false;
+        if (TasdiqOchiq) TasdiqJavob("0");
         await Malumot.Chiqish();
         Joriy = Malumot.JoriyFoydalanuvchi;
         Login.Tozala(sabab);
@@ -106,44 +146,35 @@ public partial class MainViewModel : ObservableObject
     /// <summary>Ruxsati bor birinchi bo'lim — kirgandan keyin shu ochiladi.</summary>
     private int BirinchiSahifa()
     {
-        if (KoradiBoshqaruv) return 0;
-        if (KoradiSotuv) return 1;
-        if (KoradiSmenalar) return 2;
-        if (KoradiHisobot) return 3;
-        if (KoradiOperatorlar) return 4;
-        if (KoradiAudit) return 6;
-        return 5;
+        if (KoradiBoshqaruv) return SBoshqaruv;
+        if (KoradiSavdo) return SSavdo;
+        if (KoradiSmenalar) return SSmenalar;
+        if (KoradiNasiyalar) return SNasiyalar;
+        if (KoradiHisobot) return SHisobot;
+        if (KoradiOperatorlar) return SOperatorlar;
+        if (KoradiAudit) return SAudit;
+        return SSozlamalar;
     }
 
     private void RuxsatlarniYangila()
     {
-        foreach (var n in new[] { nameof(KoradiBoshqaruv), nameof(KoradiSotuv), nameof(KoradiSmenalar), nameof(KoradiHisobot),
-                     nameof(KoradiOperatorlar), nameof(KoradiAudit), nameof(KoradiSozlamalar),
-                     nameof(KoradiEksport), nameof(KoradiAvans), nameof(KoradiBekorQilish), nameof(KoradiSotuvTahrirlash) })
+        foreach (var n in new[] { nameof(KoradiBoshqaruv), nameof(KoradiSavdo), nameof(KoradiSmenalar), nameof(KoradiNasiyalar), nameof(KoradiHisobot),
+                     nameof(KoradiOperatorlar), nameof(KoradiAudit), nameof(KoradiSozlamalar), nameof(KoradiEksport), nameof(KoradiAvans),
+                     nameof(MuddatiOtganSoni), nameof(MuddatiOtganBor), nameof(MuddatiOtganIzoh) })
             OnPropertyChanged(n);
         OnPropertyChanged(nameof(JoriyRolNomi));
-        BugungiHisobotCommand.NotifyCanExecuteChanged();
         // Ochiq sahifaga ruxsat olib tashlangan bo'lsa — ruxsati bor birinchi sahifaga o'tamiz.
         if (Kirilgan && !SahifaRuxsatli(Sahifa)) Sahifa = BirinchiSahifa();
     }
 
     private bool SahifaRuxsatli(int s) => s switch
     {
-        0 => KoradiBoshqaruv, 1 => KoradiSotuv, 2 => KoradiSmenalar, 3 => KoradiHisobot,
-        4 => KoradiOperatorlar, 5 => KoradiSozlamalar, 6 => KoradiAudit, _ => false,
+        SBoshqaruv => KoradiBoshqaruv, SSavdo => KoradiSavdo, SSmenalar => KoradiSmenalar, SNasiyalar => KoradiNasiyalar,
+        SHisobot => KoradiHisobot, SOperatorlar => KoradiOperatorlar, SSozlamalar => KoradiSozlamalar, SAudit => KoradiAudit, _ => false,
     };
 
     [RelayCommand]
     private void SahifaniOch(string indeks) => Sahifa = int.Parse(indeks);
-
-    /// <summary>Boshqaruv → "Bugungi hisobot": Hisobot sahifasi bugungi davr bilan.</summary>
-    [RelayCommand(CanExecute = nameof(KoradiHisobot))]
-    private async System.Threading.Tasks.Task BugungiHisobot()
-    {
-        Hisobot.TezDavrCommand.Execute("bugun");
-        Sahifa = 3;
-        await Hisobot.HozirYukla();
-    }
 
     [RelayCommand]
     private void MenyuniYig() => MenyuYigilgan = !MenyuYigilgan;

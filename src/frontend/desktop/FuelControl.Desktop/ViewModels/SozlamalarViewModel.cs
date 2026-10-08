@@ -17,7 +17,7 @@ public partial class YoqilgiQatoriVm : ObservableObject
     public string Nomi => Yoqilgi.Nomi;
     public string Rang => Yoqilgi.Rang;
     public string JoriyNarx => Format.Pul(Yoqilgi.Narx);
-    public string AparatSoni => Malumot.Aparatlar.Count(a => a.Yoqilgi.Id == Yoqilgi.Id) + " " + Til.T("TaAparat");
+    public string AparatSoni => Til.F("Sozlama_AparatSoni", Malumot.Aparatlar.Count(a => a.Yoqilgi.Id == Yoqilgi.Id));
     [ObservableProperty] private string _yangiNarx = "";
     public YoqilgiQatoriVm(YoqilgiTuri y)
     {
@@ -29,49 +29,23 @@ public partial class YoqilgiQatoriVm : ObservableObject
     public void NarxYangilandi() => OnPropertyChanged(nameof(JoriyNarx));
 }
 
-/// <summary>Bitta ruxsat qatori: belgilansa server'ga darhol yoziladi; rad etilsa belgi qaytariladi.</summary>
+/// <summary>Bitta ruxsat qatori — qoralama: o'zgarish faqat "Ruxsatlarni saqlash" tugmasi bilan yuboriladi (§7.14).</summary>
 public partial class RuxsatElementi : ObservableObject
 {
-    private readonly Foydalanuvchi _f;
-    private bool _qaytarilmoqda;
     public Ruxsat Ruxsat { get; }
-    public string Nomi => Til.T("R_" + Ruxsat);
-    public string Izoh => Til.T("RI_" + Ruxsat);
+    public string Nomi => Ruxsatlar.Nomi(Ruxsat);
+    /// <summary>Faqat amallar uchun izoh (bo'limlar nomi o'zi tushunarli).</summary>
+    public string Izoh => Guruh == "A" ? Ruxsatlar.Izoh(Ruxsat) : "";
+    public bool IzohBor => Guruh == "A";
+    public bool Yangi => Ruxsatlar.Yangilar.Contains(Ruxsat);
     public string Guruh { get; }
     [ObservableProperty] private bool _tanlangan;
 
     public RuxsatElementi(Foydalanuvchi f, (Ruxsat Ruxsat, string Guruh) r)
     {
-        _f = f; Ruxsat = r.Ruxsat; Guruh = r.Guruh;
+        Ruxsat = r.Ruxsat; Guruh = r.Guruh;
         _tanlangan = f.Bor(r.Ruxsat);
         Til.Ozgardi += () => OnPropertyChanged(string.Empty);
-    }
-
-    partial void OnTanlanganChanged(bool value)
-    {
-        if (_qaytarilmoqda) return;
-        _ = Saqla(value);
-    }
-
-    private async Task Saqla(bool value)
-    {
-        var eski = _f.Ruxsatlar;
-        var yangi = eski.ToHashSet();
-        if (value) yangi.Add(Ruxsat); else yangi.Remove(Ruxsat);
-        _f.Ruxsatlar = yangi;
-        try
-        {
-            if (!Malumot.AloqaBor) throw new ApiXatosi(Til.T("AloqaYoq"), 0);
-            await Malumot.RuxsatlarniOrnat(_f.Id, yangi);
-        }
-        catch (ApiXatosi e)
-        {
-            _f.Ruxsatlar = eski;
-            _qaytarilmoqda = true;
-            Tanlangan = !value;
-            _qaytarilmoqda = false;
-            Bildirish.Xato(e.Message);
-        }
     }
 }
 
@@ -109,6 +83,7 @@ public partial class SozlamalarViewModel : ObservableObject
     public bool YoqilgiYangi => YoqilgiTahrir is null;
     public bool YoqilginiOchirishMumkin => YoqilgiTahrir is not null && !Malumot.Aparatlar.Any(a => a.Yoqilgi.Id == YoqilgiTahrir.Id);
     public ObservableCollection<Aparat> Aparatlar { get; } = new();
+    public List<AparatKartasi> AparatKartalari { get; private set; } = new();
     public ObservableCollection<Foydalanuvchi> Foydalanuvchilar { get; } = new();
     public ObservableCollection<NarxTarixi> NarxTarixi { get; } = new();
     public List<RolElementi> Rollar { get; private set; } = Enum.GetValues<Rol>().Select(r => new RolElementi { Rol = r }).ToList();
@@ -124,8 +99,11 @@ public partial class SozlamalarViewModel : ObservableObject
     [ObservableProperty] private Foydalanuvchi? _ruxsatFoydalanuvchi;
     public ObservableCollection<RuxsatElementi> BolimRuxsatlari { get; } = new();
     public ObservableCollection<RuxsatElementi> AmalRuxsatlari { get; } = new();
+    private HashSet<Ruxsat> Qoralama => BolimRuxsatlari.Concat(AmalRuxsatlari).Where(e => e.Tanlangan).Select(e => e.Ruxsat).ToHashSet();
     public string RuxsatIzohi => RuxsatFoydalanuvchi is null ? "" :
-        $"{RuxsatFoydalanuvchi.RolNomi} · {RuxsatFoydalanuvchi.RuxsatSoni} {Til.T("TaRuxsat")}";
+        $"{RuxsatFoydalanuvchi.RolNomi} · {Til.F("Sozlama_RuxsatSoni", Qoralama.Count)}";
+    /// <summary>Qoralama serverdagidan farq qiladi — "Saqlanmagan o'zgarishlar".</summary>
+    public bool RuxsatSaqlanmagan => RuxsatFoydalanuvchi is { } f && !Qoralama.SetEquals(f.Ruxsatlar);
 
     // ---- Aparat dialogi
     [ObservableProperty] private bool _aparatDialogOchiq;
@@ -133,8 +111,14 @@ public partial class SozlamalarViewModel : ObservableObject
     [ObservableProperty] private string _aparatRaqam = "";
     [ObservableProperty] private YoqilgiTuri? _aparatYoqilgi;
     [ObservableProperty] private string _aparatTotalLitr = "";
+    [ObservableProperty] private string _aparatBak = "";
+    [ObservableProperty] private string _aparatSabab = "";
     [ObservableProperty] private string _aparatXato = "";
-    public string AparatDialogSarlavha => AparatTahrir is null ? Til.T("YangiAparat") : Til.T("AparatniTahrirlash");
+    public string AparatDialogSarlavha => AparatTahrir is null ? Til.T("YangiAparat") : Til.F("Aparat_Tahrirlash", AparatTahrir.Raqam);
+    public string AparatDialogIzoh => Til.T(AparatTahrir is null ? "Aparat_YangiIzoh" : "Aparat_AuditgaYoziladi");
+    public bool AparatTahrirda => AparatTahrir is not null;
+    public string AparatPultYorliq => Til.T(AparatTahrir is null ? "Aparat_BoshlangichPult" : "Aparat_PultLitr").ToUpperInvariant();
+    public string AparatBakYorliq => Til.T(AparatTahrir is null ? "Aparat_BoshlangichBak" : "Aparat_BakLitr").ToUpperInvariant();
 
     // ---- Foydalanuvchi dialogi
     [ObservableProperty] private bool _fDialogOchiq;
@@ -198,11 +182,13 @@ public partial class SozlamalarViewModel : ObservableObject
             _yoqilgiImzo = yImzo;
         }
 
-        var aImzo = string.Join("|", Malumot.Aparatlar.Select(a => $"{a.Id}:{a.Raqam}:{a.Yoqilgi.Id}:{a.Yoqilgi.Nomi}:{a.TotalLitr}"));
+        var aImzo = string.Join("|", Malumot.Aparatlar.Select(a => $"{a.Id}:{a.Raqam}:{a.Yoqilgi.Id}:{a.Yoqilgi.Nomi}:{a.TotalLitr}:{a.BakQoldiq}:{a.Yoqilgi.Rang}"));
         if (aImzo != _aparatImzo)
         {
             Aparatlar.Clear();
             foreach (var a in Malumot.Aparatlar.OrderBy(a => a.Raqam)) Aparatlar.Add(a);
+            AparatKartalari = Malumot.Aparatlar.OrderBy(a => a.Raqam).Select(a => new AparatKartasi(a, YoqilgiBelgi.Ol(a.Yoqilgi))).ToList();
+            OnPropertyChanged(nameof(AparatKartalari));
             _aparatImzo = aImzo;
             OnPropertyChanged(nameof(YoqilginiOchirishMumkin));
         }
@@ -227,7 +213,7 @@ public partial class SozlamalarViewModel : ObservableObject
         var rf = Foydalanuvchilar.FirstOrDefault(f => f.Id == RuxsatFoydalanuvchi?.Id)
                  ?? Foydalanuvchilar.FirstOrDefault(f => f.Rol == Rol.Operator) ?? Foydalanuvchilar.FirstOrDefault();
         var belgilar = BolimRuxsatlari.Concat(AmalRuxsatlari).Where(e => e.Tanlangan).Select(e => e.Ruxsat).ToHashSet();
-        if (rf != RuxsatFoydalanuvchi || (rf is not null && !belgilar.SetEquals(rf.Ruxsatlar)))
+        if (rf != RuxsatFoydalanuvchi || (rf is not null && !belgilar.SetEquals(rf.Ruxsatlar) && !_qoralamaTahrirda))
         {
             RuxsatFoydalanuvchi = null;
             RuxsatFoydalanuvchi = rf;
@@ -249,20 +235,47 @@ public partial class SozlamalarViewModel : ObservableObject
         foreach (var r in Ruxsatlar.Royxat)
         {
             var e = new RuxsatElementi(value, r);
-            e.PropertyChanged += (_, _) => OnPropertyChanged(nameof(RuxsatIzohi));
+            e.PropertyChanged += (_, a) =>
+            {
+                if (a.PropertyName != nameof(RuxsatElementi.Tanlangan)) return;
+                _qoralamaTahrirda = true;
+                OnPropertyChanged(nameof(RuxsatIzohi)); OnPropertyChanged(nameof(RuxsatSaqlanmagan));
+                RuxsatlarniSaqlaCommand.NotifyCanExecuteChanged();
+            };
             (r.Guruh == "B" ? BolimRuxsatlari : AmalRuxsatlari).Add(e);
         }
-        OnPropertyChanged(nameof(RuxsatIzohi));
+        _qoralamaTahrirda = false;
+        OnPropertyChanged(nameof(RuxsatIzohi)); OnPropertyChanged(nameof(RuxsatSaqlanmagan));
+        RuxsatlarniSaqlaCommand.NotifyCanExecuteChanged();
     }
 
-    [RelayCommand] private void BolimniTanla(string i) => Bolim = int.Parse(i);
-    [RelayCommand] private void RuxsatFoydalanuvchisiniTanla(Foydalanuvchi f) => RuxsatFoydalanuvchi = f;
+    private bool _qoralamaTahrirda;
 
+    [RelayCommand] private void BolimniTanla(string i) => Bolim = int.Parse(i);
+    [RelayCommand] private void RuxsatFoydalanuvchisiniTanla(Foydalanuvchi f) { _qoralamaTahrirda = false; RuxsatFoydalanuvchi = f; }
+
+    /// <summary>Rol bo'yicha standart to'plam qoralamaga qo'yiladi (saqlash — alohida tugma).</summary>
     [RelayCommand(CanExecute = nameof(AloqaBor))]
-    private async Task StandartRuxsatlar()
+    private void StandartRuxsatlar()
     {
         if (RuxsatFoydalanuvchi is null) return;
-        try { await Malumot.RuxsatlarniOrnat(RuxsatFoydalanuvchi.Id, Ruxsatlar.Standart(RuxsatFoydalanuvchi.Rol)); }
+        var st = Ruxsatlar.Standart(RuxsatFoydalanuvchi.Rol);
+        foreach (var e in BolimRuxsatlari.Concat(AmalRuxsatlari)) e.Tanlangan = st.Contains(e.Ruxsat);
+    }
+
+    private bool RuxsatSaqlashMumkin() => Malumot.AloqaBor && RuxsatSaqlanmagan;
+
+    [RelayCommand(CanExecute = nameof(RuxsatSaqlashMumkin))]
+    private async Task RuxsatlarniSaqla()
+    {
+        if (RuxsatFoydalanuvchi is not { } f) return;
+        try
+        {
+            await Malumot.RuxsatlarniOrnat(f.Id, Qoralama);
+            _qoralamaTahrirda = false;
+            OnPropertyChanged(nameof(RuxsatSaqlanmagan));
+            RuxsatlarniSaqlaCommand.NotifyCanExecuteChanged();
+        }
         catch (ApiXatosi e) { Bildirish.Xato(e.Message); }
     }
 
@@ -270,15 +283,12 @@ public partial class SozlamalarViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(AloqaBor))]
     private async Task NarxniSaqla(YoqilgiQatoriVm q)
     {
-        var yangi = long.TryParse(new string(q.YangiNarx.Where(char.IsDigit).ToArray()), out var v) ? v : 0;
-        if (yangi <= 0 || yangi == q.Yoqilgi.Narx) return;
-        try
-        {
-            await Malumot.YoqilgiTahrirla(q.Yoqilgi.Id, new YoqilgiTahrirlashDto(q.Yoqilgi.Nomi, yangi, q.Yoqilgi.Rang));
-            q.YangiNarx = "";
-            q.NarxYangilandi();
-        }
-        catch (ApiXatosi e) { Bildirish.Xato(e.Message); }
+        // Narx o'zgarishi dialogi: ochiq smenada shu yoqilg'i aparatlarining hozirgi pult ko'rsatkichi so'raladi (§1.10).
+        var yangi = Format.PulOl(q.YangiNarx);
+        Dialoglar.Narx.Och(q.Yoqilgi);
+        if (yangi is > 0) Dialoglar.Narx.YangiNarx = Format.Pul(yangi.Value);
+        q.YangiNarx = "";
+        await Task.CompletedTask;
     }
 
     // ================= Yoqilg'i turlari =================
@@ -341,9 +351,9 @@ public partial class SozlamalarViewModel : ObservableObject
         AparatTahrir = null;
         AparatRaqam = (Malumot.Aparatlar.Count == 0 ? 1 : Malumot.Aparatlar.Max(a => a.Raqam) + 1).ToString();
         AparatYoqilgi = YoqilgiTurlari.FirstOrDefault();
-        AparatTotalLitr = "";
+        AparatTotalLitr = ""; AparatBak = ""; AparatSabab = "";
         AparatXato = "";
-        OnPropertyChanged(nameof(AparatDialogSarlavha));
+        AparatSarlavhalari();
         AparatDialogOchiq = true;
     }
 
@@ -353,28 +363,48 @@ public partial class SozlamalarViewModel : ObservableObject
         AparatTahrir = a;
         AparatRaqam = a.Raqam.ToString();
         AparatYoqilgi = YoqilgiTurlari.FirstOrDefault(y => y.Id == a.Yoqilgi.Id);
-        AparatTotalLitr = a.TotalLitr.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+        AparatTotalLitr = Format.Son(a.TotalLitr);
+        AparatBak = Format.Son(a.BakQoldiq);
+        AparatSabab = "";
         AparatXato = "";
-        OnPropertyChanged(nameof(AparatDialogSarlavha));
+        AparatSarlavhalari();
         AparatDialogOchiq = true;
     }
 
     [RelayCommand] private void AparatDialogniYop() => AparatDialogOchiq = false;
 
-    /// <summary>Tahrirda totalizator qiymati o'zgargan bo'lsa — server uni tuzatadi va "Totalizator tuzatildi" deb auditga yozadi.</summary>
+    private void AparatSarlavhalari()
+    {
+        foreach (var n in new[] { nameof(AparatDialogSarlavha), nameof(AparatDialogIzoh), nameof(AparatTahrirda), nameof(AparatPultYorliq), nameof(AparatBakYorliq) })
+            OnPropertyChanged(n);
+    }
+
+    /// <summary>
+    /// Yangi aparat: boshlang'ich pult ko'rsatkichi va bak qoldig'i. Tahrirda pult yoki bak o'zgarsa — sabab majburiy, server auditga yozadi;
+    /// bakni qo'lda manfiy qilib bo'lmaydi (§7.11).
+    /// </summary>
     [RelayCommand(CanExecute = nameof(AloqaBor))]
     private async Task AparatniSaqla()
     {
         if (!int.TryParse(AparatRaqam.Trim(), out var raqam) || raqam <= 0 || AparatYoqilgi is null) { AparatXato = Til.T("Xato_Maydon"); return; }
-        if (Malumot.Aparatlar.Any(a => a.Raqam == raqam && a.Id != AparatTahrir?.Id)) { AparatXato = Til.T("Xato_AparatBand"); return; }
-        var litrMatn = AparatTotalLitr.Trim().Replace(" ", "").Replace(',', '.');
-        if (litrMatn.Length > 0 && !decimal.TryParse(litrMatn, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _)) { AparatXato = Til.T("Xato_Maydon"); return; }
-        var totalLitr = litrMatn.Length == 0 ? 0m : decimal.Parse(litrMatn, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture);
+        if (Malumot.Aparatlar.Any(a => a.Raqam == raqam && a.Id != AparatTahrir?.Id)) { AparatXato = Til.T("Aparat_XatoRaqamBand"); return; }
+        var pult = AparatTotalLitr.Trim().Length == 0 ? 0m : Format.KasrOl(AparatTotalLitr);
+        var bak = AparatBak.Trim().Length == 0 ? 0m : Format.KasrOl(AparatBak);
+        if (pult is null or < 0) { AparatXato = Til.T("Aparat_XatoPult"); return; }
+        if (bak is null) { AparatXato = Til.T("Xato_Maydon"); return; }
+        if (bak < 0) { AparatXato = Til.T("Aparat_XatoBakManfiy"); return; }
 
         try
         {
-            if (AparatTahrir is null) await Malumot.AparatYarat(new AparatYaratishDto(raqam, AparatYoqilgi.Id, totalLitr));
-            else await Malumot.AparatTahrirla(AparatTahrir.Id, new AparatTahrirlashDto(raqam, AparatYoqilgi.Id, totalLitr));
+            if (AparatTahrir is not { } a) await Malumot.AparatYarat(new AparatYaratishDto(raqam, AparatYoqilgi.Id, pult.Value, bak.Value));
+            else
+            {
+                var ozgardi = pult != a.TotalLitr || bak != a.BakQoldiq;
+                var sabab = AparatSabab.Trim();
+                if (ozgardi && sabab.Length == 0) { AparatXato = Til.T("Aparat_XatoSabab"); return; }
+                await Malumot.AparatTahrirla(a.Id, new AparatTahrirlashDto(raqam, AparatYoqilgi.Id,
+                    pult != a.TotalLitr ? pult : null, bak != a.BakQoldiq ? bak : null, ozgardi ? sabab : null));
+            }
             AparatDialogOchiq = false;
         }
         catch (ApiXatosi e) { AparatXato = e.Message; }

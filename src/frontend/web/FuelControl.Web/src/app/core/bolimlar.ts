@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Auth } from './auth';
-import type { Ruxsat } from '../api/turlar';
+import type { Ruxsat } from '../api/model';
 
 export interface Bolim {
   yol: string;
@@ -13,26 +13,20 @@ export interface Bolim {
   korinadi: (a: Auth) => boolean;
 }
 
-/** Menyu tartibi: boshliq uchun avval hisobotlar, operator uchun sotuv. */
+/** Menyu tartibi (docs/dizayn/Menyu): Boshqaruv, Savdo, Smenalar, Nasiyalar, Hisobotlar, Operatorlar, Audit jurnali, Sozlamalar. */
 export const BOLIMLAR: Bolim[] = [
-  { yol: 'boshqaruv', kalit: 'BoshqaruvPaneli', qisqaKalit: 'Tab_Panel', ikon: 'grid', korinadi: (a) => a.bor('Boshqaruv') },
-  { yol: 'sotuv', kalit: 'SotuvKiritish', qisqaKalit: 'Sotuv', ikon: 'plus', korinadi: (a) => a.bor('SotuvKiritish') },
+  { yol: 'boshqaruv', kalit: 'Boshqaruv', ikon: 'grid', korinadi: (a) => a.bor('Boshqaruv') },
+  { yol: 'savdo', kalit: 'Savdo', ikon: 'pump', korinadi: (a) => a.bor('Savdo') },
+  { yol: 'smenalar', kalit: 'Smenalar', ikon: 'clock', korinadi: (a) => a.bor('Smenalar') },
+  { yol: 'nasiyalar', kalit: 'Nasiyalar', ikon: 'book', korinadi: (a) => a.bor('Nasiyalar') },
   { yol: 'hisobotlar', kalit: 'Hisobotlar', qisqaKalit: 'Tab_Hisobot', ikon: 'file', korinadi: (a) => a.bor('Hisobotlar') },
-  { yol: 'smenalar', kalit: 'Smenalar', qisqaKalit: 'Tab_Smena', ikon: 'clock', korinadi: (a) => a.bor('Smenalar') },
-  { yol: 'operatorlar', kalit: 'OperatorlarHisobi', qisqaKalit: 'Tab_Operator', ikon: 'users', korinadi: (a) => a.bor('Operatorlar') },
-  // Operatorlar ruxsati yo'q, lekin sotuv kirituvchi — o'z hisob-varaqasini ko'radi (API o'z id'si uchun ruxsat beradi).
-  { yol: 'hisobim', kalit: 'MeningHisobim', qisqaKalit: 'Tab_Hisobim', ikon: 'user', korinadi: (a) => !a.bor('Operatorlar') && a.bor('SotuvKiritish') },
-  { yol: 'audit', kalit: 'AuditJurnali', ikon: 'shield', korinadi: (a) => a.bor('Audit') },
+  { yol: 'operatorlar', kalit: 'Operatorlar', qisqaKalit: 'Tab_Operator', ikon: 'users', korinadi: (a) => a.bor('Operatorlar') },
+  { yol: 'audit', kalit: 'AuditJurnali', qisqaKalit: 'Tab_Audit', ikon: 'list', korinadi: (a) => a.bor('Audit') },
+  { yol: 'sozlamalar', kalit: 'Sozlamalar', ikon: 'gear', korinadi: (a) => a.bor('Sozlamalar') },
 ];
 
 export function korinadiganlar(a: Auth): Bolim[] {
-  const r = BOLIMLAR.filter((b) => b.korinadi(a));
-  // Boshliq uchun sotuv kiritish ikkinchi darajali — oxiriga suriladi.
-  if (a.bor('Boshqaruv') || a.bor('Hisobotlar')) {
-    const i = r.findIndex((b) => b.yol === 'sotuv');
-    if (i >= 0) r.push(...r.splice(i, 1));
-  }
-  return r;
+  return BOLIMLAR.filter((b) => b.korinadi(a));
 }
 
 export const kirganmi: CanActivateFn = () => {

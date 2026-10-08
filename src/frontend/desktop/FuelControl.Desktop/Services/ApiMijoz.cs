@@ -13,10 +13,19 @@ using FuelControl.Contracts.Dto;
 namespace FuelControl.Desktop.Services;
 
 /// <summary>Server rad etgan amal yoki aloqa xatosi. Xabar foydalanuvchiga ko'rsatiladi (server ProblemDetails'dagi o'zbekcha matn).</summary>
-public sealed class ApiXatosi(string xabar, int status) : Exception(xabar)
+public sealed class ApiXatosi(string xabar, int status, int[]? kerakliAparatlar = null) : Exception(xabar)
 {
     public int Status { get; } = status;
     public bool AloqaXatosi => Status == 0;
+    /// <summary>Narx o'zgarishi 400: ko'rsatkichi kerak bo'lgan aparatlar (ProblemDetails extensions.kerakliAparatlar).</summary>
+    public int[]? KerakliAparatlar { get; } = kerakliAparatlar;
+}
+
+/// <summary>Namuna (demo) rejimi: server o'rniga javob beradi — UI'ni server tayyor bo'lmaganda va sinov harness'ida ko'rsatish uchun.</summary>
+public interface INamunaServer
+{
+    /// <summary>yol — so'rov qatori bilan ("smenalar?dan=..."); tana — yuborilgan DTO. Javob T ga mos obyekt yoki null.</summary>
+    object? Javob(HttpMethod usul, string yol, object? tana);
 }
 
 /// <summary>FuelControl API uchun tipli mijoz. Token login'dan keyin saqlanadi va har so'rovga qo'shiladi.</summary>
@@ -37,6 +46,9 @@ public sealed class ApiMijoz
 
     public string Manzil { get; }
     public string? Token { get; private set; }
+
+    /// <summary>O'rnatilsa — barcha so'rovlarga server o'rniga shu javob beradi (namuna rejimi).</summary>
+    public static INamunaServer? Namuna { get; set; }
 
     /// <summary>Token muddati tugagan yoki bekor qilingan (401) — qayta kirish kerak.</summary>
     public event Action? SessiyaTugadi;
@@ -77,29 +89,51 @@ public sealed class ApiMijoz
     public Task<FoydalanuvchiDto?> RuxsatlarniOrnat(int id, RuxsatlarOrnatishDto d) => Yubor<FoydalanuvchiDto>(HttpMethod.Put, $"foydalanuvchilar/{id}/ruxsatlar", d);
     public Task PinOrnat(int id, PinOrnatishDto d) => Yubor<object>(HttpMethod.Post, $"foydalanuvchilar/{id}/pin", d);
 
-    // ---------- Smena / sotuv ----------
-    public Task<List<SmenaDto>?> Smenalar(DateOnly? dan = null, int? operatorId = null) =>
-        Ol<List<SmenaDto>>("smenalar" + Sorov(("dan", dan), ("operatorId", operatorId)));
-    public Task<SmenaDto?> SmenaOch() => Yubor<SmenaDto>(HttpMethod.Post, "smenalar/och", null);
+    // ---------- Smena ----------
+    public Task<List<SmenaDto>?> Smenalar(DateOnly? dan = null, DateOnly? gacha = null, int? operatorId = null) =>
+        Ol<List<SmenaDto>>("smenalar" + Sorov(("dan", dan), ("gacha", gacha), ("operatorId", operatorId)));
+    /// <summary>Ochiq smena (butun shoxobcha bo'yicha); yo'q bo'lsa null (204).</summary>
+    public Task<SmenaTafsilotDto?> JoriySmena() => Ol<SmenaTafsilotDto>("smenalar/joriy");
+    /// <summary>Oxirgi yopilgan smena (butun shoxobcha bo'yicha); yo'q bo'lsa null (204).</summary>
+    public Task<SmenaTafsilotDto?> OxirgiSmena() => Ol<SmenaTafsilotDto>("smenalar/oxirgi");
+    public Task<SmenaTafsilotDto?> SmenaTafsiloti(int id) => Ol<SmenaTafsilotDto>($"smenalar/{id}");
+    public Task<SmenaDto?> SmenaOch(SmenaOchishDto d) => Yubor<SmenaDto>(HttpMethod.Post, "smenalar/och", d);
     public Task<SmenaDto?> SmenaYop(int id, SmenaYopishDto d) => Yubor<SmenaDto>(HttpMethod.Post, $"smenalar/{id}/yop", d);
+    public Task<SmenaTafsilotDto?> KorsatkichTuzat(int id, KorsatkichTuzatishDto d) => Yubor<SmenaTafsilotDto>(HttpMethod.Put, $"smenalar/{id}/korsatkich", d);
 
-    public Task<List<SotuvDto>?> Sotuvlar(DateOnly? dan = null, DateOnly? gacha = null, int? smenaId = null, SotuvHolati? holati = null) =>
-        Ol<List<SotuvDto>>("sotuvlar" + Sorov(("dan", dan), ("gacha", gacha), ("smenaId", smenaId), ("holati", holati)));
-    public Task<SotuvDto?> SotuvYarat(SotuvYaratishDto d) => Yubor<SotuvDto>(HttpMethod.Post, "sotuvlar", d);
-    public Task<SotuvDto?> SotuvTahrirla(int id, SotuvTahrirlashDto d) => Yubor<SotuvDto>(HttpMethod.Put, $"sotuvlar/{id}", d);
-    public Task<SotuvDto?> SotuvBekorQil(int id, SotuvBekorQilishDto d) => Yubor<SotuvDto>(HttpMethod.Post, $"sotuvlar/{id}/bekor", d);
+    // ---------- Nasiya / xarajat / bak ----------
+    public Task<NasiyalarDto?> Nasiyalar(string? holat = null, string? q = null) =>
+        Ol<NasiyalarDto>("nasiyalar" + Sorov(("holat", holat), ("q", string.IsNullOrWhiteSpace(q) ? null : q.Trim())));
+    /// <summary>Mavjud mijozlar (§8.2): nasiya yozuvlaridan, eng ko'pi 8 ta; q bo'sh bo'lsa — oxirgilari.</summary>
+    public Task<List<MijozTaklifDto>?> MijozTakliflari(string? q) =>
+        Ol<List<MijozTaklifDto>>("nasiyalar/mijozlar" + Sorov(("q", string.IsNullOrWhiteSpace(q) ? null : q.Trim())));
+    public Task<NasiyaTafsilotDto?> NasiyaTafsiloti(int id) => Ol<NasiyaTafsilotDto>($"nasiyalar/{id}");
+    public Task<NasiyaDto?> NasiyaYoz(NasiyaYaratishDto d) => Yubor<NasiyaDto>(HttpMethod.Post, "nasiyalar", d);
+    public Task<NasiyaDto?> QarzQaytdi(int nasiyaId, NasiyaQaytishiYaratishDto d) => Yubor<NasiyaDto>(HttpMethod.Post, $"nasiyalar/{nasiyaId}/qaytish", d);
+    public Task NasiyaOchir(int id) => Yubor<object>(HttpMethod.Delete, $"nasiyalar/{id}", null);
+    public Task QaytishOchir(int id) => Yubor<object>(HttpMethod.Delete, $"nasiyalar/qaytishlar/{id}", null);
+
+    public Task<List<XarajatDto>?> Xarajatlar(int? smenaId = null, DateOnly? dan = null, DateOnly? gacha = null) =>
+        Ol<List<XarajatDto>>("xarajatlar" + Sorov(("smenaId", smenaId), ("dan", dan), ("gacha", gacha)));
+    public Task<XarajatDto?> XarajatYoz(XarajatYaratishDto d) => Yubor<XarajatDto>(HttpMethod.Post, "xarajatlar", d);
+    public Task XarajatOchir(int id) => Yubor<object>(HttpMethod.Delete, $"xarajatlar/{id}", null);
+
+    public Task<AparatDto?> BakKirim(int aparatId, BakKirimYaratishDto d) => Yubor<AparatDto>(HttpMethod.Post, $"aparatlar/{aparatId}/kirim", d);
+    public Task<List<BakKirimDto>?> BakKirimlar(int? aparatId = null, DateOnly? dan = null, DateOnly? gacha = null) =>
+        Ol<List<BakKirimDto>>("bak-kirimlar" + Sorov(("aparatId", aparatId), ("dan", dan), ("gacha", gacha)));
 
     // ---------- Operator hisobi / audit / zaxira ----------
-    public Task<OperatorHisobDto?> OperatorHisobi(int id) => Ol<OperatorHisobDto>($"operatorlar/{id}/hisob");
+    public Task<OperatorHisobDto?> OperatorHisobi(int id, DateOnly? oy = null) => Ol<OperatorHisobDto>($"operatorlar/{id}/hisob" + Sorov(("oy", oy)));
     public Task<HisobHarakatiDto?> HarakatYoz(int id, HarakatYaratishDto d) => Yubor<HisobHarakatiDto>(HttpMethod.Post, $"operatorlar/{id}/harakat", d);
-    public Task<List<AuditYozuviDto>?> Audit(int limit) => Ol<List<AuditYozuviDto>>($"audit?limit={limit}");
+    public Task<List<AuditYozuviDto>?> Audit(int limit, string? tur = null, string? q = null, DateOnly? dan = null, DateOnly? gacha = null) =>
+        Ol<List<AuditYozuviDto>>("audit" + Sorov(("limit", limit), ("tur", tur), ("q", string.IsNullOrWhiteSpace(q) ? null : q.Trim()), ("dan", dan), ("gacha", gacha)));
     public Task AuditEksport(AuditEksportDto d) => Yubor<object>(HttpMethod.Post, "audit/eksport", d);
     public Task<ZaxiraJavobiDto?> Zaxira() => Yubor<ZaxiraJavobiDto>(HttpMethod.Post, "zaxira", null);
 
     // ---------- Boshqaruv / hisobot (serverda hisoblanadi) ----------
-    public Task<BoshqaruvBugunDto?> Boshqaruv() => Ol<BoshqaruvBugunDto>("boshqaruv/bugun");
+    public Task<BoshqaruvDto?> Boshqaruv() => Ol<BoshqaruvDto>("boshqaruv");
     public Task<HisobotDto?> Hisobot(DateOnly dan, DateOnly gacha, int? operatorId, HisobotGuruhi guruh) =>
-        Ol<HisobotDto>("hisobot" + Sorov(("dan", dan), ("gacha", gacha), ("operatorId", operatorId), ("guruh", guruh)));
+        Ol<HisobotDto>("hisobot" + Sorov(("dan", dan), ("gacha", gacha), ("operatorId", operatorId), ("guruh", guruh.ToString().ToLowerInvariant())));
 
     // ---------- Ichki ----------
     private static string Sorov(params (string Nomi, object? Qiymat)[] p)
@@ -116,6 +150,14 @@ public sealed class ApiMijoz
 
     private async Task<T?> Yubor<T>(HttpMethod usul, string yol, object? tana, bool tokenli = true)
     {
+        if (Namuna is { } n)
+        {
+            await Task.Yield();
+            var j = n.Javob(usul, yol, tana);
+            if (usul == HttpMethod.Post && yol == "auth/login" && j is LoginJavobiDto lj) Token = lj.Token;
+            return j is T t ? t : default;
+        }
+
         using var sorov = new HttpRequestMessage(usul, yol);
         if (tana is not null) sorov.Content = JsonContent.Create(tana, tana.GetType(), options: Json);
 
@@ -144,18 +186,21 @@ public sealed class ApiMijoz
             }
 
             string xabar;
+            int[]? kerakli = null;
             try
             {
                 var p = await javob.Content.ReadFromJsonAsync<JsonElement>(Json);
                 xabar = p.TryGetProperty("detail", out var d) && d.GetString() is { Length: > 0 } dt ? dt
                       : p.TryGetProperty("title", out var t) && t.GetString() is { Length: > 0 } tt ? tt
                       : Til.F("ServerXatosi", (int)javob.StatusCode);
+                if (p.TryGetProperty("kerakliAparatlar", out var ka) && ka.ValueKind == JsonValueKind.Array)
+                    kerakli = ka.EnumerateArray().Where(x => x.ValueKind == JsonValueKind.Number).Select(x => x.GetInt32()).ToArray();
             }
             catch (Exception)
             {
                 xabar = Til.F("ServerXatosi", (int)javob.StatusCode);
             }
-            throw new ApiXatosi(xabar, (int)javob.StatusCode);
+            throw new ApiXatosi(xabar, (int)javob.StatusCode, kerakli);
         }
     }
 }

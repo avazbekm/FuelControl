@@ -32,8 +32,5 @@ public abstract class SqliteBaza : IDisposable
     protected FuelControlDbContext Yangi(params IInterceptor[] interseptorlar) =>
         new(new DbContextOptionsBuilder<FuelControlDbContext>().UseSqlite(_ulanish).AddInterceptors(interseptorlar).Options);
 
-    protected SotuvYaratishDto Sorov(Guid kalit) =>
-        new(AparatId, null, 100_000, [new TolovDto(TolovTuri.Naqd, 100_000)], kalit);
-
     public void Dispose() => _ulanish.Dispose();
 }

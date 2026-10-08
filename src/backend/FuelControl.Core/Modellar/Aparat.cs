@@ -6,6 +6,9 @@ public sealed class Aparat
     public int Raqam { get; set; }
     public int YoqilgiTuriId { get; set; }
 
-    /// <summary>Totalizator — pultdagi "Total L": boshlang'ich qiymat + barcha faol sotuvlar yig'indisi.</summary>
+    /// <summary>Pultdagi "Total, L" — oxirgi yopilgan smena holatida: smena yopilganda yangi ko'rsatkichga teng bo'ladi.</summary>
     public decimal TotalLitr { get; set; }
+
+    /// <summary>Aparatning o'z baki, litrda: boshlang'ich qoldiq + kirimlar − sotilgan (smena yopilganda ayriladi). Qo'lda tuzatish faqat Sozlamalarda.</summary>
+    public decimal BakQoldiq { get; set; }
 }

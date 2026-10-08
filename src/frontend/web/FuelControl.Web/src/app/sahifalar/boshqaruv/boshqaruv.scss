@@ -1,48 +1,79 @@
-.ikon-doira.kichik { width: 26px; height: 26px; }
-.qizil-doira { background: var(--b-qizil-fon); color: var(--qizil); }
+:host { display: block; line-height: normal; }
+.sahifa-bosh .sarlavha { gap: 6px; }
 
-/* 14 kunlik ustun grafik */
-.grafik { position: relative; padding-top: 22px; }
-.max-chiziq {
-  position: absolute; top: 0; left: 0; right: 0; font-size: 11px; color: var(--matn-2);
-  border-bottom: 1px dashed var(--chiziq); padding-bottom: 2px;
-}
-.ustunlar-q { display: flex; align-items: flex-end; gap: 2px; height: 190px; padding-top: 4px; }
-.ustun {
-  flex: 1; min-width: 0; height: 100%; position: relative; border: 0; background: none; padding: 0 1px; cursor: pointer;
-  display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px;
-}
-.tayoq {
-  width: 100%; max-width: 28px; min-height: 2px; border-radius: 4px 4px 0 0;
-  background: var(--ustun); transition: background 0.15s;
-}
-.ustun.bugun .tayoq { background: var(--asosiy); }
-.ustun:hover .tayoq, .ustun.tanlangan .tayoq { background: var(--asosiy-toq); }
-.ustun.bugun:hover .tayoq { background: var(--asosiy-toq); }
-.kun { font-size: 11px; color: var(--matn-2); font-variant-numeric: tabular-nums; height: 14px; }
-.kun.yashir { visibility: hidden; }
-@media (min-width: 600px) { .kun.yashir { visibility: visible; } }
-.izohcha {
-  position: absolute; bottom: calc(100% - 30px); left: 50%; transform: translateX(-50%); z-index: 5;
-  padding: 8px 12px; border-radius: 14px; white-space: nowrap; font-size: 12px; text-align: left;
-  display: flex; flex-direction: column; gap: 2px; pointer-events: none; background: var(--dialog);
-}
-.izohcha.ong-tomon { left: auto; right: 0; transform: none; }
-.izohcha.chap-tomon { left: 0; transform: none; }
+.kpi-qator { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+@media (max-width: 520px) { .kpi-qator { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+.kpi-havola { display: contents; color: inherit; text-decoration: none; }
+.kpi-havola kpi-karta { cursor: pointer; }
 
-/* To'lov ulushlari — 2px oraliqli stek */
-.stek { display: flex; gap: 2px; height: 14px; border-radius: 999px; overflow: hidden; margin: 4px 0 10px; }
-.stek > span { flex-basis: 0; min-width: 4px; }
-.bosh-stek { flex: 1; background: var(--naycha); }
-.nuqta { width: 10px; height: 10px; border-radius: 999px; flex: none; display: inline-block; }
+.qator-panjara { gap: 18px; }
+.karta h2 { font-size: 15px; font-weight: 700; }
+.karta-izoh { font-size: 12.5px; color: var(--matn-2); }
+.mini-panjara { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 10px; }
+.mini { padding: 12px 14px; display: flex; flex-direction: column; gap: 3px; border-radius: 16px; }
+.mini .kap { font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--matn-2); }
+.mini .v { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.yashil-matn { color: #0E7A4A; }
+:host-context(:root[data-theme="dark"]) .yashil-matn { color: var(--yashil); }
+@media (prefers-color-scheme: dark) { :host-context(:root:not([data-theme="light"])) .yashil-matn { color: var(--yashil); } }
 
-.yoq-qator .matnlar { gap: 6px; }
-.naycha { display: block; height: 6px; border-radius: 999px; background: var(--naycha); overflow: hidden; }
-.naycha > span { display: block; height: 100%; border-radius: 999px; background: var(--asosiy); }
+/* ---- Joriy smena */
+.joriy-bosh { gap: 12px; }
+.joriy-matn { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.joriy-h2 { font-size: 16px !important; }
+.avatar.katta { width: 44px; height: 44px; font-size: 14px; }
+.kul-doira { background: var(--b-kul-fon); color: var(--b-kul); }
 
-.avatar {
-  width: 36px; height: 36px; border-radius: 999px; flex: none;
-  display: inline-flex; align-items: center; justify-content: center; font-weight: 700;
-  background: var(--asosiy-och); color: var(--asosiy);
+/* ---- Baklar */
+.baklar-karta { gap: 10px; }
+.baklar { list-style: none; margin: 0; padding: 0; }
+.baklar li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--chiziq); }
+.baklar li:last-child { border-bottom: 0; }
+.baklar .raqam { width: 30px; font-size: 14px; font-weight: 800; }
+.baklar .kirim { flex: 1; min-width: 0; font-size: 12px; color: var(--matn-2); text-align: right; }
+.baklar .qoldiq { min-width: 74px; text-align: right; font-size: 15px; font-weight: 800; }
+.baklar .qoldiq.manfiy { color: var(--qizil); }
+.bak-bosh, .grafik-bosh { align-items: baseline; gap: 10px; }
+.bak-bosh .karta-izoh { font-size: 12px; }
+
+/* ---- Grafik: oxirgi 14 smena */
+.grafik-oram { overflow-x: auto; }
+.grafik { min-width: 480px; height: 220px; display: flex; align-items: flex-end; gap: 8px; padding-top: 18px; }
+.ustun { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.u-qiymat { font-size: 11px; font-weight: 700; color: var(--matn-3); font-variant-numeric: tabular-nums; }
+.u-sana { font-size: 11px; color: var(--matn-2); font-variant-numeric: tabular-nums; }
+.ustun-chiziq { width: 100%; max-width: 30px; border-radius: 999px; background: #D9E5FF; box-shadow: 0 4px 10px rgba(28, 54, 110, 0.10); }
+.ustun-chiziq.oxirgi { background: linear-gradient(180deg, #6A98FF 0%, #2F6BFF 55%, #1F55E6 100%); box-shadow: 0 8px 18px rgba(47, 107, 255, 0.35); }
+:host-context(:root[data-theme="dark"]) .ustun-chiziq:not(.oxirgi) { background: #2E3A5C; box-shadow: none; }
+@media (prefers-color-scheme: dark) { :host-context(:root:not([data-theme="light"])) .ustun-chiziq:not(.oxirgi) { background: #2E3A5C; box-shadow: none; } }
+.grafik-bosh-xabar { width: 100%; align-self: center; }
+
+/* ---- To'lov turlari */
+.tolov { display: flex; flex-direction: column; gap: 7px; }
+.tolov-satr { display: flex; align-items: center; gap: 8px; font-size: 13.5px; }
+.tolov-nom { flex: 1; min-width: 0; font-weight: 600; }
+.tolov-summa { font-weight: 800; }
+.tolov-foiz { width: 40px; text-align: right; font-size: 12.5px; color: var(--matn-2); }
+.tolov-yol { height: 10px; border-radius: 999px; background: var(--naycha); display: flex; overflow: hidden; }
+.tolov-chiziq { height: 100%; border-radius: 999px; }
+.tolov .nuqta { width: 10px; height: 10px; }
+
+/* ---- Oxirgi smenalar */
+.barcha { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13.5px; font-weight: 700; }
+.jadval-oram { overflow-x: auto; }
+.smena-jadval { min-width: 680px; display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+.smena-qator {
+  display: grid; gap: 12px; align-items: center; padding: 12px 4px; font-size: 14px; border-bottom: 1px solid var(--chiziq);
+  grid-template-columns: 70px minmax(150px, 1.4fr) minmax(130px, 1fr) minmax(100px, 0.8fr) minmax(120px, 1fr) minmax(130px, 1fr);
 }
-.jonli { width: 8px; height: 8px; border-radius: 999px; background: var(--yashil); box-shadow: 0 0 0 4px var(--b-yashil-fon); }
+.smena-qator:last-child { border-bottom: 0; }
+.smena-qator.bosh-qator { padding: 0 4px 8px; border-bottom: 1px solid rgba(18, 20, 40, 0.08); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--matn-2); }
+.smena-qator .o { text-align: right; }
+.smena-qator .pill { display: inline-block; }
+.smena-qator .id { font-weight: 800; }
+.smena-qator .vaqt { color: var(--matn-2); }
+.smena-qator .savdo, .sk .savdo { font-weight: 800; }
+.bosish { cursor: pointer; }
+.satr.bosish:hover, .sk.bosish:hover { background: var(--qator-hover); border-radius: 14px; }
+.smena-kartalar { display: flex; flex-direction: column; gap: 10px; }
+.sk { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 18px; background: var(--plitka-fon); border: 1px solid var(--plitka-chegara); font-size: 14px; }

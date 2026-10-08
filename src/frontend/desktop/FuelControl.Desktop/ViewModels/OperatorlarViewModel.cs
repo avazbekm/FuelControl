@@ -18,13 +18,20 @@ public partial class OperatorKartasi : ObservableObject
 {
     public Foydalanuvchi Operator { get; }
     public string Maosh => Format.Pul(Operator.OylikMaosh);
+    public string MaoshMatni => Til.F("Operator_Maosh", Format.Pul(Operator.OylikMaosh));
+    public string SmenalarSoni { get; private set; } = "";
+    public string SmenalarIzoh { get; private set; } = "";
+    public string AvansIzoh { get; private set; } = "";
+    public string KamomatIzoh { get; private set; } = "";
+    public string OyKorsatkichlari => Til.F("Operator_OyKorsatkichlari",
+        $"{Til.T("OyNomlari").Split(',')[DateTime.Today.Month - 1]} {DateTime.Today.Year}");
     public string OyAvans { get; private set; } = "";
     public string OyKamomat { get; private set; } = "";
     public string OyOrtiqcha { get; private set; } = "";
     public string OySavdo { get; private set; } = "";
     public string OySmenalar { get; private set; } = "";
     public long Qoldiq { get; private set; }
-    public string QoldiqMatni => Format.Farq(Qoldiq);
+    public string QoldiqMatni => Format.Pul(Qoldiq);
     public bool QoldiqManfiy => Qoldiq < 0;
     public bool SmenadaMi { get; private set; }
     [ObservableProperty] private bool _tanlangan;
@@ -37,16 +44,38 @@ public partial class OperatorKartasi : ObservableObject
         var h = Malumot.Harakatlar.Where(x => x.Operator.Id == Operator.Id).ToList();
         var oy = h.Where(x => x.Sana >= oyBoshi).ToList();
         OyAvans = Format.Pul(-oy.Where(x => x.Turi == HarakatTuri.Avans).Sum(x => x.Summa));
+        AvansIzoh = Til.F("Operator_Marta", oy.Count(x => x.Turi == HarakatTuri.Avans));
+        var kamomatlar = oy.Where(x => x.Turi == HarakatTuri.Kamomat).ToList();
+        // "Smena #40" — kamomat izohidan smena raqami(lar)i.
+        var raqamlar = kamomatlar.Select(x => System.Text.RegularExpressions.Regex.Match(x.Izoh, @"#\d+").Value).Where(r => r.Length > 0).Distinct().ToList();
+        KamomatIzoh = raqamlar.Count > 0 ? Til.F("Operator_SmenaRaqami", string.Join(", ", raqamlar)) : Til.T("Operator_ShuOy");
         OyKamomat = Format.Pul(-oy.Where(x => x.Turi == HarakatTuri.Kamomat).Sum(x => x.Summa));
         OyOrtiqcha = Format.Pul(oy.Where(x => x.Turi == HarakatTuri.Ortiqcha).Sum(x => x.Summa));
         Qoldiq = h.Sum(x => x.Summa);
         // Oylik savdo va smenalar soni — server hisoblaydi (keshda faqat bugungi sotuvlar bor).
         var stat = Malumot.OyStatistikasi.GetValueOrDefault(Operator.Id);
         OySmenalar = stat.Smenalar.ToString();
+        var ochiq = Malumot.JoriySmena?.Operator.Id == Operator.Id ? 1 : 0;
+        // Server OySmenalar — shu oyda ochilgan barcha smenalar (ochiq ham kiradi).
+        SmenalarSoni = stat.Smenalar.ToString();
+        SmenalarIzoh = Til.F("Operator_YopilganOchiq", Math.Max(0, stat.Smenalar - ochiq), ochiq);
         OySavdo = Format.Pul(stat.Savdo);
-        SmenadaMi = Malumot.Smenalar.Any(s => s.Operator.Id == Operator.Id && s.Ochiqmi);
+        SmenadaMi = Malumot.JoriySmena?.Operator.Id == Operator.Id;
         OnPropertyChanged(string.Empty);
     }
+}
+
+/// <summary>Hisob harakati qatori: tur belgisi rangi va ishorali summa.</summary>
+public sealed record HarakatQatori(HisobHarakati H)
+{
+    public string Sana => Format.Sana(H.Sana);
+    public string Summa => Format.Farq(H.Summa);
+    public bool Musbat => H.Summa > 0;
+    public bool Manfiy => H.Summa < 0;
+    public string BelgiKlassi => H.Turi switch
+    {
+        HarakatTuri.Maosh => "yashil", HarakatTuri.Avans => "sariq", HarakatTuri.Kamomat => "qizil", HarakatTuri.Ortiqcha => "kok", _ => "kulrang",
+    };
 }
 
 /// <summary>Hisob-varaqa qatori (davr ichidagi harakat, yig'ilib boruvchi qoldiq bilan).</summary>
@@ -55,7 +84,7 @@ public sealed record VaraqaQatori(string Sana, string Turi, string Izoh, string 
 public partial class OperatorlarViewModel : ObservableObject
 {
     public List<OperatorKartasi> Kartalar { get; private set; } = Malumot.Operatorlar.Select(o => new OperatorKartasi(o)).ToList();
-    public ObservableCollection<HisobHarakati> Harakatlar { get; } = new();
+    public ObservableCollection<HarakatQatori> Harakatlar { get; } = new();
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TanlanganBormi))]
@@ -112,7 +141,7 @@ public partial class OperatorlarViewModel : ObservableObject
     private void HarakatlarniYukla(OperatorKartasi k)
     {
         Harakatlar.Clear();
-        foreach (var h in Malumot.Harakatlar.Where(h => h.Operator.Id == k.Operator.Id)) Harakatlar.Add(h);
+        foreach (var h in Malumot.Harakatlar.Where(h => h.Operator.Id == k.Operator.Id).OrderBy(h => h.Sana).ThenBy(h => h.Id)) Harakatlar.Add(new HarakatQatori(h));
     }
 
     [RelayCommand]

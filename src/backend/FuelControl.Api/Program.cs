@@ -138,7 +138,9 @@ app.MapScalarApiReference().AllowAnonymous();
 
 app.Ulash();
 app.YoqilgiAparatUlash();
-app.SmenaSotuvUlash();
+app.SmenaUlash();
+app.NasiyaUlash();
+app.XarajatUlash();
 app.HisobotUlash();
 app.Services.GetRequiredService<ZaxiraXizmati>().Ulash(app);
 app.MapHub<SotuvHub>("/hub").RequireAuthorization();
@@ -149,8 +151,10 @@ try
     var db = scope.ServiceProvider.GetRequiredService<FuelControlDbContext>();
     db.Database.Migrate();
     await db.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
+    await BazaKafolati.Tikla(db);
     await SeedXizmati.Boshlash(db, builder.Configuration, app.Logger);
-    if (app.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("Seed:DemoMalumot"))
+    // Demo ma'lumot (dizayn namunasi) faqat dev/web muhitida va faqat bo'sh bazada: Seed:DemoMalumot=true.
+    if ((app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Web")) && builder.Configuration.GetValue<bool>("Seed:DemoMalumot"))
         await SeedXizmati.DemoMalumot(db, app.Logger);
     await MaoshYozuvchi.Yoz(db);
 }

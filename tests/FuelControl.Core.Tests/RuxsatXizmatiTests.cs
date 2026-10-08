@@ -7,11 +7,15 @@ namespace FuelControl.Core.Tests;
 public class RuxsatXizmatiTests
 {
     [Fact]
-    public void Operator_FaqatSotuvVaSmenaRuxsatlariga_Ega()
+    public void Operator_SavdoSmenaNasiyaVaXarajatRuxsatlariga_Ega()
     {
         var ruxsatlar = RuxsatXizmati.Standart(Rol.Operator);
         Assert.Equal(
-            new HashSet<Ruxsat> { Ruxsat.SotuvKiritish, Ruxsat.SmenaOchish, Ruxsat.SmenaYopish },
+            new HashSet<Ruxsat>
+            {
+                Ruxsat.Savdo, Ruxsat.Nasiyalar, Ruxsat.SmenaOchish, Ruxsat.SmenaYopish,
+                Ruxsat.NasiyaYozish, Ruxsat.QarzQaytdi, Ruxsat.XarajatYozish,
+            },
             ruxsatlar);
     }
 
@@ -21,7 +25,8 @@ public class RuxsatXizmatiTests
         var ruxsatlar = RuxsatXizmati.Standart(Rol.Boshliq);
         Assert.DoesNotContain(Ruxsat.Sozlamalar, ruxsatlar);
         Assert.Contains(Ruxsat.Boshqaruv, ruxsatlar);
-        Assert.Contains(Ruxsat.SotuvTahrirlash, ruxsatlar);
+        Assert.Contains(Ruxsat.KorsatkichTuzatish, ruxsatlar);
+        Assert.Equal(RuxsatXizmati.Hammasi.Length - 1, ruxsatlar.Count);
     }
 
     [Fact]

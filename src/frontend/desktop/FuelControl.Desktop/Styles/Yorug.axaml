@@ -26,11 +26,29 @@
     <SolidColorBrush x:Key="BadgeSariqFon"  Color="#FFEBC2" /><SolidColorBrush x:Key="BadgeSariqMatn"  Color="#8A5A00" />
     <SolidColorBrush x:Key="BadgeKokFon"    Color="#DCE6FF" /><SolidColorBrush x:Key="BadgeKokMatn"    Color="#1B4FE0" />
     <SolidColorBrush x:Key="BadgeKulrangFon" Color="#E8EDF5" /><SolidColorBrush x:Key="BadgeKulrangMatn" Color="#334155" />
+    <SolidColorBrush x:Key="BadgeOlovFon"   Color="#FFE9DA" /><SolidColorBrush x:Key="BadgeOlovMatn"   Color="#9A3412" />
+    <SolidColorBrush x:Key="BadgeBinafshaFon" Color="#EDE6FF" /><SolidColorBrush x:Key="BadgeBinafshaMatn" Color="#5B3FD6" />
     <SolidColorBrush x:Key="Yashil"         Color="#0E7A4A" />
     <SolidColorBrush x:Key="Qizil"          Color="#D7262B" />
     <SolidColorBrush x:Key="Sariq"          Color="#8A5A00" />
     <SolidColorBrush x:Key="KamomatFon"     Color="#FFE1E1" /><SolidColorBrush x:Key="KamomatChegara" Color="#FFB4B4" />
     <SolidColorBrush x:Key="OrtiqchaFon"    Color="#D9F5E6" /><SolidColorBrush x:Key="OrtiqchaChegara" Color="#9FE3BF" />
+
+    <!-- Smena hisobi sahifalari -->
+    <SolidColorBrush x:Key="MalumotFon" Color="#E9F0FF" />
+    <SolidColorBrush x:Key="MalumotMatn" Color="#1B3A8A" />
+    <SolidColorBrush x:Key="OgohFon" Color="#FFF3D6" />
+    <SolidColorBrush x:Key="OgohChegara" Color="#F5D58A" />
+    <SolidColorBrush x:Key="OgohMatn" Color="#6B4500" />
+    <SolidColorBrush x:Key="YashilTileFon" Color="#E3F6EC" />
+    <SolidColorBrush x:Key="YashilTileChegara" Color="#A8E2C3" />
+    <SolidColorBrush x:Key="YashilTileMatn" Color="#0E7A4A" />
+    <SolidColorBrush x:Key="SegmentFon" Color="#E8ECF4" />
+    <SolidColorBrush x:Key="SegmentTanlangan" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ChiziqliChegara" Color="#B9CCFF" />
+    <SolidColorBrush x:Key="ChiziqliMatn" Color="#1B4FE0" />
+    <SolidColorBrush x:Key="IchkiTile" Color="#99FFFFFF" />
+    <SolidColorBrush x:Key="XatoFon" Color="#FFF5F5" />
 
     <LinearGradientBrush x:Key="Shisha" StartPoint="0%,0%" EndPoint="100%,100%">
         <GradientStop Offset="0" Color="#B8FFFFFF" />

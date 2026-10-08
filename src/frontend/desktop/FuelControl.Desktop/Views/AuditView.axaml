@@ -1,55 +1,65 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:l="using:FuelControl.Desktop.Controls"
+             xmlns:ctl="using:FuelControl.Desktop.Controls"
              xmlns:vm="using:FuelControl.Desktop.ViewModels"
-             xmlns:m="using:FuelControl.Desktop.Models"
              x:Class="FuelControl.Desktop.Views.AuditView"
              x:DataType="vm:AuditViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*" Margin="28,24,28,28" RowSpacing="16">
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
-            <StackPanel Spacing="3">
-                <TextBlock Text="{l:T AuditJurnali}" Classes="sarlavha" />
-                <TextBlock Text="{l:T AuditIzoh}" Classes="izoh" />
-            </StackPanel>
-            <TextBox Grid.Column="1" Text="{Binding Qidiruv}" PlaceholderText="{l:T Qidirish}" Width="280" VerticalAlignment="Center" />
-        </Grid>
-
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
-            <Button Classes="chip" Classes.tanlangan="{Binding JurnalBolimi}" Content="{l:T BarchaAmallar}" Command="{Binding BolimniTanlaCommand}" CommandParameter="0" />
-            <Button Classes="chip" Classes.tanlangan="{Binding BekorBolimi}" Content="{l:T BekorQilinganSotuvlar}" Command="{Binding BolimniTanlaCommand}" CommandParameter="1" />
+    <Grid RowDefinitions="Auto,*" Margin="28,22,28,24" RowSpacing="18">
+        <StackPanel Spacing="6">
+            <TextBlock Text="{l:T AuditJurnali}" Classes="sarlavha" FontSize="28" />
+            <TextBlock Text="{l:T Audit_Izoh}" Classes="izoh" FontSize="13" />
         </StackPanel>
 
-        <Border Grid.Row="2" Classes="card" Padding="8">
-            <Panel>
-                <DataGrid ItemsSource="{Binding Yozuvlar}" IsVisible="{Binding JurnalBolimi}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="{l:T Vaqt}" Binding="{Binding Vaqt, StringFormat='dd.MM.yyyy HH:mm'}" Width="170" />
-                        <DataGridTextColumn Header="{l:T Kim}" Binding="{Binding Kim}" Width="200" />
-                        <DataGridTemplateColumn Header="{l:T Amal}" Width="190">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate x:DataType="m:AuditYozuvi">
-                                    <TextBlock Text="{Binding Amal}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="{l:T Tafsilot}" Binding="{Binding Tafsilot}" Width="*" />
-                    </DataGrid.Columns>
-                </DataGrid>
+        <Border Grid.Row="1" Classes="card" Padding="20,18,20,8">
+            <DockPanel>
+                <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" ColumnSpacing="12" Margin="0,0,0,8">
+                    <TextBox Text="{Binding Qidiruv}" PlaceholderText="{l:T Audit_QidiruvPlaceholder}" MinHeight="44" CornerRadius="22">
+                        <TextBox.InnerLeftContent>
+                            <ctl:Ikon Nomi="search" Olcham="16" Margin="14,0,0,0" Rang="{DynamicResource MatnIkkilamchi}" />
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                        <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TurHammasi}" Content="{l:T Hammasi}" Command="{Binding TurniTanlaCommand}" CommandParameter="" />
+                        <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TurSmena}" Content="{l:T Smena}" Command="{Binding TurniTanlaCommand}" CommandParameter="smena" />
+                        <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TurNasiya}" Content="{l:T Audit_TurNasiya}" Command="{Binding TurniTanlaCommand}" CommandParameter="nasiya" />
+                        <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TurXarajat}" Content="{l:T Audit_TurXarajat}" Command="{Binding TurniTanlaCommand}" CommandParameter="xarajat" />
+                        <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TurBak}" Content="{l:T Audit_TurBak}" Command="{Binding TurniTanlaCommand}" CommandParameter="bak" />
+                        <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding TurTuzatish}" Content="{l:T Audit_TurTuzatish}" Command="{Binding TurniTanlaCommand}" CommandParameter="tuzatish" />
+                    </StackPanel>
+                </Grid>
 
-                <DataGrid ItemsSource="{Binding BekorQilinganlar}" IsVisible="{Binding BekorBolimi}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="#" Binding="{Binding Id}" Width="70" />
-                        <DataGridTextColumn Header="{l:T Vaqt}" Binding="{Binding Vaqt, StringFormat='dd.MM.yyyy HH:mm'}" Width="170" />
-                        <DataGridTextColumn Header="{l:T Operator}" Binding="{Binding Operator.ToliqIsm}" Width="190" />
-                        <DataGridTextColumn Header="{l:T Yoqilgi}" Binding="{Binding YoqilgiNomi}" Width="90" />
-                        <DataGridTextColumn Header="{l:T Litr}" Binding="{Binding Litr, StringFormat='0.00'}" Width="80" />
-                        <DataGridTextColumn Header="{l:T Summa}" Binding="{Binding Summa, StringFormat='#,0'}" Width="110" />
-                        <DataGridTextColumn Header="{l:T Sabab}" Binding="{Binding BekorSababi}" Width="*" />
-                        <DataGridTextColumn Header="{l:T BekorQilgan}" Binding="{Binding BekorQilgan}" Width="180" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Panel>
+                <TextBlock DockPanel.Dock="Top" Text="{l:T MalumotYoq}" Classes="izoh" Margin="4,16" IsVisible="{Binding BoshQator}" />
+
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Yozuvlar}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:AuditQatori">
+                                <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,0,0,1" Padding="4,12">
+                                    <Grid ColumnDefinitions="106,206,184,*">
+                                        <StackPanel VerticalAlignment="Center" Spacing="1">
+                                            <TextBlock Text="{Binding Vaqt}" FontSize="13.5" FontWeight="Bold" />
+                                            <TextBlock Text="{Binding Sana}" Classes="izoh" FontSize="12" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                            <Border Classes="avatar" Width="34" Height="34">
+                                                <TextBlock Text="{Binding Harflar}" FontSize="12" />
+                                            </Border>
+                                            <TextBlock Text="{Binding Y.Kim}" FontSize="13.5" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="160" />
+                                        </StackPanel>
+                                        <Border Grid.Column="2" Classes="badge" ctl:Klass.Nomi="{Binding BelgiKlassi}" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Y.Amal}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="3" Text="{Binding Y.Tafsilot}" FontSize="13.5" Foreground="{DynamicResource MatnYumshoq}"
+                                                   TextWrapping="Wrap" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
         </Border>
     </Grid>
 </UserControl>

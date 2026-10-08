@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FuelControl.Contracts.Dto;
@@ -10,60 +12,58 @@ using FuelControl.Desktop.Services;
 
 namespace FuelControl.Desktop.ViewModels;
 
-public sealed record YoqilgiQatori(string Nomi, string Rang, string Litr, string Summa, double Ulush);
-public sealed record TolovQatori(string Nomi, string Summa, string Foiz, double Ulush);
-public sealed record KunUstuni(string Kun, string Summa, double Balandlik, bool Bugun);
-public sealed record OperatorKunQatori(Foydalanuvchi Operator, string Summa, string Litr, int SotuvSoni, bool Ochiq);
+/// <summary>Grafik ustuni: oxirgi 14 yopilgan smena savdosi (million so'm).</summary>
+public sealed record SavdoUstuni(string Sana, string Qiymat, double Balandlik, bool Oxirgi, string Izoh);
 
-/// <summary>Boshqaruv paneli — bugungi holat bir qarashda. Ko'rsatkichlar serverda hisoblanadi (/boshqaruv/bugun).</summary>
+/// <summary>To'lov turi ulushi (shu oy).</summary>
+public sealed record UlushQatori(string Nomi, string Summa, string Foiz, double Ulush, IBrush Rang);
+
+/// <summary>Baklar qoldig'i qatori.</summary>
+public sealed record BakQatori(int Raqam, YoqilgiBelgi Yoqilgi, string Kirim, string Qoldiq, bool Manfiy);
+
+/// <summary>Oxirgi yopilgan smena qatori.</summary>
+public sealed record YopilganQator(SmenaDto S)
+{
+    public string Raqam => "#" + S.Id;
+    public string Vaqt => $"{Format.QisqaSana(S.Boshlandi.ToLocalTime())} · {Til.F("Boshqaruv_Soat", (int)Math.Round(((S.Tugadi ?? S.Boshlandi) - S.Boshlandi).TotalHours))}";
+    public string Litr => Format.Son(S.JamiLitr);
+    public string Savdo => Format.Pul(S.Savdo);
+    public string FarqMatn => S.Farq switch
+    {
+        < 0 => $"{Til.T("Kamomat")} {Format.Farq(S.Farq)}",
+        > 0 => $"{Til.T("Ortiqcha")} {Format.Farq(S.Farq)}",
+        _ => Til.T("Boshqaruv_FarqYoq"),
+    };
+    public string FarqKlassi => S.Farq < 0 ? "qizil" : S.Farq > 0 ? "kok" : "yashil";
+}
+
+/// <summary>Boshqaruv paneli — /boshqaruv (faqat yopilgan smenalar + joriy smena holati), serverda hisoblanadi.</summary>
 public partial class BoshqaruvViewModel : ObservableObject
 {
-    public string Sana => DateTime.Today.ToString("d MMMM, dddd");
-
-    public string JamiSavdo { get; private set; } = "";
-    public string JamiLitr { get; private set; } = "";
-    public string SotuvSoni { get; private set; } = "";
-    public string Naqd { get; private set; } = "";
-    public string Plastik { get; private set; } = "";
-    public string Click { get; private set; } = "";
-    public string OchiqSmenalar { get; private set; } = "";
-    public string OyJami { get; private set; } = "";
-    public string OyKamomat { get; private set; } = "";
-    public string KechagigaNisbatan { get; private set; } = "";
-    public bool KechagidanKop { get; private set; }
-
-    public List<YoqilgiQatori> Yoqilgilar { get; private set; } = new();
-    public List<TolovQatori> Tolovlar { get; private set; } = new();
-    public List<KunUstuni> OxirgiKunlar { get; private set; } = new();
-    public List<OperatorKunQatori> BugungiOperatorlar { get; private set; } = new();
-    public List<Sotuv> OxirgiSotuvlar { get; private set; } = new();
-
     private readonly KechiktirilganIsh _yuklash;
-    private BoshqaruvBugunDto? _oxirgi;
+    private BoshqaruvDto? _d;
 
     public BoshqaruvViewModel()
     {
         _yuklash = new KechiktirilganIsh(Yukla, 500);
-        Korsat(null);
-        Til.Ozgardi += () => { Korsat(_oxirgi); OnPropertyChanged(string.Empty); };
-        // Kesh har o'zgarganda (SignalR xabari, o'z amalimiz) — panel serverdan qayta so'raladi.
         Malumot.Ozgardi += () =>
         {
             if (Malumot.Kirilgan && Malumot.JoriyFoydalanuvchi.Bor(Ruxsat.Boshqaruv)) _yuklash.Rejala();
-            else if (!Malumot.Kirilgan && _oxirgi is not null) { _oxirgi = null; Korsat(null); OnPropertyChanged(string.Empty); }
+            else if (!Malumot.Kirilgan && _d is not null) { _d = null; OnPropertyChanged(string.Empty); }
         };
+        Til.Ozgardi += () => OnPropertyChanged(string.Empty);
     }
 
     private async Task Yukla(Func<bool> dolzarb)
     {
         var d = await Malumot.Api.Boshqaruv();
         if (!dolzarb() || !Malumot.Kirilgan) return;
-        _oxirgi = d;
-        Korsat(d);
+        _d = d;
         OnPropertyChanged(string.Empty);
     }
 
-    /// <summary>"Yangilash" — butun kesh va panelni serverdan qayta oladi.</summary>
+    public Task HozirYukla() => _yuklash.Bajar();
+
     [RelayCommand]
     private async Task Yangilash()
     {
@@ -72,48 +72,102 @@ public partial class BoshqaruvViewModel : ObservableObject
         await _yuklash.Bajar();
     }
 
-    private void Korsat(BoshqaruvBugunDto? d)
+    [RelayCommand] private void OylikHisobot() => Navigatsiya.Och(MainViewModel.SHisobot);
+    [RelayCommand] private void BarchaSmenalar() => Navigatsiya.Och(MainViewModel.SSmenalar);
+    [RelayCommand] private void SavdogaOt() => Navigatsiya.Och(MainViewModel.SSavdo);
+    [RelayCommand] private void BakKirim() => Dialoglar.Bak.Och(null);
+    public bool BakKirimOladi => Malumot.JoriyFoydalanuvchi.Bor(Ruxsat.BakKirim);
+
+    /// <summary>"Yakshanba, 4-oktabr 2026" — joriy til lug'atidan.</summary>
+    public string Sana
     {
-        var k = d?.Kpi;
-        long jami = k?.BugungiSumma ?? 0, kecha = k?.KechagiSumma ?? 0;
-        JamiSavdo = Format.Pul(jami);
-        JamiLitr = Format.Litr(k?.BugungiLitr ?? 0);
-        SotuvSoni = (k?.SotuvSoni ?? 0).ToString();
-        OchiqSmenalar = (k?.OchiqSmenalar ?? 0).ToString();
-        OyJami = Format.Pul(k?.OyJami ?? 0);
-        OyKamomat = Format.Pul(k?.OyKamomat ?? 0);
-
-        long Tolov(TolovTuri t) => d?.TolovUlushlari.FirstOrDefault(x => x.Turi == t)?.Summa ?? 0;
-        long naqd = Tolov(TolovTuri.Naqd), plastik = Tolov(TolovTuri.Plastik), click = Tolov(TolovTuri.Click);
-        Naqd = Format.Pul(naqd);
-        Plastik = Format.Pul(plastik);
-        Click = Format.Pul(click);
-
-        KechagidanKop = jami >= kecha;
-        var foiz = kecha == 0 ? 0 : (double)(jami - kecha) / kecha * 100;
-        KechagigaNisbatan = $"{(foiz >= 0 ? "▲" : "▼")} {Math.Abs(foiz):0}% {Til.T("KechagigaNisbatan")}";
-
-        Yoqilgilar = (d?.YoqilgiUlushlari ?? []).Select(y =>
-            new YoqilgiQatori(y.Nomi, y.Rang, Format.Litr(y.Litr), Format.Pul(y.Summa), jami == 0 ? 0 : (double)y.Summa / jami)).ToList();
-
-        Tolovlar =
-        [
-            new(Til.T("Naqd"), Format.Pul(naqd), Foiz(naqd, jami), Ulush(naqd, jami)),
-            new(Til.T("Plastik"), Format.Pul(plastik), Foiz(plastik, jami), Ulush(plastik, jami)),
-            new(Til.T("Click"), Format.Pul(click), Foiz(click, jami), Ulush(click, jami)),
-        ];
-
-        var kunlar = d?.OxirgiKunlar ?? Enumerable.Range(0, 14).Select(i => new KunlikDto(Malumot.Bugun.AddDays(-13 + i), 0, 0)).ToArray();
-        long maks = Math.Max(1, kunlar.Max(x => x.Summa));
-        OxirgiKunlar = kunlar.Select(x => new KunUstuni(x.Sana.ToString("dd"), Format.Pul(x.Summa),
-            Math.Max(4, 120.0 * x.Summa / maks), x.Sana == Malumot.Bugun)).ToList();
-
-        BugungiOperatorlar = (d?.Operatorlar ?? []).Select(o => new OperatorKunQatori(
-            Malumot.FoydalanuvchiniOl(o.OperatorId, o.Ism), Format.Pul(o.BugungiSumma), Format.Litr(o.BugungiLitr), o.SotuvSoni, o.SmenaOchiqmi)).ToList();
-
-        OxirgiSotuvlar = (d?.OxirgiSotuvlar ?? []).Select(Malumot.SotuvKorinishi).ToList();
+        get
+        {
+            var b = DateTime.Today;
+            var kunlar = Til.T("Boshqaruv_HaftaKunlari").Split(',');
+            var oylar = Til.T("Boshqaruv_OyNomlari").Split(',');
+            return Til.F("Boshqaruv_SanaShakli", kunlar[(int)b.DayOfWeek], b.Day, oylar[b.Month - 1], b.Year);
+        }
     }
 
-    private static string Foiz(long qism, long jami) => jami == 0 ? "0%" : $"{100.0 * qism / jami:0}%";
-    private static double Ulush(long qism, long jami) => jami == 0 ? 0 : (double)qism / jami;
+    // ---- KPI
+    private SmenaDto? Oxirgi => _d?.OxirgiYopilgan;
+    public string OxirgiSavdo => Format.Pul(Oxirgi?.Savdo ?? 0);
+    public string OxirgiIzoh => Oxirgi is { } o ? Til.F("Boshqaruv_OxirgiSmenaIzoh", o.Id, o.OperatorIsmi, Format.Son(o.JamiLitr)) : Til.T("Boshqaruv_YopilganYoq");
+    public string OySavdo => Format.Pul(_d?.OySavdo ?? 0);
+    public string OyIzoh => Til.F("Boshqaruv_OySmenaIzoh", _d?.OySmenaSoni ?? 0, Format.Son(_d?.OyLitr ?? 0));
+    public string OyKamomat => Format.Pul(_d?.OyKamomat ?? 0);
+    public string OrtiqchaIzoh => (_d?.OyOrtiqcha ?? 0) > 0
+        ? Til.F("Boshqaruv_OrtiqchaIzoh", Format.Pul(_d!.OyOrtiqcha), _d.OxirgiSmenalar.Count(s => s.Farq > 0))
+        : Til.T("Boshqaruv_OrtiqchaYoq");
+    public string OtganNasiya => Format.Pul(_d?.Nasiyalar.MuddatiOtgan ?? 0);
+    public string OtganIzoh => Til.F("Boshqaruv_QarzIzoh", _d?.Nasiyalar.MuddatiOtganSoni ?? 0, Format.Pul(_d?.Nasiyalar.FaolQarz ?? 0));
+
+    // ---- Joriy smena
+    private SmenaDto? J => _d?.JoriySmena;
+    public bool JoriyBor => J is not null;
+    public bool JoriyYoq => J is null;
+    public string JoriySarlavha => J is { } j ? Til.F("Boshqaruv_JoriySmena", j.Id, j.OperatorIsmi) : "";
+    public string JoriyHarflar => Format.BoshHarflar(J?.OperatorIsmi ?? "");
+    public string JoriyIzoh => J is { } j
+        ? Til.F("Boshqaruv_BoshlanganDavomiylik", Format.QisqaSanaVaqt(j.Boshlandi.ToLocalTime()), Format.Davomiylik(DateTime.UtcNow - j.Boshlandi))
+        : "";
+    public string JQaytim => Format.Pul(J?.OchishQaytim ?? 0);
+    public string JTerminal => Format.Pul(J?.OchishTerminal ?? 0);
+    public string JDepozit => Format.Pul(J?.OchishDepozit ?? 0);
+    public string JNasiya => Format.Pul(J?.NasiyaJami ?? 0);
+    public string JQaytgan => Format.Pul(J?.QaytganNasiya ?? 0);
+    public string JXarajat => Format.Pul(J?.XarajatJami ?? 0);
+    // Soni Malumot.Joriy dan (BoshqaruvDto da soni yo'q).
+    public string JNasiyaYorliq => Til.F("Boshqaruv_NasiyaSoni", Malumot.Joriy?.Nasiyalar.Length ?? 0).ToUpperInvariant();
+    public string JXarajatYorliq => Til.F("Boshqaruv_XarajatSoni", Malumot.Joriy?.Xarajatlar.Length ?? 0).ToUpperInvariant();
+    public string OxirgiSmenaSarlavha => Oxirgi is { } o ? Til.F("Boshqaruv_OxirgiSmena", o.Id) : Til.T("Boshqaruv_YopilganYoq");
+    public string OxirgiYopildi => Oxirgi?.Tugadi is { } t ? $"{Til.T("Boshqaruv_Yopildi")}: {Format.SanaVaqt(t.ToLocalTime())} · {Oxirgi.OperatorIsmi}" : "";
+    public bool SavdogaOtaOladi => Malumot.JoriyFoydalanuvchi.Bor(Ruxsat.Savdo);
+
+    // ---- Baklar
+    public List<BakQatori> Baklar => (_d?.Aparatlar ?? []).OrderBy(a => a.Raqam).Select(a =>
+    {
+        var y = Malumot.Yoqilgilar.FirstOrDefault(x => x.Id == a.YoqilgiTuriId);
+        return new BakQatori(a.Raqam, YoqilgiBelgi.Yarat(a.YoqilgiNomi, y?.Rang ?? "#2F6BFF"),
+            a.OxirgiKirimVaqti is { } v ? Til.F("Boshqaruv_KirimSana", Format.QisqaSana(v.ToLocalTime())) : "",
+            Format.ButunLitr(a.BakQoldiq) + " L", a.BakQoldiq < 0);
+    }).ToList();
+    public string BakHolati => Til.F("Boshqaruv_HolatigaVaqt", Oxirgi?.Tugadi is { } t ? Format.QisqaSanaVaqt(t.ToLocalTime()) : Format.QisqaSanaVaqt(DateTime.Now));
+
+    // ---- Grafik
+    public List<SavdoUstuni> Ustunlar
+    {
+        get
+        {
+            var l = _d?.OxirgiSmenalar ?? [];
+            if (l.Length == 0) return new();
+            var maks = Math.Max(1, l.Max(x => x.Savdo));
+            return l.Select((x, i) => new SavdoUstuni(Format.QisqaSana(x.Sana),
+                (x.Savdo / 1_000_000m).ToString("0.0", CultureInfo.InvariantCulture),
+                Math.Max(8, 150.0 * x.Savdo / maks), i == l.Length - 1,
+                $"#{x.Id} · {x.OperatorIsmi} · {Format.Som(x.Savdo)}")).ToList();
+        }
+    }
+
+    // ---- To'lov turlari
+    public List<UlushQatori> Tolovlar
+    {
+        get
+        {
+            var t = _d?.OyTolovlar ?? new TolovTaqsimotiDto(0, 0, 0, 0);
+            var jami = Math.Max(1, t.Naqd + t.Plastik + t.Depozit + t.Nasiya);
+            UlushQatori Q(string kalit, long s, string rang) =>
+                new(Til.T(kalit), Format.Pul(s), $"{Math.Round(100.0 * s / jami)}%", (double)s / jami, new SolidColorBrush(Color.Parse(rang)));
+            return new[]
+            {
+                Q("Tolov_Plastik", t.Plastik, "#19B5C9"), Q("Tolov_Naqd", t.Naqd, "#2F6BFF"),
+                Q("Tolov_Depozit", t.Depozit, "#7C5CFF"), Q("Tolov_Nasiya", t.Nasiya, "#E8590C"),
+            }.OrderByDescending(x => x.Ulush).ToList();
+        }
+    }
+
+    // ---- Oxirgi yopilganlar
+    public List<YopilganQator> OxirgiYopilganlar => (_d?.OxirgiYopilganlar ?? []).Select(s => new YopilganQator(s)).ToList();
+    public bool SmenalarniKoradi => Malumot.JoriyFoydalanuvchi.Bor(Ruxsat.Smenalar);
 }

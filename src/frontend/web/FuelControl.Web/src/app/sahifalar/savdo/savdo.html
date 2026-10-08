@@ -1,0 +1,305 @@
+<div class="sahifa">
+  @if (!yuklandi()) {
+    <div class="sahifa-bosh"><div class="sarlavha"><h1>{{ til.t('Savdo') }}</h1></div></div>
+    <div class="shisha karta"><div class="skelet" style="height: 220px"></div></div>
+    <div class="shisha karta"><div class="skelet" style="height: 260px"></div></div>
+  } @else if (xato()) {
+    <div class="sahifa-bosh"><div class="sarlavha"><h1>{{ til.t('Savdo') }}</h1></div></div>
+    <div class="shisha karta bosh">
+      {{ xato() }}<br /><br />
+      <button type="button" class="tugma" (click)="yukla()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button>
+    </div>
+  } @else if (joriy(); as t) {
+    <!-- ===== Smena ochiq ===== -->
+    <header class="sahifa-bosh">
+      <div class="sarlavha">
+        <h1>{{ til.t('Savdo') }}</h1>
+        <div class="qator orala holat-qator">
+          <span class="pill yashil katta"><span class="nuqta"></span>{{ til.t('Savdo_SmenaOchiq') }}</span>
+          <span class="sarlavha-izoh">#{{ t.smena.id }} · {{ t.smena.operatorIsmi }} · {{ kunSoatQisqa(t.smena.boshlandi) }} {{ til.t('Savdo_Dan') }} · {{ davomiylik(t.smena.boshlandi) }}</span>
+        </div>
+      </div>
+      <div class="amallar">
+        @if (auth.bor('BakKirim')) {
+          <button type="button" class="tugma" (click)="bakOchiq.set(true)"><ikon nomi="truck" [olcham]="17" [qalinlik]="2" /> {{ til.t('Bak_Kirim') }}</button>
+        }
+        @if (auth.bor('SmenaYopish')) {
+          <a class="tugma asosiy" routerLink="/savdo/yopish"><ikon nomi="stop" [olcham]="16" [qalinlik]="2" /> {{ til.t('Savdo_SmenaniYopish') }}</a>
+        }
+      </div>
+    </header>
+
+    <div class="qator-panjara">
+      <section class="shisha karta asosiy" aria-labelledby="qoldiq-s" style="gap: 16px">
+        <div class="karta-bosh">
+          <h2 id="qoldiq-s">{{ til.t('Savdo_OchilgandagiQoldiqlar') }}</h2>
+          <span class="karta-izoh">{{ til.t('Savdo_OperatorKiritgan') }}</span>
+        </div>
+        <div class="plitkalar">
+          <div class="plitka qoldiq">
+            <span class="ikon-doira"><ikon nomi="cash" [olcham]="19" [qalinlik]="2" /></span>
+            <div class="matn"><span class="yorliq">{{ til.t('Savdo_QaytimNaqd') }}</span><span class="xulosa-qiymat">{{ pul(t.smena.ochishQaytim) }} <small>{{ til.t('Som') }}</small></span></div>
+          </div>
+          <div class="plitka qoldiq">
+            <span class="ikon-doira moviy"><ikon nomi="card" [olcham]="19" [qalinlik]="2" /></span>
+            <div class="matn"><span class="yorliq">{{ til.t('Savdo_TerminalPlastik') }}</span><span class="xulosa-qiymat">{{ pul(t.smena.ochishTerminal) }} <small>{{ til.t('Som') }}</small></span><span class="izoh">{{ til.t('Savdo_TerminalIzoh') }}</span></div>
+          </div>
+          <div class="plitka qoldiq">
+            <span class="ikon-doira binafsha"><ikon nomi="wallet" [olcham]="19" [qalinlik]="2" /></span>
+            <div class="matn"><span class="yorliq">{{ til.t('Savdo_DepozitKarta') }}</span><span class="xulosa-qiymat">{{ pul(t.smena.ochishDepozit) }} <small>{{ til.t('Som') }}</small></span><span class="izoh">{{ til.t('Savdo_DepozitIzoh') }}</span></div>
+          </div>
+        </div>
+        <ol class="bosqichlar" [attr.aria-label]="til.t('Savdo_Bosqichlar')">
+          <li>
+            <span class="raqam tayyor"><ikon nomi="check" [olcham]="15" [qalinlik]="2.5" /></span>
+            <span class="matn"><b>{{ til.t('Savdo_Bosqich1') }}</b><span>{{ til.t('Savdo_Bosqich1Izoh', soatMin(t.smena.boshlandi)) }}</span></span>
+          </li>
+          <li>
+            <span class="raqam joriy">2</span>
+            <span class="matn"><b>{{ til.t('Savdo_Bosqich2') }}</b><span>{{ til.t('Savdo_Bosqich2Izoh') }}</span></span>
+          </li>
+          <li>
+            <span class="raqam">3</span>
+            <span class="matn"><b>{{ til.t('Savdo_Bosqich3') }}</b><span>{{ til.t('Savdo_Bosqich3Izoh') }}</span></span>
+          </li>
+        </ol>
+      </section>
+
+      <section class="joriy-karta yon" aria-labelledby="joriy-s">
+        <div class="qator">
+          <span class="soat-ikon"><ikon nomi="clock" [olcham]="17" [qalinlik]="2" /></span>
+          <h2 id="joriy-s">{{ til.t('Savdo_JoriySmena', t.smena.id) }}</h2>
+        </div>
+        <dl>
+          <dt>{{ til.t('Savdo_Operator') }}</dt><dd>{{ t.smena.operatorIsmi }}</dd>
+          <dt>{{ til.t('Savdo_Ochildi') }}</dt><dd>{{ kunOy(t.smena.boshlandi) }} · {{ soatMin(t.smena.boshlandi) }}</dd>
+          <dt>{{ til.t('Savdo_Davomiyligi') }}</dt><dd>{{ davomiylik(t.smena.boshlandi) }}</dd>
+          <dt>{{ til.t('Savdo_NasiyaBerildi') }}</dt><dd>{{ pul(t.smena.nasiyaJami) }}</dd>
+          <dt>{{ til.t('Savdo_QaytganNasiya') }}</dt><dd>{{ pul(t.smena.qaytganNasiya) }}</dd>
+          <dt>{{ til.t('Savdo_Xarajatlar') }}</dt><dd>{{ pul(t.smena.xarajatJami) }}</dd>
+        </dl>
+        <div class="chiziq"></div>
+        <p>{{ til.t('Savdo_FarqIzoh') }}</p>
+        @if (auth.bor('SmenaYopish')) {
+          <a class="tugma yashil katta yopish-tugma" routerLink="/savdo/yopish"><ikon nomi="check" [olcham]="18" [qalinlik]="2.4" /> {{ til.t('Savdo_SmenaniYopish') }}</a>
+        }
+      </section>
+    </div>
+
+    <section class="shisha karta" aria-labelledby="aparat-s">
+      <div class="karta-bosh">
+        <h2 id="aparat-s">{{ til.t('Savdo_Aparatlar') }}</h2>
+        <span class="karta-izoh">{{ til.t('Savdo_AparatlarIzoh', oxirgiYopilganVaqt()) }}</span>
+      </div>
+      <div class="aparatlar">
+        @for (a of aparatlar(); track a.id) {
+          <article class="plitka aparat">
+            <div class="qator ora">
+              <h3>{{ til.t('Aparat_Raqami', a.raqam) }}</h3>
+              <yoqilgi-pill [nomi]="a.yoqilgiNomi" [rang]="rang(a.yoqilgiTuriId)" />
+            </div>
+            <span class="karta-izoh">{{ pul(narx(a.yoqilgiTuriId)) }} {{ til.t('Savdo_SomLitr') }}</span>
+            <div class="chiziq-och"></div>
+            <div class="ustun-kichik">
+              <span class="yorliq">{{ til.t('Savdo_PultKorsatkichi') }}</span>
+              <span class="pult-qiymat">{{ litr(a.totalLitr) }} <small>L</small></span>
+            </div>
+            <div class="bak-blok">
+              <span class="bak-bosh"><ikon nomi="database" [olcham]="14" [qalinlik]="2" /><span class="yorliq">{{ til.t('Savdo_BakQoldigi') }}</span></span>
+              <span class="bak-qiymat" [class.manfiy]="a.bakQoldiq < 0">{{ litrQisqa(a.bakQoldiq) }} <small>L</small></span>
+              <span class="karta-izoh">{{ oxirgiKirim(a) }}</span>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <div class="uchlik">
+      <section class="shisha karta" aria-labelledby="nasiya-s">
+        <div class="qator sarlavha-bloki">
+          <span class="ikon-doira to-rang"><ikon nomi="book" [olcham]="19" [qalinlik]="2" /></span>
+          <div class="bosh-joy"><h2 id="nasiya-s">{{ til.t('Savdo_Nasiya') }}</h2><span class="karta-izoh">{{ til.t('Savdo_NasiyaShuSmenada', t.nasiyalar.length, pul(t.smena.nasiyaJami)) }}</span></div>
+        </div>
+        <ul class="royxat-ul">
+          @for (n of t.nasiyalar; track n.id) {
+            <li>
+              <span class="avatar katta">{{ harflar(n.mijozIsmi) }}</span>
+              <div class="bosh-joy ikki-qator">
+                <span class="nom">{{ n.mijozIsmi }}</span>
+                <span class="qator orala kichik-qator">{{ tel(n.telefon) }} <mashina-raqami [qiymat]="n.mashinaRaqami" /></span>
+              </div>
+              <div class="ong-ustun">
+                <span class="summa">{{ pul(n.summa) }}</span>
+                <span class="pill" [class]="muddatRang(n)">{{ til.t('Savdo_MuddatGacha', kunOy(n.muddat)) }}</span>
+              </div>
+              @if (ochirish(n.muallifId)) {
+                <button type="button" class="tugma ikonli kichik shaffof ochir" (click)="nasiyaOchir(n)" [attr.aria-label]="til.t('Ochirish')" [title]="til.t('Ochirish')"><ikon nomi="trash" [olcham]="16" /></button>
+              }
+            </li>
+          } @empty {
+            <li class="bosh-qator">{{ til.t('Savdo_NasiyaYoq') }}</li>
+          }
+        </ul>
+        @for (q of t.qaytishlar; track q.id) {
+          <div class="qaytish-qator">
+            <span class="yashil"><ikon nomi="undo" [olcham]="16" [qalinlik]="2" /></span>
+            <span class="matn"><b>{{ q.mijozIsmi }}</b> {{ til.t('Savdo_QarzniQaytardi') }} · {{ soatMin(q.vaqt) }} · {{ til.t('Tolov_' + q.usul).toLowerCase() }}</span>
+            <span class="plyus">+{{ pul(q.summa) }}</span>
+            @if (ochirish(q.muallifId)) {
+              <button type="button" class="tugma ikonli kichik shaffof ochir" (click)="qaytishOchir(q.id)" [attr.aria-label]="til.t('Ochirish')" [title]="til.t('Ochirish')"><ikon nomi="trash" [olcham]="16" /></button>
+            }
+          </div>
+        }
+        <div class="qator orala tugmalar">
+          @if (auth.bor('NasiyaYozish')) {
+            <button type="button" class="tugma asosiy" (click)="nasiyaOchiq.set(true)"><ikon nomi="plus" [olcham]="16" [qalinlik]="2.4" /> {{ til.t('Nasiya_Yozish') }}</button>
+          }
+          @if (auth.bor('QarzQaytdi')) {
+            <button type="button" class="tugma" (click)="qaytishOchiq.set(true)"><ikon nomi="undo" [olcham]="16" [qalinlik]="2" /> {{ til.t('Nasiya_QarzQaytdi') }}</button>
+          }
+        </div>
+      </section>
+
+      <section class="shisha karta" aria-labelledby="xarajat-s">
+        <div class="qator sarlavha-bloki">
+          <span class="ikon-doira sariq"><ikon nomi="receipt" [olcham]="19" [qalinlik]="2" /></span>
+          <div class="bosh-joy"><h2 id="xarajat-s">{{ til.t('Savdo_Xarajatlar') }}</h2><span class="karta-izoh">{{ til.t('Savdo_XarajatIzoh', t.xarajatlar.length) }}</span></div>
+        </div>
+        <ul class="royxat-ul">
+          @for (x of t.xarajatlar; track x.id) {
+            <li class="xarajat">
+              <div class="bosh-joy ikki-qator">
+                <span class="nom">{{ x.sabab }}</span>
+                <span class="karta-izoh">{{ soatMin(x.vaqt) }} · {{ til.t(x.manba === 'Kassa' ? 'Savdo_Kassadan' : 'Savdo_DepozitKartadan') }}</span>
+              </div>
+              <span class="summa">{{ pul(x.summa) }}</span>
+              @if (ochirish(x.muallifId)) {
+                <button type="button" class="tugma ikonli kichik shaffof ochir" (click)="xarajatOchir(x.id)" [attr.aria-label]="til.t('Ochirish')" [title]="til.t('Ochirish')"><ikon nomi="trash" [olcham]="16" /></button>
+              }
+            </li>
+          } @empty {
+            <li class="bosh-qator">{{ til.t('Savdo_XarajatYoq') }}</li>
+          }
+        </ul>
+        <div class="qator ora jami-qator"><span class="yorliq-oddiy">{{ til.t('Savdo_Jami') }}</span><span class="jami-qiymat">{{ pul(t.smena.xarajatJami) }} <small>{{ til.t('Som') }}</small></span></div>
+        @if (auth.bor('XarajatYozish')) {
+          <button type="button" class="tugma asosiy" (click)="xarajatOchiq.set(true)"><ikon nomi="plus" [olcham]="16" [qalinlik]="2.4" /> {{ til.t('Xarajat_Yozish') }}</button>
+        }
+      </section>
+
+      @if (muddatiOtgan().length) {
+        <section class="karta otgan-karta" aria-labelledby="muddat-s">
+          <div class="qator sarlavha-bloki">
+            <span class="ikon-doira qizil"><ikon nomi="warning" [olcham]="19" [qalinlik]="2" /></span>
+            <div class="bosh-joy"><h2 id="muddat-s">{{ til.t('Savdo_MuddatiOtganQarzlar') }}</h2><span class="karta-izoh">{{ til.t('Savdo_MijozSumma', muddatiOtgan().length, pul(muddatiOtganJami())) }}</span></div>
+          </div>
+          <ul class="royxat-ul otgan">
+            @for (n of muddatiOtgan().slice(0, 4); track n.id) {
+              <li>
+                <div class="bosh-joy ikki-qator">
+                  <span class="nom">{{ n.mijozIsmi }}</span>
+                  <span class="qator orala kichik-qator"><mashina-raqami [qiymat]="n.mashinaRaqami" /> {{ til.t('Savdo_MuddatEdi', kunOy(n.muddat)) }}</span>
+                </div>
+                <div class="ong-ustun">
+                  <span class="summa">{{ pul(n.qoldiq) }}</span>
+                  <span class="pill qizil">{{ til.t('Nasiya_KunOtdi', -n.muddatgachaKun) }}</span>
+                </div>
+              </li>
+            }
+          </ul>
+          <a class="tugma barcha" routerLink="/nasiyalar">{{ til.t('Savdo_BarchaNasiyalar') }} <ikon nomi="arrow" [olcham]="16" [qalinlik]="2" /></a>
+        </section>
+      }
+    </div>
+  } @else {
+    <!-- ===== Smena yopiq: ochish formasi ===== -->
+    <header class="sahifa-bosh">
+      <div class="sarlavha">
+        <h1>{{ til.t('Savdo') }}</h1>
+        <div class="qator orala holat-qator">
+          <span class="pill kul katta"><span class="nuqta kul-nuqta"></span>{{ til.t('Savdo_SmenaYopiq') }}</span>
+          @if (oxirgi(); as o) { <span class="sarlavha-izoh">{{ til.t('Savdo_OxirgiSmenaYopdi', o.smena.id, o.smena.operatorIsmi) }}</span> }
+        </div>
+      </div>
+    </header>
+
+    <div class="qator-panjara tepa">
+      <section class="shisha karta asosiy ochish-karta" aria-labelledby="och-s">
+        <div class="ustun-kichik katta-oraliq">
+          <h2 id="och-s" class="katta-sarlavha">{{ til.t('Savdo_SmenaniOchish') }}</h2>
+          <p class="izoh-p">{{ til.t('Savdo_OchishIzoh') }}</p>
+        </div>
+        @if (auth.bor('SmenaOchish')) {
+          <form (ngSubmit)="smenaOch()" enterKeyingi autocomplete="off" class="ochish-forma" novalidate>
+            <div class="plitka katta ochish-qator">
+              <span class="ikon-doira katta"><ikon nomi="cash" [olcham]="20" [qalinlik]="2" /></span>
+              <div class="matn"><label for="och-qaytim">{{ til.t('Savdo_QaytimPuli') }}</label><span>{{ til.t('Savdo_QaytimIzoh') }}</span></div>
+              <son-kiritish [(qiymat)]="qaytim" sinf="kiritish pul" inputId="och-qaytim" [avto]="true" />
+            </div>
+            <div class="plitka katta ochish-qator">
+              <span class="ikon-doira moviy katta"><ikon nomi="card" [olcham]="20" [qalinlik]="2" /></span>
+              <div class="matn"><label for="och-terminal">{{ til.t('Savdo_TerminalSumma') }}</label><span>{{ til.t('Savdo_TerminalSummaIzoh') }}</span></div>
+              <son-kiritish [(qiymat)]="terminal" sinf="kiritish pul" inputId="och-terminal" />
+            </div>
+            <div class="plitka katta ochish-qator">
+              <span class="ikon-doira binafsha katta"><ikon nomi="wallet" [olcham]="20" [qalinlik]="2" /></span>
+              <div class="matn"><label for="och-depozit">{{ til.t('Savdo_DepozitQoldigi') }}</label><span>{{ til.t('Savdo_DepozitQoldigiIzoh') }}</span></div>
+              <son-kiritish [(qiymat)]="depozit" sinf="kiritish pul" inputId="och-depozit" />
+            </div>
+            @if (ochishXato()) { <div class="xato-matn" role="alert">{{ ochishXato() }}</div> }
+            <div class="qator ora orala ochish-past">
+              <span class="ochuvchi"><span class="avatar kichik">{{ harflar(auth.foydalanuvchi()?.toliqIsm) }}</span>{{ til.t('Savdo_OchishVaqti', auth.foydalanuvchi()?.toliqIsm, hozirSoat()) }}</span>
+              <button type="submit" class="tugma yashil katta" [disabled]="band() || !tayyorOchish()">
+                @if (band()) { <span class="aylanma"></span> } @else { <ikon nomi="play" [olcham]="16" [qalinlik]="2" /> } {{ til.t('Savdo_SmenaniOchish') }}
+              </button>
+            </div>
+          </form>
+        } @else {
+          <div class="malumot-blok"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Savdo_OchishRuxsatYoq') }}</span></div>
+        }
+      </section>
+
+      <aside class="yon ustunlar-18">
+        @if (oxirgi(); as o) {
+          <section class="shisha karta" aria-labelledby="oxirgi-s">
+            <div class="qator ora"><h2 id="oxirgi-s">{{ til.t('Savdo_OxirgiSmena', o.smena.id) }}</h2><span class="pill kul">{{ til.t('Savdo_Yopilgan') }}</span></div>
+            <span class="karta-izoh kichik-bosh">{{ o.smena.operatorIsmi }} · {{ til.t('Savdo_Soat', davomiylikSoat(o.smena)) }}</span>
+            <dl class="dl-oddiy">
+              <dt>{{ til.t('Savdo_SavdoQator') }}</dt><dd class="qalin">{{ pul(o.smena.savdo) }}</dd>
+              <dt>{{ til.t('Savdo_SotilganLitr') }}</dt><dd>{{ litr(o.smena.jamiLitr) }} L</dd>
+              <dt>{{ til.t('Savdo_Plastik') }}</dt><dd>{{ pul(o.smena.plastik) }}</dd>
+              <dt>{{ til.t('Savdo_DepozitFarqi') }}</dt><dd>{{ ishora(o.smena.depozitFarqi) }}</dd>
+              <dt>{{ til.t('Savdo_Nasiya') }}</dt><dd>{{ pul(o.smena.nasiyaJami) }}</dd>
+              <dt>{{ til.t('Savdo_Xarajatlar') }}</dt><dd>{{ pul(o.smena.xarajatJami) }}</dd>
+            </dl>
+            @if (o.smena.farq < 0) {
+              <div class="kamomat-blok"><span class="bosh-joy farq-matn"><b class="qizil">{{ til.t('Savdo_Kamomat') }}</b> · {{ til.t('Savdo_OylikdanAyirildi', o.smena.operatorIsmi) }}</span><span class="farq-qiymat qizil">{{ pul(o.smena.farq) }}</span></div>
+            } @else if (o.smena.farq > 0) {
+              <div class="ortiqcha-blok"><span class="bosh-joy farq-matn"><b class="yashil">{{ til.t('Savdo_Ortiqcha') }}</b> · {{ til.t('Savdo_HisobigaYozildi', o.smena.operatorIsmi) }}</span><span class="farq-qiymat yashil">+{{ pul(o.smena.farq) }}</span></div>
+            } @else {
+              <div class="ortiqcha-blok"><ikon nomi="check" [olcham]="16" [qalinlik]="2.4" /><span class="bosh-joy farq-matn"><b class="yashil">{{ til.t('Savdo_FarqYoq') }}</b></span></div>
+            }
+          </section>
+        }
+
+        <section class="shisha karta" aria-labelledby="holat-s">
+          <h2 id="holat-s">{{ til.t('Savdo_AparatlarHolati') }}</h2>
+          <span class="karta-izoh kichik-bosh">{{ oxirgi() ? til.t('Savdo_SmenaYopilgandanKeyin', oxirgi()!.smena.id) : til.t('Savdo_HozirgiHolat') }}</span>
+          <div class="holat-jadval">
+            <span class="yorliq">{{ til.t('Savdo_Aparat') }}</span><span class="yorliq o">{{ til.t('Savdo_Pult') }}</span><span class="yorliq o">{{ til.t('Savdo_Bak') }}</span>
+            @for (a of aparatlar(); track a.id) {
+              <span class="h-yacheyka qalin">{{ a.raqam }} · {{ a.yoqilgiNomi }}</span>
+              <span class="h-yacheyka o">{{ litr(a.totalLitr) }}</span>
+              <span class="h-yacheyka o qalin" [class.manfiy]="a.bakQoldiq < 0">{{ litr(a.bakQoldiq) }}</span>
+            }
+          </div>
+        </section>
+      </aside>
+    </div>
+  }
+</div>
+
+<nasiya-dialog [(ochiq)]="nasiyaOchiq" (saqlandi)="yukla(true)" />
+<qarz-qaytdi-dialog [(ochiq)]="qaytishOchiq" (saqlandi)="yukla(true)" />
+<xarajat-dialog [(ochiq)]="xarajatOchiq" (saqlandi)="yukla(true)" />
+<bak-kirim-dialog [(ochiq)]="bakOchiq" (saqlandi)="yukla(true)" />

@@ -1,124 +1,220 @@
-<div class="sahifa">
-  <div class="sahifa-bosh">
-    <h1>{{ til.t('Hisobotlar') }}</h1>
-    @if (auth.bor('Eksport')) {
-      <button class="tugma kichik" (click)="eksport()" [disabled]="!natija() || eksportBand()">
-        @if (eksportBand()) { <span class="aylanma"></span> } @else { <ikon nomi="excel" [olcham]="16" /> } {{ til.t('ExcelXlsx') }}
-      </button>
-    }
-      </div>
+<div class="sahifa hisobotlar">
 
-  <section class="shisha karta ustunlar">
-    <div class="chiplar">
-      @for (t of tezlar; track t.kod) {
-        <button class="chip" [class.tanlangan]="tez() === t.kod" (click)="tezTanla(t.kod)">{{ til.t(t.kalit) }}</button>
-      }
+  <header class="sahifa-bosh">
+    <div class="sarlavha">
+      <h1>{{ til.t('Hisobotlar') }}</h1>
+      <span class="sarlavha-izoh">{{ davrIzoh() }}</span>
     </div>
-    <div class="filtrlar">
-      <div class="maydon">
-        <label for="h-dan">{{ til.t('Dan') }}</label>
-        <input id="h-dan" type="date" class="kiritish" [ngModel]="dan()" (ngModelChange)="sanaOzgardi('dan', $event)" [max]="gacha()" />
+    @if (auth.bor('Eksport')) {
+      <button type="button" class="tugma" [disabled]="eksportBand() || !natija()" (click)="excel()"><ikon nomi="excel" [olcham]="16" [qalinlik]="2" /> {{ til.t('Hisobot_Excel') }}</button>
+    }
+  </header>
+
+  <!-- Filtrlar -->
+  <section class="shisha filtr-karta" [attr.aria-label]="til.t('Hisobot_Filtrlar')">
+    <div class="filtr-qator">
+      <div class="maydon f-sana">
+        <label for="hs-dan">{{ til.t('Hisobot_Dan') }}</label>
+        <input id="hs-dan" class="kiritish" type="date" [value]="dan()" [max]="gacha()" (change)="sanaOzgardi('dan', $any($event.target).value)" />
       </div>
-      <div class="maydon">
-        <label for="h-gacha">{{ til.t('Gacha') }}</label>
-        <input id="h-gacha" type="date" class="kiritish" [ngModel]="gacha()" (ngModelChange)="sanaOzgardi('gacha', $event)" [min]="dan()" />
+      <div class="maydon f-sana">
+        <label for="hs-gacha">{{ til.t('Hisobot_Gacha') }}</label>
+        <input id="hs-gacha" class="kiritish" type="date" [value]="gacha()" [min]="dan()" (change)="sanaOzgardi('gacha', $any($event.target).value)" />
       </div>
-      @if (operatorlar().length) {
-        <div class="maydon">
-          <label for="h-op">{{ til.t('Operator') }}</label>
-          <select id="h-op" class="kiritish" [ngModel]="operatorId()" (ngModelChange)="operatorTanla($event)">
-            <option [ngValue]="null">{{ til.t('BarchaOperatorlar') }}</option>
-            @for (o of operatorlar(); track o.id) { <option [ngValue]="o.id">{{ o.ism }}</option> }
-          </select>
-        </div>
-      }
-      <div class="maydon">
-        <span class="yorliq">{{ til.t('Guruhlash') }}</span>
-        <div class="segment">
+      <div class="maydon f-operator">
+        <label for="hs-op">{{ til.t('Hisobot_Operator') }}</label>
+        <select id="hs-op" class="kiritish" (change)="operatorTanla($any($event.target).value)">
+          <option value="">{{ til.t('Hisobot_Hammasi') }}</option>
+          @for (o of operatorlar(); track o.id) { <option [value]="o.id" [selected]="operatorId() === o.id">{{ o.ism }}</option> }
+        </select>
+      </div>
+      <div class="maydon f-guruh">
+        <span class="yorliq" id="hs-guruh-l">{{ til.t('Hisobot_Guruhlash') }}</span>
+        <div class="segment" role="group" aria-labelledby="hs-guruh-l">
           @for (g of guruhlar; track g.kod) {
-            <button [class.tanlangan]="guruh() === g.kod" (click)="guruhTanla(g.kod)">{{ til.t(g.kalit) }}</button>
+            <button type="button" [class.tanlangan]="guruh() === g.kod" [attr.aria-pressed]="guruh() === g.kod" (click)="guruh.set(g.kod)">{{ til.t(g.kalit) }}</button>
           }
         </div>
       </div>
     </div>
+    <div class="tez-qator">
+      <span class="tez-yorliq">{{ til.t('Hisobot_TezDavr') }}</span>
+      @for (t of tezlar; track t.kod) {
+        <button type="button" class="chip" [class.tanlangan]="tez() === t.kod" [attr.aria-pressed]="tez() === t.kod" (click)="tezTanla(t.kod)">{{ til.t(t.kalit) }}</button>
+      }
+      <span class="tez-izoh">{{ til.t('Hisobot_KunlikIzoh') }}</span>
+    </div>
   </section>
 
-  @if (xato(); as x) {
-    <div class="shisha karta bosh">{{ x }}<br /><br /><button class="tugma" (click)="yukla()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button></div>
+  @if (xato()) {
+    <div class="shisha karta bosh">
+      {{ xato() }}<br /><br />
+      <button type="button" class="tugma" (click)="qayta()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button>
+    </div>
+  } @else if (!natija()) {
+    <div class="kpi-tarmoq">@for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) { <div class="skelet" style="height: 88px; border-radius: 22px"></div> }</div>
   } @else if (natija(); as n) {
-    <div class="kpilar" [class.xira]="yuklanmoqda()">
+
+    <!-- KPI -->
+    <div class="kpi-tarmoq">
       @for (k of kpilar(); track k.kalit) {
-        <div class="shisha kpi" [class.asosiy-kpi]="k.asosiy">
-          <span class="nom">@if (k.rang) { <span class="nuqta" [style.background]="'var(--q-' + k.rang + ')'"></span> }{{ til.t(k.kalit) }}</span>
-          <span class="qiymat" [class.qizil]="k.qizil">{{ k.qiymat }}@if (k.birlik) {<small>{{ til.t(k.birlik) }}</small>}</span>
+        <div class="shisha kpi-plitka">
+          <span class="yorliq kpi-nom">@if (k.rang) { <span class="kpi-nuqta" [style.background]="k.rang"></span> }{{ til.t(k.kalit) }}</span>
+          <span class="kpi-son" [class.qizil-matn]="k.qizil">{{ k.qiymat }}</span>
+          <span class="kpi-izoh">{{ k.izoh }}</span>
         </div>
       }
     </div>
 
-    <section class="shisha karta" [class.xira]="yuklanmoqda()">
+    <!-- Guruh jadvali -->
+    <section class="shisha jadval-karta" aria-labelledby="hs-jadval-s">
+      <h2 id="hs-jadval-s">{{ til.t('Hisobot_JadvalSarlavha') }}</h2>
+
       <!-- Keng ekran: jadval -->
-      <div class="jadval-oram keng">
-        <table class="jadval">
-          <thead>
-            <tr>
-              <th>{{ til.t(guruh() === 'Operator' ? 'Operator' : guruh() === 'Kun' ? 'Sana' : 'Oy') }}</th>
-              @for (u of ustunlar; track u.maydon) { <th class="o">{{ til.t(u.kalit) }}</th> }
-            </tr>
-          </thead>
-          @for (b of bolimlar(); track b.guruh) {
-            <tbody [class.bolim]="b.yoqilgilar.length">
-              @for (y of b.yoqilgilar; track y.yoqilgi) {
-                <tr class="yoq-qator">
-                  <td><span class="ichki">{{ y.yoqilgi }}</span></td>
-                  @for (u of ustunlar; track u.maydon) { <td class="o">{{ qiymat(y, u) }}</td> }
-                </tr>
-              }
-              <tr [class.guruh-jami]="b.yoqilgilar.length">
-                <td>{{ nomi(b.jami) }}</td>
-                @for (u of ustunlar; track u.maydon) {
-                  <td class="o" [class.qizil]="u.maydon === 'kamomat' && b.jami.kamomat > 0">
-                    @if (u.maydon === 'summa') { <b>{{ qiymat(b.jami, u) }}</b> } @else { {{ qiymat(b.jami, u) }} }
-                  </td>
-                }
-              </tr>
-            </tbody>
-          } @empty { <tbody><tr><td [attr.colspan]="ustunlar.length + 1" class="bosh">{{ til.t('MalumotYoq') }}</td></tr></tbody> }
-          <tfoot>
-            <tr>
-              <td>{{ til.t('Jami') }}</td>
-              @for (u of ustunlar; track u.maydon) { <td class="o" [class.qizil]="u.maydon === 'kamomat' && n.jami.kamomat > 0">{{ qiymat(n.jami, u) }}</td> }
-            </tr>
-          </tfoot>
-        </table>
+      <div class="faqat-keng jadval-skroll">
+        <div class="hs-jadval">
+          <div class="hs-qator hs-bosh">
+            <span>{{ birinchiYorliq() }}</span><span>{{ ikkinchiYorliq() }}</span>
+            <span class="o">{{ til.t('Hisobot_ColLitr') }}</span><span class="o">{{ til.t('Hisobot_ColSavdo') }}</span><span class="o">{{ til.t('Hisobot_ColPlastik') }}</span>
+            <span class="o">{{ til.t('Hisobot_ColDepozit') }}</span><span class="o">{{ til.t('Hisobot_ColNasiya') }}</span><span class="o">{{ til.t('Hisobot_ColQaytgan') }}</span>
+            <span class="o">{{ til.t('Hisobot_ColXarajat') }}</span><span class="o">{{ til.t('Hisobot_ColNaqd') }}</span><span class="o">{{ til.t('Hisobot_ColFarq') }}</span>
+          </div>
+          @for (q of n.qatorlar; track $index) {
+            <div class="hs-qator">
+              <span class="birinchi"><span class="nom">{{ nomi(q) }}</span>@if (kichikSana(q)) { <span class="sana">{{ kichikSana(q) }}</span> }</span>
+              <span [class.ikkilamchi]="guruh() !== 'Smena'">{{ ikkinchi(q) }}</span>
+              <span class="o">{{ litr(q.litr) }}</span>
+              <span class="o savdo">{{ pul(q.savdo) }}</span>
+              <span class="o">{{ pul(q.plastik) }}</span>
+              <span class="o">{{ pul(q.depozit) }}</span>
+              <span class="o">{{ pul(q.nasiya) }}</span>
+              <span class="o">{{ pul(q.qaytganNasiya) }}</span>
+              <span class="o">{{ pul(q.xarajat) }}</span>
+              <span class="o">{{ pul(q.naqdSavdo) }}</span>
+              <span class="o farq" [class]="farqSinf(farq(q))">{{ farqMatn(farq(q)) }}</span>
+            </div>
+          } @empty {
+            <div class="bosh">{{ til.t('Hisobot_Bosh') }}</div>
+          }
+          <div class="hs-qator hs-jami">
+            <span>{{ til.t('Jami') }}</span><span></span>
+            <span class="o">{{ litr(n.jami.litr) }}</span><span class="o asosiy-rang">{{ pul(n.jami.savdo) }}</span><span class="o">{{ pul(n.jami.plastik) }}</span>
+            <span class="o">{{ pul(n.jami.depozit) }}</span><span class="o">{{ pul(n.jami.nasiya) }}</span><span class="o">{{ pul(n.jami.qaytganNasiya) }}</span>
+            <span class="o">{{ pul(n.jami.xarajat) }}</span><span class="o">{{ pul(n.jami.naqdSavdo) }}</span><span class="o farq" [class]="farqSinf(farq(n.jami))">{{ farqMatn(farq(n.jami)) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Telefon: har qator karta -->
+      <div class="faqat-tor hs-kartalar">
+        @for (q of n.qatorlar; track $index) {
+          <div class="plitka hs-karta">
+            <div class="ust">
+              <span class="bosh-joy">
+                <b class="nom">{{ nomi(q) }}</b>
+                @if (kichikSana(q)) { <span class="sana">{{ kichikSana(q) }}</span> }
+                <span class="ikkilamchi op">{{ ikkinchi(q) }}</span>
+              </span>
+              <span class="farq" [class]="farqSinf(farq(q))">{{ farqMatn(farq(q)) }}</span>
+            </div>
+            <dl class="tarmoq">
+              <div><dt>{{ til.t('Hisobot_ColSavdo') }}</dt><dd class="savdo">{{ pul(q.savdo) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColLitr') }}</dt><dd>{{ litr(q.litr) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColPlastik') }}</dt><dd>{{ pul(q.plastik) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColDepozit') }}</dt><dd>{{ pul(q.depozit) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColNasiya') }}</dt><dd>{{ pul(q.nasiya) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColQaytgan') }}</dt><dd>{{ pul(q.qaytganNasiya) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColXarajat') }}</dt><dd>{{ pul(q.xarajat) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColNaqd') }}</dt><dd>{{ pul(q.naqdSavdo) }}</dd></div>
+            </dl>
+          </div>
+        } @empty {
+          <div class="bosh">{{ til.t('Hisobot_Bosh') }}</div>
+        }
+        <div class="plitka hs-karta jami">
+          <div class="ust"><b class="bosh-joy">{{ til.t('Jami') }}</b><span class="farq" [class]="farqSinf(farq(n.jami))">{{ farqMatn(farq(n.jami)) }}</span></div>
+          <dl class="tarmoq">
+            <div><dt>{{ til.t('Hisobot_ColSavdo') }}</dt><dd class="savdo asosiy-rang">{{ pul(n.jami.savdo) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColLitr') }}</dt><dd>{{ litr(n.jami.litr) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColPlastik') }}</dt><dd>{{ pul(n.jami.plastik) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColDepozit') }}</dt><dd>{{ pul(n.jami.depozit) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColNasiya') }}</dt><dd>{{ pul(n.jami.nasiya) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColQaytgan') }}</dt><dd>{{ pul(n.jami.qaytganNasiya) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColXarajat') }}</dt><dd>{{ pul(n.jami.xarajat) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColNaqd') }}</dt><dd>{{ pul(n.jami.naqdSavdo) }}</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- Aparatlar va baklar -->
+    <section class="shisha jadval-karta" aria-labelledby="hs-bak-s">
+      <div class="karta-bosh">
+        <h2 id="hs-bak-s">{{ til.t('Hisobot_BakSarlavha') }}</h2>
+        <span class="karta-izoh">{{ til.t('Hisobot_BakFormula') }}</span>
+      </div>
+      @if (operatorId() != null) {
+        <div class="malumot-blok bak-izoh"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Hisobot_BakOperatorgaBogliqEmas') }}</span></div>
+      }
+
+      <!-- Keng ekran: jadval -->
+      <div class="faqat-keng jadval-skroll">
+        <div class="bk-jadval">
+          <div class="bk-qator bk-bosh">
+            <span>{{ til.t('Hisobot_ColAparat') }}</span><span class="o">{{ til.t('Hisobot_ColBakBoshida') }}</span><span class="o">{{ til.t('Hisobot_ColKirim') }}</span>
+            <span class="o">{{ til.t('Hisobot_ColSotildi') }}</span><span class="o">{{ til.t('Hisobot_ColBakOxirida') }}</span><span class="o">{{ til.t('Hisobot_ColSavdo') }}</span>
+          </div>
+          @for (b of n.aparatlar; track b.aparatId) {
+            <div class="bk-qator">
+              <span class="apt"><b>{{ til.t('Aparat_Raqami', b.raqam) }}</b><yoqilgi-pill [nomi]="b.yoqilgiNomi" [rang]="rang(b.yoqilgiNomi)" /></span>
+              <span class="o" [class.qizil-matn]="b.bakBoshida < 0">{{ litr(b.bakBoshida) }}</span>
+              <span class="o kirim">{{ kirimMatn(b.kirim) }}</span>
+              <span class="o">{{ litr(b.sotildi) }}</span>
+              <span class="o qalin" [class.qizil-matn]="b.bakOxirida < 0">{{ litr(b.bakOxirida) }}</span>
+              <span class="o qalin-600">{{ pul(b.savdo) }}</span>
+            </div>
+          } @empty {
+            <div class="bosh">{{ til.t('Hisobot_Bosh') }}</div>
+          }
+          <div class="bk-qator bk-jami">
+            <span>{{ til.t('Jami') }}</span>
+            <span class="o" [class.qizil-matn]="bakJami().boshida < 0">{{ litr(bakJami().boshida) }}</span>
+            <span class="o kirim">{{ kirimMatn(bakJami().kirim) }}</span>
+            <span class="o">{{ litr(bakJami().sotildi) }}</span>
+            <span class="o" [class.qizil-matn]="bakJami().oxirida < 0">{{ litr(bakJami().oxirida) }}</span>
+            <span class="o asosiy-rang">{{ pul(bakJami().savdo) }}</span>
+          </div>
+        </div>
       </div>
 
       <!-- Telefon: kartalar -->
-      <div class="kartalar">
-        @for (b of bolimlar(); track b.guruh) {
-          <div class="h-karta">
-            <div class="qator ora"><b>{{ nomi(b.jami) }}</b><b class="son">{{ pul(b.jami.summa) }}</b></div>
-            <div class="h-ichki son">
-              <span><span class="nuqta" style="background:var(--q-naqd)"></span>{{ pul(b.jami.naqd) }}</span>
-              <span><span class="nuqta" style="background:var(--q-plastik)"></span>{{ pul(b.jami.plastik) }}</span>
-              <span><span class="nuqta" style="background:var(--q-click)"></span>{{ pul(b.jami.click) }}</span>
+      <div class="faqat-tor hs-kartalar">
+        @for (b of n.aparatlar; track b.aparatId) {
+          <div class="plitka hs-karta">
+            <div class="ust">
+              <span class="bosh-joy apt"><b>{{ til.t('Aparat_Raqami', b.raqam) }}</b><yoqilgi-pill [nomi]="b.yoqilgiNomi" [rang]="rang(b.yoqilgiNomi)" /></span>
+              <span class="savdo">{{ pul(b.savdo) }}</span>
             </div>
-            @for (y of b.yoqilgilar; track y.yoqilgi) {
-              <div class="qator ora kichik-matn yoq-ichki son">
-                <span>{{ y.yoqilgi }} · {{ litr(y.litr) }} {{ til.t('L') }}</span><span>{{ pul(y.summa) }}</span>
-              </div>
-            }
-            <div class="ikkilamchi kichik-matn son">
-              {{ litr(b.jami.litr) }} {{ til.t('L') }}
-              @if (b.jami.soni) { · {{ b.jami.soni }} {{ til.t('TaSotuv') }} }
-              @if (b.jami.kamomat) { · <span class="qizil">{{ til.t('Kamomat') }} {{ pul(b.jami.kamomat) }}</span> }
-              @if (b.jami.avans) { · {{ til.t('AvansKichik') }} {{ pul(b.jami.avans) }} }
-              @if (b.jami.bekorSoni) { · {{ b.jami.bekorSoni }} {{ til.t('Bekor') }} }
-            </div>
+            <dl class="tarmoq">
+              <div><dt>{{ til.t('Hisobot_ColBakBoshida') }}</dt><dd [class.qizil-matn]="b.bakBoshida < 0">{{ litr(b.bakBoshida) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColKirim') }}</dt><dd class="kirim">{{ kirimMatn(b.kirim) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColSotildi') }}</dt><dd>{{ litr(b.sotildi) }}</dd></div>
+              <div><dt>{{ til.t('Hisobot_ColBakOxirida') }}</dt><dd class="qalin" [class.qizil-matn]="b.bakOxirida < 0">{{ litr(b.bakOxirida) }}</dd></div>
+            </dl>
           </div>
-        } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+        } @empty {
+          <div class="bosh">{{ til.t('Hisobot_Bosh') }}</div>
+        }
+        <div class="plitka hs-karta jami">
+          <div class="ust"><b class="bosh-joy">{{ til.t('Jami') }}</b><span class="savdo asosiy-rang">{{ pul(bakJami().savdo) }}</span></div>
+          <dl class="tarmoq">
+            <div><dt>{{ til.t('Hisobot_ColBakBoshida') }}</dt><dd [class.qizil-matn]="bakJami().boshida < 0">{{ litr(bakJami().boshida) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColKirim') }}</dt><dd class="kirim">{{ kirimMatn(bakJami().kirim) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColSotildi') }}</dt><dd>{{ litr(bakJami().sotildi) }}</dd></div>
+            <div><dt>{{ til.t('Hisobot_ColBakOxirida') }}</dt><dd class="qalin" [class.qizil-matn]="bakJami().oxirida < 0">{{ litr(bakJami().oxirida) }}</dd></div>
+          </dl>
+        </div>
       </div>
     </section>
-  } @else {
-    <div class="shisha karta"><div class="skelet" style="height:200px"></div></div>
   }
 </div>

@@ -213,6 +213,7 @@
             <Setter Property="CornerRadius" Value="26" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="FontWeight" Value="Normal" />
         </Style>
         
         <Style Selector="^.karta /template/ Border#PART_SoyaQuti, ^.karta:pointerover /template/ Border#PART_SoyaQuti">
@@ -236,6 +237,36 @@
             <Setter Property="IsVisible" Value="False" />
         </Style>
         <Style Selector="^.link /template/ Border#PART_Aks, ^.link /template/ Border#PART_Tub">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <!-- Segment tanlovi (Naqd / Plastik / Depozit): yo'l ichida, tanlangani oq "tomchi" -->
+        <Style Selector="^.segment">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="MinHeight" Value="44" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource MatnIkkilamchi}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="^.segment /template/ Border#PART_SoyaQuti, ^.segment /template/ Border#PART_Aks, ^.segment /template/ Border#PART_Tub">
+            <Setter Property="IsVisible" Value="False" />
+        </Style>
+        <Style Selector="^.segment.tanlangan">
+            <Setter Property="Background" Value="{DynamicResource SegmentTanlangan}" />
+            <Setter Property="Foreground" Value="{DynamicResource Matn}" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+        <Style Selector="^.segment.tanlangan /template/ Border#PART_SoyaQuti">
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+
+        <!-- Chiziqli tugma (ko'k chegara, ko'k matn) -->
+        <Style Selector="^.chiziqli">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ChiziqliChegara}" />
+            <Setter Property="Foreground" Value="{DynamicResource ChiziqliMatn}" />
+        </Style>
+        <Style Selector="^.chiziqli /template/ Border#PART_SoyaQuti">
             <Setter Property="IsVisible" Value="False" />
         </Style>
     </ControlTheme>

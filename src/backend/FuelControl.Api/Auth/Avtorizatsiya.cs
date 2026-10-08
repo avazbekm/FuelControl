@@ -34,10 +34,25 @@ public sealed class RuxsatTalabFilter(Ruxsat kerak) : IEndpointFilter
     }
 }
 
+/// <summary>Berilgan ruxsatlardan kamida bittasi bo'lsa o'tkazadi.</summary>
+public sealed class RuxsatdanBiriTalabFilter(Ruxsat[] kerak) : IEndpointFilter
+{
+    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext ctx, EndpointFilterDelegate next)
+    {
+        if (!kerak.Any(ctx.HttpContext.User.Bor))
+            return Results.Problem(statusCode: 403, title: "Ruxsat yo'q",
+                detail: $"Bu amal uchun {string.Join(" yoki ", kerak.Select(r => $"\"{r}\""))} ruxsati kerak.");
+        return await next(ctx);
+    }
+}
+
 public static class RuxsatFilterKengaytmasi
 {
     public static RouteHandlerBuilder RuxsatKerak(this RouteHandlerBuilder b, Ruxsat r) =>
         b.AddEndpointFilter(new RuxsatTalabFilter(r));
+
+    public static RouteHandlerBuilder RuxsatdanBiriKerak(this RouteHandlerBuilder b, params Ruxsat[] r) =>
+        b.AddEndpointFilter(new RuxsatdanBiriTalabFilter(r));
 }
 
 public sealed class TokenXizmati(IConfiguration konfiguratsiya)

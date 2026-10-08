@@ -8,70 +8,89 @@
   </div>
 }
 
-<aside class="yon shisha">
+<!-- Keng ekran: yon menyu (docs/dizayn/Menyu) -->
+<aside class="yon shisha" [attr.aria-label]="til.t('AsosiyMenyu')">
   <div class="brend">
-    <span class="logo"><ikon nomi="drop" [olcham]="20" [qalinlik]="2" /></span>
-    <div>
-      <div class="brend-nom">FuelControl</div>
-      <div class="ikkilamchi kichik-matn">{{ til.t('BrendIzoh') }}</div>
+    <span class="logo"><ikon nomi="pump" [olcham]="24" [qalinlik]="2" /></span>
+    <div class="brend-matn">
+      <span class="brend-nom">FuelControl</span>
+      <span class="brend-izoh">{{ til.t('BrendIzoh') }}</span>
     </div>
   </div>
-  <nav>
+  <nav class="menyu">
     @for (b of bolimlar(); track b.yol) {
-      <a class="nav" [routerLink]="'/' + b.yol" routerLinkActive="faol">
-        <ikon [nomi]="b.ikon" /> <span>{{ til.t(b.kalit) }}</span>
+      <a class="nav" [routerLink]="'/' + b.yol" routerLinkActive="faol" [attr.aria-label]="b.yol === 'nasiyalar' && muddatiOtgan() ? til.t('MuddatiOtganQarzlarSoni', muddatiOtgan()) : null">
+        <ikon [nomi]="b.ikon" [olcham]="19" [qalinlik]="2" />
+        <span class="nav-matn">{{ til.t(b.kalit) }}</span>
+        @if (b.yol === 'nasiyalar' && muddatiOtgan() > 0) { <span class="belgi-son">{{ muddatiOtgan() }}</span> }
       </a>
     }
-    <a class="nav" routerLink="/sozlamalar" routerLinkActive="faol">
-      <ikon nomi="gear" /> <span>{{ til.t('Sozlamalar') }}</span>
-    </a>
   </nav>
   <div class="bosh-joy"></div>
-  <button class="tugma keng" (click)="tema.almashtir()">
-    <ikon [nomi]="tema.qorongimi() ? 'sun' : 'moon'" [olcham]="18" /> {{ til.t('QorongiRejim') }}
+  <div class="tillar" role="group" [attr.aria-label]="til.t('Til')">
+    @for (t of tillar; track t.kod) {
+      <button type="button" class="til-tugma" [class.faol]="til.kod() === t.kod" [attr.aria-pressed]="til.kod() === t.kod" (click)="til.tanla(t.kod)">{{ t.nom }}</button>
+    }
+  </div>
+  <button type="button" class="tema-tugma" (click)="tema.almashtir()">
+    <ikon [nomi]="tema.qorongimi() ? 'sun' : 'moon'" [olcham]="16" [qalinlik]="2" /> {{ til.t(tema.qorongimi() ? 'YorugRejim' : 'QorongiRejim') }}
   </button>
   <div class="men">
-    <span class="avatar">{{ bosh() }}</span>
-    <div class="matnlar">
-      <div class="ism">{{ auth.foydalanuvchi()?.toliqIsm }}</div>
-      <div class="ikkilamchi kichik-matn">{{ til.t('Rol_' + auth.foydalanuvchi()?.rol) }}</div>
-    </div>
-    <button class="tugma ikonli kichik shaffof" (click)="auth.chiqish()" [attr.aria-label]="til.t('Chiqish')" [title]="til.t('Chiqish')">
-      <ikon nomi="power" [olcham]="18" />
+    @if (hisobimBor()) {
+      <a class="men-havola" routerLink="/hisobim" [attr.aria-label]="til.t('MeningHisobim')">
+        <span class="avatar">{{ bosh() }}</span>
+        <span class="matnlar">
+          <span class="ism">{{ auth.foydalanuvchi()?.toliqIsm }}</span>
+          <span class="rol">{{ til.t('Rol_' + auth.foydalanuvchi()?.rol) }}</span>
+        </span>
+      </a>
+    } @else {
+      <span class="men-havola">
+        <span class="avatar">{{ bosh() }}</span>
+        <span class="matnlar">
+          <span class="ism">{{ auth.foydalanuvchi()?.toliqIsm }}</span>
+          <span class="rol">{{ til.t('Rol_' + auth.foydalanuvchi()?.rol) }}</span>
+        </span>
+      </span>
+    }
+    <button type="button" class="chiqish" (click)="auth.chiqish()" [attr.aria-label]="til.t('Chiqish')" [title]="til.t('Chiqish')">
+      <ikon nomi="power" [olcham]="16" [qalinlik]="2" />
     </button>
   </div>
+  <div class="holat">
+    <span class="holat-nuqta" [class.xato]="!ulangan()"></span>
+    <span>{{ til.t(ulangan() ? 'ServerAloqaBor' : 'AloqaYoq') }}</span>
+  </div>
+  <div class="versiya">v {{ versiya }}</div>
 </aside>
 
 <main>
   <router-outlet />
 </main>
 
+<!-- Telefon: pastki tab-bar (ruxsatga qarab) -->
 <nav class="tablar shisha" [attr.aria-label]="til.t('Bolimlar')">
   @for (b of tablar(); track b.yol) {
     <a class="tab" [routerLink]="'/' + b.yol" routerLinkActive="faol">
-      <ikon [nomi]="b.ikon" [olcham]="22" />
-      <span>{{ til.t(b.qisqaKalit ?? b.kalit) }}</span>
+      <span class="tab-ikon">
+        <ikon [nomi]="b.ikon" [olcham]="22" />
+        @if (b.yol === 'nasiyalar' && muddatiOtgan() > 0) { <span class="tab-belgi">{{ muddatiOtgan() }}</span> }
+      </span>
+      <span class="tab-matn">{{ til.t(b.qisqaKalit ?? b.kalit) }}</span>
     </a>
   }
-  @if (qolganlar().length) {
-    <button class="tab" [class.faol]="yanaFaol()" (click)="yanaOchiq.set(true)">
-      <ikon nomi="more" [olcham]="22" [qalinlik]="3" />
-      <span>{{ til.t('Yana') }}</span>
-    </button>
-  } @else {
-    <a class="tab" routerLink="/sozlamalar" routerLinkActive="faol">
-      <ikon nomi="gear" [olcham]="22" />
-      <span>{{ til.t('Sozlamalar') }}</span>
-    </a>
-  }
+  <button type="button" class="tab" [class.faol]="yanaFaol()" (click)="yanaOchiq.set(true)">
+    <span class="tab-ikon"><ikon nomi="more" [olcham]="22" [qalinlik]="3" /></span>
+    <span class="tab-matn">{{ til.t('Yana') }}</span>
+  </button>
 </nav>
 
 @if (yanaOchiq()) {
   <div class="parda" (click)="yanaOchiq.set(false)">
     <div class="dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
       <div class="dialog-bosh">
-        <h2>{{ til.t('Yana') }}</h2>
-        <button class="tugma ikonli kichik" (click)="yanaOchiq.set(false)" aria-label="×"><ikon nomi="x" [olcham]="18" /></button>
+        <div class="matnlar"><h2>{{ til.t('Yana') }}</h2></div>
+        <button type="button" class="yopish" (click)="yanaOchiq.set(false)" aria-label="×"><ikon nomi="x" [olcham]="18" /></button>
       </div>
       <div class="royxat">
         @for (b of qolganlar(); track b.yol) {
@@ -81,17 +100,31 @@
             <ikon nomi="chevronRight" [olcham]="18" />
           </a>
         }
+        @if (hisobimBor()) {
+          <a class="element" routerLink="/hisobim">
+            <span class="ikon-doira"><ikon nomi="user" [olcham]="18" /></span>
+            <span class="matnlar"><span class="asosiy-matn">{{ til.t('MeningHisobim') }}</span></span>
+            <ikon nomi="chevronRight" [olcham]="18" />
+          </a>
+        }
         <a class="element" routerLink="/sozlamalar">
           <span class="ikon-doira"><ikon nomi="gear" [olcham]="18" /></span>
           <span class="matnlar"><span class="asosiy-matn">{{ til.t('Sozlamalar') }}</span></span>
           <ikon nomi="chevronRight" [olcham]="18" />
         </a>
-        <!-- Telefonda yon menyu yo'q — chiqish shu yerda -->
-        <button type="button" class="element" (click)="auth.chiqish()">
-          <span class="ikon-doira"><ikon nomi="power" [olcham]="18" /></span>
-          <span class="matnlar"><span class="asosiy-matn">{{ til.t('Chiqish') }}</span></span>
-        </button>
       </div>
+      <div class="tillar tor" role="group" [attr.aria-label]="til.t('Til')">
+        @for (t of tillar; track t.kod) {
+          <button type="button" class="til-tugma" [class.faol]="til.kod() === t.kod" [attr.aria-pressed]="til.kod() === t.kod" (click)="til.tanla(t.kod)">{{ t.nom }}</button>
+        }
+      </div>
+      <button type="button" class="tema-tugma" (click)="tema.almashtir()">
+        <ikon [nomi]="tema.qorongimi() ? 'sun' : 'moon'" [olcham]="16" [qalinlik]="2" /> {{ til.t(tema.qorongimi() ? 'YorugRejim' : 'QorongiRejim') }}
+      </button>
+      <button type="button" class="tema-tugma" (click)="auth.chiqish()">
+        <ikon nomi="power" [olcham]="16" [qalinlik]="2" /> {{ til.t('Chiqish') }}
+      </button>
+      <div class="versiya yana">FuelControl · v {{ versiya }}</div>
     </div>
   </div>
 }

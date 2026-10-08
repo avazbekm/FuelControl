@@ -4,11 +4,14 @@
   "/boshqaruv": { "target": "http://localhost:5000", "secure": false },
   "/hisobot": { "target": "http://localhost:5000", "secure": false },
   "/smenalar": { "target": "http://localhost:5000", "secure": false },
-  "/sotuvlar": { "target": "http://localhost:5000", "secure": false },
+  "/nasiyalar": { "target": "http://localhost:5000", "secure": false },
+  "/xarajatlar": { "target": "http://localhost:5000", "secure": false },
+  "/bak-kirimlar": { "target": "http://localhost:5000", "secure": false },
   "/operatorlar": { "target": "http://localhost:5000", "secure": false },
   "/aparatlar": { "target": "http://localhost:5000", "secure": false },
   "/yoqilgilar": { "target": "http://localhost:5000", "secure": false },
   "/foydalanuvchilar": { "target": "http://localhost:5000", "secure": false },
   "/audit": { "target": "http://localhost:5000", "secure": false },
+  "/zaxira": { "target": "http://localhost:5000", "secure": false },
   "/hub": { "target": "http://localhost:5000", "secure": false, "ws": true }
 }

@@ -4,7 +4,7 @@ import lugatWeb from './lugat-web.json';
 
 export type TilKodi = 'uz' | 'uzk' | 'ru';
 
-// Asosiy lug'at desktop'dagi Til.cs dan generatsiya qilinadi (`npm run lugat`); lugat-web.json — faqat PWA'ga xos kalitlar.
+// Asosiy lug'at desktop'dagi Til.cs dan generatsiya qilinadi (`npm run lugat`); lugat-web.json — faqat PWA'ga xos kalitlar yoki Til.cs'dagidan qasddan farqli matnlar.
 const LUGAT: Record<string, string[]> = { ...lugat, ...lugatWeb };
 const INDEKS: Record<TilKodi, number> = { uz: 0, uzk: 1, ru: 2 };
 const KALIT = 'fc.til';

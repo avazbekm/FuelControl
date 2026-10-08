@@ -42,3 +42,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Avtomatik yaratiladi (scripts/versiya.mjs): build vaqti va commit
+/src/app/core/versiya.ts

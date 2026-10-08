@@ -1,0 +1,206 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="using:FuelControl.Desktop.Controls"
+             xmlns:ctl="using:FuelControl.Desktop.Controls"
+             xmlns:vm="using:FuelControl.Desktop.ViewModels"
+             x:Class="FuelControl.Desktop.Views.NasiyalarView"
+             x:DataType="vm:NasiyalarViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Border.kpi TextBlock.som">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{DynamicResource MatnYumshoq}" />
+        </Style>
+        <Style Selector="Border.qatorFon.otgan">
+            <Setter Property="Background" Value="{DynamicResource KamomatFon}" />
+            <Setter Property="CornerRadius" Value="14" />
+        </Style>
+        <Style Selector="Border.qatorFon.yopilgan">
+            <Setter Property="Background" Value="{DynamicResource TileFon}" />
+            <Setter Property="CornerRadius" Value="14" />
+        </Style>
+        <Style Selector="Border.soni">
+            <Setter Property="MinWidth" Value="26" />
+            <Setter Property="Height" Value="26" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Background" Value="{DynamicResource Chiziq}" />
+        </Style>
+        <Style Selector="Border.soni TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Button.tanlangan Border.soni">
+            <Setter Property="Background" Value="#40FFFFFF" />
+        </Style>
+        <Style Selector="Button.qaytdi">
+            <Setter Property="Padding" Value="20,0" />
+            <Setter Property="MinHeight" Value="40" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="28,22,28,24" RowSpacing="18">
+        <!-- Sarlavha -->
+        <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="6">
+                <TextBlock Text="{l:T Nasiyalar}" Classes="sarlavha" FontSize="28" />
+                <TextBlock Text="{l:T Nasiyalar_Izoh}" Classes="izoh" FontSize="13" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Bottom">
+                <Button IsVisible="{Binding QarzQaytdiOladi}" Command="{Binding QaytdiCommand}" CommandParameter="{x:Null}">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="undo" Olcham="15" /><TextBlock Text="{l:T Nasiya_QarzQaytdi}" /></StackPanel>
+                </Button>
+                <Button Classes="primary" IsVisible="{Binding NasiyaYozaOladi}" Command="{Binding NasiyaYozCommand}" ToolTip.Tip="{Binding NasiyaYozishIzoh}"
+                        ToolTip.ShowOnDisabled="True">
+                    <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="plus" Olcham="15" /><TextBlock Text="{l:T Nasiya_Yozish}" /></StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Xulosa kartalari -->
+        <UniformGrid Grid.Row="1" Columns="4" ColumnSpacing="18">
+            <Border Classes="kpi">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{l:T Nasiyalar_FaolQarz, Katta=True}" Classes="nom" />
+                    <TextBlock><Run Text="{Binding FaolQarz}" FontSize="28" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                    <TextBlock Text="{Binding FaolIzoh}" Classes="izoh" />
+                </StackPanel>
+            </Border>
+            <Border Classes="kpi" Background="{DynamicResource KamomatFon}" BorderBrush="{DynamicResource KamomatChegara}">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{l:T Nasiyalar_MuddatiOtgan, Katta=True}" Classes="nom" />
+                    <TextBlock Foreground="{DynamicResource Qizil}"><Run Text="{Binding OtganQarz}" FontSize="28" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                    <TextBlock Text="{Binding OtganIzoh}" Classes="izoh" />
+                </StackPanel>
+            </Border>
+            <Border Classes="kpi">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{l:T Nasiyalar_OyBerilgan, Katta=True}" Classes="nom" />
+                    <TextBlock><Run Text="{Binding OyBerilgan}" FontSize="28" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                    <TextBlock Text="{Binding OyBerilganIzoh}" Classes="izoh" />
+                </StackPanel>
+            </Border>
+            <Border Classes="kpi">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{l:T Nasiyalar_OyQaytgan, Katta=True}" Classes="nom" />
+                    <TextBlock Foreground="{DynamicResource Yashil}"><Run Text="{Binding OyQaytgan}" FontSize="28" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                    <TextBlock Text="{Binding OyQaytganIzoh}" Classes="izoh" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- Ro'yxat -->
+        <Border Grid.Row="2" Classes="card" Padding="20,18,20,8">
+            <DockPanel>
+                <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*" ColumnSpacing="12" Margin="0,0,0,14">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Classes="chip" MinHeight="44" Padding="16,0,8,0" Classes.tanlangan="{Binding FHammasi}" Command="{Binding FiltrTanlaCommand}" CommandParameter="">
+                            <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{l:T Nasiyalar_Hammasi}" VerticalAlignment="Center" /><Border Classes="soni"><TextBlock Text="{Binding SoniHammasi}" /></Border></StackPanel>
+                        </Button>
+                        <Button Classes="chip" MinHeight="44" Padding="16,0,8,0" Classes.tanlangan="{Binding FFaol}" Command="{Binding FiltrTanlaCommand}" CommandParameter="faol">
+                            <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{l:T Nasiyalar_Faol}" VerticalAlignment="Center" /><Border Classes="soni"><TextBlock Text="{Binding SoniFaol}" /></Border></StackPanel>
+                        </Button>
+                        <Button Classes="chip" MinHeight="44" Padding="16,0,8,0" Classes.tanlangan="{Binding FOtgan}" Command="{Binding FiltrTanlaCommand}" CommandParameter="otgan">
+                            <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{l:T Nasiyalar_MuddatiOtgan}" VerticalAlignment="Center" /><Border Classes="soni"><TextBlock Text="{Binding SoniOtgan}" /></Border></StackPanel>
+                        </Button>
+                        <Button Classes="chip" MinHeight="44" Padding="16,0,8,0" Classes.tanlangan="{Binding FYopilgan}" Command="{Binding FiltrTanlaCommand}" CommandParameter="yopilgan">
+                            <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{l:T Nasiyalar_Yopilgan}" VerticalAlignment="Center" /><Border Classes="soni"><TextBlock Text="{Binding SoniYopilgan}" /></Border></StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBox Grid.Column="1" Text="{Binding Qidiruv}" PlaceholderText="{l:T Nasiya_Qidiruv}" MinHeight="44" CornerRadius="22">
+                        <TextBox.InnerLeftContent><ctl:Ikon Nomi="search" Olcham="16" Margin="14,0,0,0" Rang="{DynamicResource MatnIkkilamchi}" /></TextBox.InnerLeftContent>
+                    </TextBox>
+                </Grid>
+
+                <Grid DockPanel.Dock="Top" ColumnDefinitions="1.6*,0.9*,1*,0.75*,0.75*,0.8*,1*,112" ColumnSpacing="12" Margin="4,0,4,8">
+                    <TextBlock Text="{l:T Nasiyalar_Mijoz, Katta=True}" Classes="yorliq" Margin="0" />
+                    <TextBlock Grid.Column="1" Text="{l:T Nasiyalar_Mashina, Katta=True}" Classes="yorliq" Margin="0" />
+                    <TextBlock Grid.Column="2" Text="{l:T Nasiyalar_Yozilgan, Katta=True}" Classes="yorliq" Margin="0" />
+                    <TextBlock Grid.Column="3" Text="{l:T Nasiya_Qarz, Katta=True}" Classes="yorliq" Margin="0" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="4" Text="{l:T Nasiya_Qaytgan, Katta=True}" Classes="yorliq" Margin="0" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="5" Text="{l:T Nasiya_Qoldiq, Katta=True}" Classes="yorliq" Margin="0" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="6" Text="{l:T Nasiya_MuddatYorliq, Katta=True}" Classes="yorliq" Margin="0" />
+                </Grid>
+                <Border DockPanel.Dock="Top" Classes="chiziq" />
+                <TextBlock DockPanel.Dock="Top" Text="{l:T Nasiyalar_Yoq}" Classes="izoh" Margin="4,16" IsVisible="{Binding BoshQator}" />
+
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Qatorlar}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:NasiyaQatori">
+                                <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,0,0,1">
+                                    <Border Classes="qatorFon" Classes.otgan="{Binding Otgan}" Classes.yopilgan="{Binding Yopilgan}" Margin="0,2">
+                                        <StackPanel>
+                                            <Button Classes="karta" CornerRadius="14" Command="{Binding $parent[UserControl].((vm:NasiyalarViewModel)DataContext).TafsilotCommand}" CommandParameter="{Binding}">
+                                                <Grid ColumnDefinitions="1.6*,0.9*,1*,0.75*,0.75*,0.8*,1*,112" ColumnSpacing="12" Margin="4,12">
+                                                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding N.MijozIsmi}" FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding Telefon}" Classes="izoh" FontSize="13" />
+                                                    </StackPanel>
+                                                    <Border Grid.Column="1" Classes="davlatRaqam" IsVisible="{Binding RaqamBor}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                                            <TextBlock Text="{Binding Hudud}" IsVisible="{Binding HududBor}" />
+                                                            <Border Width="1.5" Background="{DynamicResource Matn}" Margin="0,1" IsVisible="{Binding HududBor}" />
+                                                            <TextBlock Text="{Binding Raqam}" />
+                                                        </StackPanel>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="2" Spacing="2" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Yozilgan}" FontSize="14" />
+                                                        <TextBlock Text="{Binding Kim}" Classes="izoh" FontSize="12.5" />
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="3" Text="{Binding Summa}" FontSize="14.5" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                    <TextBlock Grid.Column="4" Text="{Binding Qaytgan}" FontSize="14.5" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource Yashil}" />
+                                                    <TextBlock Grid.Column="5" Text="{Binding Qoldiq}" FontSize="15" FontWeight="ExtraBold" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="6" Spacing="4" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Muddat}" FontSize="14" />
+                                                        <Border Classes="badge" ctl:Klass.Nomi="{Binding BelgiKlassi}" Padding="9,2"><TextBlock Text="{Binding Belgi}" /></Border>
+                                                    </StackPanel>
+                                                    <Button Grid.Column="7" Classes="qaytdi chiziqli" Content="{l:T Nasiyalar_Qaytdi}" ToolTip.Tip="{Binding QaytdiIzoh}"
+                                                            IsVisible="{Binding Faol}" Command="{Binding $parent[UserControl].((vm:NasiyalarViewModel)DataContext).QaytdiCommand}" CommandParameter="{Binding}" />
+                                                </Grid>
+                                            </Button>
+
+                                            <!-- Tafsilot: qaytishlar tarixi -->
+                                            <Border IsVisible="{Binding Ochiq}" Margin="12,0,12,12" Classes="ichki" Padding="16,12">
+                                                <StackPanel Spacing="8">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <TextBlock Text="{l:T Nasiyalar_QaytishlarTarixi}" FontWeight="Bold" VerticalAlignment="Center" />
+                                                        <Button Grid.Column="1" Classes="danger chip" IsVisible="{Binding OchirishMumkin}"
+                                                                Command="{Binding $parent[UserControl].((vm:NasiyalarViewModel)DataContext).NasiyaOchirCommand}" CommandParameter="{Binding}">
+                                                            <StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="x" Olcham="12" /><TextBlock Text="{l:T Nasiyalar_Ochirish}" /></StackPanel>
+                                                        </Button>
+                                                    </Grid>
+                                                    <TextBlock Text="{Binding N.Izoh}" Classes="izoh" IsVisible="{Binding N.Izoh, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                                    <TextBlock Text="{l:T Nasiyalar_QaytishYoq}" Classes="izoh" IsVisible="{Binding QaytishYoq}" />
+                                                    <ItemsControl ItemsSource="{Binding Qaytishlar}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:QaytishQatori">
+                                                                <Grid ColumnDefinitions="110,*,Auto,Auto" ColumnSpacing="12" Margin="0,4">
+                                                                    <TextBlock Text="{Binding Vaqt}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                                                    <TextBlock Grid.Column="1" Text="{Binding Izoh}" Classes="izoh" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                                                    <TextBlock Grid.Column="2" Text="{Binding Summa}" FontSize="14" FontWeight="ExtraBold" Foreground="{DynamicResource Yashil}" VerticalAlignment="Center" />
+                                                                    <Button Grid.Column="3" Classes="ikon" Width="34" Height="34" Padding="0" IsVisible="{Binding OchirishMumkin}" ToolTip.Tip="{l:T Ochirish}"
+                                                                            Command="{Binding $parent[UserControl].((vm:NasiyalarViewModel)DataContext).QaytishOchirCommand}" CommandParameter="{Binding}">
+                                                                        <ctl:Ikon Nomi="x" Olcham="12" />
+                                                                    </Button>
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

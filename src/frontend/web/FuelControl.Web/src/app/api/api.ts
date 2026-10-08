@@ -3,7 +3,8 @@ import type { paths } from './schema';
 
 /** Server xatosi (ProblemDetails) — `detail` foydalanuvchiga ko'rsatiladi. */
 export class ApiXato extends Error {
-  constructor(public readonly status: number, xabar: string) { super(xabar); }
+  /** ProblemDetails.extensions (masalan, `kerakliAparatlar`). */
+  constructor(public readonly status: number, xabar: string, public readonly qoshimcha: Record<string, unknown> = {}) { super(xabar); }
 }
 
 /** Tarmoq xatosi (internet yo'q / server javob bermadi). */

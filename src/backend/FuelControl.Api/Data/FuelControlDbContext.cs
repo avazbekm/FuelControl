@@ -10,6 +10,28 @@ public sealed class UtcVaqtKonverteri() : ValueConverter<DateTime, DateTime>(
     v => v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : v,
     v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
 
+/// <summary>
+/// Foydalanuvchi ruxsatlari bazada nomlar bilan, vergul bilan ajratilgan matn. O'qishda noma'lum nomlar (olib tashlangan
+/// ruxsatlar) e'tiborga olinmaydi, eski "SotuvKiritish" — "Savdo" ga o'tadi: eski bazadagi foydalanuvchi kirishdan to'xtamasin.
+/// </summary>
+public static class RuxsatMatni
+{
+    public static string Yoz(List<Ruxsat> v) => string.Join(',', v);
+
+    public static List<Ruxsat> Oqi(string? v)
+    {
+        var natija = new List<Ruxsat>();
+        foreach (var nom in (v ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var qiymat = nom == "SotuvKiritish" ? Ruxsat.Savdo
+                : Enum.TryParse<Ruxsat>(nom, out var r) && Enum.IsDefined(r) && !int.TryParse(nom, out _) ? r
+                : (Ruxsat?)null;
+            if (qiymat is { } q && !natija.Contains(q)) natija.Add(q);
+        }
+        return natija;
+    }
+}
+
 public sealed class FuelControlDbContext(DbContextOptions<FuelControlDbContext> options) : DbContext(options)
 {
     public DbSet<Foydalanuvchi> Foydalanuvchilar => Set<Foydalanuvchi>();
@@ -17,8 +39,12 @@ public sealed class FuelControlDbContext(DbContextOptions<FuelControlDbContext> 
     public DbSet<NarxTarixi> NarxTarixlari => Set<NarxTarixi>();
     public DbSet<Aparat> Aparatlar => Set<Aparat>();
     public DbSet<Smena> Smenalar => Set<Smena>();
-    public DbSet<Sotuv> Sotuvlar => Set<Sotuv>();
-    public DbSet<SotuvTolovi> SotuvTolovlari => Set<SotuvTolovi>();
+    public DbSet<SmenaKorsatkichi> SmenaKorsatkichlari => Set<SmenaKorsatkichi>();
+    public DbSet<Nasiya> Nasiyalar => Set<Nasiya>();
+    public DbSet<NasiyaQaytishi> NasiyaQaytishlari => Set<NasiyaQaytishi>();
+    public DbSet<Xarajat> Xarajatlar => Set<Xarajat>();
+    public DbSet<BakKirim> BakKirimlari => Set<BakKirim>();
+    public DbSet<BakTuzatishi> BakTuzatishlari => Set<BakTuzatishi>();
     public DbSet<HisobHarakati> Harakatlar => Set<HisobHarakati>();
     public DbSet<AuditYozuvi> Audit => Set<AuditYozuvi>();
 
@@ -31,10 +57,8 @@ public sealed class FuelControlDbContext(DbContextOptions<FuelControlDbContext> 
     protected override void OnModelCreating(ModelBuilder m)
     {
         var ruxsatKonverter = new ValueConverter<List<Ruxsat>, string>(
-            v => string.Join(',', v),
-            v => string.IsNullOrEmpty(v)
-                ? new List<Ruxsat>()
-                : v.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Enum.Parse<Ruxsat>).ToList());
+            v => RuxsatMatni.Yoz(v),
+            v => RuxsatMatni.Oqi(v));
         var ruxsatTaqqoslagich = new ValueComparer<List<Ruxsat>>(
             (a, b) => a!.SequenceEqual(b!),
             v => v.Aggregate(0, (h, x) => HashCode.Combine(h, (int)x)),
@@ -61,26 +85,59 @@ public sealed class FuelControlDbContext(DbContextOptions<FuelControlDbContext> 
         {
             e.Ignore(x => x.Ochiqmi);
             e.HasIndex(x => new { x.OperatorId, x.Tugadi });
-            // Bir operatorda bir vaqtda faqat bitta ochiq smena — parallel so'rovlarda ham baza kafolatlaydi.
-            e.HasIndex(x => x.OperatorId).IsUnique().HasFilter("\"Tugadi\" IS NULL").HasDatabaseName("IX_Smenalar_OchiqSmena");
+            // Butun shoxobchada bir vaqtda faqat bitta ochiq smena. Kafolat — bazada: IX_Smenalar_BittaOchiq
+            // (UNIQUE ((1)) WHERE Tugadi IS NULL) migratsiyada SQL bilan yaratiladi (EF modeli ifodali indeksni bilmaydi).
             e.HasIndex(x => x.Boshlandi);
             e.HasOne<Foydalanuvchi>().WithMany().HasForeignKey(x => x.OperatorId).OnDelete(DeleteBehavior.Restrict);
         });
 
-        m.Entity<Sotuv>(e =>
+        m.Entity<SmenaKorsatkichi>(e =>
         {
-            e.Ignore(x => x.Faolmi);
-            e.Property(x => x.Holati).HasConversion<string>();
-            e.HasIndex(x => x.IdempotencyKey).IsUnique();
+            e.HasIndex(x => new { x.SmenaId, x.AparatId, x.Tartib }).IsUnique();
+            e.HasIndex(x => x.AparatId);
+            e.HasOne<Smena>().WithMany().HasForeignKey(x => x.SmenaId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Aparat>().WithMany().HasForeignKey(x => x.AparatId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        m.Entity<Nasiya>(e =>
+        {
+            e.Ignore(x => x.Qoldiq);
+            e.HasIndex(x => x.SmenaId);
+            e.HasIndex(x => x.Yozildi);
+            e.HasOne<Smena>().WithMany().HasForeignKey(x => x.SmenaId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Foydalanuvchi>().WithMany().HasForeignKey(x => x.OperatorId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        m.Entity<NasiyaQaytishi>(e =>
+        {
+            e.Property(x => x.Usul).HasConversion<string>();
+            e.HasIndex(x => x.NasiyaId);
+            e.HasIndex(x => x.SmenaId);
             e.HasIndex(x => x.Vaqt);
+            e.HasOne<Nasiya>().WithMany().HasForeignKey(x => x.NasiyaId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Smena>().WithMany().HasForeignKey(x => x.SmenaId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne<Foydalanuvchi>().WithMany().HasForeignKey(x => x.OperatorId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        m.Entity<Xarajat>(e =>
+        {
+            e.Property(x => x.Manba).HasConversion<string>();
             e.HasIndex(x => x.SmenaId);
             e.HasOne<Smena>().WithMany().HasForeignKey(x => x.SmenaId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne<Foydalanuvchi>().WithMany().HasForeignKey(x => x.OperatorId).OnDelete(DeleteBehavior.Restrict);
-            e.HasOne<Aparat>().WithMany().HasForeignKey(x => x.AparatId).OnDelete(DeleteBehavior.Restrict);
-            e.HasMany(x => x.Tolovlar).WithOne().HasForeignKey(x => x.SotuvId).OnDelete(DeleteBehavior.Cascade);
         });
 
-        m.Entity<SotuvTolovi>(e => e.Property(x => x.Turi).HasConversion<string>());
+        m.Entity<BakKirim>(e =>
+        {
+            e.HasIndex(x => new { x.AparatId, x.Vaqt });
+            e.HasOne<Aparat>().WithMany().HasForeignKey(x => x.AparatId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        m.Entity<BakTuzatishi>(e =>
+        {
+            e.HasIndex(x => new { x.AparatId, x.Vaqt });
+            e.HasOne<Aparat>().WithMany().HasForeignKey(x => x.AparatId).OnDelete(DeleteBehavior.Restrict);
+        });
 
         m.Entity<HisobHarakati>(e =>
         {
@@ -91,6 +148,10 @@ public sealed class FuelControlDbContext(DbContextOptions<FuelControlDbContext> 
             e.HasOne<Foydalanuvchi>().WithMany().HasForeignKey(x => x.OperatorId).OnDelete(DeleteBehavior.Restrict);
         });
 
-        m.Entity<AuditYozuvi>(e => e.HasIndex(x => x.Vaqt));
+        m.Entity<AuditYozuvi>(e =>
+        {
+            e.HasIndex(x => x.Vaqt);
+            e.HasIndex(x => x.Tur);
+        });
     }
 }

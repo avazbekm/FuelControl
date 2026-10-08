@@ -1,8 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { Til } from '../../core/til';
+import { Server } from '../../core/server';
 import { Bildirish } from '../../core/bildirish';
 import { kun, soat } from '../../core/format';
-import { SozlamalarXizmati } from './sozlamalar-xizmati';
 
 const KALIT = 'fc.oxirgiNusxa';
 interface Nusxa { vaqt: string; fayl: string; hajmBayt: number }
@@ -11,26 +11,27 @@ interface Nusxa { vaqt: string; fayl: string; hajmBayt: number }
 @Component({
   selector: 'sozlamalar-zaxira',
   template: `
-    <section class="shisha karta ustunlar zaxira">
-      <h2 style="margin:0">{{ til.t('ZaxiraNusxa') }}</h2>
+    <section class="shisha karta zaxira">
+      <h2>{{ til.t('ZaxiraNusxa') }}</h2>
       <div class="plitka">
-        <div style="font-weight:650">{{ til.t('AvtomatikNusxa') }}</div>
+        <div class="qalin">{{ til.t('AvtomatikNusxa') }}</div>
         <div class="ikkilamchi kichik-matn">{{ til.t('NusxaIzoh') }}</div>
       </div>
       <div class="plitka oxirgi">
         <div class="bosh-joy">
-          <div style="font-weight:650">{{ til.t('OxirgiNusxa') }}</div>
+          <div class="qalin">{{ til.t('OxirgiNusxa') }}</div>
           <div class="ikkilamchi kichik-matn matn">{{ oxirgiMatn() }}</div>
         </div>
         <button type="button" class="tugma asosiy" [disabled]="band()" (click)="olish()">
           @if (band()) { <span class="aylanma"></span> } {{ til.t('HozirNusxa') }}
         </button>
       </div>
-      <p class="ikkilamchi kichik-matn" style="margin:0">{{ til.t('ZaxiraServerda') }}</p>
+      <p class="ikkilamchi kichik-matn">{{ til.t('ZaxiraServerda') }}</p>
     </section>
   `,
   styles: `
     .zaxira { max-width: 700px; }
+    .zaxira h2 { font-size: 16px; }
     .oxirgi { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
     .oxirgi .bosh-joy { flex: 1 1 220px; min-width: 0; }
     .matn { overflow-wrap: anywhere; }
@@ -39,7 +40,7 @@ interface Nusxa { vaqt: string; fayl: string; hajmBayt: number }
 })
 export class ZaxiraBolimi {
   protected readonly til = inject(Til);
-  private readonly x = inject(SozlamalarXizmati);
+  private readonly server = inject(Server);
   private readonly bildirish = inject(Bildirish);
 
   protected readonly band = signal(false);
@@ -57,7 +58,7 @@ export class ZaxiraBolimi {
     if (this.band()) return;
     this.band.set(true);
     try {
-      const z = await this.x.zaxiraOl();
+      const z = await this.server.zaxira();
       const n: Nusxa = { vaqt: z.vaqt, fayl: z.faylNomi, hajmBayt: z.hajmBayt };
       this.nusxa.set(n);
       try { localStorage.setItem(KALIT, JSON.stringify(n)); } catch { /* */ }

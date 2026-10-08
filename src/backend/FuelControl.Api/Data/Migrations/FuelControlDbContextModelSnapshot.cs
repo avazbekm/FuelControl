@@ -23,6 +23,10 @@ namespace FuelControl.Api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("BakQoldiq")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Raqam")
                         .HasColumnType("INTEGER");
 
@@ -61,14 +65,93 @@ namespace FuelControl.Api.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Tur")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Vaqt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Tur");
+
                     b.HasIndex("Vaqt");
 
                     b.ToTable("Audit");
+                });
+
+            modelBuilder.Entity("FuelControl.Core.Modellar.BakKirim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AparatId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Hujjat")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("KimYozdi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Litr")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("QoldiqKeyin")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("QoldiqOldin")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Vaqt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AparatId", "Vaqt");
+
+                    b.ToTable("BakKirimlari");
+                });
+
+            modelBuilder.Entity("FuelControl.Core.Modellar.BakTuzatishi", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AparatId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Keyin")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("KimYozdi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Oldin")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Sabab")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Vaqt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AparatId", "Vaqt");
+
+                    b.ToTable("BakTuzatishlari");
                 });
 
             modelBuilder.Entity("FuelControl.Core.Modellar.Foydalanuvchi", b =>
@@ -192,6 +275,108 @@ namespace FuelControl.Api.Data.Migrations
                     b.ToTable("NarxTarixlari");
                 });
 
+            modelBuilder.Entity("FuelControl.Core.Modellar.Nasiya", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Izoh")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("KimYozdi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MashinaRaqami")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MijozIsmi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Muddat")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OperatorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Qaytgan")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SmenaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Summa")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Telefon")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("Yopildi")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Yozildi")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OperatorId");
+
+                    b.HasIndex("SmenaId");
+
+                    b.HasIndex("Yozildi");
+
+                    b.ToTable("Nasiyalar");
+                });
+
+            modelBuilder.Entity("FuelControl.Core.Modellar.NasiyaQaytishi", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Izoh")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("KimYozdi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("NasiyaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OperatorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SmenaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Summa")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Usul")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Vaqt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NasiyaId");
+
+                    b.HasIndex("OperatorId");
+
+                    b.HasIndex("SmenaId");
+
+                    b.HasIndex("Vaqt");
+
+                    b.ToTable("NasiyaQaytishlari");
+                });
+
             modelBuilder.Entity("FuelControl.Core.Modellar.Smena", b =>
                 {
                     b.Property<int>("Id")
@@ -201,6 +386,12 @@ namespace FuelControl.Api.Data.Migrations
                     b.Property<DateTime>("Boshlandi")
                         .HasColumnType("TEXT");
 
+                    b.Property<long>("DepozitFarqi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Farq")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Izoh")
                         .HasColumnType("TEXT");
 
@@ -208,48 +399,58 @@ namespace FuelControl.Api.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("KutilganClick")
+                    b.Property<long>("Kutilgan")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("KutilganNaqd")
+                    b.Property<long>("NasiyaJami")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("KutilganPlastik")
+                    b.Property<long>("OchishDepozit")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("OchishQaytim")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("OchishTerminal")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("OperatorId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SotuvSoni")
+                    b.Property<long>("Plastik")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("TopshirilganClick")
+                    b.Property<long>("QaytganNasiya")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("TopshirilganNaqd")
+                    b.Property<long?>("SanalganNaqd")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("TopshirilganPlastik")
+                    b.Property<long>("Savdo")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime?>("Tugadi")
                         .HasColumnType("TEXT");
 
+                    b.Property<long>("XarajatJami")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("YopishDepozit")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("YopishTerminal")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Boshlandi");
-
-                    b.HasIndex("OperatorId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Smenalar_OchiqSmena")
-                        .HasFilter("\"Tugadi\" IS NULL");
 
                     b.HasIndex("OperatorId", "Tugadi");
 
                     b.ToTable("Smenalar");
                 });
 
-            modelBuilder.Entity("FuelControl.Core.Modellar.Sotuv", b =>
+            modelBuilder.Entity("FuelControl.Core.Modellar.SmenaKorsatkichi", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -258,17 +459,8 @@ namespace FuelControl.Api.Data.Migrations
                     b.Property<int>("AparatId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("BekorQilgan")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BekorSababi")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Holati")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("IdempotencyKey")
+                    b.Property<decimal>("Boshi")
+                        .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Litr")
@@ -278,8 +470,55 @@ namespace FuelControl.Api.Data.Migrations
                     b.Property<long>("Narx")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("NarxOzgarishida")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Oxiri")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SmenaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Summa")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Tartib")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Vaqt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AparatId");
+
+                    b.HasIndex("SmenaId", "AparatId", "Tartib")
+                        .IsUnique();
+
+                    b.ToTable("SmenaKorsatkichlari");
+                });
+
+            modelBuilder.Entity("FuelControl.Core.Modellar.Xarajat", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("KimYozdi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Manba")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("OperatorId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Sabab")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("SmenaId")
                         .HasColumnType("INTEGER");
@@ -292,41 +531,11 @@ namespace FuelControl.Api.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AparatId");
-
-                    b.HasIndex("IdempotencyKey")
-                        .IsUnique();
-
                     b.HasIndex("OperatorId");
 
                     b.HasIndex("SmenaId");
 
-                    b.HasIndex("Vaqt");
-
-                    b.ToTable("Sotuvlar");
-                });
-
-            modelBuilder.Entity("FuelControl.Core.Modellar.SotuvTolovi", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SotuvId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("Summa")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Turi")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SotuvId");
-
-                    b.ToTable("SotuvTolovlari");
+                    b.ToTable("Xarajatlar");
                 });
 
             modelBuilder.Entity("FuelControl.Core.Modellar.YoqilgiTuri", b =>
@@ -363,6 +572,24 @@ namespace FuelControl.Api.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("FuelControl.Core.Modellar.BakKirim", b =>
+                {
+                    b.HasOne("FuelControl.Core.Modellar.Aparat", null)
+                        .WithMany()
+                        .HasForeignKey("AparatId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FuelControl.Core.Modellar.BakTuzatishi", b =>
+                {
+                    b.HasOne("FuelControl.Core.Modellar.Aparat", null)
+                        .WithMany()
+                        .HasForeignKey("AparatId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("FuelControl.Core.Modellar.HisobHarakati", b =>
                 {
                     b.HasOne("FuelControl.Core.Modellar.Foydalanuvchi", null)
@@ -372,23 +599,8 @@ namespace FuelControl.Api.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FuelControl.Core.Modellar.Smena", b =>
+            modelBuilder.Entity("FuelControl.Core.Modellar.Nasiya", b =>
                 {
-                    b.HasOne("FuelControl.Core.Modellar.Foydalanuvchi", null)
-                        .WithMany()
-                        .HasForeignKey("OperatorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("FuelControl.Core.Modellar.Sotuv", b =>
-                {
-                    b.HasOne("FuelControl.Core.Modellar.Aparat", null)
-                        .WithMany()
-                        .HasForeignKey("AparatId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("FuelControl.Core.Modellar.Foydalanuvchi", null)
                         .WithMany()
                         .HasForeignKey("OperatorId")
@@ -402,18 +614,63 @@ namespace FuelControl.Api.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FuelControl.Core.Modellar.SotuvTolovi", b =>
+            modelBuilder.Entity("FuelControl.Core.Modellar.NasiyaQaytishi", b =>
                 {
-                    b.HasOne("FuelControl.Core.Modellar.Sotuv", null)
-                        .WithMany("Tolovlar")
-                        .HasForeignKey("SotuvId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("FuelControl.Core.Modellar.Nasiya", null)
+                        .WithMany()
+                        .HasForeignKey("NasiyaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FuelControl.Core.Modellar.Foydalanuvchi", null)
+                        .WithMany()
+                        .HasForeignKey("OperatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FuelControl.Core.Modellar.Smena", null)
+                        .WithMany()
+                        .HasForeignKey("SmenaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("FuelControl.Core.Modellar.Smena", b =>
+                {
+                    b.HasOne("FuelControl.Core.Modellar.Foydalanuvchi", null)
+                        .WithMany()
+                        .HasForeignKey("OperatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("FuelControl.Core.Modellar.Sotuv", b =>
+            modelBuilder.Entity("FuelControl.Core.Modellar.SmenaKorsatkichi", b =>
                 {
-                    b.Navigation("Tolovlar");
+                    b.HasOne("FuelControl.Core.Modellar.Aparat", null)
+                        .WithMany()
+                        .HasForeignKey("AparatId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FuelControl.Core.Modellar.Smena", null)
+                        .WithMany()
+                        .HasForeignKey("SmenaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FuelControl.Core.Modellar.Xarajat", b =>
+                {
+                    b.HasOne("FuelControl.Core.Modellar.Foydalanuvchi", null)
+                        .WithMany()
+                        .HasForeignKey("OperatorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FuelControl.Core.Modellar.Smena", null)
+                        .WithMany()
+                        .HasForeignKey("SmenaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -78,3 +78,59 @@ export function sonOl(matn: string | number | null | undefined): number | null {
   const n = Number(t);
   return isFinite(n) ? n : null;
 }
+
+/** Toshkent bo'yicha kun (yyyy-MM-dd) va soat ("HH:mm") dan UTC ISO vaqt. */
+export function toshkentdan(kunIso: string, soatMin: string): string {
+  const [y, m, d] = kunIso.split('-').map(Number);
+  const [h, min] = soatMin.split(':').map(Number);
+  return new Date(Date.UTC(y, m - 1, d, h - 5, min)).toISOString();
+}
+
+/** "dd.MM" (Toshkent) — qisqa sana. */
+export function kunQisqa(s: string | Date): string {
+  return kun(s).slice(0, 5);
+}
+
+/** "9 soat 40 daqiqa" / "24 soat" uchun: [soat, daqiqa]. */
+export function davomiylikSD(boshi: string, oxiri: string | null): [number, number] {
+  const ms = (oxiri ? sana(oxiri) : new Date()).getTime() - sana(boshi).getTime();
+  const daq = Math.max(0, Math.floor(ms / 60000));
+  return [Math.floor(daq / 60), daq % 60];
+}
+
+/** Qo'shish/ayirish belgisi bilan: "+15 995 270" / "−7 330 000" / "0". */
+export function ishoraPul(n: number): string {
+  return n > 0 ? '+' + pul(n) : pul(n);
+}
+
+/** Litr, oxiridagi ".00" siz: 6840 → "6 840", 6428.2 → "6 428.20". */
+export function litrQisqa(n: number | null | undefined): string {
+  const s = litr(n);
+  return s.endsWith('.00') ? s.slice(0, -3) : s;
+}
+
+/** Ismning bosh harflari (avatar): "Alisher Karimov" → "AK". */
+export function harflar(ism: string | null | undefined): string {
+  return (ism ?? '').split(/\s+/).filter(Boolean).map((s) => s[0]).slice(0, 2).join('').toUpperCase();
+}
+
+/** "yyyy-MM-dd" → "dd.MM". */
+export function kunOy(iso: string): string {
+  return iso.slice(8, 10) + '.' + iso.slice(5, 7);
+}
+
+/** "yyyy-MM-dd" → "dd.MM.yyyy". */
+export function kunToliq(iso: string): string {
+  return iso.slice(8, 10) + '.' + iso.slice(5, 7) + '.' + iso.slice(0, 4);
+}
+
+/** Toshkentdagi hozirgi vaqt: kun "yyyy-MM-dd" va soat "HH:mm". */
+export function hozirToshkent(): { kun: string; soat: string } {
+  const d = new Date();
+  return { kun: isoKun(d), soat: soat(d) };
+}
+
+/** Ikki "yyyy-MM-dd" orasidagi kun farqi (b − a). */
+export function kunFarqi(a: string, b: string): number {
+  return Math.round((new Date(b + 'T00:00:00Z').getTime() - new Date(a + 'T00:00:00Z').getTime()) / 864e5);
+}

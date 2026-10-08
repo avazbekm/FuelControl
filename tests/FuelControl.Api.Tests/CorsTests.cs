@@ -83,12 +83,12 @@ public sealed class CorsTests : IAsyncLifetime
         var oddiy = await mijoz.SendAsync(Sorov(HttpMethod.Get, "/openapi/v1.json", Boshqa));
         Assert.Null(Sarlavha(oddiy, "Access-Control-Allow-Origin"));
 
-        var pre = await mijoz.SendAsync(Preflight("/sotuvlar", Boshqa));
+        var pre = await mijoz.SendAsync(Preflight("/nasiyalar", Boshqa));
         Assert.Null(Sarlavha(pre, "Access-Control-Allow-Origin"));
     }
 
     [Theory]
-    [InlineData("/sotuvlar", "POST")]
+    [InlineData("/nasiyalar", "POST")]
     [InlineData("/auth/login", "POST")]
     [InlineData("/smenalar/5", "GET")]
     [InlineData("/yoqilgilar/3", "DELETE")]
@@ -131,7 +131,7 @@ public sealed class CorsTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, oddiy.StatusCode);
         Assert.Null(Sarlavha(oddiy, "Access-Control-Allow-Origin"));
 
-        var pre = await mijoz.SendAsync(Preflight("/sotuvlar", Ruxsatli));
+        var pre = await mijoz.SendAsync(Preflight("/nasiyalar", Ruxsatli));
         Assert.Null(Sarlavha(pre, "Access-Control-Allow-Origin"));
     }
 

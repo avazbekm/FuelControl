@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -18,10 +19,11 @@ public enum Bolim
     Yoqilgilar = 2,
     Aparatlar = 4,
     Smenalar = 8,
-    Sotuvlar = 16,
-    Harakatlar = 32,
-    Audit = 64,
-    Hammasi = 127,
+    JoriySmena = 16,
+    Nasiyalar = 32,
+    Harakatlar = 64,
+    Audit = 128,
+    Hammasi = 255,
 }
 
 /// <summary>
@@ -37,18 +39,25 @@ public static class Malumot
     public static readonly List<YoqilgiTuri> Yoqilgilar = new();
     public static readonly List<Aparat> Aparatlar = new();
     public static readonly List<Smena> Smenalar = new();
-    public static readonly List<Sotuv> Sotuvlar = new();
     public static readonly List<HisobHarakati> Harakatlar = new();
     public static readonly List<AuditYozuvi> Audit = new();
     public static readonly List<NarxTarixi> NarxTarixi = new();
 
-    // Keshda faqat yaqin davr: bugungi sotuvlar, oxirgi 60 kun smenalari va bekor qilinganlar, oxirgi 500 audit.
-    // Boshqaruv, hisobot, eski smena sotuvlari va "Hammasi" filtri serverdan alohida so'raladi.
+    /// <summary>Butun shoxobchadagi ochiq smena tafsiloti (GET /smenalar/joriy); yo'q bo'lsa null.</summary>
+    public static SmenaTafsilotDto? Joriy { get; private set; }
+    /// <summary>Ochiq smena (Joriy.Smena ning modeli) yoki null.</summary>
+    public static Smena? JoriySmena { get; private set; }
+    /// <summary>Oxirgi yopilgan smena (GET /smenalar/oxirgi) — Savdo ochish formasidagi "Oxirgi smena" uchun.</summary>
+    public static Smena? OxirgiYopilgan { get; private set; }
+
+    /// <summary>Qarzi bor nasiyalar (holat=faol, muddati o'tganlar ham) va umumiy xulosa. Nasiyalar ruxsati bo'lmasa null.</summary>
+    public static NasiyalarDto? FaolNasiyalar { get; private set; }
+    public static int MuddatiOtganSoni => FaolNasiyalar?.Xulosa.MuddatiOtganSoni ?? 0;
+
+    // Keshda faqat yaqin davr: oxirgi 60 kun smenalari, oxirgi 500 audit.
+    // Boshqaruv, hisobot, smena tafsiloti, nasiyalar ro'yxati (filtr bilan) va "Hammasi" filtri serverdan alohida so'raladi.
     public const int SmenaKunlari = 60;
     public const int AuditSoni = 500;
-
-    /// <summary>Oxirgi 60 kundagi bekor qilingan sotuvlar (Audit sahifasi uchun).</summary>
-    public static readonly List<Sotuv> BekorQilinganlar = new();
 
     /// <summary>Operatorning joriy oy savdosi va smenalar soni (operator hisobi so'rovidan).</summary>
     public static readonly Dictionary<int, (long Savdo, int Smenalar)> OyStatistikasi = new();
@@ -65,7 +74,14 @@ public static class Malumot
     public static ApiMijoz Api { get; private set; } = YangiMijoz(Sozlama.Joriy.ServerManzili);
 
     /// <summary>SignalR ulanishi bor-yo'qligi. Yo'q bo'lsa yozuvchi tugmalar o'chiriladi (1-versiyada navbat yo'q).</summary>
-    public static bool AloqaBor { get; private set; }
+    /// <summary>SignalR holati: Ulanmoqda (birinchi ulanish yoki qayta ulanish), Bor, Yoq (ulanmadi yoki bir necha soniyada tiklanmadi).</summary>
+    public enum AloqaHolati { Ulanmoqda, Bor, Yoq }
+    public static AloqaHolati Holat { get; private set; } = AloqaHolati.Yoq;
+
+    /// <summary>Yozuvchi amallar mumkinmi: yozish REST orqali, shuning uchun ulanayotganda ham ruxsat; faqat aloqa haqiqatan yo'q bo'lsa o'chadi.</summary>
+    public static bool AloqaBor => Holat != AloqaHolati.Yoq;
+    private const int UlanishKutish = 6; // soniya — shundan keyin ham ulanmasa "Aloqa yo'q"
+    private static DispatcherTimer? _ulanishTaymeri;
     public static event Action? AloqaOzgardi;
 
     /// <summary>Sessiya tugadi yoki o'z ruxsatlari o'zgardi — qayta kirish kerak. Parametr — sabab matni.</summary>
@@ -108,7 +124,9 @@ public static class Malumot
             await Chiqish();
             throw;
         }
-        _ = HubniBoshla();
+        // Namuna rejimida SignalR yo'q — aloqa bor deb hisoblaymiz.
+        if (ApiMijoz.Namuna is not null) HolatniOrnat(AloqaHolati.Bor);
+        else { HolatniOrnat(AloqaHolati.Ulanmoqda); _ = HubniBoshla(); }
         return JoriyFoydalanuvchi;
     }
 
@@ -124,15 +142,16 @@ public static class Malumot
             try { await hub.DisposeAsync(); } catch (Exception) { /* yopilayotgan ulanish */ }
         }
         Api.Chiqish();
-        AloqaniOrnat(false);
+        HolatniOrnat(AloqaHolati.Yoq);
         Tozala();
         OzgardiXabar();
     }
 
     private static void Tozala()
     {
-        Foydalanuvchilar.Clear(); Yoqilgilar.Clear(); Aparatlar.Clear(); Smenalar.Clear(); Sotuvlar.Clear();
-        Harakatlar.Clear(); Audit.Clear(); NarxTarixi.Clear(); Begonalar.Clear(); BekorQilinganlar.Clear(); OyStatistikasi.Clear();
+        Foydalanuvchilar.Clear(); Yoqilgilar.Clear(); Aparatlar.Clear(); Smenalar.Clear();
+        Harakatlar.Clear(); Audit.Clear(); NarxTarixi.Clear(); Begonalar.Clear(); OyStatistikasi.Clear();
+        Joriy = null; JoriySmena = null; OxirgiYopilgan = null; FaolNasiyalar = null;
         JoriyFoydalanuvchi = new Foydalanuvchi();
     }
 
@@ -181,25 +200,27 @@ public static class Malumot
             {
                 a.Raqam = d.Raqam;
                 a.Yoqilgi = YoqilgiOl(d.YoqilgiTuriId, d.YoqilgiNomi);
-                a.TotalLitr = d.TotalLitr;
+                a.TotalLitr = d.TotalLitr; a.BakQoldiq = d.BakQoldiq;
+                a.OxirgiKirimVaqti = d.OxirgiKirimVaqti?.ToLocalTime(); a.OxirgiKirimLitr = d.OxirgiKirimLitr;
             });
+
+        if (b.HasFlag(Bolim.JoriySmena))
+        {
+            Joriy = await Api.JoriySmena();
+            JoriySmena = Joriy is null ? null : SmenaniQoy(Joriy.Smena, xabar: false);
+            OxirgiYopilgan = await Api.OxirgiSmena() is { } ox ? SmenaKorinishi(ox.Smena) : null;
+            // Boshqa joyda yopilgan smena keshda ochiq bo'lib qolmasin.
+            if (JoriySmena is null && Smenalar.Any(s => s.Ochiqmi)) b |= Bolim.Smenalar;
+        }
+
+        if (b.HasFlag(Bolim.Nasiyalar))
+            FaolNasiyalar = j.Bor(Ruxsat.Nasiyalar) ? await Api.Nasiyalar("faol") : null;
 
         if (b.HasFlag(Bolim.Smenalar))
         {
             Mosla(Smenalar, (await Api.Smenalar(Bugun.AddDays(-SmenaKunlari)))!, d => d.Id, SmenaYarat, SmenaYangila);
+            if (JoriySmena is { } js && !Smenalar.Contains(js)) Smenalar.Add(js);
             Smenalar.Sort((x, y) => y.Boshlandi.CompareTo(x.Boshlandi));
-        }
-
-        if (b.HasFlag(Bolim.Sotuvlar))
-        {
-            Mosla(Sotuvlar, (await Api.Sotuvlar(Bugun, Bugun))!, d => d.Id, SotuvYarat, SotuvYangila);
-            Sotuvlar.Sort((x, y) => y.Vaqt.CompareTo(x.Vaqt));
-            if (j.Bor(Ruxsat.Audit))
-            {
-                var bekor = (await Api.Sotuvlar(Bugun.AddDays(-SmenaKunlari), holati: SotuvHolati.BekorQilingan))!;
-                BekorQilinganlar.Clear();
-                BekorQilinganlar.AddRange(bekor.Select(SotuvKorinishi).OrderByDescending(s => s.Vaqt));
-            }
         }
 
         if (b.HasFlag(Bolim.Harakatlar))
@@ -225,7 +246,7 @@ public static class Malumot
         {
             var audit = (await Api.Audit(AuditSoni))!;
             Audit.Clear();
-            Audit.AddRange(audit.Select(a => new AuditYozuvi { Id = a.Id, Vaqt = a.Vaqt.ToLocalTime(), Kim = a.Kim, Amal = a.Amal, Tafsilot = a.Tafsilot }));
+            Audit.AddRange(audit.Select(a => new AuditYozuvi { Id = a.Id, Vaqt = a.Vaqt.ToLocalTime(), Kim = a.Kim, Amal = a.Amal, Tafsilot = a.Tafsilot, Tur = a.Tur }));
         }
 
         OzgardiXabar();
@@ -282,10 +303,13 @@ public static class Malumot
 
         void UI(Action a) => Dispatcher.UIThread.Post(() => { if (_hub == hub) a(); });
 
-        hub.On<SotuvDto>("SotuvQoshildi", d => UI(() => { SotuvniQoy(d); Rejala(Bolim.Aparatlar | Bolim.Smenalar | Bolim.Audit); }));
-        hub.On<SotuvDto>("SotuvOzgardi", d => UI(() => { SotuvniQoy(d); Rejala(Bolim.Aparatlar | Bolim.Smenalar | Bolim.Sotuvlar | Bolim.Harakatlar | Bolim.Audit); }));
-        hub.On<SmenaDto>("SmenaOzgardi", d => UI(() => { SmenaniQoy(d); Rejala(Bolim.Harakatlar | Bolim.Audit); }));
-        hub.On<YoqilgiTuriDto>("NarxOzgardi", _ => UI(() => Rejala(Bolim.Yoqilgilar | Bolim.Aparatlar | Bolim.Audit)));
+        // Smena hisobi hodisalari — faqat "qayta yuklash" signali (yuk DTO'si ishlatilmaydi, o'chirishda ham shu keladi).
+        void Signal(string nomi, Bolim bolim) => hub.On<JsonElement>(nomi, _ => UI(() => Rejala(bolim)));
+        Signal("SmenaOzgardi", Bolim.JoriySmena | Bolim.Smenalar | Bolim.Aparatlar | Bolim.Harakatlar | Bolim.Audit);
+        Signal("NasiyaOzgardi", Bolim.JoriySmena | Bolim.Nasiyalar | Bolim.Audit);
+        Signal("XarajatOzgardi", Bolim.JoriySmena | Bolim.Audit);
+        Signal("AparatOzgardi", Bolim.Aparatlar | Bolim.Audit);
+        Signal("NarxOzgardi", Bolim.Yoqilgilar | Bolim.Aparatlar | Bolim.JoriySmena | Bolim.Audit);
         hub.On<string>("Ozgardi", bolim => UI(() => Rejala(Bolim.Audit | bolim switch
         {
             "Foydalanuvchilar" => Bolim.Foydalanuvchilar,
@@ -298,10 +322,10 @@ public static class Malumot
         // Server o'zgargan foydalanuvchining ulanishini uzishdan oldin yuboradi: o'z holatimizni darhol tekshiramiz
         // (nofaol bo'lsak /me → 401 → chiqish; ruxsat o'zgargan bo'lsa — joyida yangilanadi, qayta ulanish yangi guruhlar bilan).
         hub.On("QaytaUlan", () => UI(() => Rejala(Bolim.Foydalanuvchilar)));
-        hub.Reconnecting += _ => { UI(() => AloqaniOrnat(false)); return Task.CompletedTask; };
+        hub.Reconnecting += _ => { UI(() => HolatniOrnat(AloqaHolati.Ulanmoqda)); return Task.CompletedTask; };
         // Uzilish paytida o'tkazib yuborilgan xabarlar — hammasini qayta yuklaymiz.
-        hub.Reconnected += _ => { UI(() => { AloqaniOrnat(true); Rejala(Bolim.Hammasi); }); return Task.CompletedTask; };
-        hub.Closed += xato => { UI(() => { AloqaniOrnat(false); _ = Ulan(hub, qaytaYukla: true); }); return Task.CompletedTask; };
+        hub.Reconnected += _ => { UI(() => { HolatniOrnat(AloqaHolati.Bor); Rejala(Bolim.Hammasi); }); return Task.CompletedTask; };
+        hub.Closed += xato => { UI(() => { HolatniOrnat(AloqaHolati.Yoq); _ = Ulan(hub, qaytaYukla: true); }); return Task.CompletedTask; };
 
         await Ulan(hub, qaytaYukla: false);
     }
@@ -314,62 +338,92 @@ public static class Malumot
             try
             {
                 await hub.StartAsync();
-                AloqaniOrnat(true);
+                HolatniOrnat(AloqaHolati.Bor);
                 if (qaytaYukla) Rejala(Bolim.Hammasi);
                 return;
             }
             catch (Exception)
             {
-                AloqaniOrnat(false);
+                HolatniOrnat(AloqaHolati.Yoq);
                 qaytaYukla = true;
                 await Task.Delay(TimeSpan.FromSeconds(5));
             }
         }
     }
 
-    private static void AloqaniOrnat(bool bor)
+    private static void HolatniOrnat(AloqaHolati h)
     {
-        if (AloqaBor == bor) return;
-        AloqaBor = bor;
+        _ulanishTaymeri?.Stop();
+        if (h == AloqaHolati.Ulanmoqda)
+        {
+            // Ulanish cho'zilsa — "Aloqa yo'q".
+            _ulanishTaymeri ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(UlanishKutish) };
+            _ulanishTaymeri.Tick -= UlanishTugadi;
+            _ulanishTaymeri.Tick += UlanishTugadi;
+            _ulanishTaymeri.Start();
+        }
+        if (Holat == h) return;
+        Holat = h;
         AloqaOzgardi?.Invoke();
+    }
+
+    private static void UlanishTugadi(object? s, EventArgs e)
+    {
+        _ulanishTaymeri?.Stop();
+        if (Holat == AloqaHolati.Ulanmoqda) HolatniOrnat(AloqaHolati.Yoq);
     }
 
     // ================= Yozuvchi amallar (API → kesh) =================
 
-    public static async Task<Sotuv> SotuvYarat(SotuvYaratishDto d)
+    public static async Task<Smena> SmenaOch(SmenaOchishDto d)
     {
-        var s = SotuvniQoy((await Api.SotuvYarat(d))!);
-        await JimYukla(Bolim.Aparatlar | Bolim.Smenalar | Bolim.Audit);
-        return s;
-    }
-
-    public static async Task<Sotuv> SotuvTahrirla(int id, SotuvTahrirlashDto d)
-    {
-        var s = SotuvniQoy((await Api.SotuvTahrirla(id, d))!);
-        await JimYukla(Bolim.Aparatlar | Bolim.Smenalar | Bolim.Harakatlar | Bolim.Audit);
-        return s;
-    }
-
-    public static async Task<Sotuv> SotuvBekorQil(int id, string sabab)
-    {
-        var s = SotuvniQoy((await Api.SotuvBekorQil(id, new SotuvBekorQilishDto(sabab)))!);
-        await JimYukla(Bolim.Aparatlar | Bolim.Smenalar | Bolim.Sotuvlar | Bolim.Harakatlar | Bolim.Audit);
-        return s;
-    }
-
-    public static async Task<Smena> SmenaOch()
-    {
-        var s = SmenaniQoy((await Api.SmenaOch())!);
-        await JimYukla(Bolim.Audit);
+        var s = SmenaniQoy((await Api.SmenaOch(d))!);
+        await JimYukla(Bolim.JoriySmena | Bolim.Audit);
         return s;
     }
 
     public static async Task<Smena> SmenaYop(int id, SmenaYopishDto d)
     {
         var s = SmenaniQoy((await Api.SmenaYop(id, d))!);
-        await JimYukla(Bolim.Harakatlar | Bolim.Audit);
+        await JimYukla(Bolim.JoriySmena | Bolim.Aparatlar | Bolim.Harakatlar | Bolim.Audit);
         return s;
     }
+
+    public static async Task<SmenaTafsilotDto> KorsatkichTuzat(int smenaId, KorsatkichTuzatishDto d)
+    {
+        var t = (await Api.KorsatkichTuzat(smenaId, d))!;
+        SmenaniQoy(t.Smena);
+        await JimYukla(Bolim.JoriySmena | Bolim.Aparatlar | Bolim.Harakatlar | Bolim.Audit);
+        return t;
+    }
+
+    public static async Task<NasiyaDto> NasiyaYoz(NasiyaYaratishDto d)
+    {
+        var n = (await Api.NasiyaYoz(d))!;
+        await JimYukla(Bolim.JoriySmena | Bolim.Nasiyalar | Bolim.Audit);
+        return n;
+    }
+
+    public static async Task<NasiyaDto> QarzQaytdi(int nasiyaId, NasiyaQaytishiYaratishDto d)
+    {
+        var n = (await Api.QarzQaytdi(nasiyaId, d))!;
+        await JimYukla(Bolim.JoriySmena | Bolim.Nasiyalar | Bolim.Audit);
+        return n;
+    }
+
+    public static async Task NasiyaOchir(int id) { await Api.NasiyaOchir(id); await JimYukla(Bolim.JoriySmena | Bolim.Nasiyalar | Bolim.Audit); }
+    public static async Task QaytishOchir(int id) { await Api.QaytishOchir(id); await JimYukla(Bolim.JoriySmena | Bolim.Nasiyalar | Bolim.Audit); }
+
+    public static async Task<XarajatDto> XarajatYoz(XarajatYaratishDto d)
+    {
+        var x = (await Api.XarajatYoz(d))!;
+        await JimYukla(Bolim.JoriySmena | Bolim.Audit);
+        return x;
+    }
+
+    public static async Task XarajatOchir(int id) { await Api.XarajatOchir(id); await JimYukla(Bolim.JoriySmena | Bolim.Audit); }
+
+    public static async Task BakKirim(int aparatId, BakKirimYaratishDto d) { await Api.BakKirim(aparatId, d); await JimYukla(Bolim.Aparatlar | Bolim.Audit); }
 
     public static async Task HarakatYoz(int operatorId, HarakatYaratishDto d)
     {
@@ -378,7 +432,7 @@ public static class Malumot
     }
 
     public static async Task YoqilgiYarat(YoqilgiYaratishDto d) { await Api.YoqilgiYarat(d); await JimYukla(Bolim.Yoqilgilar | Bolim.Audit); }
-    public static async Task YoqilgiTahrirla(int id, YoqilgiTahrirlashDto d) { await Api.YoqilgiTahrirla(id, d); await JimYukla(Bolim.Yoqilgilar | Bolim.Aparatlar | Bolim.Audit); }
+    public static async Task YoqilgiTahrirla(int id, YoqilgiTahrirlashDto d) { await Api.YoqilgiTahrirla(id, d); await JimYukla(Bolim.Yoqilgilar | Bolim.Aparatlar | Bolim.JoriySmena | Bolim.Audit); }
     public static async Task YoqilgiOchir(int id) { await Api.YoqilgiOchir(id); await JimYukla(Bolim.Yoqilgilar | Bolim.Audit); }
 
     public static async Task AparatYarat(AparatYaratishDto d) { await Api.AparatYarat(d); await JimYukla(Bolim.Aparatlar | Bolim.Audit); }
@@ -435,7 +489,7 @@ public static class Malumot
 
     private static int ModelId(object x) => x switch
     {
-        Foydalanuvchi f => f.Id, YoqilgiTuri y => y.Id, Aparat a => a.Id, Smena s => s.Id, Sotuv s => s.Id,
+        Foydalanuvchi f => f.Id, YoqilgiTuri y => y.Id, Aparat a => a.Id, Smena s => s.Id,
         _ => throw new ArgumentException(x.GetType().Name),
     };
 
@@ -460,62 +514,22 @@ public static class Malumot
     private static YoqilgiTuri YoqilgiOl(int id, string nomi) =>
         Yoqilgilar.FirstOrDefault(y => y.Id == id) ?? new YoqilgiTuri { Id = id, Nomi = nomi };
 
-    private static Aparat AparatOl(int id, int raqam, string yoqilgi) =>
-        Aparatlar.FirstOrDefault(a => a.Id == id)
-        ?? new Aparat { Id = id, Raqam = raqam, Yoqilgi = Yoqilgilar.FirstOrDefault(y => y.Nomi == yoqilgi) ?? new YoqilgiTuri { Nomi = yoqilgi } };
-
     private static Smena SmenaYarat(SmenaDto d) =>
-        new() { Id = d.Id, Operator = FoydalanuvchiOl(d.OperatorId, d.OperatorIsmi), Boshlandi = d.Boshlandi.ToLocalTime() };
+        new() { Id = d.Id, Operator = FoydalanuvchiOl(d.OperatorId, d.OperatorIsmi) };
 
     private static void SmenaYangila(Smena s, SmenaDto d)
     {
-        s.Tugadi = d.Tugadi?.ToLocalTime();
-        s.KutilganNaqd = d.KutilganNaqd; s.KutilganPlastik = d.KutilganPlastik; s.KutilganClick = d.KutilganClick;
-        s.JamiLitr = d.JamiLitr; s.SotuvSoni = d.SotuvSoni;
-        s.TopshirilganNaqd = d.TopshirilganNaqd; s.TopshirilganPlastik = d.TopshirilganPlastik; s.TopshirilganClick = d.TopshirilganClick;
-    }
-
-    private static Sotuv SotuvYarat(SotuvDto d) => new()
-    {
-        Id = d.Id, SmenaId = d.SmenaId, Operator = FoydalanuvchiOl(d.OperatorId, d.OperatorIsmi), Vaqt = d.Vaqt.ToLocalTime(),
-    };
-
-    private static void SotuvYangila(Sotuv s, SotuvDto d)
-    {
-        s.Aparat = AparatOl(d.AparatId, d.AparatRaqami, d.YoqilgiNomi);
-        s.Narx = d.Narx; s.Litr = d.Litr; s.Summa = d.Summa;
-        s.Tolovlar = d.Tolovlar.Select(t => new Tolov { Turi = t.Turi, Summa = t.Summa }).ToList();
-        s.Holati = d.Holati; s.BekorSababi = d.BekorSababi; s.BekorQilgan = d.BekorQilgan;
-    }
-
-    /// <summary>Bitta sotuvni keshga qo'yadi. Keshda faqat bugungilar: eski sotuv (masalan, o'tgan smenadagi tahrir) qo'shilmaydi.</summary>
-    private static Sotuv SotuvniQoy(SotuvDto d)
-    {
-        var s = Sotuvlar.FirstOrDefault(x => x.Id == d.Id);
-        if (s is null)
-        {
-            s = SotuvYarat(d);
-            if (s.Vaqt.Date == DateTime.Today)
-            {
-                Sotuvlar.Add(s);
-                Sotuvlar.Sort((x, y) => y.Vaqt.CompareTo(x.Vaqt));
-            }
-        }
-        SotuvYangila(s, d);
-        OzgardiXabar();
-        return s;
+        s.Boshlandi = d.Boshlandi.ToLocalTime(); s.Tugadi = d.Tugadi?.ToLocalTime();
+        s.OchishQaytim = d.OchishQaytim; s.OchishTerminal = d.OchishTerminal; s.OchishDepozit = d.OchishDepozit;
+        s.YopishTerminal = d.YopishTerminal; s.YopishDepozit = d.YopishDepozit; s.SanalganNaqd = d.SanalganNaqd;
+        s.JamiLitr = d.JamiLitr; s.Savdo = d.Savdo; s.Plastik = d.Plastik; s.DepozitFarqi = d.DepozitFarqi;
+        s.NasiyaJami = d.NasiyaJami; s.QaytganNasiya = d.QaytganNasiya; s.XarajatJami = d.XarajatJami;
+        s.Kutilgan = d.Kutilgan; s.Farq = d.Farq; s.Izoh = d.Izoh;
     }
 
     // ================= Serverdan bevosita (keshga kirmaydigan) ma'lumot =================
 
     /// <summary>DTO → model: keshda bo'lsa o'sha obyekt (yangilanadi), aks holda alohida obyekt.</summary>
-    public static Sotuv SotuvKorinishi(SotuvDto d)
-    {
-        var s = Sotuvlar.FirstOrDefault(x => x.Id == d.Id) ?? SotuvYarat(d);
-        SotuvYangila(s, d);
-        return s;
-    }
-
     public static Smena SmenaKorinishi(SmenaDto d)
     {
         var s = Smenalar.FirstOrDefault(x => x.Id == d.Id) ?? SmenaYarat(d);
@@ -524,9 +538,6 @@ public static class Malumot
     }
 
     public static Foydalanuvchi FoydalanuvchiniOl(int id, string ism) => FoydalanuvchiOl(id, ism);
-
-    public static async Task<List<Sotuv>> SmenaSotuvlari(int smenaId) =>
-        (await Api.Sotuvlar(smenaId: smenaId))!.Select(SotuvKorinishi).ToList();
 
     /// <summary>Smenalar sahifasidagi "Hammasi" filtri — 60 kundan eskilari ham.</summary>
     public static async Task<List<Smena>> BarchaSmenalar(int? operatorId) =>
@@ -546,7 +557,7 @@ public static class Malumot
         catch (ApiXatosi) { }
     }
 
-    private static Smena SmenaniQoy(SmenaDto d)
+    private static Smena SmenaniQoy(SmenaDto d, bool xabar = true)
     {
         var s = Smenalar.FirstOrDefault(x => x.Id == d.Id);
         if (s is null)
@@ -555,7 +566,7 @@ public static class Malumot
             Smenalar.Insert(0, s);
         }
         SmenaYangila(s, d);
-        OzgardiXabar();
+        if (xabar) OzgardiXabar();
         return s;
     }
 }

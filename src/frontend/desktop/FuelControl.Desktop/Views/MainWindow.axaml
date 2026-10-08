@@ -23,6 +23,27 @@
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="Padding" Value="0,12" />
         </Style>
+        <Style Selector="Button.nav:not(.yigilgan)">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <!-- Menyu belgisi (muddati o'tgan nasiyalar soni) -->
+        <Style Selector="Border.menyuBelgi">
+            <Setter Property="MinWidth" Value="22" />
+            <Setter Property="Height" Value="22" />
+            <Setter Property="Padding" Value="7,0" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Background" Value="#D7262B" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.menyuBelgi TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.menyuBelgi.faol"><Setter Property="Background" Value="White" /></Style>
+        <Style Selector="Border.menyuBelgi.faol TextBlock"><Setter Property="Foreground" Value="#B3261E" /></Style>
     </Window.Styles>
 
     <Panel>
@@ -63,13 +84,30 @@
                             IsVisible="{Binding KoradiBoshqaruv}" Command="{Binding SahifaniOchCommand}" CommandParameter="0" ToolTip.Tip="{l:T Boshqaruv}">
                         <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="grid" Olcham="19" /><TextBlock Text="{l:T Boshqaruv}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
                     </Button>
-                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding SotuvSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
-                            IsVisible="{Binding KoradiSotuv}" Command="{Binding SahifaniOchCommand}" CommandParameter="1" ToolTip.Tip="{l:T SotuvKiritish}">
-                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="plus" Olcham="19" /><TextBlock Text="{l:T SotuvKiritish}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding SavdoSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                            IsVisible="{Binding KoradiSavdo}" Command="{Binding SahifaniOchCommand}" CommandParameter="1" ToolTip.Tip="{l:T Savdo}">
+                        <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="pump" Olcham="19" /><TextBlock Text="{l:T Savdo}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
                     </Button>
                     <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding SmenalarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
                             IsVisible="{Binding KoradiSmenalar}" Command="{Binding SahifaniOchCommand}" CommandParameter="2" ToolTip.Tip="{l:T Smenalar}">
                         <StackPanel Orientation="Horizontal" Spacing="12"><ctl:Ikon Nomi="clock" Olcham="19" /><TextBlock Text="{l:T Smenalar}" IsVisible="{Binding MenyuOchiq}" /></StackPanel>
+                    </Button>
+                    <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding NasiyalarSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
+                            IsVisible="{Binding KoradiNasiyalar}" Command="{Binding SahifaniOchCommand}" CommandParameter="7" ToolTip.Tip="{l:T Nasiyalar}">
+                        <Panel>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" IsVisible="{Binding MenyuOchiq}">
+                                <ctl:Ikon Nomi="book" Olcham="19" />
+                                <TextBlock Grid.Column="1" Text="{l:T Nasiyalar}" />
+                                <Border Grid.Column="2" Classes="menyuBelgi" Classes.faol="{Binding NasiyalarSahifasi}" IsVisible="{Binding MuddatiOtganBor}" ToolTip.Tip="{Binding MuddatiOtganIzoh}">
+                                    <TextBlock Text="{Binding MuddatiOtganSoni}" />
+                                </Border>
+                            </Grid>
+                            <Panel IsVisible="{Binding MenyuYigilgan}">
+                                <ctl:Ikon Nomi="book" Olcham="19" />
+                                <Border Width="9" Height="9" CornerRadius="5" Background="#D7262B" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-3,-5,0"
+                                        IsVisible="{Binding MuddatiOtganBor}" />
+                            </Panel>
+                        </Panel>
                     </Button>
                     <Button DockPanel.Dock="Top" Classes="nav" Classes.faol="{Binding HisobotSahifasi}" Classes.yigilgan="{Binding MenyuYigilgan}"
                             IsVisible="{Binding KoradiHisobot}" Command="{Binding SahifaniOchCommand}" CommandParameter="3" ToolTip.Tip="{l:T Hisobotlar}">
@@ -135,6 +173,10 @@
                                 <Border Width="8" Height="8" CornerRadius="4" Background="#1EA66A" BoxShadow="0 0 0 4 #2E1EA66A" VerticalAlignment="Center" />
                                 <TextBlock Text="{l:T ServerAloqa}" Classes="izoh" />
                             </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="7" IsVisible="{Binding AloqaUlanmoqda}">
+                                <Border Width="8" Height="8" CornerRadius="4" Background="#8A97B1" VerticalAlignment="Center" />
+                                <TextBlock Text="{l:T Yuklanmoqda}" Classes="izoh" />
+                            </StackPanel>
                             <StackPanel Orientation="Horizontal" Spacing="7" IsVisible="{Binding AloqaYoq}">
                                 <Border Width="8" Height="8" CornerRadius="4" Background="#E5484D" BoxShadow="0 0 0 4 #2EE5484D" VerticalAlignment="Center" />
                                 <TextBlock Text="{l:T ServerAloqaYoq}" Classes="izoh" Foreground="{DynamicResource Qizil}" />
@@ -147,8 +189,9 @@
             <!-- Sahifalar -->
             <Panel Grid.Column="1">
                 <v:BoshqaruvView DataContext="{Binding Boshqaruv}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).BoshqaruvSahifasi}" />
-                <v:SotuvView DataContext="{Binding Sotuv}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).SotuvSahifasi}" />
+                <v:SavdoView DataContext="{Binding Savdo}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).SavdoSahifasi}" />
                 <v:SmenalarView DataContext="{Binding Smenalar}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).SmenalarSahifasi}" />
+                <v:NasiyalarView DataContext="{Binding Nasiyalar}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).NasiyalarSahifasi}" />
                 <v:HisobotView DataContext="{Binding Hisobot}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).HisobotSahifasi}" />
                 <v:OperatorlarView DataContext="{Binding Operatorlar}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).OperatorlarSahifasi}" />
                 <v:SozlamalarView DataContext="{Binding Sozlamalar}" IsVisible="{Binding $parent[Window].((vm:MainViewModel)DataContext).SozlamalarSahifasi}" />
@@ -156,124 +199,8 @@
             </Panel>
         </Grid>
 
-        <!-- ============ Smenani yopish dialogi (barcha sahifalar uchun umumiy) ============ -->
-        <Border Classes="parda" DataContext="{Binding Smenalar}" x:DataType="vm:SmenalarViewModel" IsVisible="{Binding YopishOchiq}">
-            <Border Classes="dialog" Width="560">
-                <StackPanel Spacing="16">
-                    <StackPanel Spacing="3">
-                        <TextBlock Classes="sarlavha" FontSize="24" Text="{Binding YopishSarlavha}" />
-                        <TextBlock Classes="izoh" Text="{Binding YopishIzohMatni}" TextWrapping="Wrap" />
-                    </StackPanel>
-
-                    <Grid ColumnDefinitions="100,*,*,110" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" ColumnSpacing="10">
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{l:T Kutilgan, Katta=True}" Classes="yorliq" />
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="{l:T Topshirilgan, Katta=True}" Classes="yorliq" />
-                        <TextBlock Grid.Row="0" Grid.Column="3" Text="{l:T Farq, Katta=True}" Classes="yorliq" TextAlignment="Right" />
-
-                        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"><ctl:Ikon Nomi="cash" Olcham="16" /><TextBlock Text="{l:T Naqd}" FontWeight="Bold" /></StackPanel>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Tanlangan.KutilganNaqd, StringFormat='#,0'}" IsReadOnly="True" TextAlignment="Right" Opacity="0.7" />
-                        <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Naqd}" TextAlignment="Right" PlaceholderText="0" FontWeight="Bold" ctl:AvtoFokus.Yoqilgan="True" />
-                        <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding NaqdFarqMatni}" VerticalAlignment="Center" TextAlignment="Right" FontWeight="ExtraBold" />
-
-                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"><ctl:Ikon Nomi="card" Olcham="16" /><TextBlock Text="{l:T Plastik}" FontWeight="Bold" /></StackPanel>
-                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Tanlangan.KutilganPlastik, StringFormat='#,0'}" IsReadOnly="True" TextAlignment="Right" Opacity="0.7" />
-                        <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding Plastik}" TextAlignment="Right" PlaceholderText="0" FontWeight="Bold" />
-                        <TextBlock Grid.Row="2" Grid.Column="3" Text="{Binding PlastikFarqMatni}" VerticalAlignment="Center" TextAlignment="Right" FontWeight="ExtraBold" />
-
-                        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center"><ctl:Ikon Nomi="phone" Olcham="16" /><TextBlock Text="{l:T Click}" FontWeight="Bold" /></StackPanel>
-                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Tanlangan.KutilganClick, StringFormat='#,0'}" IsReadOnly="True" TextAlignment="Right" Opacity="0.7" />
-                        <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Click}" TextAlignment="Right" PlaceholderText="0" FontWeight="Bold" />
-                        <TextBlock Grid.Row="3" Grid.Column="3" Text="{Binding ClickFarqMatni}" VerticalAlignment="Center" TextAlignment="Right" FontWeight="ExtraBold" />
-                    </Grid>
-
-                    <Border Classes="tile" Classes.kamomat="{Binding KamomatBor}" Classes.ortiqcha="{Binding OrtiqchaBor}">
-                        <Border.Styles>
-                            <Style Selector="Border.kamomat"><Setter Property="Background" Value="{DynamicResource KamomatFon}" /><Setter Property="BorderBrush" Value="{DynamicResource KamomatChegara}" /></Style>
-                            <Style Selector="Border.ortiqcha"><Setter Property="Background" Value="{DynamicResource OrtiqchaFon}" /><Setter Property="BorderBrush" Value="{DynamicResource OrtiqchaChegara}" /></Style>
-                        </Border.Styles>
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="{Binding YakunIzohi}" TextWrapping="Wrap" VerticalAlignment="Center" FontSize="13" />
-                            <TextBlock Grid.Column="1" Text="{Binding JamiFarqMatni}" FontSize="24" FontWeight="ExtraBold" Margin="12,0,0,0"
-                                       Classes.manfiy="{Binding KamomatBor}" Classes.musbat="{Binding OrtiqchaBor}" />
-                        </Grid>
-                    </Border>
-
-                    <StackPanel>
-                        <TextBlock Text="{l:T IzohIxtiyoriy, Katta=True}" Classes="yorliq" />
-                        <TextBox Text="{Binding Izoh}" PlaceholderText="{l:T IzohMisol}" />
-                    </StackPanel>
-
-                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-                        <Button Classes="ghost" Content="{l:T BekorQilish}" Command="{Binding YopishniBekorQilCommand}" />
-                        <Button Classes="primary" Command="{Binding SmenaniYopCommand}">
-                            <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="check" Olcham="16" /><TextBlock Text="{l:T YopishVaSaqlash}" /></StackPanel>
-                        </Button>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-        </Border>
-
-        <!-- ============ Sotuvni tahrirlash / bekor qilish dialogi ============ -->
-        <Border Classes="parda" DataContext="{Binding SotuvTahrir}" x:DataType="vm:SotuvTahrirViewModel" IsVisible="{Binding Ochiq}">
-            <Border Classes="dialog" Width="600">
-                <StackPanel Spacing="14">
-                    <StackPanel Spacing="3">
-                        <TextBlock Text="{Binding Sarlavha}" Classes="sarlavha" FontSize="22" />
-                        <TextBlock Text="{Binding Izoh}" Classes="izoh" />
-                    </StackPanel>
-                    <Border Classes="tile" Padding="12,10">
-                        <StackPanel Spacing="2">
-                            <TextBlock Text="{l:T Hozirgi, Katta=True}" Classes="yorliq" Margin="0" />
-                            <TextBlock Text="{Binding Eski}" FontWeight="Bold" TextWrapping="Wrap" />
-                        </StackPanel>
-                    </Border>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                        <StackPanel>
-                            <TextBlock Text="{l:T Aparat, Katta=True}" Classes="yorliq" />
-                            <ComboBox ItemsSource="{Binding Aparatlar}" SelectedItem="{Binding Aparat}" HorizontalAlignment="Stretch">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:AparatTanlovi"><TextBlock Text="{Binding Nomi}" /></DataTemplate>
-                                </ComboBox.ItemTemplate>
-                            </ComboBox>
-                        </StackPanel>
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="{l:T SummaSom, Katta=True}" Classes="yorliq" />
-                            <TextBox Text="{Binding Summa}" TextAlignment="Right" FontWeight="Bold" ctl:AvtoFokus.Yoqilgan="True" />
-                            <TextBlock Text="{Binding HisobIzohi}" Classes="izoh" HorizontalAlignment="Right" Margin="0,4,0,0" />
-                        </StackPanel>
-                    </Grid>
-                    <StackPanel>
-                        <TextBlock Text="{l:T TolovTuri, Katta=True}" Classes="yorliq" />
-                        <UniformGrid Columns="4" ColumnSpacing="8">
-                            <Button Classes="chip" Classes.tanlangan="{Binding TolovNaqd}" Content="{l:T Naqd}" Command="{Binding TolovniTanlaCommand}" CommandParameter="0" HorizontalAlignment="Stretch" />
-                            <Button Classes="chip" Classes.tanlangan="{Binding TolovPlastik}" Content="{l:T Plastik}" Command="{Binding TolovniTanlaCommand}" CommandParameter="1" HorizontalAlignment="Stretch" />
-                            <Button Classes="chip" Classes.tanlangan="{Binding TolovClick}" Content="{l:T Click}" Command="{Binding TolovniTanlaCommand}" CommandParameter="2" HorizontalAlignment="Stretch" />
-                            <Button Classes="chip" Classes.tanlangan="{Binding TolovAralash}" Content="{l:T Aralash}" Command="{Binding TolovniTanlaCommand}" CommandParameter="3" HorizontalAlignment="Stretch" />
-                        </UniformGrid>
-                    </StackPanel>
-                    <Border Classes="tile" IsVisible="{Binding TolovAralash}">
-                        <Grid ColumnDefinitions="*,*,*,Auto" ColumnSpacing="10">
-                            <StackPanel><TextBlock Text="{l:T Naqd, Katta=True}" Classes="yorliq" /><TextBox Text="{Binding AralashNaqd}" TextAlignment="Right" PlaceholderText="0" /></StackPanel>
-                            <StackPanel Grid.Column="1"><TextBlock Text="{l:T Plastik, Katta=True}" Classes="yorliq" /><TextBox Text="{Binding AralashPlastik}" TextAlignment="Right" PlaceholderText="0" /></StackPanel>
-                            <StackPanel Grid.Column="2"><TextBlock Text="{l:T Click, Katta=True}" Classes="yorliq" /><TextBox Text="{Binding AralashClick}" TextAlignment="Right" PlaceholderText="0" /></StackPanel>
-                            <StackPanel Grid.Column="3" VerticalAlignment="Bottom"><TextBlock Text="{l:T Qoldiq, Katta=True}" Classes="yorliq" /><TextBlock Text="{Binding AralashQoldiq}" FontWeight="ExtraBold" Height="42" VerticalAlignment="Center" /></StackPanel>
-                        </Grid>
-                    </Border>
-                    <StackPanel>
-                        <TextBlock Text="{l:T Sabab, Katta=True}" Classes="yorliq" />
-                        <TextBox Text="{Binding Sabab}" PlaceholderText="{l:T SababMisol}" />
-                    </StackPanel>
-                    <TextBlock Text="{Binding Xato}" Foreground="{DynamicResource Qizil}" FontSize="12" TextWrapping="Wrap" IsVisible="{Binding Xato, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
-                        <Button Classes="danger" Content="{l:T SotuvniBekorQilish}" IsVisible="{Binding BekorQilishMumkin}" Command="{Binding BekorQilCommand}" />
-                        <Button Grid.Column="2" Classes="ghost" Content="{l:T Yopish}" Command="{Binding YopCommand}" />
-                        <Button Grid.Column="3" Classes="primary" Command="{Binding SaqlaCommand}">
-                            <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="check" Olcham="16" /><TextBlock Text="{l:T Saqlash}" /></StackPanel>
-                        </Button>
-                    </Grid>
-                </StackPanel>
-            </Border>
-        </Border>
+        <!-- ============ Smena hisobi dialoglari va tasdiq ============ -->
+        <v:DialoglarView IsVisible="{Binding Kirilgan}" />
 
         <!-- ============ Kirish ============ -->
         <v:LoginView DataContext="{Binding Login}" IsVisible="{Binding !$parent[Window].((vm:MainViewModel)DataContext).Kirilgan}" />

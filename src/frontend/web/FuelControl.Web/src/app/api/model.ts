@@ -1,0 +1,64 @@
+// Shartnoma turlari — avtomatik generatsiya qilingan sxemadan (schema.d.ts, `npm run api`) qulay nomlar. Qo'lda yozilmaydi: sxema o'zgarsa shu yerda ham o'zgaradi.
+import type { components } from './schema';
+
+type S = components['schemas'];
+
+export type AparatDto = S['AparatDto'];
+export type AparatKorsatkichDto = S['AparatKorsatkichDto'];
+export type AparatTahrirlashDto = S['AparatTahrirlashDto'];
+export type AparatYaratishDto = S['AparatYaratishDto'];
+export type AuditEksportDto = S['AuditEksportDto'];
+export type BakKirimDto = S['BakKirimDto'];
+export type BakKirimYaratishDto = S['BakKirimYaratishDto'];
+export type BoshqaruvDto = S['BoshqaruvDto'];
+export type FoydalanuvchiDto = S['FoydalanuvchiDto'];
+export type FoydalanuvchiTahrirlashDto = S['FoydalanuvchiTahrirlashDto'];
+export type FoydalanuvchiYaratishDto = S['FoydalanuvchiYaratishDto'];
+export type HarakatTuri = S['HarakatTuri'];
+export type HarakatYaratishDto = S['HarakatYaratishDto'];
+export type HisobHarakatiDto = S['HisobHarakatiDto'];
+export type HisobotAparatDto = S['HisobotAparatDto'];
+export type HisobotDto = S['HisobotDto'];
+export type HisobotQatoriDto = S['HisobotQatoriDto'];
+export type KorsatkichTuzatishDto = S['KorsatkichTuzatishDto'];
+export type LoginJavobiDto = S['LoginJavobiDto'];
+export type LoginSoroviDto = S['LoginSoroviDto'];
+export type NarxTarixiDto = S['NarxTarixiDto'];
+export type NasiyaDto = S['NasiyaDto'];
+export type NasiyaHolati = S['NasiyaHolati'];
+export type NasiyalarDto = S['NasiyalarDto'];
+export type NasiyalarXulosaDto = S['NasiyalarXulosaDto'];
+export type NasiyaQaytishiDto = S['NasiyaQaytishiDto'];
+export type NasiyaQaytishiYaratishDto = S['NasiyaQaytishiYaratishDto'];
+export type NasiyaTafsilotDto = S['NasiyaTafsilotDto'];
+export type NasiyaYaratishDto = S['NasiyaYaratishDto'];
+export type MijozTaklifDto = S['MijozTaklifDto'];
+export type OperatorHisobDto = S['OperatorHisobDto'];
+export type PinOrnatishDto = S['PinOrnatishDto'];
+export type ProblemDetails = S['ProblemDetails'];
+export type Rol = S['Rol'];
+export type Ruxsat = S['Ruxsat'];
+export type RuxsatlarOrnatishDto = S['RuxsatlarOrnatishDto'];
+export type SmenaDto = S['SmenaDto'];
+export type SmenaKorsatkichDto = S['SmenaKorsatkichDto'];
+export type SmenaOchishDto = S['SmenaOchishDto'];
+export type SmenaQisqaDto = S['SmenaQisqaDto'];
+export type SmenaTafsilotDto = S['SmenaTafsilotDto'];
+export type SmenaYopishDto = S['SmenaYopishDto'];
+export type TolovTaqsimotiDto = S['TolovTaqsimotiDto'];
+export type TolovTuri = S['TolovTuri'];
+export type XarajatDto = S['XarajatDto'];
+export type XarajatManbai = S['XarajatManbai'];
+export type XarajatYaratishDto = S['XarajatYaratishDto'];
+export type YoqilgiTahrirlashDto = S['YoqilgiTahrirlashDto'];
+export type YoqilgiTuriDto = S['YoqilgiTuriDto'];
+export type YoqilgiYaratishDto = S['YoqilgiYaratishDto'];
+export type ZaxiraJavobiDto = S['ZaxiraJavobiDto'];
+
+/** Audit turi (filtr): API'da oddiy satr. */
+export type AuditTuri = 'smena' | 'nasiya' | 'xarajat' | 'bak' | 'tuzatish' | 'hisob' | 'sozlama' | 'kirish';
+export type AuditYozuviDto = Omit<S['AuditYozuviDto'], 'tur'> & { tur: AuditTuri | string };
+/** GET /hisobot?guruh= — standart: smena. */
+export type HisobotGuruhi = 'Smena' | 'Kun' | 'Oy' | 'Operator';
+export type LoginJavobi = LoginJavobiDto;
+export type ZaxiraJavobi = ZaxiraJavobiDto;

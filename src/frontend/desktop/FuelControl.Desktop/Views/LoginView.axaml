@@ -19,7 +19,8 @@
             <WrapPanel ItemSpacing="8" LineSpacing="8">
                 <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="cash" Olcham="14" /><TextBlock Text="{l:T Naqd}" /></StackPanel></Border>
                 <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="card" Olcham="14" /><TextBlock Text="{l:T Plastik}" /></StackPanel></Border>
-                <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="phone" Olcham="14" /><TextBlock Text="{l:T Click}" /></StackPanel></Border>
+                <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="wallet" Olcham="14" /><TextBlock Text="{l:T Tolov_Depozit}" /></StackPanel></Border>
+                <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="book" Olcham="14" /><TextBlock Text="{l:T Nasiyalar}" /></StackPanel></Border>
                 <Border Classes="badge kok"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="clock" Olcham="14" Rang="#1B4FE0" /><TextBlock Text="{l:T SmenaKamomati}" /></StackPanel></Border>
                 <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="users" Olcham="14" /><TextBlock Text="{l:T OperatorHisobi}" /></StackPanel></Border>
                 <Border Classes="badge"><StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="file" Olcham="14" /><TextBlock Text="{l:T ExcelPdf}" /></StackPanel></Border>

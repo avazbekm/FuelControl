@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../core/auth';
+import { BUILD_BELGISI } from '../../core/versiya';
 import { Til, TilKodi } from '../../core/til';
 import { Tema } from '../../core/tema';
 import { ApiXato, AloqaXato } from '../../api/api';
@@ -16,6 +17,7 @@ import { OrnatishTaklif } from '../../ui/ornatish-taklif';
 })
 export class KirishSahifa {
   protected readonly auth = inject(Auth);
+  protected readonly versiya = BUILD_BELGISI;
   protected readonly til = inject(Til);
   protected readonly tema = inject(Tema);
   private readonly router = inject(Router);

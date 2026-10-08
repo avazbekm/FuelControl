@@ -3,12 +3,10 @@ import type { HubConnection } from '@microsoft/signalr';
 import { Subject } from 'rxjs';
 import { Auth } from './auth';
 import { Sozlama } from './sozlama';
-import type { Sotuv, Smena } from '../api/turlar';
 
-export type HubHodisa =
-  | { turi: 'SotuvQoshildi' | 'SotuvOzgardi'; sotuv: Sotuv }
-  | { turi: 'SmenaOzgardi'; smena: Smena }
-  | { turi: 'NarxOzgardi'; malumot: unknown };
+/** SignalR hodisasi — faqat "qayta yuklash" signali (yuk e'tiborsiz: smena uchun GET /smenalar/joriy). */
+export type HodisaTuri = 'SmenaOzgardi' | 'NasiyaOzgardi' | 'XarajatOzgardi' | 'AparatOzgardi' | 'NarxOzgardi';
+export interface HubHodisa { turi: HodisaTuri }
 
 /**
  * Tarmoq holati va SignalR (/hub). Kirgan foydalanuvchi uchun ulanadi, uzilsa cheksiz qayta urinadi.
@@ -51,10 +49,9 @@ export class Aloqa {
         .withAutomaticReconnect({ nextRetryDelayInMilliseconds: (c) => Math.min(30000, 1000 * 2 ** Math.min(c.previousRetryCount, 5)) })
         .configureLogging(LogLevel.Warning)
         .build();
-      hub.on('SotuvQoshildi', (s: Sotuv) => this.hodisa$.next({ turi: 'SotuvQoshildi', sotuv: s }));
-      hub.on('SotuvOzgardi', (s: Sotuv) => this.hodisa$.next({ turi: 'SotuvOzgardi', sotuv: s }));
-      hub.on('SmenaOzgardi', (s: Smena) => this.hodisa$.next({ turi: 'SmenaOzgardi', smena: s }));
-      hub.on('NarxOzgardi', (m: unknown) => this.hodisa$.next({ turi: 'NarxOzgardi', malumot: m }));
+      for (const turi of ['SmenaOzgardi', 'NasiyaOzgardi', 'XarajatOzgardi', 'AparatOzgardi', 'NarxOzgardi'] as const) {
+        hub.on(turi, () => this.hodisa$.next({ turi }));
+      }
       // Server foydalanuvchi ruxsati/roli o'zgarganda ulanishni uzadi: /me ni yangilab darhol qayta ulanamiz.
       hub.on('QaytaUlan', async () => {
         this.qaytaUlanKutilmoqda = true;

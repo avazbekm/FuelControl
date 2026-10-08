@@ -3,23 +3,24 @@ import { FormsModule } from '@angular/forms';
 import { Auth } from '../../core/auth';
 import { Til } from '../../core/til';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
-import { pul } from '../../core/format';
-import type { Foydalanuvchi, Rol } from '../../api/turlar';
+import { harflar, pul } from '../../core/format';
+import type { FoydalanuvchiDto, Rol } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { Oyna } from '../../ui/oyna';
-import { SozlamalarXizmati, butunSon } from './sozlamalar-xizmati';
+import { SonKiritish } from '../../ui/son-kiritish';
+import { SozlamalarXizmati } from './sozlamalar-xizmati';
 
 const ROLLAR: Rol[] = ['Operator', 'Boshliq', 'Admin'];
 
 /** "Foydalanuvchilar": jadval (telefonda kartalar), foydalanuvchi dialogi va PIN/parol tiklash dialogi. */
 @Component({
   selector: 'sozlamalar-foydalanuvchilar',
-  imports: [FormsModule, Ikon, Oyna],
+  imports: [FormsModule, Ikon, Oyna, SonKiritish],
   template: `
     <section class="shisha karta">
-      <div class="qator ora orala sarlavha-qator">
-        <h2 style="margin:0">{{ til.t('Foydalanuvchilar') }}</h2>
-        <button type="button" class="tugma asosiy" (click)="qosh()"><ikon nomi="plus" [olcham]="16" /> {{ til.t('FoydalanuvchiQoshish') }}</button>
+      <div class="karta-bosh sarlavha-qator">
+        <h2>{{ til.t('Foydalanuvchilar') }}</h2>
+        <button type="button" class="tugma asosiy" (click)="qosh()"><ikon nomi="plus" [olcham]="16" [qalinlik]="2.4" /> {{ til.t('FoydalanuvchiQoshish') }}</button>
       </div>
 
       <!-- Keng ekran: jadval -->
@@ -31,11 +32,11 @@ const ROLLAR: Rol[] = ['Operator', 'Boshliq', 'Admin'];
           <tbody>
             @for (f of x.foydalanuvchilar(); track f.id) {
               <tr>
-                <td><b>{{ f.toliqIsm }}</b></td>
+                <td><span class="qator ism-qator"><span class="avatar kichik">{{ harflar(f.toliqIsm) }}</span><b>{{ f.toliqIsm }}</b></span></td>
                 <td class="ikkilamchi">{{ f.login }}</td>
-                <td><span class="badge kok">{{ til.t('Rol_' + f.rol) }}</span></td>
+                <td><span class="pill kok">{{ til.t('Rol_' + f.rol) }}</span></td>
                 <td class="o">{{ pul(f.oylikMaosh) }}</td>
-                <td>@if (f.faol) { <span class="badge yashil">{{ til.t('Faol') }}</span> } @else { <span class="badge kul">{{ til.t('Nofaol') }}</span> }</td>
+                <td>@if (f.faol) { <span class="pill yashil">{{ til.t('Faol') }}</span> } @else { <span class="pill kul">{{ til.t('Nofaol') }}</span> }</td>
                 <td class="amallar-yacheyka">
                   <button type="button" class="tugma kichik" (click)="tahrirla(f)">{{ til.t('Tahrirlash') }}</button>
                   <button type="button" class="tugma kichik" (click)="tiklashOch(f)">{{ til.t('PinParolTiklash') }}</button>
@@ -47,18 +48,22 @@ const ROLLAR: Rol[] = ['Operator', 'Boshliq', 'Admin'];
       </div>
 
       <!-- Telefon: kartalar -->
-      <div class="faqat-tor royxat">
+      <div class="faqat-tor">
+       <div class="kartalar">
         @for (f of x.foydalanuvchilar(); track f.id) {
-          <div class="element karta-element">
+          <div class="plitka f-karta">
             <div class="qator ora">
-              <div class="matnlar">
-                <span class="asosiy-matn">{{ f.toliqIsm }}</span>
-                <span class="ikkinchi">{{ f.login }} · {{ pul(f.oylikMaosh) }} {{ til.t('Som') }}</span>
-              </div>
-              <div class="belgilar">
-                <span class="badge kok">{{ til.t('Rol_' + f.rol) }}</span>
-                @if (f.faol) { <span class="badge yashil">{{ til.t('Faol') }}</span> } @else { <span class="badge kul">{{ til.t('Nofaol') }}</span> }
-              </div>
+              <span class="qator">
+                <span class="avatar">{{ harflar(f.toliqIsm) }}</span>
+                <span class="matnlar">
+                  <span class="ism">{{ f.toliqIsm }}</span>
+                  <span class="ikkilamchi kichik-matn">{{ f.login }} · {{ pul(f.oylikMaosh) }} {{ til.t('Som') }}</span>
+                </span>
+              </span>
+              <span class="belgilar">
+                <span class="pill kok">{{ til.t('Rol_' + f.rol) }}</span>
+                @if (f.faol) { <span class="pill yashil">{{ til.t('Faol') }}</span> } @else { <span class="pill kul">{{ til.t('Nofaol') }}</span> }
+              </span>
             </div>
             <div class="qator tugmalar">
               <button type="button" class="tugma kichik bosh-joy" (click)="tahrirla(f)">{{ til.t('Tahrirlash') }}</button>
@@ -66,23 +71,24 @@ const ROLLAR: Rol[] = ['Operator', 'Boshliq', 'Admin'];
             </div>
           </div>
         } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
+       </div>
       </div>
     </section>
 
     <!-- Foydalanuvchi dialogi -->
-    <oyna [(ochiq)]="dialog" [sarlavha]="tahrirF() ? til.t('FoydalanuvchiniTahrirlash') : til.t('YangiFoydalanuvchi')" [kenglik]="520">
-      <form class="forma-ustun" (ngSubmit)="saqla()" autocomplete="off">
+    <oyna [(ochiq)]="dialog" [sarlavha]="tahrirF() ? til.t('FoydalanuvchiniTahrirlash') : til.t('YangiFoydalanuvchi')" [kenglik]="520" ikon="user">
+      <form class="forma-ustun" (ngSubmit)="saqla()" autocomplete="off" novalidate>
         <div class="maydon">
-          <label class="katta-yorliq" for="f-ism">{{ til.t('ToliqIsm') }}</label>
+          <label for="f-ism">{{ til.t('ToliqIsm') }}</label>
           <input id="f-ism" class="kiritish" name="ism" [(ngModel)]="ism" autocomplete="off" data-avto />
         </div>
         <div class="ikki-ustun">
           <div class="maydon">
-            <label class="katta-yorliq" for="f-login">{{ til.t('Login') }}</label>
+            <label for="f-login">{{ til.t('Login') }}</label>
             <input id="f-login" class="kiritish" name="login" [(ngModel)]="login" autocomplete="off" autocapitalize="none" spellcheck="false" />
           </div>
           <div class="maydon">
-            <label class="katta-yorliq" for="f-rol">{{ til.t('Rol') }}</label>
+            <label for="f-rol">{{ til.t('Rol') }}</label>
             <select id="f-rol" class="kiritish" name="rol" [(ngModel)]="rol">
               @for (r of rollar; track r) { <option [value]="r">{{ til.t('Rol_' + r) }}</option> }
             </select>
@@ -90,11 +96,11 @@ const ROLLAR: Rol[] = ['Operator', 'Boshliq', 'Admin'];
         </div>
         <div class="ikki-ustun">
           <div class="maydon">
-            <label class="katta-yorliq" for="f-maosh">{{ til.t('OylikMaosh') }}</label>
-            <input id="f-maosh" class="kiritish son" name="maosh" inputmode="numeric" style="text-align:right" [(ngModel)]="maosh" placeholder="0" autocomplete="off" />
+            <label for="f-maosh">{{ til.t('OylikMaosh') }}</label>
+            <son-kiritish [(qiymat)]="maosh" sinf="kiritish pul" inputId="f-maosh" />
           </div>
           <div class="maydon">
-            <label class="katta-yorliq" for="f-pin">{{ til.t('PinYokiParol') }}</label>
+            <label for="f-pin">{{ til.t('PinYokiParol') }}</label>
             <input id="f-pin" class="kiritish" name="pin" type="password" [(ngModel)]="pin" autocomplete="new-password" />
           </div>
         </div>
@@ -103,35 +109,40 @@ const ROLLAR: Rol[] = ['Operator', 'Boshliq', 'Admin'];
         <div class="amallar">
           <button type="button" class="tugma" (click)="dialog.set(false)">{{ til.t('BekorQilish') }}</button>
           <button type="submit" class="tugma asosiy" [disabled]="band()">
-            @if (band()) { <span class="aylanma"></span> } {{ til.t('Saqlash') }}
+            @if (band()) { <span class="aylanma"></span> } @else { <ikon nomi="check" [olcham]="16" [qalinlik]="2.4" /> } {{ til.t('Saqlash') }}
           </button>
         </div>
       </form>
     </oyna>
 
     <!-- PIN/parol tiklash dialogi -->
-    <oyna [(ochiq)]="tiklash" [sarlavha]="til.t('PinParolTiklash')" [kenglik]="420">
-      <form class="forma-ustun" (ngSubmit)="tiklashSaqla()" autocomplete="off">
-        <div class="ikkilamchi">{{ tiklashF()?.toliqIsm }}</div>
+    <oyna [(ochiq)]="tiklash" [sarlavha]="til.t('PinParolTiklash')" [tagsarlavha]="tiklashF()?.toliqIsm ?? ''" [kenglik]="460" ikon="lock">
+      <form class="forma-ustun" (ngSubmit)="tiklashSaqla()" autocomplete="off" novalidate>
         <div class="maydon">
-          <label class="katta-yorliq" for="t-pin">{{ til.t('YangiPinParol') }}</label>
+          <label for="t-pin">{{ til.t('YangiPinParol') }}</label>
           <input id="t-pin" class="kiritish katta" name="yangipin" style="text-align:center" [(ngModel)]="yangiPin" autocomplete="off" data-avto />
         </div>
         @if (tiklashXato()) { <div class="xato-matn" role="alert">{{ tiklashXato() }}</div> }
         <div class="amallar">
           <button type="button" class="tugma" (click)="tiklash.set(false)">{{ til.t('BekorQilish') }}</button>
           <button type="submit" class="tugma asosiy" [disabled]="band()">
-            @if (band()) { <span class="aylanma"></span> } {{ til.t('Tiklash') }}
+            @if (band()) { <span class="aylanma"></span> } @else { <ikon nomi="check" [olcham]="16" [qalinlik]="2.4" /> } {{ til.t('Tiklash') }}
           </button>
         </div>
       </form>
     </oyna>
   `,
   styles: `
-    .sarlavha-qator { margin-bottom: 10px; }
+    .sarlavha-qator { align-items: center; }
+    .sarlavha-qator h2 { font-size: 16px; }
+    .ism-qator { gap: 10px; }
+    .avatar.kichik { width: 34px; height: 34px; font-size: 12px; }
     .amallar-yacheyka { white-space: nowrap; text-align: right; }
     .amallar-yacheyka .tugma + .tugma { margin-left: 6px; }
-    .karta-element { flex-direction: column; align-items: stretch; gap: 10px; }
+    .kartalar { display: flex; flex-direction: column; gap: 10px; }
+    .f-karta { display: flex; flex-direction: column; gap: 10px; }
+    .matnlar { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .ism { font-weight: 700; }
     .belgilar { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex: none; }
     .tugmalar { gap: 8px; }
   `,
@@ -143,35 +154,36 @@ export class FoydalanuvchilarBolimi {
   private readonly bildirish = inject(Bildirish);
 
   protected readonly pul = pul;
+  protected readonly harflar = harflar;
   protected readonly rollar = ROLLAR;
   protected readonly band = signal(false);
 
   protected readonly dialog = signal(false);
-  protected readonly tahrirF = signal<Foydalanuvchi | null>(null);
+  protected readonly tahrirF = signal<FoydalanuvchiDto | null>(null);
   protected readonly xato = signal<string | null>(null);
   protected ism = '';
   protected login = '';
   protected rol: Rol = 'Operator';
-  protected maosh = '';
+  protected readonly maosh = signal<number | null>(null);
   protected pin = '';
   protected faol = true;
 
   protected readonly tiklash = signal(false);
-  protected readonly tiklashF = signal<Foydalanuvchi | null>(null);
+  protected readonly tiklashF = signal<FoydalanuvchiDto | null>(null);
   protected readonly tiklashXato = signal<string | null>(null);
   protected yangiPin = '';
 
   protected qosh() {
     this.tahrirF.set(null);
-    this.ism = ''; this.login = ''; this.rol = 'Operator'; this.maosh = ''; this.pin = ''; this.faol = true;
+    this.ism = ''; this.login = ''; this.rol = 'Operator'; this.maosh.set(null); this.pin = ''; this.faol = true;
     this.xato.set(null);
     this.dialog.set(true);
   }
 
-  protected tahrirla(f: Foydalanuvchi) {
+  protected tahrirla(f: FoydalanuvchiDto) {
     this.tahrirF.set(f);
     this.ism = f.toliqIsm; this.login = f.login; this.rol = f.rol;
-    this.maosh = f.oylikMaosh > 0 ? pul(f.oylikMaosh) : ''; this.pin = ''; this.faol = f.faol;
+    this.maosh.set(f.oylikMaosh > 0 ? f.oylikMaosh : null); this.pin = ''; this.faol = f.faol;
     this.xato.set(null);
     this.dialog.set(true);
   }
@@ -182,7 +194,7 @@ export class FoydalanuvchilarBolimi {
     const t = this.tahrirF();
     if (!ism || !login || (!t && !this.pin.trim())) return this.xato.set(this.til.t('Xato_Maydon'));
     if (this.x.foydalanuvchilar().some((f) => f.login.toLowerCase() === login && f.id !== t?.id)) return this.xato.set(this.til.t('Xato_LoginBand'));
-    const maosh = butunSon(this.maosh);
+    const maosh = Math.round(this.maosh() ?? 0);
     this.band.set(true);
     try {
       if (t) {
@@ -202,7 +214,7 @@ export class FoydalanuvchilarBolimi {
     }
   }
 
-  protected tiklashOch(f: Foydalanuvchi) {
+  protected tiklashOch(f: FoydalanuvchiDto) {
     this.tiklashF.set(f);
     this.yangiPin = '';
     this.tiklashXato.set(null);

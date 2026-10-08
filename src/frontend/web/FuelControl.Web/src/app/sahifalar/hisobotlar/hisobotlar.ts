@@ -1,171 +1,177 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { api, ol } from '../../api/api';
+import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { Auth } from '../../core/auth';
 import { Til } from '../../core/til';
+import { Server } from '../../core/server';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
-import { Malumot, OperatorElement } from '../../core/malumot';
-import { pul, litr, isoKun, kunQosh, oyBoshi, oyOxiri, oyQosh } from '../../core/format';
-import type { Hisobot, HisobotGuruhi, HisobotQatori } from '../../api/turlar';
+import { Malumot, OperatorElement, jonliYangila } from '../../core/malumot';
+import { isoKun, ishoraPul, kunOy, kunQosh, kunToliq, litr, litrQisqa, oyBoshi, oyOxiri, oyQosh, pul } from '../../core/format';
+import type { HisobotAparatDto, HisobotDto, HisobotGuruhi, HisobotQatoriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
-import { bolimlarga } from './hisobot-model';
+import { YoqilgiPill } from '../../ui/belgilar';
+import { hisobotExcel } from './hisobot-excel';
 
-/** `faqatJami` — kamomat/avans/bekor faqat guruh jami qatorida keladi; yoqilg'i qatorida bo'sh. */
-type Ustun = { kalit: string; maydon: keyof HisobotQatori; tur: 'pul' | 'litr' | 'son'; faqatJami?: boolean };
+type TezDavr = 'kecha' | '7kun' | 'shuoy' | 'otganoy';
 
-const USTUNLAR: Ustun[] = [
-  { kalit: 'Litr', maydon: 'litr', tur: 'litr' }, { kalit: 'Naqd', maydon: 'naqd', tur: 'pul' },
-  { kalit: 'Plastik', maydon: 'plastik', tur: 'pul' }, { kalit: 'Click', maydon: 'click', tur: 'pul' },
-  { kalit: 'Summa', maydon: 'summa', tur: 'pul' }, { kalit: 'SotuvSoni', maydon: 'soni', tur: 'son' },
-  { kalit: 'Kamomat', maydon: 'kamomat', tur: 'pul', faqatJami: true }, { kalit: 'Avans', maydon: 'avans', tur: 'pul', faqatJami: true },
-  { kalit: 'BekorSoni', maydon: 'bekorSoni', tur: 'son', faqatJami: true },
-];
+interface Kpi { kalit: string; qiymat: string; izoh: string; rang?: string; qizil?: boolean }
 
-type TezDavr = 'bugun' | 'kecha' | 'kun7' | 'oy' | 'otganOy';
+const HODISALAR = ['SmenaOzgardi', 'NasiyaOzgardi', 'XarajatOzgardi', 'AparatOzgardi'];
 
+/**
+ * Hisobotlar (docs/dizayn/Hisobotlar): davr/operator/guruh filtri, KPI plitkalari, guruh jadvali (smena | kun | oy | operator)
+ * va "Aparatlar va baklar" jadvali (operator filtriga bog'liq emas — butun shoxobcha bo'yicha). Excel — ikki varaq.
+ */
 @Component({
   selector: 'hisobotlar-sahifa',
-  imports: [FormsModule, Ikon],
+  imports: [Ikon, YoqilgiPill],
   templateUrl: './hisobotlar.html',
   styleUrl: './hisobotlar.scss',
 })
 export class HisobotlarSahifa {
   protected readonly til = inject(Til);
   protected readonly auth = inject(Auth);
+  private readonly server = inject(Server);
   private readonly malumot = inject(Malumot);
   private readonly bildirish = inject(Bildirish);
 
+  /** `?tez=kecha|7kun|shuoy|otganoy` — Boshqaruvdagi "Oylik hisobot" tugmasi shu bilan keladi. */
+  readonly tezParam = input<string | undefined>(undefined, { alias: 'tez' });
+
   protected readonly tezlar: { kod: TezDavr; kalit: string }[] = [
-    { kod: 'bugun', kalit: 'Bugun' }, { kod: 'kecha', kalit: 'Kecha' }, { kod: 'kun7', kalit: 'Oxirgi7Kun' },
-    { kod: 'oy', kalit: 'ShuOy' }, { kod: 'otganOy', kalit: 'OtganOy' },
+    { kod: 'kecha', kalit: 'Hisobot_TezKecha' }, { kod: '7kun', kalit: 'Hisobot_Tez7Kun' },
+    { kod: 'shuoy', kalit: 'Hisobot_TezShuOy' }, { kod: 'otganoy', kalit: 'Hisobot_TezOtganOy' },
   ];
   protected readonly guruhlar: { kod: HisobotGuruhi; kalit: string }[] = [
-    { kod: 'Operator', kalit: 'OperatorBoyicha' }, { kod: 'Kun', kalit: 'Kunlik' }, { kod: 'Oy', kalit: 'Oylik' },
+    { kod: 'Smena', kalit: 'Hisobot_GuruhSmena' }, { kod: 'Kun', kalit: 'Hisobot_GuruhKun' },
+    { kod: 'Oy', kalit: 'Hisobot_GuruhOy' }, { kod: 'Operator', kalit: 'Hisobot_GuruhOperator' },
   ];
+
   protected readonly dan = signal(oyBoshi(isoKun()));
   protected readonly gacha = signal(isoKun());
-  protected readonly tez = signal<TezDavr | null>('oy');
-  protected readonly guruh = signal<HisobotGuruhi>('Operator');
+  protected readonly tez = signal<TezDavr | null>('shuoy');
+  protected readonly guruh = signal<HisobotGuruhi>('Smena');
   protected readonly operatorId = signal<number | null>(null);
   protected readonly operatorlar = signal<OperatorElement[]>([]);
-  protected readonly natija = signal<Hisobot | null>(null);
-  protected readonly yuklanmoqda = signal(false);
+  protected readonly natija = signal<HisobotDto | null>(null);
+  protected readonly ranglar = signal<Record<string, string>>({});
+  protected readonly yuklandi = signal(false);
   protected readonly xato = signal<string | null>(null);
-  protected readonly pul = pul;
-  protected readonly litr = litr;
-
-  protected readonly bolimlar = computed(() => { const n = this.natija(); return n ? bolimlarga(n) : []; });
-  protected readonly ustunlar = USTUNLAR;
-  protected readonly yoqilgiBor = computed(() => this.bolimlar().some((b) => b.yoqilgilar.length > 0));
   protected readonly eksportBand = signal(false);
 
-  protected readonly kpilar = computed(() => {
+  protected readonly pul = pul;
+  protected readonly litr = litr;
+  protected readonly litrQisqa = litrQisqa;
+  protected readonly ishoraPul = ishoraPul;
+  protected readonly kunToliq = kunToliq;
+
+  protected readonly davrIzoh = computed(() =>
+    this.til.t('Hisobot_Davr', kunToliq(this.dan()), kunToliq(this.gacha()), this.natija()?.jami.smenaSoni ?? 0));
+
+  protected readonly kpilar = computed<Kpi[]>(() => {
     const j = this.natija()?.jami;
     if (!j) return [];
-    return [
-      { kalit: 'JamiSavdo', qiymat: pul(j.summa), birlik: 'Som', asosiy: true },
-      { kalit: 'Litr', qiymat: litr(j.litr), birlik: 'L' },
-      { kalit: 'Naqd', qiymat: pul(j.naqd), birlik: 'Som', rang: 'naqd' },
-      { kalit: 'Plastik', qiymat: pul(j.plastik), birlik: 'Som', rang: 'plastik' },
-      { kalit: 'Click', qiymat: pul(j.click), birlik: 'Som', rang: 'click' },
-      { kalit: 'Kamomat', qiymat: pul(j.kamomat), birlik: 'Som', qizil: j.kamomat > 0 },
-      { kalit: 'Avans', qiymat: pul(j.avans), birlik: 'Som' },
-      { kalit: 'BekorSoni', qiymat: String(j.bekorSoni), birlik: '' },
+    const T = (k: string, ...a: unknown[]) => this.til.t(k, ...a);
+    const foiz = (v: number) => (j.savdo > 0 ? `${Math.round((v / j.savdo) * 100)}%` : '0%');
+    const r: Kpi[] = [
+      { kalit: 'Hisobot_KpiJamiSavdo', qiymat: pul(j.savdo), izoh: T('Hisobot_KpiSomSmena', j.smenaSoni) },
+      { kalit: 'Hisobot_KpiLitr', qiymat: litr(j.litr), izoh: T('Hisobot_KpiBarchaAparatlar') },
+      { kalit: 'Hisobot_KpiNaqd', qiymat: pul(j.naqdSavdo), izoh: foiz(j.naqdSavdo), rang: 'var(--q-naqd)' },
+      { kalit: 'Hisobot_KpiPlastik', qiymat: pul(j.plastik), izoh: foiz(j.plastik), rang: 'var(--q-plastik)' },
+      { kalit: 'Hisobot_KpiDepozit', qiymat: pul(j.depozit), izoh: foiz(j.depozit), rang: 'var(--q-depozit)' },
+      { kalit: 'Hisobot_KpiNasiya', qiymat: pul(j.nasiya), izoh: T('Hisobot_KpiQaytgan', pul(j.qaytganNasiya)), rang: 'var(--q-nasiya)' },
+      { kalit: 'Hisobot_KpiXarajat', qiymat: pul(j.xarajat), izoh: T('Hisobot_KpiXarajatYozuv', j.xarajatSoni) },
+      { kalit: 'Hisobot_KpiKamomat', qiymat: pul(j.kamomat), izoh: T('Hisobot_KpiOrtiqcha', pul(j.ortiqcha)), qizil: j.kamomat > 0 },
     ];
+    const avans = this.natija()?.avans ?? 0;
+    if (avans > 0) r.push({ kalit: 'Hisobot_KpiAvans', qiymat: pul(avans), izoh: T('Hisobot_KpiAvansIzoh') });
+    return r;
+  });
+
+  /** Bak jadvalining Jami qatori (2 xona aniqlikda yig'iladi). */
+  protected readonly bakJami = computed(() => {
+    const a = this.natija()?.aparatlar ?? [];
+    const y = (f: (x: HisobotAparatDto) => number) => Math.round(a.reduce((s, x) => s + f(x), 0) * 100) / 100;
+    return { boshida: y((x) => x.bakBoshida), kirim: y((x) => x.kirim), sotildi: y((x) => x.sotildi), oxirida: y((x) => x.bakOxirida), savdo: a.reduce((s, x) => s + x.savdo, 0) };
   });
 
   constructor() {
-    this.yukla();
-    this.malumot.operatorlar().then((o) => this.operatorlar.set(o)).catch(() => {});
+    this.malumot.operatorlar().then((o) => this.operatorlar.set(o)).catch(() => undefined);
+    this.server.yoqilgilar().then((r) => this.ranglar.set(Object.fromEntries(r.map((y) => [y.nomi, y.rang])))).catch(() => undefined);
+    // ?tez= bilan ochilsa shu davr
+    effect(() => {
+      const t = this.tezParam();
+      if (t === 'kecha' || t === '7kun' || t === 'shuoy' || t === 'otganoy') untracked(() => this.tezTanla(t));
+    });
+    effect(() => { this.dan(); this.gacha(); this.guruh(); this.operatorId(); untracked(() => this.yukla()); });
+    jonliYangila(() => this.yukla(), (h) => HODISALAR.includes(h.turi));
   }
 
-  tezTanla(t: TezDavr) {
+  protected tezTanla(t: TezDavr) {
     const b = isoKun();
-    const [d, g] = {
-      bugun: [b, b],
+    const [d, g] = ({
       kecha: [kunQosh(b, -1), kunQosh(b, -1)],
-      kun7: [kunQosh(b, -6), b],
-      oy: [oyBoshi(b), b],
-      otganOy: [oyQosh(b, -1), oyOxiri(oyQosh(b, -1))],
-    }[t];
+      '7kun': [kunQosh(b, -6), b],
+      shuoy: [oyBoshi(b), b],
+      otganoy: [oyQosh(b, -1), oyOxiri(oyQosh(b, -1))],
+    } as Record<TezDavr, [string, string]>)[t];
     this.tez.set(t);
     this.dan.set(d);
     this.gacha.set(g);
-    this.yukla();
   }
 
-  sanaOzgardi(qaysi: 'dan' | 'gacha', v: string) {
+  protected sanaOzgardi(qaysi: 'dan' | 'gacha', v: string) {
     if (!v) return;
     (qaysi === 'dan' ? this.dan : this.gacha).set(v);
     this.tez.set(null);
-    this.yukla();
   }
+  protected operatorTanla(v: string) { this.operatorId.set(v ? Number(v) : null); }
 
-  guruhTanla(g: HisobotGuruhi) { this.guruh.set(g); this.yukla(); }
-  operatorTanla(id: number | null) { this.operatorId.set(id); this.yukla(); }
-
-  async yukla() {
-    this.yuklanmoqda.set(true);
+  private async yukla() {
     try {
-      const r = await ol(api.GET('/hisobot', {
-        params: { query: { dan: this.dan(), gacha: this.gacha(), guruh: this.guruh(), operatorId: this.operatorId() ?? undefined } },
-      }));
-      this.natija.set(r);
+      this.natija.set(await this.server.hisobot(this.dan(), this.gacha(), this.operatorId() ?? undefined, this.guruh()));
       this.xato.set(null);
     } catch (e) {
       this.xato.set(xatoMatni(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy')));
     } finally {
-      this.yuklanmoqda.set(false);
+      this.yuklandi.set(true);
     }
   }
 
-  qiymat(q: HisobotQatori, u: Ustun): string {
-    if (u.faqatJami && !q.jami) return '';
-    const v = q[u.maydon] as number;
-    return u.tur === 'litr' ? litr(v) : u.tur === 'pul' ? pul(v) : String(v);
-  }
+  protected async qayta() { await this.yukla(); }
 
-  /** Guruh nomi: server til-mustaqil beradi (kun "yyyy-MM-dd", oy "yyyy-MM", operator — ism); nomni lug'atdan chiqaramiz. */
-  nomi(q: HisobotQatori): string {
-    if (/^\d{4}-\d\d-\d\d$/.test(q.guruh)) return q.guruh.split('-').reverse().join('.');
-    if (/^\d{4}-\d\d$/.test(q.guruh)) return `${this.til.t('OyNomlari').split(',')[+q.guruh.slice(5, 7) - 1]} ${q.guruh.slice(0, 4)}`;
-    return q.guruh;
+  // ---- Ko'rinish yordamchilari
+  /** Guruh nomi: smena — "#39"; kun — "01.10.2026"; oy — "Oktabr 2026"; operator — ism (server til-mustaqil beradi). */
+  protected nomi(q: HisobotQatoriDto): string {
+    switch (this.guruh()) {
+      case 'Smena': return '#' + q.guruh.replace(/^#/, '');
+      case 'Kun': return /^\d{4}-\d\d-\d\d$/.test(q.sana ?? q.guruh) ? kunToliq(q.sana ?? q.guruh) : q.guruh;
+      case 'Oy': return /^\d{4}-\d\d$/.test(q.guruh) ? `${this.til.t('OyNomlari').split(',')[+q.guruh.slice(5, 7) - 1]} ${q.guruh.slice(0, 4)}` : q.guruh;
+      default: return q.guruh;
+    }
   }
+  protected kichikSana(q: HisobotQatoriDto): string { return this.guruh() === 'Smena' && q.sana ? kunOy(q.sana) : ''; }
+  protected ikkinchi(q: HisobotQatoriDto): string {
+    return this.guruh() === 'Smena' ? (q.operatorIsmi ?? '') : this.til.t('Hisobot_SmenaSoni', q.smenaSoni);
+  }
+  protected farq(q: HisobotQatoriDto): number { return q.ortiqcha - q.kamomat; }
+  protected farqMatn(f: number): string { return f === 0 ? '0' : ishoraPul(f); }
+  protected farqSinf(f: number): string { return f === 0 ? 'nol' : f < 0 ? 'manfiy' : 'musbat'; }
+  protected birinchiYorliq(): string {
+    return this.til.t(({ Smena: 'Hisobot_ColSmena', Kun: 'Hisobot_ColKun', Oy: 'Hisobot_ColOy', Operator: 'Operator' } as const)[this.guruh()]);
+  }
+  protected ikkinchiYorliq(): string { return this.til.t(this.guruh() === 'Smena' ? 'Hisobot_ColOperator' : 'Hisobot_ColSmenalar'); }
+  protected rang(nomi: string): string { return this.ranglar()[nomi] ?? '#2563EB'; }
+  protected kirimMatn(v: number): string { return v > 0 ? '+' + litrQisqa(v) : '0'; }
 
-  /** Haqiqiy .xlsx (write-excel-file, faqat eksportda yuklanadi): sarlavha qalin, pul formati "# ##0", litr "0.00". */
-  async eksport() {
+  protected async excel() {
     const n = this.natija();
     if (!n || this.eksportBand()) return;
     this.eksportBand.set(true);
     try {
-      const { default: writeXlsxFile } = await import('write-excel-file/browser');
-      const t = (k: string) => this.til.t(k);
-      const yoqBor = this.yoqilgiBor();
-      const PUL = '#,##0', LITR = '#,##0.00';
-      type Hujayra = { value?: string | number; type?: StringConstructor | NumberConstructor; format?: string; fontWeight?: 'bold'; backgroundColor?: string };
-      const son = (v: number, f = PUL, qalin = false): Hujayra => ({ value: v, type: Number, format: f, ...(qalin ? { fontWeight: 'bold' as const } : {}) });
-      const matn = (v: string, qalin = false): Hujayra => ({ value: v, type: String, ...(qalin ? { fontWeight: 'bold' as const } : {}) });
-      const sarlavha = [
-        t(this.guruh() === 'Operator' ? 'Operator' : this.guruh() === 'Kun' ? 'Sana' : 'Oy'),
-        ...(yoqBor ? [t('Yoqilgi')] : []),
-        ...USTUNLAR.map((u) => t(u.kalit)),
-      ].map((x) => ({ ...matn(x, true), backgroundColor: '#E9F0FF' }));
-      const format = { pul: PUL, litr: LITR, son: '0' };
-      const qator = (q: HisobotQatori, nom: string, yoq: string | null, qalin: boolean): Hujayra[] => [
-        matn(nom, qalin), ...(yoqBor ? [matn(yoq ?? '', qalin)] : []),
-        ...USTUNLAR.map((u) => (u.faqatJami && !q.jami ? {} : son(q[u.maydon] as number, format[u.tur], qalin))),
-      ];
-      const malumot: Hujayra[][] = [sarlavha];
-      for (const b of this.bolimlar()) {
-        for (const y of b.yoqilgilar) malumot.push(qator(y, this.nomi(b.jami), y.yoqilgi ?? '', false));
-        malumot.push(qator(b.jami, this.nomi(b.jami), yoqBor ? t('Jami') : null, yoqBor));
-      }
-      malumot.push(qator(n.jami, t('Jami'), null, true));
-      const kenglik = [22, ...(yoqBor ? [12] : []), ...USTUNLAR.map((u) => (u.tur === 'son' ? 10 : 14))].map((width) => ({ width }));
-      await writeXlsxFile(malumot as never, {
-        sheet: t('Hisobotlar').slice(0, 31), columns: kenglik, stickyRowsCount: 1,
-      } as never).toFile(`fuelcontrol-hisobot-${this.dan()}_${this.gacha()}.xlsx`);
-      this.bildirish.korsat(t('FaylSaqlandi'));
+      await hisobotExcel(n, {
+        T: (k, ...a) => this.til.t(k, ...a), guruh: this.guruh(), nomi: (q) => this.nomi(q), ikkinchi: (q) => this.ikkinchi(q),
+        fayl: `hisobot_${this.dan()}_${this.gacha()}.xlsx`,
+      });
+      this.bildirish.korsat(this.til.t('FaylSaqlandi'));
     } catch (e) {
       this.bildirish.xato(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy'));
     } finally {

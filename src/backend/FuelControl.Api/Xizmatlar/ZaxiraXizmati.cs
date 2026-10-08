@@ -2,6 +2,7 @@ using FuelControl.Api.Auth;
 using FuelControl.Api.Data;
 using FuelControl.Contracts;
 using FuelControl.Contracts.Dto;
+using FuelControl.Core.Modellar;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,7 +52,7 @@ public sealed class ZaxiraXizmati(IConfiguration konfiguratsiya, IServiceScopeFa
             var natija = await z.NusxaOl(ctx.RequestAborted);
             using var scope = scopes.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<FuelControlDbContext>();
-            Audit.Yoz(db, ctx.User.Ism(), "Zaxira nusxa olindi", natija.FaylNomi);
+            Audit.Yoz(db, ctx.User.Ism(), "Zaxira nusxa olindi", natija.FaylNomi, AuditTurlari.Sozlama);
             await db.SaveChangesAsync();
             return Results.Ok(natija);
         }).RuxsatKerak(Ruxsat.Sozlamalar).RequireAuthorization().Produces<ZaxiraJavobiDto>();

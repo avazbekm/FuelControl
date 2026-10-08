@@ -115,29 +115,3 @@ public sealed class MaoshMigratsiyaTests : IDisposable
 
     public void Dispose() => _ulanish.Dispose();
 }
-
-public sealed class BittaTolovTuriTests : SqliteBaza
-{
-    [Fact]
-    public async Task TolovTuriBerilsa_SummaniServerQoyadi()
-    {
-        await using var db = Yangi();
-        var (s, _) = await SotuvXizmati.Yarat(db, OperatorId, new SotuvYaratishDto(AparatId, 10m, null, null, Guid.NewGuid(), TolovTuri.Click));
-        var t = Assert.Single(s.Tolovlar);
-        Assert.Equal(TolovTuri.Click, t.Turi);
-        Assert.Equal(122_000, t.Summa);
-        Assert.Equal(122_000, s.Summa);
-    }
-
-    [Fact]
-    public async Task IkkalasiYokiHechBiri_RadEtiladi()
-    {
-        await using var db = Yangi();
-        await Assert.ThrowsAsync<BiznesXatosi>(() => SotuvXizmati.Yarat(db, OperatorId,
-            new SotuvYaratishDto(AparatId, null, 100_000, [new TolovDto(TolovTuri.Naqd, 100_000)], Guid.NewGuid(), TolovTuri.Naqd)));
-        await Assert.ThrowsAsync<BiznesXatosi>(() => SotuvXizmati.Yarat(db, OperatorId,
-            new SotuvYaratishDto(AparatId, null, 100_000, null, Guid.NewGuid())));
-        await Assert.ThrowsAsync<BiznesXatosi>(() => SotuvXizmati.Yarat(db, OperatorId,
-            new SotuvYaratishDto(AparatId, null, 100_000, [], Guid.NewGuid())));
-    }
-}

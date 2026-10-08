@@ -61,17 +61,17 @@ public sealed class JoriyRuxsatTests : IAsyncLifetime
         var op = (await yaratildi.Content.ReadFromJsonAsync<FoydalanuvchiDto>(Json))!;
 
         var operatorMijoz = await Kir("sardor", "1111");
-        Assert.Equal(HttpStatusCode.Forbidden, (await operatorMijoz.GetAsync("/hisobot")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await operatorMijoz.GetAsync("/audit")).StatusCode);
 
         // Ruxsat berildi — o'sha token bilan darhol ishlaydi.
         await admin.PutAsJsonAsync($"/foydalanuvchilar/{op.Id}/ruxsatlar",
-            new RuxsatlarOrnatishDto([Ruxsat.SotuvKiritish, Ruxsat.SmenaOchish, Ruxsat.SmenaYopish, Ruxsat.Hisobotlar]), Json);
-        Assert.Equal(HttpStatusCode.OK, (await operatorMijoz.GetAsync("/hisobot")).StatusCode);
+            new RuxsatlarOrnatishDto([Ruxsat.Savdo, Ruxsat.SmenaOchish, Ruxsat.SmenaYopish, Ruxsat.Audit]), Json);
+        Assert.Equal(HttpStatusCode.OK, (await operatorMijoz.GetAsync("/audit")).StatusCode);
 
         // SmenaOchish olib tashlandi — token'da bor bo'lsa ham 403.
-        await admin.PutAsJsonAsync($"/foydalanuvchilar/{op.Id}/ruxsatlar", new RuxsatlarOrnatishDto([Ruxsat.SotuvKiritish]), Json);
-        Assert.Equal(HttpStatusCode.Forbidden, (await operatorMijoz.PostAsync("/smenalar/och", null)).StatusCode);
-        Assert.Equal(HttpStatusCode.Forbidden, (await operatorMijoz.GetAsync("/hisobot")).StatusCode);
+        await admin.PutAsJsonAsync($"/foydalanuvchilar/{op.Id}/ruxsatlar", new RuxsatlarOrnatishDto([Ruxsat.Savdo]), Json);
+        Assert.Equal(HttpStatusCode.Forbidden, (await operatorMijoz.PostAsJsonAsync("/smenalar/och", new SmenaOchishDto(0, 0, 0), Json)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await operatorMijoz.GetAsync("/audit")).StatusCode);
 
         // Nofaol qilindi — har qanday so'rov 401.
         await admin.PutAsJsonAsync($"/foydalanuvchilar/{op.Id}", new FoydalanuvchiTahrirlashDto("Sardor", Rol.Operator, false, 4_000_000), Json);
@@ -120,7 +120,7 @@ public sealed class JoriyRuxsatTests : IAsyncLifetime
         Assert.Equal(HubConnectionState.Connected, hub1.State);
 
         // Ruxsat o'zgarsa — "QaytaUlan" keladi va server ulanishni uzadi.
-        await admin.PutAsJsonAsync($"/foydalanuvchilar/{op.Id}/ruxsatlar", new RuxsatlarOrnatishDto([Ruxsat.SotuvKiritish, Ruxsat.Smenalar]), Json);
+        await admin.PutAsJsonAsync($"/foydalanuvchilar/{op.Id}/ruxsatlar", new RuxsatlarOrnatishDto([Ruxsat.Savdo, Ruxsat.Smenalar]), Json);
         await qayta1.Task.WaitAsync(TimeSpan.FromSeconds(10));
         await yopildi1.Task.WaitAsync(TimeSpan.FromSeconds(10));
         Assert.Equal(0, ulanishlar.Soni(op.Id));
@@ -137,25 +137,6 @@ public sealed class JoriyRuxsatTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task SmenaTafsiloti_EgasigaVaRuxsatliga_Boshqasiga403()
-    {
-        var admin = await Kir("admin", "admin1234");
-        await admin.PostAsJsonAsync("/foydalanuvchilar", new FoydalanuvchiYaratishDto("Ali", "ali", Rol.Operator, 0, "1111"), Json);
-        await admin.PostAsJsonAsync("/foydalanuvchilar", new FoydalanuvchiYaratishDto("Vali", "vali", Rol.Operator, 0, "2222"), Json);
-        var ali = await Kir("ali", "1111");
-        var aparatId = (await admin.GetFromJsonAsync<AparatDto[]>("/aparatlar", Json))![0].Id;
-        var sotuv = await (await ali.PostAsJsonAsync("/sotuvlar",
-            new SotuvYaratishDto(aparatId, null, 50_000, null, Guid.NewGuid(), TolovTuri.Naqd), Json)).Content.ReadFromJsonAsync<SotuvDto>(Json);
-
-        var tafsilot = await ali.GetFromJsonAsync<SmenaTafsilotDto>($"/smenalar/{sotuv!.SmenaId}", Json);
-        Assert.Equal(sotuv.Id, Assert.Single(tafsilot!.Sotuvlar).Id);
-        Assert.Equal(HttpStatusCode.OK, (await admin.GetAsync($"/smenalar/{sotuv.SmenaId}")).StatusCode);
-        var vali = await Kir("vali", "2222");
-        Assert.Equal(HttpStatusCode.Forbidden, (await vali.GetAsync($"/smenalar/{sotuv.SmenaId}")).StatusCode);
-        Assert.Equal(HttpStatusCode.NotFound, (await admin.GetAsync("/smenalar/999")).StatusCode);
-    }
-
-    [Fact]
     public async Task OpenApi_JavobTurlariBor_SonlarFaqatSon()
     {
         var mijoz = _ilova.CreateClient();
@@ -168,7 +149,7 @@ public sealed class JoriyRuxsatTests : IAsyncLifetime
         Assert.EndsWith("/OperatorHisobDto", Javob("/operatorlar/{id}/hisob", "get", "200"));
         Assert.EndsWith("/SmenaTafsilotDto", Javob("/smenalar/{id}", "get", "200"));
 
-        var summa = sxema.GetProperty("components").GetProperty("schemas").GetProperty("BoshqaruvKpiDto").GetProperty("properties").GetProperty("bugungiSumma");
+        var summa = sxema.GetProperty("components").GetProperty("schemas").GetProperty("SmenaDto").GetProperty("properties").GetProperty("savdo");
         Assert.Equal("integer", summa.GetProperty("type").GetString());
         Assert.False(summa.TryGetProperty("pattern", out _));
     }
@@ -188,6 +169,7 @@ public sealed class JoriyRuxsatTests : IAsyncLifetime
 
     [Theory]
     [InlineData("operator", HttpStatusCode.OK)]
+    [InlineData("smena", HttpStatusCode.OK)]
     [InlineData("KUN", HttpStatusCode.OK)]
     [InlineData("Oy", HttpStatusCode.OK)]
     [InlineData(null, HttpStatusCode.OK)]

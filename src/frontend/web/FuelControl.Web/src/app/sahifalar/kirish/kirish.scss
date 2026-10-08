@@ -9,9 +9,9 @@
 .brend h1 { font-size: 30px; }
 .brend p { margin: 0; font-size: 14px; }
 .logo {
-  width: 64px; height: 64px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
-  color: #fff; background: linear-gradient(180deg, #6A96FF, #2F6BFF 60%, #2457E0);
-  box-shadow: 0 12px 30px rgba(47, 107, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+  width: 64px; height: 64px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; background: linear-gradient(135deg, #4C8DFF 0%, #3A6BFF 55%, #8B5CF6 100%);
+  box-shadow: 0 12px 28px rgba(79, 107, 255, 0.35);
 }
 .forma { width: 100%; max-width: 400px; padding: 22px 20px; display: flex; flex-direction: column; gap: 16px; }
 .pin-tugma { min-height: 28px; padding: 0 8px; font-size: 13px; color: var(--asosiy); }
@@ -19,4 +19,5 @@
 .klaviatura { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .klaviatura .tugma { min-height: 54px; font-size: 22px; font-weight: 650; }
 .izoh { margin: 0; text-align: center; }
+.versiya-belgi { margin: 8px 0 0; font-size: 11px; text-align: center; color: var(--matn-4); font-variant-numeric: tabular-nums; }
 .taklif-joy { width: 100%; max-width: 400px; display: flex; }

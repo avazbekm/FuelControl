@@ -70,7 +70,7 @@ public sealed class AparatTests : IAsyncLifetime
         var yoqilgi = (await Yoqilgilar(admin))[0];
 
         // Seed 1–5 raqamli aparatlarni yaratgan; 6 bo'sh.
-        var javob = await admin.PostAsJsonAsync("/aparatlar", new AparatYaratishDto(6, yoqilgi.Id, 1234.5m), Json);
+        var javob = await admin.PostAsJsonAsync("/aparatlar", new AparatYaratishDto(6, yoqilgi.Id, 1234.5m, 0m), Json);
         Assert.Equal(HttpStatusCode.Created, javob.StatusCode);
         var yaratilgan = (await javob.Content.ReadFromJsonAsync<AparatDto>(Json))!;
         Assert.Equal(1234.5m, yaratilgan.TotalLitr);
@@ -81,7 +81,7 @@ public sealed class AparatTests : IAsyncLifetime
         Assert.Equal(yoqilgi.Nomi, royxatda.YoqilgiNomi);
         Assert.Equal(1234.5m, royxatda.TotalLitr);
 
-        Assert.Contains(await Audit(admin, "Aparat yaratildi"), a => a.Amal == "Aparat yaratildi" && a.Tafsilot.Contains("#6"));
+        Assert.Contains(await Audit(admin, "Aparat yaratildi"), a => a.Amal == "Aparat yaratildi" && a.Tafsilot.Contains("6-aparat"));
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public sealed class AparatTests : IAsyncLifetime
         var admin = await AdminKir();
         var yoqilgilar = await Yoqilgilar(admin);
         var yaratilgan = (await (await admin.PostAsJsonAsync("/aparatlar",
-            new AparatYaratishDto(6, yoqilgilar[0].Id, 1234.5m), Json)).Content.ReadFromJsonAsync<AparatDto>(Json))!;
+            new AparatYaratishDto(6, yoqilgilar[0].Id, 1234.5m, 0m), Json)).Content.ReadFromJsonAsync<AparatDto>(Json))!;
         var yol = $"/aparatlar/{yaratilgan.Id}";
 
         // 1) TotalLitr berilmasa: raqam va yoqilg'i o'zgaradi, totalizator o'zgarmaydi, "Totalizator tuzatildi" yozilmaydi.
@@ -108,14 +108,19 @@ public sealed class AparatTests : IAsyncLifetime
         Assert.Equal(1234.5m, (await Aparatlar(admin, yaratilgan.Id)).TotalLitr);
         Assert.Empty(await Audit(admin, "Totalizator tuzatildi"));
 
-        // 3) Boshqa qiymat berilsa — o'zgaradi (javobda ham, GET'da ham) va auditga yoziladi.
-        var j3 = await admin.PutAsJsonAsync(yol, new AparatTahrirlashDto(7, yoqilgilar[1].Id, 2000.25m), Json);
+        // 3) Boshqa qiymat berilsa — sabab majburiy; sabab bilan o'zgaradi (javobda ham, GET'da ham) va auditga yoziladi.
+        var sababsiz = await admin.PutAsJsonAsync(yol, new AparatTahrirlashDto(7, yoqilgilar[1].Id, 2000.25m), Json);
+        Assert.Equal(HttpStatusCode.BadRequest, sababsiz.StatusCode);
+        Assert.Equal(1234.5m, (await Aparatlar(admin, yaratilgan.Id)).TotalLitr);
+        var j3 = await admin.PutAsJsonAsync(yol, new AparatTahrirlashDto(7, yoqilgilar[1].Id, 2000.25m, null, "Pult almashtirildi"), Json);
         Assert.Equal(HttpStatusCode.OK, j3.StatusCode);
         Assert.Equal(2000.25m, (await j3.Content.ReadFromJsonAsync<AparatDto>(Json))!.TotalLitr);
         Assert.Equal(2000.25m, (await Aparatlar(admin, yaratilgan.Id)).TotalLitr);
         var tuzatish = Assert.Single(await Audit(admin, "Totalizator tuzatildi"));
         Assert.Equal("Totalizator tuzatildi", tuzatish.Amal);
-        Assert.Contains("#7", tuzatish.Tafsilot);
+        Assert.Contains("7-aparat", tuzatish.Tafsilot);
+        Assert.Contains("1 234.50 dan 2 000.25 ga", tuzatish.Tafsilot);
+        Assert.Equal("tuzatish", tuzatish.Tur);
 
         // 4) Manfiy qiymat rad etiladi, totalizator o'zgarmaydi.
         var j4 = await admin.PutAsJsonAsync(yol, new AparatTahrirlashDto(7, yoqilgilar[1].Id, -1m), Json);
@@ -129,15 +134,15 @@ public sealed class AparatTests : IAsyncLifetime
         var admin = await AdminKir();
         var yoqilgi = (await Yoqilgilar(admin))[0];
 
-        var band = await admin.PostAsJsonAsync("/aparatlar", new AparatYaratishDto(1, yoqilgi.Id, 0m), Json);
+        var band = await admin.PostAsJsonAsync("/aparatlar", new AparatYaratishDto(1, yoqilgi.Id, 0m, 0m), Json);
         Assert.Equal(HttpStatusCode.Conflict, band.StatusCode);
         Assert.Equal("Bunday raqamli aparat bor.", await Detail(band));
 
-        var manfiy = await admin.PostAsJsonAsync("/aparatlar", new AparatYaratishDto(6, yoqilgi.Id, -5m), Json);
+        var manfiy = await admin.PostAsJsonAsync("/aparatlar", new AparatYaratishDto(6, yoqilgi.Id, -5m, 0m), Json);
         Assert.Equal(HttpStatusCode.BadRequest, manfiy.StatusCode);
         Assert.Equal("Totalizator manfiy bo'lmasligi kerak.", await Detail(manfiy));
 
-        var yoqilgiYoq = await admin.PostAsJsonAsync("/aparatlar", new AparatYaratishDto(6, 9999, 0m), Json);
+        var yoqilgiYoq = await admin.PostAsJsonAsync("/aparatlar", new AparatYaratishDto(6, 9999, 0m, 0m), Json);
         Assert.Equal(HttpStatusCode.NotFound, yoqilgiYoq.StatusCode);
         Assert.Equal("Yoqilg'i topilmadi.", await Detail(yoqilgiYoq));
 

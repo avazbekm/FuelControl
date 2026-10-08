@@ -26,7 +26,8 @@ public sealed class SotuvHub(UlanishlarXaritasi ulanishlar) : Hub
         ulanishlar.Qosh(Context);
         var u = Context.User!;
         await Groups.AddToGroupAsync(Context.ConnectionId, Egasi(u.FoydalanuvchiId()));
-        if (u.Bor(Ruxsat.Smenalar) || u.Bor(Ruxsat.Hisobotlar) || u.Bor(Ruxsat.Boshqaruv))
+        // Smena, nasiya, xarajat va aparat o'zgarishlarini ko'ra oladiganlar (operativ ish va hisobot ruxsatlari).
+        if (u.Bor(Ruxsat.Savdo) || u.Bor(Ruxsat.Nasiyalar) || u.Bor(Ruxsat.Smenalar) || u.Bor(Ruxsat.Hisobotlar) || u.Bor(Ruxsat.Boshqaruv))
             await Groups.AddToGroupAsync(Context.ConnectionId, Kuzatuvchilar);
         await base.OnConnectedAsync();
     }
@@ -34,9 +35,11 @@ public sealed class SotuvHub(UlanishlarXaritasi ulanishlar) : Hub
 
 public static class Xabarlar
 {
-    public const string SotuvQoshildi = "SotuvQoshildi";
-    public const string SotuvOzgardi = "SotuvOzgardi";
+    // Hodisalar o'zgarish signali: klient tegishli ma'lumotni qayta yuklasin (smena: /smenalar/joriy). Yuk — o'zgargan yozuv DTO'si.
     public const string SmenaOzgardi = "SmenaOzgardi";
+    public const string NasiyaOzgardi = "NasiyaOzgardi";
+    public const string XarajatOzgardi = "XarajatOzgardi";
+    public const string AparatOzgardi = "AparatOzgardi";
     public const string NarxOzgardi = "NarxOzgardi";
 
     /// <summary>Boshqa o'zgarishlar: parametr — bo'lim nomi (Bolimlar.*), klient o'sha ro'yxatni qayta yuklaydi.</summary>
@@ -47,9 +50,9 @@ public static class HubKengaytmasi
 {
     public static Task Bildir(this IHubContext<SotuvHub> hub, string bolim) => hub.Clients.All.SendAsync(Xabarlar.Ozgardi, bolim);
 
-    /// <summary>Operatorga tegishli xabar (sotuv, smena) — kuzatuvchilarga va operatorning o'ziga.</summary>
-    public static Task OperatorgaBildir(this IHubContext<SotuvHub> hub, int operatorId, string xabar, object dto) =>
-        hub.Clients.Groups([SotuvHub.Kuzatuvchilar, SotuvHub.Egasi(operatorId)]).SendAsync(xabar, dto);
+    /// <summary>Smena, nasiya, xarajat, aparat o'zgarishi: faqat ko'rish ruxsati borlarga (kuzatuvchilar). Yuk — o'zgargan yozuv DTO'si; klient qayta yuklaydi.</summary>
+    public static Task Kuzatuvchilarga(this IHubContext<SotuvHub> hub, string xabar, object dto) =>
+        hub.Clients.Group(SotuvHub.Kuzatuvchilar).SendAsync(xabar, dto);
 }
 
 public static class Bolimlar
@@ -62,8 +65,9 @@ public static class Bolimlar
 
 public static class Audit
 {
-    public static void Yoz(FuelControlDbContext db, string kim, string amal, string tafsilot) =>
-        db.Audit.Add(new AuditYozuvi { Vaqt = DateTime.UtcNow, Kim = kim, Amal = amal, Tafsilot = tafsilot });
+    /// <summary>tur — <see cref="AuditTurlari"/>: smena | nasiya | xarajat | bak | tuzatish | hisob | sozlama | kirish.</summary>
+    public static void Yoz(FuelControlDbContext db, string kim, string amal, string tafsilot, string tur) =>
+        db.Audit.Add(new AuditYozuvi { Vaqt = DateTime.UtcNow, Kim = kim, Amal = amal, Tafsilot = tafsilot, Tur = tur });
 }
 
 public static class Xaritalash
@@ -71,53 +75,8 @@ public static class Xaritalash
     public static FoydalanuvchiDto Dto(this Foydalanuvchi f) =>
         new(f.Id, f.ToliqIsm, f.Login, f.Rol, f.Faol, f.OylikMaosh, f.Ruxsatlar.Distinct().ToArray());
 
-    public static SmenaDto Dto(this Smena s, string operatorIsmi) => new(
-        s.Id, s.OperatorId, operatorIsmi, s.Boshlandi, s.Tugadi,
-        s.KutilganNaqd, s.KutilganPlastik, s.KutilganClick, s.JamiLitr, s.SotuvSoni,
-        s.TopshirilganNaqd, s.TopshirilganPlastik, s.TopshirilganClick,
-        SmenaHisoblagich.Farq(s), SmenaHisoblagich.Kamomat(s), SmenaHisoblagich.Ortiqcha(s), s.Izoh);
-
-    public static SotuvDto Dto(this Sotuv s, string operatorIsmi, Aparat a, string yoqilgiNomi) => new(
-        s.Id, s.SmenaId, s.OperatorId, operatorIsmi, s.AparatId, a.Raqam, yoqilgiNomi,
-        s.Narx, s.Litr, s.Summa, s.Vaqt,
-        s.Tolovlar.Select(t => new TolovDto(t.Turi, t.Summa)).ToArray(),
-        s.Holati, s.BekorSababi, s.BekorQilgan);
-
     public static HisobHarakatiDto Dto(this HisobHarakati h) =>
         new(h.Id, h.OperatorId, h.Sana, h.Turi, h.Summa, h.Izoh, h.KimYozdi);
-
-    /// <summary>Sotuvlarni DTO'ga aylantiradi (operator, aparat, yoqilg'i nomlarini bitta so'rovda yig'adi).</summary>
-    public static async Task<List<SotuvDto>> SotuvDtolari(this FuelControlDbContext db, List<Sotuv> sotuvlar)
-    {
-        var opIdlar = sotuvlar.Select(s => s.OperatorId).Distinct().ToList();
-        var ismlar = await db.Foydalanuvchilar.Where(f => opIdlar.Contains(f.Id)).ToDictionaryAsync(f => f.Id, f => f.ToliqIsm);
-        var aparatlar = await db.Aparatlar.ToDictionaryAsync(a => a.Id);
-        var yoqilgilar = await db.Yoqilgilar.ToDictionaryAsync(y => y.Id, y => y.Nomi);
-        return sotuvlar.Select(s =>
-        {
-            var a = aparatlar[s.AparatId];
-            return s.Dto(ismlar.GetValueOrDefault(s.OperatorId, "?"), a, yoqilgilar[a.YoqilgiTuriId]);
-        }).ToList();
-    }
-
-    public static async Task<SmenaDto> SmenaDtosi(this FuelControlDbContext db, Smena s)
-    {
-        var ism = await db.Foydalanuvchilar.Where(f => f.Id == s.OperatorId).Select(f => f.ToliqIsm).FirstAsync();
-        return s.Dto(ism);
-    }
-}
-
-public static class Vaqt
-{
-    public static readonly TimeSpan Toshkent = TimeSpan.FromHours(5);
-
-    /// <summary>Toshkent kuni boshlanishi (UTC sifatida).</summary>
-    public static DateTime KunBoshi(DateTime utc) => utc.Add(Toshkent).Date.Subtract(Toshkent);
-
-    /// <summary>?dan=2026-03-01 kabi Toshkent sanasini UTC chegaraga aylantiradi.</summary>
-    public static DateTime? Dan(DateOnly? d) => d is null ? null : DateTime.SpecifyKind(d.Value.ToDateTime(TimeOnly.MinValue) - Toshkent, DateTimeKind.Utc);
-
-    public static DateTime? Gacha(DateOnly? d) => d is null ? null : DateTime.SpecifyKind(d.Value.AddDays(1).ToDateTime(TimeOnly.MinValue) - Toshkent, DateTimeKind.Utc);
 }
 
 public static class MaoshYozuvchi

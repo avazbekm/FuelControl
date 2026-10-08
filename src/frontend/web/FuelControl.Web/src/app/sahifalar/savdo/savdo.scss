@@ -1,0 +1,137 @@
+:host { display: block; }
+
+.holat-qator { gap: 10px; }
+.pill .nuqta { width: 7px; height: 7px; }
+.pill .kul-nuqta { background: #64748B; }
+
+/* ---- Smena ochiq: qoldiqlar */
+.plitkalar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.plitka.qoldiq { display: flex; align-items: center; gap: 12px; }
+.plitka.qoldiq .matn { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.plitka.qoldiq .izoh { font-size: 12px; color: var(--matn-2); }
+.bosqichlar {
+  list-style: none; margin: 0; padding: 14px 0 0; border-top: 1px solid var(--chiziq);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px;
+}
+.bosqichlar li { display: flex; align-items: flex-start; gap: 10px; }
+.bosqichlar .raqam {
+  width: 28px; height: 28px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: #334155; background: #E8EDF5;
+}
+.bosqichlar .raqam.tayyor { color: #fff; background: linear-gradient(180deg, #22A468 0%, #0E7A4A 60%, #0B6B40 100%); }
+.bosqichlar .raqam.joriy { color: #fff; background: linear-gradient(135deg, #7FB0FF 0%, #2F6BFF 55%, #1B3FD6 100%); }
+:host-context(:root[data-theme="dark"]) .bosqichlar .raqam:not(.tayyor):not(.joriy) { background: var(--b-kul-fon); color: var(--b-kul); }
+.bosqichlar .matn { display: flex; flex-direction: column; gap: 2px; }
+.bosqichlar .matn b { font-size: 13.5px; font-weight: 700; }
+.bosqichlar .matn span { font-size: 12.5px; color: var(--matn-2); }
+
+/* ---- Joriy smena (ko'k panel) */
+.joriy-karta {
+  flex: 1 1 320px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 14px; color: #fff;
+  background: linear-gradient(140deg, #2A5CF5 0%, #1B3FD6 100%); border: 1px solid rgba(255, 255, 255, 0.45); border-radius: 30px;
+  box-shadow: 0 24px 56px rgba(27, 63, 214, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.joriy-karta h2 { font-size: 16px; font-weight: 700; color: #fff; }
+.soat-ikon { width: 32px; height: 32px; flex: none; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.22); }
+.joriy-karta dl { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; row-gap: 9px; column-gap: 12px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.joriy-karta dt { color: #E8EEFF; }
+.joriy-karta dd { margin: 0; font-weight: 700; text-align: right; }
+.joriy-karta .chiziq { height: 1px; background: rgba(255, 255, 255, 0.28); }
+.joriy-karta p { font-size: 13px; line-height: 1.45; color: #E8EEFF; }
+.joriy-karta .yopish-tugma { box-shadow: 0 10px 24px rgba(8, 60, 36, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
+
+/* ---- Aparatlar */
+.aparatlar { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.plitka.aparat { padding: 16px; display: flex; flex-direction: column; gap: 11px; border-radius: 20px; }
+.aparat h3 { font-size: 16px; font-weight: 800; }
+.chiziq-och { height: 1px; background: var(--chiziq); }
+.ustun-kichik { display: flex; flex-direction: column; gap: 4px; }
+.pult-qiymat { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pult-qiymat small, .bak-qiymat small, .jami-qiymat small { font-size: 13px; font-weight: 600; color: var(--matn-2); }
+.bak-blok { padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; border-radius: 14px; background: rgba(217, 245, 230, 0.6); border: 1px solid rgba(14, 122, 74, 0.14); }
+:host-context(:root[data-theme="dark"]) .bak-blok { background: var(--b-yashil-fon); }
+.bak-bosh { display: flex; align-items: center; gap: 6px; color: var(--yashil); }
+.bak-qiymat { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bak-qiymat.manfiy { color: var(--qizil); }
+
+/* ---- Uchlik: nasiya, xarajat, muddati o'tgan */
+.uchlik { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; align-items: start; }
+.uchlik > .karta { gap: 12px; }
+.sarlavha-bloki { gap: 12px; }
+.royxat-ul { list-style: none; margin: 0; padding: 0; }
+.royxat-ul li { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-bottom: 1px solid var(--chiziq); }
+.royxat-ul li.xarajat { padding: 12px 2px; }
+.royxat-ul li:last-child { border-bottom: 0; }
+.royxat-ul .avatar.katta { width: 38px; height: 38px; }
+.ikki-qator { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.xarajat .ikki-qator { gap: 3px; }
+.nom { font-size: 14px; font-weight: 600; }
+.kichik-qator { gap: 6px; font-size: 12.5px; color: var(--matn-2); }
+.ong-ustun { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.summa { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tugma.ochir { width: 32px; min-height: 32px; flex: none; color: var(--matn-2); }
+.tugma.ochir:hover { color: var(--qizil); }
+.bosh-qator { justify-content: center; color: var(--matn-2); font-size: 13px; }
+.qaytish-qator {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px;
+  background: rgba(217, 245, 230, 0.6); border: 1px solid rgba(14, 122, 74, 0.14);
+}
+:host-context(:root[data-theme="dark"]) .qaytish-qator { background: var(--b-yashil-fon); }
+.qaytish-qator .matn { flex: 1; min-width: 0; font-size: 13px; }
+.qaytish-qator .plyus { font-weight: 800; color: var(--yashil); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tugmalar { gap: 10px; }
+.tugmalar .tugma { flex: 1 1 auto; }
+.jami-qator { align-items: baseline; padding: 2px 2px 0; }
+.yorliq-oddiy { font-size: 13px; font-weight: 700; color: var(--matn-2); }
+.jami-qiymat { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.otgan-karta {
+  background: linear-gradient(160deg, rgba(255, 238, 238, 0.92), rgba(255, 225, 225, 0.72)); border: 1px solid #FFB4B4; border-radius: 26px;
+  box-shadow: 0 18px 48px rgba(120, 30, 30, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+:host-context(:root[data-theme="dark"]) .otgan-karta { background: linear-gradient(160deg, rgba(120, 40, 44, 0.5), rgba(80, 30, 34, 0.4)); border-color: #7A3034; }
+.royxat-ul.otgan li { border-bottom-color: rgba(179, 38, 30, 0.12); }
+.otgan-karta .barcha { align-self: stretch; }
+
+/* ---- Smena yopiq: ochish formasi */
+.qator-panjara.tepa { align-items: flex-start; }
+.ochish-karta { padding: 24px; gap: 16px; }
+.katta-oraliq { gap: 6px; }
+.katta-sarlavha { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; }
+.izoh-p { font-size: 13.5px; line-height: 1.45; color: var(--matn-2); }
+.ochish-forma { display: flex; flex-direction: column; gap: 16px; }
+.ochish-qator { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+.ochish-qator .ikon-doira.katta { width: 44px; height: 44px; }
+.ochish-qator .matn { flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.ochish-qator .matn label { font-size: 14.5px; font-weight: 700; }
+.ochish-qator .matn span { font-size: 12.5px; line-height: 1.4; color: var(--matn-2); }
+.ochish-qator son-kiritish { display: contents; }
+:host ::ng-deep .ochish-qator .kiritish { flex: 1 1 200px; width: auto; min-width: 0; }
+.ochish-past { padding-top: 4px; gap: 14px; }
+.ochuvchi { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--matn-2); }
+.avatar.kichik { width: 34px; height: 34px; font-size: 12px; }
+.ustunlar-18 { display: flex; flex-direction: column; gap: 18px; }
+.kichik-bosh { margin-top: -6px; }
+.dl-oddiy { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; column-gap: 12px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.dl-oddiy dt { color: var(--matn-2); }
+.dl-oddiy dd { margin: 0; font-weight: 700; text-align: right; }
+.dl-oddiy dd.qalin { font-weight: 800; }
+.farq-matn { font-size: 13px; line-height: 1.4; min-width: 0; }
+.farq-qiymat { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.holat-jadval { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 14px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.holat-jadval .yorliq { padding: 6px 0; }
+.holat-jadval .o { text-align: right; }
+.h-yacheyka { padding: 8px 0; border-top: 1px solid var(--chiziq); }
+.h-yacheyka.qalin { font-weight: 700; }
+.manfiy { color: var(--qizil); }
+
+@media (max-width: 899px) {
+  .qator-panjara > .asosiy, .qator-panjara > .yon { flex-basis: 100%; }
+  .joriy-karta { flex-basis: 100%; }
+}
+@media (max-width: 480px) {
+  .ochish-qator .matn { flex: 1 1 150px; }
+  :host ::ng-deep .ochish-qator .kiritish { flex: 1 1 100%; }
+  .ochish-karta { padding: 18px; }
+  .joriy-karta { padding: 20px; }
+  .ochish-past .tugma, .ochish-past .ochuvchi { width: 100%; }
+}

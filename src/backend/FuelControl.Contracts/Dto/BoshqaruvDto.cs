@@ -1,28 +1,14 @@
 namespace FuelControl.Contracts.Dto;
 
-/// <summary>Bugungi KPI. OyKamomat — shu oydagi Kamomat harakatlari (musbat son).</summary>
-public sealed record BoshqaruvKpiDto(
-    long BugungiSumma,
-    decimal BugungiLitr,
-    int SotuvSoni,
-    int OchiqSmenalar,
-    long KechagiSumma,
-    long OyJami,
-    long OyKamomat);
+/// <summary>To'lov turlari bo'yicha taqsimot (Naqd = Savdo - Plastik - Depozit(farqi) - Nasiya).</summary>
+public sealed record TolovTaqsimotiDto(long Naqd, long Plastik, long Depozit, long Nasiya);
 
-public sealed record TolovUlushiDto(TolovTuri Turi, long Summa);
-
-/// <summary>Barcha yoqilg'i turlari (bugun sotilmaganlari ham — 0 bilan).</summary>
-public sealed record YoqilgiUlushiDto(string Nomi, string Rang, decimal Litr, long Summa);
-
-public sealed record KunlikDto(DateOnly Sana, long Summa, decimal Litr);
-
-public sealed record OperatorQisqaDto(int OperatorId, string Ism, long BugungiSumma, decimal BugungiLitr, int SotuvSoni, bool SmenaOchiqmi);
-
-public sealed record BoshqaruvBugunDto(
-    BoshqaruvKpiDto Kpi,
-    TolovUlushiDto[] TolovUlushlari,
-    YoqilgiUlushiDto[] YoqilgiUlushlari,
-    KunlikDto[] OxirgiKunlar,
-    OperatorQisqaDto[] Operatorlar,
-    SotuvDto[] OxirgiSotuvlar);
+/// <summary>
+/// Boshqaruv paneli. Oy* - joriy (Toshkent) oyda ochilgan yopilgan smenalar bo'yicha; OyKamomat/OyOrtiqcha - musbat sonlar.
+/// JoriySmena - ochiq smena (yo'q bo'lsa null); OxirgiYopilgan - oxirgi yopilgan smena.
+/// </summary>
+public sealed record BoshqaruvDto(SmenaDto? JoriySmena, SmenaDto? OxirgiYopilgan,
+    long OySavdo, decimal OyLitr, int OySmenaSoni, long OyKamomat, long OyOrtiqcha,
+    NasiyalarXulosaDto Nasiyalar, AparatDto[] Aparatlar,
+    SmenaQisqaDto[] OxirgiSmenalar,        // 14 ta yopilgan, eskisidan yangisiga
+    TolovTaqsimotiDto OyTolovlar, SmenaDto[] OxirgiYopilganlar);   // 3 ta

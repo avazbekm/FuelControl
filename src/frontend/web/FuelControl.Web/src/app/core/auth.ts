@@ -1,17 +1,19 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { api, apiSozla, ol, ApiXato } from '../api/api';
+import { apiSozla, ApiXato } from '../api/api';
+import { Server } from './server';
 import { sana } from './format';
-import type { Foydalanuvchi, LoginJavobi, Ruxsat } from '../api/turlar';
+import type { FoydalanuvchiDto, Ruxsat } from '../api/model';
 
 const KALIT = 'fc.sessiya';
 
-interface Sessiya { token: string; muddati: string; foydalanuvchi: Foydalanuvchi }
+interface Sessiya { token: string; muddati: string; foydalanuvchi: FoydalanuvchiDto }
 
 /** JWT sessiyasi. "Eslab qolish" — localStorage (12 soatgacha), aks holda sessionStorage (tab yopilguncha). */
 @Injectable({ providedIn: 'root' })
 export class Auth {
   private readonly router = inject(Router);
+  private readonly server = inject(Server);
   readonly sessiya = signal<Sessiya | null>(this.oqi());
   readonly foydalanuvchi = computed(() => this.sessiya()?.foydalanuvchi ?? null);
   readonly kirganmi = computed(() => this.sessiya() !== null);
@@ -38,7 +40,7 @@ export class Auth {
   }
 
   async kirish(login: string, parolYokiPin: string, eslab: boolean) {
-    const j = await ol(api.POST('/auth/login', { body: { login, parolYokiPin } }));
+    const j = await this.server.kirish(login, parolYokiPin);
     const s: Sessiya = { token: j.token, muddati: j.tokenMuddati, foydalanuvchi: j.foydalanuvchi };
     this.yoz(s, eslab);
     this.tugadi.set(false);
@@ -50,7 +52,7 @@ export class Auth {
     const s = this.sessiya();
     if (!s) return;
     try {
-      const f = await ol(api.GET('/me'));
+      const f = await this.server.men();
       const yangi = { ...s, foydalanuvchi: f };
       this.yoz(yangi, localStorage.getItem(KALIT) !== null);
       this.sessiya.set(yangi);

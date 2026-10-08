@@ -2,9 +2,15 @@ namespace FuelControl.Contracts;
 
 public enum Rol { Operator, Boshliq, Admin }
 
-public enum TolovTuri { Naqd, Plastik, Click }
+/// <summary>Nasiya qaytishi usuli. (Eski "Click" — hamma joyda "Depozit".) Terminal = Plastik.</summary>
+public enum TolovTuri { Naqd, Plastik, Depozit }
 
-public enum SotuvHolati { Faol, BekorQilingan }
+public enum XarajatManbai { Kassa, Depozit }
+
+/// <summary>Faol — qarz bor, muddat o'tmagan; MuddatiOtgan — qarz bor, muddat (Toshkent sanasi bo'yicha) o'tgan; Yopilgan — qoldiq 0.</summary>
+public enum NasiyaHolati { Faol, MuddatiOtgan, Yopilgan }
+
+public enum HisobotGuruhi { Smena, Kun, Oy, Operator }
 
 public enum HarakatTuri { Maosh, Avans, Kamomat, Ortiqcha, Tolov }
 
@@ -12,18 +18,20 @@ public enum HarakatTuri { Maosh, Avans, Kamomat, Ortiqcha, Tolov }
 public enum Ruxsat
 {
     Boshqaruv,
-    SotuvKiritish,
+    Savdo,
     SmenaOchish,
     SmenaYopish,
     Smenalar,
+    Nasiyalar,
+    NasiyaYozish,
+    QarzQaytdi,
+    XarajatYozish,
+    BakKirim,
+    KorsatkichTuzatish,
     Hisobotlar,
     Eksport,
     Operatorlar,
     AvansBerish,
-    SotuvBekorQilish,
-    SotuvTahrirlash,
     Audit,
     Sozlamalar,
 }
-
-public enum HisobotGuruhi { Operator, Kun, Oy }
