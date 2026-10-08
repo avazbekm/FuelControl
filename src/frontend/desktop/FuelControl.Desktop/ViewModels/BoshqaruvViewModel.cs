@@ -100,8 +100,9 @@ public partial class BoshqaruvViewModel : ObservableObject
     public string OrtiqchaIzoh => (_d?.OyOrtiqcha ?? 0) > 0
         ? Til.F("Boshqaruv_OrtiqchaIzoh", Format.Pul(_d!.OyOrtiqcha), _d.OxirgiSmenalar.Count(s => s.Farq > 0))
         : Til.T("Boshqaruv_OrtiqchaYoq");
-    public string OtganNasiya => Format.Pul(_d?.Nasiyalar.MuddatiOtgan ?? 0);
-    public string OtganIzoh => Til.F("Boshqaruv_QarzIzoh", _d?.Nasiyalar.MuddatiOtganSoni ?? 0, Format.Pul(_d?.Nasiyalar.FaolQarz ?? 0));
+    /// <summary>§8.7: asosiy raqam — jami qarzdorlik, ostida qizil — muddati o'tgan.</summary>
+    public string JamiQarzdorlik => Format.Pul(_d?.Nasiyalar.FaolQarz ?? 0);
+    public string OtganIzoh => Til.F("Boshqaruv_OtganQarzQisqa", Format.Pul(_d?.Nasiyalar.MuddatiOtgan ?? 0), _d?.Nasiyalar.MuddatiOtganSoni ?? 0);
 
     // ---- Joriy smena
     private SmenaDto? J => _d?.JoriySmena;

@@ -376,6 +376,7 @@ export class OperatorlarSahifa {
     try {
       const { default: writeXlsxFile } = await import('write-excel-file/browser');
       const t = (k: string) => this.til.t(k);
+      const fayl = `fuelcontrol-${h.operatorIsmi.replace(/\s+/g, '-')}-${this.oy().slice(0, 7)}.xlsx`;
       type Hujayra = { value?: string | number; type?: StringConstructor | NumberConstructor; format?: string; fontWeight?: 'bold'; backgroundColor?: string };
       const matn = (v: string, qalin = false): Hujayra => ({ value: v, type: String, ...(qalin ? { fontWeight: 'bold' as const } : {}) });
       const son = (v: number, qalin = false): Hujayra => ({ value: v, type: Number, format: '#,##0', ...(qalin ? { fontWeight: 'bold' as const } : {}) });
@@ -391,8 +392,9 @@ export class OperatorlarSahifa {
       ];
       await writeXlsxFile(malumot as never, {
         sheet: t('HisobVaraqa').slice(0, 31), columns: [{ width: 14 }, { width: 14 }, { width: 46 }, { width: 20 }, { width: 16 }], stickyRowsCount: 4,
-      } as never).toFile(`fuelcontrol-${h.operatorIsmi.replace(/\s+/g, '-')}-${this.oy().slice(0, 7)}.xlsx`);
+      } as never).toFile(fayl);
       this.bildirish.korsat(t('FaylSaqlandi'));
+      void this.server.auditEksport('Hisob-varaqa', `${h.operatorIsmi}, ${this.oy().slice(0, 7)} — ${fayl}`);
     } catch (e) {
       this.bildirish.xato(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy'));
     } finally {

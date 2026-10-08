@@ -56,7 +56,8 @@
 
 /* ---- Uchlik: nasiya, xarajat, muddati o'tgan */
 .uchlik { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; align-items: start; }
-.uchlik > .karta { gap: 12px; }
+.uchlik > .karta, .qarz-blok > .karta { gap: 12px; }
+.qarz-blok { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .sarlavha-bloki { gap: 12px; }
 .royxat-ul { list-style: none; margin: 0; padding: 0; }
 .royxat-ul li { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-bottom: 1px solid var(--chiziq); }
@@ -84,6 +85,11 @@
 .jami-qator { align-items: baseline; padding: 2px 2px 0; }
 .yorliq-oddiy { font-size: 13px; font-weight: 700; color: var(--matn-2); }
 .jami-qiymat { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.jami-qarz {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 18px; font-size: 14.5px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--matn);
+  background: var(--plitka-fon); border: 1px solid var(--plitka-chegara);
+}
+.jami-qarz ikon { color: var(--matn-2); flex: none; }
 .otgan-karta {
   background: linear-gradient(160deg, rgba(255, 238, 238, 0.92), rgba(255, 225, 225, 0.72)); border: 1px solid #FFB4B4; border-radius: 26px;
   box-shadow: 0 18px 48px rgba(120, 30, 30, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.8);

@@ -47,29 +47,29 @@
                 <Border Classes="kpi">
                     <StackPanel Spacing="6">
                         <TextBlock Text="{l:T Boshqaruv_OxirgiSmenaSavdosi, Katta=True}" Classes="nom" />
-                        <TextBlock><Run Text="{Binding OxirgiSavdo}" FontSize="28" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OxirgiSavdo}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
                         <TextBlock Text="{Binding OxirgiIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
                 <Border Classes="kpi">
                     <StackPanel Spacing="6">
                         <TextBlock Text="{l:T Boshqaruv_OySavdo, Katta=True}" Classes="nom" />
-                        <TextBlock><Run Text="{Binding OySavdo}" FontSize="28" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OySavdo}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
                         <TextBlock Text="{Binding OyIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
                 <Border Classes="kpi">
                     <StackPanel Spacing="6">
                         <TextBlock Text="{l:T ShuOyKamomat, Katta=True}" Classes="nom" />
-                        <TextBlock Foreground="{DynamicResource Qizil}"><Run Text="{Binding OyKamomat}" FontSize="28" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OyKamomat}" FontSize="28" FontWeight="ExtraBold" Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /><TextBlock Text=" " Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /></StackPanel>
                         <TextBlock Text="{Binding OrtiqchaIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
-                <Border Classes="kpi" Background="{DynamicResource KamomatFon}" BorderBrush="{DynamicResource KamomatChegara}">
+                <Border Classes="kpi">
                     <StackPanel Spacing="6">
-                        <TextBlock Text="{l:T Boshqaruv_MuddatiOtganNasiya, Katta=True}" Classes="nom" />
-                        <TextBlock Foreground="{DynamicResource Qizil}"><Run Text="{Binding OtganNasiya}" FontSize="28" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
-                        <TextBlock Text="{Binding OtganIzoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{l:T Boshqaruv_NasiyaQarzdorligi, Katta=True}" Classes="nom" />
+                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding JamiQarzdorlik}" FontSize="28" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
+                        <TextBlock Text="{Binding OtganIzoh}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource Qizil}" TextTrimming="CharacterEllipsis" />
                     </StackPanel>
                 </Border>
             </UniformGrid>

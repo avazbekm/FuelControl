@@ -48,6 +48,11 @@
 }
 .qator-grid.bosh-qator { padding: 4px 4px 8px; border-bottom: 1px solid rgba(18, 20, 40, 0.08); font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--matn-2); }
 .o { text-align: right; }
+.qator-grid.jami-qator { border-bottom: 0; border-top: 1px solid rgba(18, 20, 40, 0.14); margin-top: 4px; padding-top: 14px; font-variant-numeric: tabular-nums; }
+.jami-yorliq { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--matn-2); }
+.jami-soni { letter-spacing: 0; font-weight: 600; }
+:host-context(:root[data-theme="dark"]) .qator-grid.jami-qator { border-top-color: rgba(255, 255, 255, 0.16); }
+@media (prefers-color-scheme: dark) { :host-context(:root:not([data-theme="light"])) .qator-grid.jami-qator { border-top-color: rgba(255, 255, 255, 0.16); } }
 .satr { cursor: pointer; font-variant-numeric: tabular-nums; }
 .satr:hover { background: var(--qator-hover); border-radius: 14px; }
 .satr.otgan { background: color-mix(in srgb, var(--kamomat-fon) 45%, transparent); border-radius: 14px; }
@@ -83,6 +88,8 @@
 }
 .nk.otgan { background: color-mix(in srgb, var(--kamomat-fon) 60%, transparent); border-color: var(--kamomat-chegara); }
 .nk.yopilgan { opacity: 0.8; }
+.nk.jami-nk { cursor: default; background: color-mix(in srgb, var(--asosiy) 7%, transparent); border-color: color-mix(in srgb, var(--asosiy) 22%, transparent); }
+.nk.jami-nk .jami-yorliq { align-self: center; }
 .nk-tepa { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .nk-qoldiq { align-items: flex-end; text-align: right; gap: 2px; }
 .nk-qoldiq .qoldiq { font-size: 18px; }

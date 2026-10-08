@@ -66,6 +66,10 @@ export class Server {
   }
   boshqaruv(): Promise<BoshqaruvDto> { return ol(api.GET('/boshqaruv')); }
   audit(q?: string, tur?: string): Promise<AuditYozuviDto[]> { return ol(api.GET('/audit', { params: { query: { q: q?.trim() || undefined, tur: tur || undefined } } })); }
+  /** Fayl eksporti auditga yoziladi (desktop bilan bir xil turi/tafsilot). Eksport allaqachon bajarilgan — audit xatosi jim o'tadi. */
+  async auditEksport(turi: string, tafsilot: string): Promise<void> {
+    try { await ol(api.POST('/audit/eksport', { body: { turi, tafsilot } })); } catch { /* audit yozilmadi — foydalanuvchiga xalaqit bermaymiz */ }
+  }
   operatorlar(): Promise<FoydalanuvchiDto[]> { return ol(api.GET('/operatorlar')); }
   operatorHisob(id: number, oy?: string): Promise<OperatorHisobDto> { return ol(api.GET('/operatorlar/{id}/hisob', { params: { path: { id }, query: { oy } } })); }
   async avansBer(id: number, summa: number, turi: 'Avans' | 'Tolov', izoh: string): Promise<void> {

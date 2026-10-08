@@ -239,6 +239,16 @@ Olib tashlanadi: barcha `/sotuvlar` yo'llari. `/operatorlar/{id}/hisob` saqlanad
    - Smena ochish formasi va narx o'zgarishi dialogida ham shu tartib ishlaydi.
 5. **Web yangilanishi.** Yangi versiya chiqqanda PWA eski keshlangan nusxada qolib ketmasligi kerak. Yangilanish aniqlansa, "Yangi versiya" xabari chiqadi va bir bosishda sahifa qayta yuklanadi, yoki yangi versiya avtomatik faollashadi.
 
+6. **Nasiyalar → Excel (2026-10-08).** Nasiyalar sahifasida "Excel" tugmasi bo'ladi, faqat `Eksport` ruxsati bilan. U joriy filtr va qidiruv bo'yicha ko'rinib turgan ro'yxatni chiqaradi.
+   - Ustunlar: Mijoz, Telefon, Mashina raqami, Yozilgan sana, Smena, Operator, Qarz, Qaytgan, Qoldiq, Muddat, Holat (masalan "7 kun o'tdi", "Yopilgan").
+   - Oxirida Jami qatori bo'ladi: Qarz, Qaytgan, Qoldiq yig'indilari.
+   - Fayl nomi `nasiyalar-YYYY-MM-DD.xlsx`. Eksport `POST /audit/eksport` orqali auditga yoziladi, xuddi boshqa eksportlar kabi.
+7. **Jami qarzdorlik ko'rinsin (2026-10-08).**
+   - **Nasiyalar sahifasi.** "Faol qarz" KPI nomi **"Jami qarzdorlik"** bo'ladi. Izohi: "7 ta mijoz · shundan muddati o'tgan 480 000". Jadval oxirida joriy filtr bo'yicha **Jami** qatori bo'ladi: Qarz, Qaytgan, Qoldiq.
+   - **Savdo sahifasi.** "Muddati o'tgan qarzlar" kartasining tepasida "Jami qarzdorlik 2 510 000 · 7 ta mijoz" qatori chiqadi. Muddati o'tganlar ro'yxati uning ostida qoladi.
+   - **Boshqaruv.** Nasiya KPI plitkasida asosiy raqam jami qarzdorlik bo'ladi. Ostida qizil rangda "muddati o'tgan 480 000 · 2 ta" yoziladi. Plitka nomi "Nasiya qarzdorligi".
+   - Barcha raqamlar `NasiyalarXulosaDto` dan olinadi: `FaolQarz`, `FaolSoni`, `MuddatiOtgan`, `MuddatiOtganSoni`. Jami qatori esa klientda joriy ro'yxatdan hisoblanadi.
+
 ## 9. Ish tartibi
 
 - Faqat o'z papkangizga tegasiz: backend `src/backend` + `tests`, web `src/frontend/web`, desktop `src/frontend/desktop`. `docs/` — faqat fc.

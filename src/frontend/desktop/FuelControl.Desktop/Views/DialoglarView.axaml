@@ -297,14 +297,14 @@
                         <Border Classes="miniTile" Padding="16,14">
                             <StackPanel Spacing="2">
                                 <TextBlock Text="{l:T Bak_HozirgiQoldiq, Katta=True}" Classes="yorliq" Margin="0" FontSize="10.5" />
-                                <TextBlock Classes.manfiy="{Binding HozirgiManfiy}"><Run Text="{Binding Hozirgi}" FontSize="22" FontWeight="ExtraBold" /><Run Text="L" FontSize="12" /></TextBlock>
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Hozirgi}" FontSize="22" FontWeight="ExtraBold" Classes.manfiy="{Binding HozirgiManfiy}" VerticalAlignment="Bottom" /><TextBlock Text="L" FontSize="12" Classes.manfiy="{Binding HozirgiManfiy}" VerticalAlignment="Bottom" /></StackPanel>
                                 <TextBlock Text="{Binding OxirgiKirim}" Classes="izoh" FontSize="12" />
                             </StackPanel>
                         </Border>
                         <Border Classes="yashilTile" Padding="16,14">
                             <StackPanel Spacing="2">
                                 <TextBlock Text="{l:T Bak_KirimdanKeyin, Katta=True}" FontSize="10.5" FontWeight="Bold" LetterSpacing="1" Foreground="{DynamicResource YashilTileMatn}" />
-                                <TextBlock><Run Text="{Binding Keyin}" FontSize="22" FontWeight="ExtraBold" /><Run Text="L" FontSize="12" /></TextBlock>
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Keyin}" FontSize="22" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text="L" FontSize="12" VerticalAlignment="Bottom" /></StackPanel>
                                 <TextBlock Text="{l:T Bak_PultOzgarmaydi}" FontSize="12" Foreground="{DynamicResource YashilTileMatn}" />
                             </StackPanel>
                         </Border>

@@ -248,7 +248,7 @@
                         <ComboBox ItemsSource="{Binding TuzatishAparatlari}" SelectedItem="{Binding TuzatishAparat}" HorizontalAlignment="Stretch" MinHeight="46" CornerRadius="23">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="dto:SmenaKorsatkichDto">
-                                    <TextBlock><Run Text="{Binding AparatRaqam}" /><Run Text=" · " /><Run Text="{Binding YoqilgiNomi}" /></TextBlock>
+                                    <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding AparatRaqam}" VerticalAlignment="Bottom" /><TextBlock Text=" · " VerticalAlignment="Bottom" /><TextBlock Text="{Binding YoqilgiNomi}" VerticalAlignment="Bottom" /></StackPanel>
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>

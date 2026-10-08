@@ -4,7 +4,7 @@ import { Auth } from '../../core/auth';
 import { Server } from '../../core/server';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { jonliYangila } from '../../core/malumot';
-import { kunQisqa, kunToliq, pul } from '../../core/format';
+import { isoKun, kunQisqa, kunToliq, pul } from '../../core/format';
 import { telefonFormat } from '../../core/telefon';
 import { qidiruvMos } from '../../core/qidiruv';
 import type { NasiyaDto, NasiyalarXulosaDto, SmenaDto } from '../../api/model';
@@ -14,6 +14,7 @@ import { NasiyaDialog } from '../../ui/dialoglar/nasiya-dialog';
 import { QarzQaytdiDialog } from '../../ui/dialoglar/qarz-qaytdi-dialog';
 import { KpiKarta } from '../boshqaruv/kpi-karta';
 import { NasiyaTafsilotDialog } from './nasiya-tafsilot-dialog';
+import { nasiyalarExcel } from './nasiyalar-excel';
 
 type Filtr = 'hammasi' | 'faol' | 'otgan' | 'yopilgan';
 
@@ -46,6 +47,7 @@ export class NasiyalarSahifa {
   protected readonly xulosa = signal<NasiyalarXulosaDto | null>(null);
   protected readonly joriy = signal<SmenaDto | null>(null);
   protected readonly yuklandi = signal(false);
+  protected readonly eksportBand = signal(false);
   protected readonly xato = signal<string | null>(null);
   protected readonly filtr = signal<Filtr>('hammasi');
   protected readonly qidiruv = signal('');
@@ -79,6 +81,12 @@ export class NasiyalarSahifa {
       .sort((a, b) => guruh(a) - guruh(b) || a.muddat.localeCompare(b.muddat) || a.id - b.id);
   });
 
+  /** Ko'rinib turgan ro'yxat (joriy filtr + qidiruv) bo'yicha jami: klientda hisoblanadi, sahifa yuqoridagi KPI (butun baza) bilan farq qilishi mumkin. */
+  protected readonly jami = computed(() => {
+    const r = this.royxat();
+    return { soni: r.length, summa: r.reduce((a, n) => a + n.summa, 0), qaytgan: r.reduce((a, n) => a + n.qaytgan, 0), qoldiq: r.reduce((a, n) => a + n.qoldiq, 0) };
+  });
+
   /** Nasiya yozish — ochiq smena kerak; qaytish — ochiq smena yoki boshliq (smenadan tashqari). */
   protected readonly yozishMumkin = computed(() => this.auth.bor('NasiyaYozish') && !!this.joriy());
   protected readonly qaytishMumkin = computed(() => this.auth.bor('QarzQaytdi') && (!!this.joriy() || this.auth.bor('Smenalar')));
@@ -104,6 +112,25 @@ export class NasiyalarSahifa {
       if (!jim) this.xato.set(xatoMatni(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy')));
     } finally {
       this.yuklandi.set(true);
+    }
+  }
+
+  /** Ko'rinib turgan ro'yxatni .xlsx ga chiqaradi va auditga yozadi (Hisobotlar eksporti kabi). */
+  protected async excel() {
+    const r = this.royxat();
+    if (!r.length || this.eksportBand()) return;
+    this.eksportBand.set(true);
+    try {
+      const fayl = `nasiyalar-${isoKun()}.xlsx`;
+      await nasiyalarExcel(r, { T: (k, ...a) => this.til.t(k, ...a), holat: (n) => this.belgiMatn(n), fayl });
+      this.bildirish.korsat(this.til.t('FaylSaqlandi'));
+      const q = this.qidiruv().trim();
+      const izoh = `${kunToliq(isoKun())} · ${this.til.t(this.filtrlar().find((f) => f.k === this.filtr())!.kalit)}${q ? ` · "${q}"` : ''} · ${r.length}`;
+      void this.server.auditEksport('Nasiyalar', `${izoh} — ${fayl}`);
+    } catch (e) {
+      this.bildirish.xato(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy'));
+    } finally {
+      this.eksportBand.set(false);
     }
   }
 

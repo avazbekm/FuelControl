@@ -919,6 +919,51 @@
   "қарзи йўқ",
   "без долга"
  ],
+ "Nasiyalar_JamiQarzdorlik": [
+  "Jami qarzdorlik",
+  "Жами қарздорлик",
+  "Общая задолженность"
+ ],
+ "Nasiyalar_JamiQarzIzoh": [
+  "{0} ta mijoz · shundan muddati o'tgan {1}",
+  "{0} та мижоз · шундан муддати ўтган {1}",
+  "Клиентов: {0} · из них просрочено {1}"
+ ],
+ "Nasiyalar_Excel": [
+  "Excel",
+  "Excel",
+  "Excel"
+ ],
+ "Nasiyalar_ExcelSarlavha": [
+  "Nasiyalar",
+  "Насиялар",
+  "Долги"
+ ],
+ "Nasiyalar_ColSmena": [
+  "Smena",
+  "Смена",
+  "Смена"
+ ],
+ "Nasiyalar_ColHolat": [
+  "Holat",
+  "Ҳолат",
+  "Статус"
+ ],
+ "Savdo_JamiQarzdorlik": [
+  "Jami qarzdorlik {0} · {1} ta mijoz",
+  "Жами қарздорлик {0} · {1} та мижоз",
+  "Общая задолженность {0} · клиентов: {1}"
+ ],
+ "Boshqaruv_NasiyaQarzdorligi": [
+  "Nasiya qarzdorligi",
+  "Насия қарздорлиги",
+  "Задолженность по долгам"
+ ],
+ "Boshqaruv_OtganQarzQisqa": [
+  "muddati o'tgan {0} · {1} ta",
+  "муддати ўтган {0} · {1} та",
+  "просрочено {0} · {1}"
+ ],
  "Sozlama_AparatSoni": [
   "{0} ta aparat",
   "{0} та апарат",

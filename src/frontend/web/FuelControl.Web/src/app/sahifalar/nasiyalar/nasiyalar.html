@@ -5,6 +5,9 @@
       <span class="sarlavha-izoh">{{ til.t('Nasiyalar_Izoh') }}</span>
     </div>
     <div class="amallar">
+      @if (auth.bor('Eksport')) {
+        <button type="button" class="tugma" [disabled]="eksportBand() || !yuklandi() || !royxat().length" (click)="excel()"><ikon nomi="excel" [olcham]="16" [qalinlik]="2" /> {{ til.t('Nasiyalar_Excel') }}</button>
+      }
       @if (auth.bor('QarzQaytdi')) {
         <button type="button" class="tugma" [disabled]="!qaytishMumkin()" (click)="qaytishOch(null)"><ikon nomi="undo" [olcham]="16" [qalinlik]="2" /> {{ til.t('Nasiya_QarzQaytdi') }}</button>
       }
@@ -30,7 +33,7 @@
   } @else {
     @if (xulosa(); as x) {
       <div class="kpi-qator">
-        <kpi-karta [nom]="til.t('Nasiyalar_FaolQarz')" [qiymat]="pul(x.faolQarz)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_MijozSoni', x.faolSoni)" />
+        <kpi-karta [nom]="til.t('Nasiyalar_JamiQarzdorlik')" [qiymat]="pul(x.faolQarz)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_JamiQarzIzoh', x.faolSoni, pul(x.muddatiOtgan))" />
         <kpi-karta [nom]="til.t('Nasiyalar_MuddatiOtgan')" [qiymat]="pul(x.muddatiOtgan)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_MijozSoni', x.muddatiOtganSoni)" ton="qizil" [qizilKarta]="true" />
         <kpi-karta [nom]="til.t('Nasiyalar_OyBerilgan')" [qiymat]="pul(x.oyBerilgan)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_NasiyaSoni', x.oyBerilganSoni)" />
         <kpi-karta [nom]="til.t('Nasiyalar_OyQaytgan')" [qiymat]="pul(x.oyQaytgan)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_TolovSoni', x.oyQaytganSoni)" ton="yashil" />
@@ -81,11 +84,31 @@
           } @empty {
             <div class="bosh">{{ til.t('Nasiyalar_Yoq') }}</div>
           }
+          @if (royxat().length) {
+            <div class="qator-grid jami-qator" role="row">
+              <span class="jami-yorliq">{{ til.t('Jami') }} <span class="jami-soni">· {{ jami().soni }}</span></span><span></span><span></span>
+              <span class="o son">{{ pul(jami().summa) }}</span><span class="o son yashil-matn">{{ pul(jami().qaytgan) }}</span><span class="o son qoldiq">{{ pul(jami().qoldiq) }}</span>
+              <span></span><span></span>
+            </div>
+          }
         </div>
       </div>
 
       <!-- Telefon: kartalar -->
       <div class="faqat-tor"><div class="kartalar">
+        @if (royxat().length) {
+          <div class="nk jami-nk">
+            <div class="nk-tepa">
+              <span class="jami-yorliq">{{ til.t('Jami') }} <span class="jami-soni">· {{ jami().soni }}</span></span>
+              <span class="ustun nk-qoldiq"><span class="yorliq">{{ til.t('Nasiya_Qoldiq') }}</span><span class="qoldiq son">{{ pul(jami().qoldiq) }}</span></span>
+            </div>
+            <div class="nk-tafsilot son">
+              <span><span class="yorliq">{{ til.t('Nasiya_Qarz') }}</span>{{ pul(jami().summa) }}</span>
+              <span><span class="yorliq">{{ til.t('Nasiya_Qaytgan') }}</span><span class="yashil-matn">{{ pul(jami().qaytgan) }}</span></span>
+              <span></span>
+            </div>
+          </div>
+        }
         @for (n of royxat(); track n.id) {
           <div class="nk" [class.otgan]="n.holati === 'MuddatiOtgan'" [class.yopilgan]="n.holati === 'Yopilgan'" role="button" tabindex="0"
                (click)="tafsilotOch(n.id)" (keydown.enter)="tafsilotOch(n.id)">

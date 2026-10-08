@@ -33,9 +33,9 @@
       <kpi-karta [nom]="til.t('Boshqaruv_OySavdo')" [qiymat]="pul(d.oySavdo)" [birlik]="til.t('Som')" [izoh]="til.t('Boshqaruv_OySmenaIzoh', d.oySmenaSoni, litr(d.oyLitr))" />
       <kpi-karta [nom]="til.t('ShuOyKamomat')" [qiymat]="pul(d.oyKamomat)" [birlik]="til.t('Som')" [ton]="d.oyKamomat > 0 ? 'qizil' : ''"
                  [izoh]="d.oyOrtiqcha > 0 ? til.t('Boshqaruv_OrtiqchaIzoh', pul(d.oyOrtiqcha), ortiqchaSmenalar()) : til.t('Boshqaruv_OrtiqchaYoq')" />
-      <a class="kpi-havola" routerLink="/nasiyalar" [attr.aria-label]="til.t('Boshqaruv_MuddatiOtganNasiya')">
-        <kpi-karta [nom]="til.t('Boshqaruv_MuddatiOtganNasiya')" [qiymat]="pul(d.nasiyalar.muddatiOtgan)" [birlik]="til.t('Som')" ton="qizil" [qizilKarta]="true"
-                   [izoh]="til.t('Boshqaruv_QarzIzoh', d.nasiyalar.muddatiOtganSoni, pul(d.nasiyalar.faolQarz))" />
+      <a class="kpi-havola" routerLink="/nasiyalar" [attr.aria-label]="til.t('Boshqaruv_NasiyaQarzdorligi')">
+        <kpi-karta [nom]="til.t('Boshqaruv_NasiyaQarzdorligi')" [qiymat]="pul(d.nasiyalar.faolQarz)" [birlik]="til.t('Som')"
+                   [qizilIzoh]="til.t('Boshqaruv_OtganQarzQisqa', pul(d.nasiyalar.muddatiOtgan), d.nasiyalar.muddatiOtganSoni)" />
       </a>
     </div>
 

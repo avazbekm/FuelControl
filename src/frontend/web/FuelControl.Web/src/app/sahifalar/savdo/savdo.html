@@ -187,29 +187,36 @@
         }
       </section>
 
-      @if (muddatiOtgan().length) {
-        <section class="karta otgan-karta" aria-labelledby="muddat-s">
-          <div class="qator sarlavha-bloki">
-            <span class="ikon-doira qizil"><ikon nomi="warning" [olcham]="19" [qalinlik]="2" /></span>
-            <div class="bosh-joy"><h2 id="muddat-s">{{ til.t('Savdo_MuddatiOtganQarzlar') }}</h2><span class="karta-izoh">{{ til.t('Savdo_MijozSumma', muddatiOtgan().length, pul(muddatiOtganJami())) }}</span></div>
-          </div>
-          <ul class="royxat-ul otgan">
-            @for (n of muddatiOtgan().slice(0, 4); track n.id) {
-              <li>
-                <div class="bosh-joy ikki-qator">
-                  <span class="nom">{{ n.mijozIsmi }}</span>
-                  <span class="qator orala kichik-qator"><mashina-raqami [qiymat]="n.mashinaRaqami" /> {{ til.t('Savdo_MuddatEdi', kunOy(n.muddat)) }}</span>
-                </div>
-                <div class="ong-ustun">
-                  <span class="summa">{{ pul(n.qoldiq) }}</span>
-                  <span class="pill qizil">{{ til.t('Nasiya_KunOtdi', -n.muddatgachaKun) }}</span>
-                </div>
-              </li>
-            }
-          </ul>
-          <a class="tugma barcha" routerLink="/nasiyalar">{{ til.t('Savdo_BarchaNasiyalar') }} <ikon nomi="arrow" [olcham]="16" [qalinlik]="2" /></a>
-        </section>
-      }
+      <div class="qarz-blok">
+        @if (qarzXulosa(); as q) {
+          @if (q.faolQarz > 0) {
+            <div class="jami-qarz"><ikon nomi="wallet" [olcham]="17" [qalinlik]="2" /><span>{{ til.t('Savdo_JamiQarzdorlik', pul(q.faolQarz), q.faolSoni) }}</span></div>
+          }
+        }
+        @if (muddatiOtgan().length) {
+          <section class="karta otgan-karta" aria-labelledby="muddat-s">
+            <div class="qator sarlavha-bloki">
+              <span class="ikon-doira qizil"><ikon nomi="warning" [olcham]="19" [qalinlik]="2" /></span>
+              <div class="bosh-joy"><h2 id="muddat-s">{{ til.t('Savdo_MuddatiOtganQarzlar') }}</h2><span class="karta-izoh">{{ til.t('Savdo_MijozSumma', muddatiOtgan().length, pul(muddatiOtganJami())) }}</span></div>
+            </div>
+            <ul class="royxat-ul otgan">
+              @for (n of muddatiOtgan().slice(0, 4); track n.id) {
+                <li>
+                  <div class="bosh-joy ikki-qator">
+                    <span class="nom">{{ n.mijozIsmi }}</span>
+                    <span class="qator orala kichik-qator"><mashina-raqami [qiymat]="n.mashinaRaqami" /> {{ til.t('Savdo_MuddatEdi', kunOy(n.muddat)) }}</span>
+                  </div>
+                  <div class="ong-ustun">
+                    <span class="summa">{{ pul(n.qoldiq) }}</span>
+                    <span class="pill qizil">{{ til.t('Nasiya_KunOtdi', -n.muddatgachaKun) }}</span>
+                  </div>
+                </li>
+              }
+            </ul>
+            <a class="tugma barcha" routerLink="/nasiyalar">{{ til.t('Savdo_BarchaNasiyalar') }} <ikon nomi="arrow" [olcham]="16" [qalinlik]="2" /></a>
+          </section>
+        }
+      </div>
     </div>
   } @else {
     <!-- ===== Smena yopiq: ochish formasi ===== -->

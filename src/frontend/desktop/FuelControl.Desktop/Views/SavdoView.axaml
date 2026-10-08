@@ -80,7 +80,7 @@
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                                             <TextBlock Text="{l:T Savdo_QaytimNaqd, Katta=True}" Classes="yorliq" Margin="0" />
-                                            <TextBlock><Run Text="{Binding Qaytim}" FontSize="20" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                                            <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Qaytim}" FontSize="20" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -91,7 +91,7 @@
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                                             <TextBlock Text="{l:T Savdo_TerminalPlastik, Katta=True}" Classes="yorliq" Margin="0" />
-                                            <TextBlock><Run Text="{Binding OchishTerminal}" FontSize="20" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                                            <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OchishTerminal}" FontSize="20" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
                                             <TextBlock Text="{l:T Savdo_TerminalIzoh}" Classes="izoh" FontSize="12" TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Grid>
@@ -103,7 +103,7 @@
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
                                             <TextBlock Text="{l:T Savdo_DepozitKarta, Katta=True}" Classes="yorliq" Margin="0" />
-                                            <TextBlock><Run Text="{Binding OchishDepozit}" FontSize="20" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="13" /></TextBlock>
+                                            <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding OchishDepozit}" FontSize="20" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
                                             <TextBlock Text="{l:T Savdo_DepozitIzoh}" Classes="izoh" FontSize="12" TextWrapping="Wrap" />
                                         </StackPanel>
                                     </Grid>
@@ -191,7 +191,7 @@
                                             <TextBlock Text="{Binding Narx}" Classes="izoh" FontSize="13" />
                                             <Border Classes="chiziq" />
                                             <TextBlock Text="{l:T Savdo_PultKorsatkichi, Katta=True}" Classes="yorliq" Margin="0,2,0,0" />
-                                            <TextBlock><Run Text="{Binding Pult}" FontSize="20" FontWeight="ExtraBold" /><Run Text=" L" FontSize="13" /></TextBlock>
+                                            <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Pult}" FontSize="20" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" L" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
                                             <Panel>
                                                 <Border Classes="yashilTile" IsVisible="{Binding !BakManfiy}">
                                                     <StackPanel Spacing="2">
@@ -199,7 +199,7 @@
                                                             <ctl:Ikon Nomi="bak" Olcham="12" Rang="{DynamicResource YashilTileMatn}" />
                                                             <TextBlock Text="{l:T Savdo_BakQoldigi, Katta=True}" FontSize="10.5" FontWeight="Bold" LetterSpacing="1" Foreground="{DynamicResource YashilTileMatn}" />
                                                         </StackPanel>
-                                                        <TextBlock><Run Text="{Binding Bak}" FontSize="17" FontWeight="ExtraBold" /><Run Text=" L" FontSize="12" /></TextBlock>
+                                                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Bak}" FontSize="17" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" L" FontSize="12" VerticalAlignment="Bottom" /></StackPanel>
                                                         <TextBlock Text="{Binding OxirgiKirim}" Classes="izoh" FontSize="12" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
@@ -209,7 +209,7 @@
                                                             <ctl:Ikon Nomi="alert" Olcham="12" Rang="{DynamicResource Qizil}" />
                                                             <TextBlock Text="{l:T Savdo_BakQoldigi, Katta=True}" FontSize="10.5" FontWeight="Bold" LetterSpacing="1" Foreground="{DynamicResource Qizil}" />
                                                         </StackPanel>
-                                                        <TextBlock Foreground="{DynamicResource Qizil}"><Run Text="{Binding Bak}" FontSize="17" FontWeight="ExtraBold" /><Run Text=" L" FontSize="12" /></TextBlock>
+                                                        <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Bak}" FontSize="17" FontWeight="ExtraBold" Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /><TextBlock Text=" L" FontSize="12" Foreground="{DynamicResource Qizil}" VerticalAlignment="Bottom" /></StackPanel>
                                                         <TextBlock Text="{Binding OxirgiKirim}" Classes="izoh" FontSize="12" TextWrapping="Wrap" />
                                                     </StackPanel>
                                                 </Border>
@@ -325,7 +325,7 @@
                             </ItemsControl>
                             <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
                                 <TextBlock Text="{l:T Savdo_Jami}" FontWeight="Bold" VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="1"><Run Text="{Binding XarajatJami}" FontSize="20" FontWeight="ExtraBold" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="12" /></TextBlock>
+                                <StackPanel Orientation="Horizontal" Grid.Column="1"><TextBlock Text="{Binding XarajatJami}" FontSize="20" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="12" VerticalAlignment="Bottom" /></StackPanel>
                             </Grid>
                             <Button Classes="primary" HorizontalAlignment="Stretch" IsVisible="{Binding XarajatYozaOladi}" Command="{Binding XarajatYozCommand}">
                                 <StackPanel Orientation="Horizontal" Spacing="8"><ctl:Ikon Nomi="plus" Olcham="15" /><TextBlock Text="{l:T Xarajat_Yozish}" /></StackPanel>
@@ -346,7 +346,13 @@
                                     <TextBlock Text="{Binding OtganIzoh}" Classes="izoh" TextWrapping="Wrap" />
                                 </StackPanel>
                             </Grid>
-                            <ItemsControl ItemsSource="{Binding OtganQarzlar}">
+                            <Border Background="{DynamicResource IchkiTile}" CornerRadius="14" Padding="14,10">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <ctl:Ikon Nomi="wallet" Olcham="15" Rang="{DynamicResource MatnYumshoq}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding JamiQarzdorlik}" FontWeight="Bold" FontSize="13.5" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                            <ItemsControl ItemsSource="{Binding OtganQarzlar}" IsVisible="{Binding OtganRoyxatBor}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate x:DataType="vm:OtganQarz">
                                         <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,0,0,1" Padding="0,12">
@@ -488,7 +494,7 @@
                                         <DataTemplate x:DataType="vm:AparatKartasi">
                                             <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,1,0,0" Padding="0,8">
                                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="14">
-                                                    <TextBlock FontWeight="Bold" FontSize="13"><Run Text="{Binding A.Raqam}" /><Run Text=" · " /><Run Text="{Binding A.Yoqilgi.Nomi}" /></TextBlock>
+                                                    <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding A.Raqam}" FontWeight="Bold" FontSize="13" VerticalAlignment="Bottom" /><TextBlock Text=" · " FontWeight="Bold" FontSize="13" VerticalAlignment="Bottom" /><TextBlock Text="{Binding A.Yoqilgi.Nomi}" FontWeight="Bold" FontSize="13" VerticalAlignment="Bottom" /></StackPanel>
                                                     <TextBlock Grid.Column="1" Text="{Binding Pult}" FontSize="13" HorizontalAlignment="Right" />
                                                     <TextBlock Grid.Column="2" Text="{Binding BakAniq}" FontSize="13" FontWeight="Bold" MinWidth="64" TextAlignment="Right"
                                                                Classes.manfiy="{Binding BakManfiy}" />
@@ -574,9 +580,7 @@
                                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="24">
                                         <TextBlock Text="{l:T Yopish_Jami}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{Binding JamiLitrMatn}" FontSize="15" FontWeight="ExtraBold" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="2" FontSize="18" FontWeight="ExtraBold" Foreground="{DynamicResource ChiziqliMatn}" VerticalAlignment="Center">
-                                            <Run Text="{Binding JamiSummaMatn}" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="12" />
-                                        </TextBlock>
+                                        <StackPanel Orientation="Horizontal" Grid.Column="2" VerticalAlignment="Center"><TextBlock Text="{Binding JamiSummaMatn}" FontSize="18" FontWeight="ExtraBold" Foreground="{DynamicResource ChiziqliMatn}" VerticalAlignment="Bottom" /><TextBlock Text=" " FontSize="18" FontWeight="ExtraBold" Foreground="{DynamicResource ChiziqliMatn}" VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="12" FontWeight="ExtraBold" Foreground="{DynamicResource ChiziqliMatn}" VerticalAlignment="Bottom" /></StackPanel>
                                     </Grid>
                                 </Border>
                                 </StackPanel>
@@ -716,7 +720,7 @@
                             <Grid ColumnDefinitions="*,Auto"><TextBlock Classes="deepYorliq" Text="{l:T Yopish_Xarajatlar}" /><TextBlock Grid.Column="1" Classes="deepQiymat" Text="{Binding BXarajat}" /></Grid>
                             <Border Height="1" Background="#40FFFFFF" Margin="0,8" />
                             <TextBlock Text="{l:T Yopish_KassadaBolishiKerak, Katta=True}" Foreground="#D9FFFFFF" FontSize="11" FontWeight="Bold" LetterSpacing="1" />
-                            <TextBlock Foreground="White"><Run Text="{Binding Kutilgan}" FontSize="38" FontWeight="ExtraBold" LetterSpacing="-1" /><Run Text=" " /><Run Text="{l:T Som}" FontSize="14" FontWeight="Bold" /></TextBlock>
+                            <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Kutilgan}" FontSize="38" FontWeight="ExtraBold" LetterSpacing="-1" Foreground="White" VerticalAlignment="Bottom" /><TextBlock Text=" " Foreground="White" VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Bottom" /></StackPanel>
                             <TextBlock Text="{l:T Yopish_SanalganNaqd, Katta=True}" Foreground="#D9FFFFFF" FontSize="11" FontWeight="Bold" LetterSpacing="1" Margin="0,6,0,0" />
                             <TextBox Classes="dialogKatta oq" Text="{Binding SanalganNaqd}" PlaceholderText="0" ctl:EnterTartib.Guruh="yopish" />
 

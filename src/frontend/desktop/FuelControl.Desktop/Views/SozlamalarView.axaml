@@ -77,7 +77,7 @@
                                 <DataTemplate x:DataType="m:NarxTarixi">
                                     <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,0,0,1" Padding="2,10">
                                         <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="2">
-                                            <TextBlock FontWeight="Bold" FontSize="13.5"><Run Text="{Binding Yoqilgi}" /><Run Text=" · " /><Run Text="{Binding EskiNarx, StringFormat='#,0'}" /><Run Text=" → " /><Run Text="{Binding YangiNarx, StringFormat='#,0'}" /></TextBlock>
+                                            <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Yoqilgi}" FontWeight="Bold" FontSize="13.5" VerticalAlignment="Bottom" /><TextBlock Text=" · " FontWeight="Bold" FontSize="13.5" VerticalAlignment="Bottom" /><TextBlock Text="{Binding EskiNarx, StringFormat='#,0'}" FontWeight="Bold" FontSize="13.5" VerticalAlignment="Bottom" /><TextBlock Text=" → " FontWeight="Bold" FontSize="13.5" VerticalAlignment="Bottom" /><TextBlock Text="{Binding YangiNarx, StringFormat='#,0'}" FontWeight="Bold" FontSize="13.5" VerticalAlignment="Bottom" /></StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding Vaqt, StringFormat='dd.MM.yyyy HH:mm'}" Classes="izoh" />
                                             <TextBlock Grid.Row="1" Text="{Binding Kim}" Classes="izoh" />
                                         </Grid>
@@ -119,10 +119,9 @@
                                                 </Grid>
                                                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="6">
                                                     <TextBlock Classes="qator" Text="{l:T Aparat_PultKorsatkichi}" />
-                                                    <TextBlock Grid.Column="1" FontWeight="ExtraBold" FontSize="13.5"><Run Text="{Binding Pult}" /><Run Text=" L" /></TextBlock>
+                                                    <StackPanel Orientation="Horizontal" Grid.Column="1"><TextBlock Text="{Binding Pult}" FontWeight="ExtraBold" FontSize="13.5" VerticalAlignment="Bottom" /><TextBlock Text=" L" FontWeight="ExtraBold" FontSize="13.5" VerticalAlignment="Bottom" /></StackPanel>
                                                     <TextBlock Grid.Row="1" Classes="qator" Text="{l:T Aparat_BakQoldigi}" />
-                                                    <TextBlock Grid.Row="1" Grid.Column="1" FontWeight="ExtraBold" FontSize="13.5" Foreground="{DynamicResource Yashil}"
-                                                               Classes.manfiy="{Binding BakManfiy}"><Run Text="{Binding Bak}" /><Run Text=" L" /></TextBlock>
+                                                    <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1"><TextBlock Text="{Binding Bak}" FontWeight="ExtraBold" FontSize="13.5" Foreground="{DynamicResource Yashil}" Classes.manfiy="{Binding BakManfiy}" VerticalAlignment="Bottom" /><TextBlock Text=" L" FontWeight="ExtraBold" FontSize="13.5" Foreground="{DynamicResource Yashil}" Classes.manfiy="{Binding BakManfiy}" VerticalAlignment="Bottom" /></StackPanel>
                                                 </Grid>
                                             </StackPanel>
                                         </Border>

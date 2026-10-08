@@ -172,6 +172,8 @@ export class HisobotlarSahifa {
         fayl: `hisobot_${this.dan()}_${this.gacha()}.xlsx`,
       });
       this.bildirish.korsat(this.til.t('FaylSaqlandi'));
+      const op = this.operatorlar().find((o) => o.id === this.operatorId())?.ism ?? this.til.t('Hisobot_Hammasi');
+      void this.server.auditEksport('Hisobot', `${kunToliq(this.dan())} — ${kunToliq(this.gacha())}, ${op}, ${this.guruh()} — hisobot_${this.dan()}_${this.gacha()}.xlsx`);
     } catch (e) {
       this.bildirish.xato(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy'));
     } finally {

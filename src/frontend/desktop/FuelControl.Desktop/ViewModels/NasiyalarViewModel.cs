@@ -109,7 +109,7 @@ public partial class NasiyalarViewModel : ObservableObject
 
     private NasiyalarXulosaDto X => _malumot?.Xulosa ?? new NasiyalarXulosaDto(0, 0, 0, 0, 0, 0, 0, 0);
     public string FaolQarz => Format.Pul(X.FaolQarz);
-    public string FaolIzoh => Til.F("Nasiyalar_MijozSoni", X.FaolSoni);
+    public string FaolIzoh => Til.F("Nasiyalar_JamiQarzIzoh", X.FaolSoni, Format.Pul(X.MuddatiOtgan));
     public string OtganQarz => Format.Pul(X.MuddatiOtgan);
     public string OtganIzoh => Til.F("Nasiyalar_MijozSoni", X.MuddatiOtganSoni);
     public string OyBerilgan => Format.Pul(X.OyBerilgan);
@@ -117,6 +117,12 @@ public partial class NasiyalarViewModel : ObservableObject
     public string OyQaytgan => Format.Pul(X.OyQaytgan);
     public string OyQaytganIzoh => Til.F("Nasiyalar_TolovSoni", X.OyQaytganSoni);
     public bool BoshQator => Qatorlar.Count == 0;
+    // Jami qatori — joriy filtr va qidiruv bo'yicha ko'rinib turgan ro'yxatdan (§8.7).
+    public bool JamiBor => Qatorlar.Count > 0;
+    public string JamiQarz => Format.Pul(Qatorlar.Sum(q => q.N.Summa));
+    public string JamiQaytgan => Format.Pul(Qatorlar.Sum(q => q.N.Qaytgan));
+    public string JamiQoldiq => Format.Pul(Qatorlar.Sum(q => q.N.Qoldiq));
+    public bool EksportKorinsin => Joriy.Bor(Ruxsat.Eksport);
 
     private static Foydalanuvchi Joriy => Malumot.JoriyFoydalanuvchi;
     public bool QarzQaytdiOladi => Joriy.Bor(Ruxsat.QarzQaytdi);
@@ -133,6 +139,8 @@ public partial class NasiyalarViewModel : ObservableObject
             else if (!Malumot.Kirilgan) { _malumot = null; Filtrla(); }
             foreach (var n in new[] { nameof(QarzQaytdiOladi), nameof(NasiyaYozaOladi), nameof(SmenaOchiq), nameof(NasiyaYozishIzoh) }) OnPropertyChanged(n);
             NasiyaYozCommand.NotifyCanExecuteChanged();
+            ExcelCommand.NotifyCanExecuteChanged();
+            OnPropertyChanged(nameof(EksportKorinsin));
         };
         Til.Ozgardi += () => { Filtrla(); OnPropertyChanged(string.Empty); };
     }
@@ -170,6 +178,7 @@ public partial class NasiyalarViewModel : ObservableObject
                  .OrderBy(n => n.Qoldiq > 0 ? 0 : 1).ThenBy(n => n.Muddat).ThenByDescending(n => n.Id))
             Qatorlar.Add(new NasiyaQatori(n));
         OnPropertyChanged(string.Empty);
+        ExcelCommand.NotifyCanExecuteChanged();
         if (ochiqId is { } id && Qatorlar.FirstOrDefault(x => x.N.Id == id) is { } qayta) _ = TafsilotOch(qayta);
     }
 
@@ -204,6 +213,33 @@ public partial class NasiyalarViewModel : ObservableObject
 
     [RelayCommand]
     private void Qaytdi(NasiyaQatori? q) => Dialoglar.Qaytish.Och(q?.N);
+
+    private bool EksportMumkin() => _malumot is not null && Joriy.Bor(Ruxsat.Eksport);
+
+    /// <summary>§8.6: joriy filtr va qidiruv bo'yicha ko'rinib turgan ro'yxat → Documents\FuelControl\Nasiyalar\nasiyalar-YYYY-MM-DD.xlsx.</summary>
+    [RelayCommand(CanExecute = nameof(EksportMumkin))]
+    private async Task Excel()
+    {
+        string[] ustunlar = [Til.T("Nasiyalar_Mijoz"), Til.T("Nasiya_Telefon"), Til.T("Nasiya_MashinaRaqami"), Til.T("Nasiyalar_Yozilgan"),
+            Til.T("Nasiyalar_ColSmena"), Til.T("Operator"), Til.T("Nasiya_Qarz"), Til.T("Nasiya_Qaytgan"), Til.T("Nasiya_Qoldiq"),
+            Til.T("Nasiya_MuddatYorliq"), Til.T("Nasiyalar_ColHolat")];
+        var qatorlar = Qatorlar.Select(q => (new object?[]
+        {
+            q.N.MijozIsmi, Format.Telefon(q.N.Telefon), q.N.MashinaRaqami, Format.Sana(q.N.Yozildi.ToLocalTime()), "#" + q.N.SmenaId,
+            q.N.OperatorIsmi, q.N.Summa, q.N.Qaytgan, q.N.Qoldiq, Format.Sana(q.N.Muddat), q.Belgi,
+        }, false)).ToList();
+        object?[] jami = [Til.T("Jami"), null, null, null, null, null,
+            Qatorlar.Sum(q => q.N.Summa), Qatorlar.Sum(q => q.N.Qaytgan), Qatorlar.Sum(q => q.N.Qoldiq), null, null];
+        var filtr = Filtr switch { "faol" => Til.T("Nasiyalar_Faol"), "otgan" => Til.T("Nasiyalar_MuddatiOtgan"), "yopilgan" => Til.T("Nasiyalar_Yopilgan"), _ => Til.T("Nasiyalar_Hammasi") };
+        var izoh = $"{Format.Sana(DateTime.Today)} · {filtr}" + (Qidiruv.Trim().Length > 0 ? $" · \"{Qidiruv.Trim()}\"" : "") + $" · {Qatorlar.Count}";
+        try
+        {
+            var fayl = ExcelEksport.Saqla("Nasiyalar", $"nasiyalar-{DateTime.Today:yyyy-MM-dd}.xlsx", Til.T("Nasiyalar_ExcelSarlavha"), izoh, ustunlar, qatorlar, jami);
+            await Malumot.EksportniYoz("Nasiyalar", $"{izoh} — {System.IO.Path.GetFileName(fayl)}");
+            Bildirish.Malumot($"{Til.T("FaylSaqlandi")}: {fayl}");
+        }
+        catch (Exception e) when (e is System.IO.IOException or UnauthorizedAccessException) { Bildirish.Xato(e.Message); }
+    }
 
     private bool NasiyaYozMumkin() => SmenaOchiq && NasiyaYozaOladi;
     [RelayCommand(CanExecute = nameof(NasiyaYozMumkin))]

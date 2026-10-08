@@ -225,6 +225,7 @@ export class SmenalarSahifa {
     try {
       await smenaExcel(t, (k, ...a) => this.til.t(k, ...a));
       this.bildirish.korsat(this.til.t('FaylSaqlandi'));
+      void this.server.auditEksport('Smena', `#${t.smena.id} — fuelcontrol-smena-${t.smena.id}.xlsx`);
     } catch (e) {
       this.bildirish.xato(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy'));
     } finally {

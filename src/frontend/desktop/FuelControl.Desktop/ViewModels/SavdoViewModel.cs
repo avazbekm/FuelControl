@@ -163,7 +163,11 @@ public partial class SavdoViewModel : ObservableObject
     public string XarajatIzoh => Til.F("Savdo_XarajatIzoh", Xarajatlar.Count);
 
     public List<OtganQarz> OtganQarzlar { get; private set; } = new();
-    public bool OtganKorinsin => Joriy.Bor(Ruxsat.Nasiyalar) && OtganQarzlar.Count > 0;
+    /// <summary>Karta qarzi bor mijozlar bo'lsa ko'rinadi (§8.7): tepada jami qarzdorlik, ostida muddati o'tganlar.</summary>
+    public bool OtganKorinsin => Joriy.Bor(Ruxsat.Nasiyalar) && (Malumot.FaolNasiyalar?.Xulosa.FaolSoni ?? 0) > 0;
+    public bool OtganRoyxatBor => OtganQarzlar.Count > 0;
+    public string JamiQarzdorlik => Til.F("Savdo_JamiQarzdorlik", Format.Pul(Malumot.FaolNasiyalar?.Xulosa.FaolQarz ?? 0),
+        Malumot.FaolNasiyalar?.Xulosa.FaolSoni ?? 0);
     public string OtganIzoh => Til.F("Savdo_MijozSumma", Malumot.FaolNasiyalar?.Xulosa.MuddatiOtganSoni ?? 0,
         Format.Pul(Malumot.FaolNasiyalar?.Xulosa.MuddatiOtgan ?? 0));
 
