@@ -69,12 +69,12 @@ public sealed class NamunaServer : INamunaServer
             long kutilgan = 100_000 + savdo + qaytgan - plastik - depFarq - nasiya - xarajat;
             _smenalar.Add(new SmenaDto(i, op, Ism(op), Utc(kun, 8, 2), Utc(kun.AddDays(1), 8, 1),
                 100_000, 200_000, 1_250_000, 200_000 + plastik, 1_250_000 + depFarq, kutilgan + farq,
-                litr, savdo, plastik, depFarq, nasiya, qaytgan, xarajat, kutilgan, farq, null));
+                litr, savdo, plastik, depFarq, nasiya, qaytgan, xarajat, kutilgan, farq, null, []));
         }
 
         // Ochiq smena #42 — dizayndagi Main / SmenaYopish holati.
         _smenalar.Add(new SmenaDto(42, 2, "Alisher Karimov", Utc(b, 8, 2), null, 100_000, 200_000, 1_250_000,
-            null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null));
+            null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, []));
 
         // Nasiyalar.dc.html dagi 8 ta mijoz (bugun = dizayndagi 04.10).
         _nasiyalar.Add(Nasiya(88, 29, 2, "Sherzod Qodirov", "+998 99 410 22 11", "40 C 919 DA", 180_000, 0, b.AddDays(-6), Utc(b.AddDays(-13), 18, 40), null));
@@ -260,7 +260,7 @@ public sealed class NamunaServer : INamunaServer
     {
         if (Ochiq is not null) throw Xato("Ochiq smena bor", 409);
         var smena = new SmenaDto(_smenalar.Max(x => x.Id) + 1, _joriyFoydalanuvchi, Ism(_joriyFoydalanuvchi), DateTime.UtcNow, null,
-            d.Qaytim, d.Terminal, d.Depozit, null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null);
+            d.Qaytim, d.Terminal, d.Depozit, null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, []);
         _smenalar.Add(smena);
         Audit(Ism(_joriyFoydalanuvchi), "Smena ochildi", $"#{smena.Id}", "smena");
         return smena;
@@ -284,7 +284,7 @@ public sealed class NamunaServer : INamunaServer
         {
             Tugadi = DateTime.UtcNow, YopishTerminal = d.Terminal, YopishDepozit = d.Depozit, SanalganNaqd = d.SanalganNaqd,
             JamiLitr = segmentlar.Sum(x => x.Litr), Savdo = natija.Savdo, Plastik = natija.Plastik, DepozitFarqi = natija.DepozitFarqi,
-            Kutilgan = natija.Kutilgan, Farq = natija.Farq, Izoh = d.Izoh,
+            Kutilgan = natija.Kutilgan, Farq = natija.Farq, Izoh = d.Izoh, PlastikSummalari = d.PlastikSummalari ?? [],
         };
         _smenalar[_smenalar.FindIndex(x => x.Id == id)] = yopilgan;
         _korsatkichlar[id] = segmentlar;

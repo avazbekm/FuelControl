@@ -196,7 +196,11 @@ public partial class SmenalarViewModel : ObservableObject
             if (d.Tugadi is not null)
             {
                 l.Add(new(Til.T("Smenalar_SavdoAparatlar"), Plus(d.Savdo)));
-                l.Add(new(Til.F("Smenalar_PlastikSatr", Format.Pul(d.YopishTerminal ?? 0), Format.Pul(d.OchishTerminal)), Minus(d.Plastik)));
+                // §8.9: bir nechta plastik summasi bo'lsa — "Plastik: a + b + c = jami − ochishdagi"; eski smenada bitta raqam (web bilan bir xil)
+                var yopishdagi = d.PlastikSummalari is { Length: > 1 } q
+                    ? $"{string.Join(" + ", q.Select(Format.Pul))} = {Format.Pul(d.YopishTerminal ?? 0)}"
+                    : Format.Pul(d.YopishTerminal ?? 0);
+                l.Add(new(Til.F("Smenalar_PlastikSatr", yopishdagi, Format.Pul(d.OchishTerminal)), Minus(d.Plastik)));
                 l.Add(new(Til.F("Smenalar_DepozitSatr", Format.Pul(d.OchishDepozit), Format.Pul(d.YopishDepozit ?? 0)), Minus(d.DepozitFarqi)));
             }
             foreach (var q in t.Qaytishlar) l.Add(new($"{Til.T("Smenalar_QaytganNasiya")} · {q.MijozIsmi}", Plus(q.Summa)));

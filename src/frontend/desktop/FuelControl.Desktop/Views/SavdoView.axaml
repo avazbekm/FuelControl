@@ -246,7 +246,7 @@
                                                 <StackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Sarlavha}" FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis" />
                                                     <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding Izoh}" Classes="izoh" /></Viewbox>
-                                                    <Border Classes="davlatRaqam" HorizontalAlignment="Left"><TextBlock Text="{Binding Raqam}" /></Border>
+                                                    <Border Classes="davlatRaqam" HorizontalAlignment="Left" IsVisible="{Binding Raqam, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"><TextBlock Text="{Binding Raqam}" /></Border>
                                                 </StackPanel>
                                                 <StackPanel Grid.Column="2" Spacing="6" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Summa}" FontSize="17" FontWeight="ExtraBold" HorizontalAlignment="Right" />
@@ -331,16 +331,26 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Muddati o'tgan qarzlar -->
-                    <Border Classes="card" Padding="20,18" VerticalAlignment="Top" IsVisible="{Binding OtganKorinsin}"
-                            Background="{DynamicResource KamomatFon}" BorderBrush="{DynamicResource KamomatChegara}">
+                    <!-- Nasiyalar kartasi (§8.7): muddati o'tgan bo'lsa — qizil "Muddati o'tgan qarzlar", aks holda neytral "Nasiyalar" -->
+                    <Border Classes="card nasiyaKarta" Classes.otgan="{Binding OtganBor}" Padding="20,18" VerticalAlignment="Top" IsVisible="{Binding OtganKorinsin}">
+                        <Border.Styles>
+                            <Style Selector="Border.nasiyaKarta.otgan">
+                                <Setter Property="Background" Value="{DynamicResource KamomatFon}" />
+                                <Setter Property="BorderBrush" Value="{DynamicResource KamomatChegara}" />
+                            </Style>
+                        </Border.Styles>
                         <StackPanel Spacing="12">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                                <Border Classes="ikonDoira" Width="40" Height="40" Background="{DynamicResource BadgeQizilFon}">
-                                    <ctl:Ikon Nomi="alert" Olcham="18" Rang="{DynamicResource Qizil}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
+                                <Panel>
+                                    <Border Classes="ikonDoira" Width="40" Height="40" Background="{DynamicResource BadgeQizilFon}" IsVisible="{Binding OtganBor}">
+                                        <ctl:Ikon Nomi="alert" Olcham="18" Rang="{DynamicResource Qizil}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <Border Classes="ikonDoira" Width="40" Height="40" Background="{DynamicResource BadgeKokFon}" IsVisible="{Binding !OtganBor}">
+                                        <ctl:Ikon Nomi="book" Olcham="18" Rang="{DynamicResource BadgeKokMatn}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </Panel>
                                 <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
-                                    <TextBlock Text="{l:T Savdo_MuddatiOtganQarzlar}" Classes="kichikSarlavha" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding NasiyaKartaSarlavha}" Classes="kichikSarlavha" TextWrapping="Wrap" />
                                     <TextBlock Text="{Binding OtganIzoh}" Classes="izoh" TextWrapping="Wrap" />
                                 </StackPanel>
                             </Grid>
@@ -357,11 +367,11 @@
                                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="6">
                                                 <TextBlock Text="{Binding N.MijozIsmi}" FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis" Margin="0,0,10,0" />
                                                 <TextBlock Grid.Column="1" Text="{Binding Summa}" FontSize="17" FontWeight="ExtraBold" HorizontalAlignment="Right" />
-                                                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6">
+                                                <WrapPanel Grid.Row="1" ItemSpacing="6" LineSpacing="4" Margin="0,0,8,0">
                                                     <Border Classes="davlatRaqam" IsVisible="{Binding RaqamBor}"><TextBlock Text="{Binding Raqam}" /></Border>
                                                     <TextBlock Text="{Binding MuddatEdi}" Classes="izoh" VerticalAlignment="Center" />
-                                                </StackPanel>
-                                                <Border Grid.Row="1" Grid.Column="1" Classes="badge qizil" HorizontalAlignment="Right"><TextBlock Text="{Binding KunOtdi}" /></Border>
+                                                </WrapPanel>
+                                                <Border Grid.Row="1" Grid.Column="1" Classes="badge" ctl:Klass.Nomi="{Binding KunKlassi}" HorizontalAlignment="Right"><TextBlock Text="{Binding KunOtdi}" /></Border>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -615,9 +625,30 @@
                                                 </Border>
                                                 <TextBlock Grid.Column="1" Text="{l:T Yopish_PlastikTerminal}" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="Wrap" />
                                             </Grid>
-                                            <TextBlock Text="{l:T Yopish_TerminalSummasi, Katta=True}" Classes="yorliq" Margin="0,4,0,0" />
-                                            <TextBox Classes="orta" Classes.xato="{Binding TerminalXato}" Text="{Binding YopTerminal}" PlaceholderText="0" ctl:EnterTartib.Guruh="yopish" />
-                                            <TextBlock Text="{l:T Yopish_TerminalIzoh}" Classes="izoh" TextWrapping="Wrap" />
+                                            <TextBlock Text="{l:T Yopish_PlastikSummalari, Katta=True}" Classes="yorliq" Margin="0,4,0,0" />
+                                            <!-- §8.9: bir nechta plastik summasi — har biri alohida qator (nomsiz), × bilan o'chiriladi -->
+                                            <ItemsControl x:Name="PlastikRoyxat" ItemsSource="{Binding PlastikQatorlari}">
+                                                <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="8" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:PlastikQatori">
+                                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                            <TextBox Classes="orta" Classes.xato="{Binding Xato}" Text="{Binding Summa}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="{Binding SummaYorligi}" AutomationProperties.Name="{Binding SummaYorligi}" ctl:EnterTartib.Guruh="yopish" />
+                                                            <Button Grid.Column="1" Classes="ikon" VerticalAlignment="Center" ToolTip.Tip="{Binding OchirishYorligi}" AutomationProperties.Name="{Binding OchirishYorligi}"
+                                                                    Command="{Binding $parent[UserControl].((vm:SavdoViewModel)DataContext).PlastikOchirCommand}" CommandParameter="{Binding}">
+                                                                <ctl:Ikon Nomi="x" Olcham="13" />
+                                                            </Button>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <Button HorizontalAlignment="Left" Command="{Binding PlastikQoshCommand}" IsEnabled="{Binding PlastikQoshMumkin}">
+                                                <StackPanel Orientation="Horizontal" Spacing="6"><ctl:Ikon Nomi="plus" Olcham="14" /><TextBlock Text="{l:T Yopish_PlastikQosh}" /></StackPanel>
+                                            </Button>
+                                            <TextBlock Text="{l:T Yopish_PlastikIzoh}" Classes="izoh" TextWrapping="Wrap" />
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" IsVisible="{Binding PlastikKopQator}">
+                                                <TextBlock Text="{l:T Yopish_JamiPlastik}" FontWeight="Bold" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="1" Text="{Binding JamiPlastikMatn}" FontWeight="ExtraBold" />
+                                            </Grid>
                                             <Border Classes="chiziq" Margin="0,4" />
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"><TextBlock Classes="qator" Text="{l:T Yopish_OchishdaYozilgan}" TextTrimming="CharacterEllipsis" /><TextBlock Grid.Column="1" Text="{Binding OchishTerminal}" FontWeight="Bold" /></Grid>
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"><TextBlock Text="{l:T Yopish_ShuSmenaPlastik}" FontWeight="Bold" FontSize="13" TextTrimming="CharacterEllipsis" /><TextBlock Grid.Column="1" Text="{Binding ShuSmenaPlastikMatn}" FontWeight="ExtraBold" Classes.manfiy="{Binding PlastikKam}" /></Grid>
@@ -633,7 +664,7 @@
                                                 <TextBlock Grid.Column="1" Text="{l:T Yopish_DepozitKarta}" FontWeight="Bold" VerticalAlignment="Center" TextWrapping="Wrap" />
                                             </Grid>
                                             <TextBlock Text="{l:T Yopish_KartadagiQoldiq, Katta=True}" Classes="yorliq" Margin="0,4,0,0" />
-                                            <TextBox Classes="orta" Classes.xato="{Binding DepozitXato}" Text="{Binding YopDepozit}" PlaceholderText="0" ctl:EnterTartib.Guruh="yopish" />
+                                            <TextBox Classes="orta" Classes.xato="{Binding DepozitXato}" Text="{Binding YopDepozit}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:EnterTartib.Guruh="yopish" />
                                             <TextBlock Text="{l:T Yopish_DepozitIzoh}" Classes="izoh" TextWrapping="Wrap" />
                                             <Border Classes="chiziq" Margin="0,4" />
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10"><TextBlock Classes="qator" Text="{l:T Yopish_OchishdaYozilgan}" TextTrimming="CharacterEllipsis" /><TextBlock Grid.Column="1" Text="{Binding OchishDepozit}" FontWeight="Bold" /></Grid>
@@ -731,9 +762,26 @@
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12"><TextBlock Classes="deepYorliq" Text="{l:T Yopish_Xarajatlar}" TextWrapping="Wrap" MaxWidth="150" /><Viewbox Grid.Column="1" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Top"><TextBlock Classes="deepQiymat" Text="{Binding BXarajat}" /></Viewbox></Grid>
                             <Border Height="1" Background="#40FFFFFF" Margin="0,8" />
                             <TextBlock Text="{l:T Yopish_KassadaBolishiKerak, Katta=True}" Foreground="#D9FFFFFF" FontSize="11" FontWeight="Bold" LetterSpacing="1" />
-                            <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Kutilgan}" FontSize="38" FontWeight="ExtraBold" LetterSpacing="-1" Foreground="White" VerticalAlignment="Bottom" /><TextBlock Text=" " Foreground="White" VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Bottom" /></StackPanel></Viewbox>
+                            <!-- Hisob chiqmasa: raqam o'rniga nima yetishmasligi (qaysi aparat, nega) va kiritilganlar bo'yicha taxminiy natija -->
+                            <Border Background="#26FFFFFF" CornerRadius="16" Padding="14,12" IsVisible="{Binding HolatToliqEmas}">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{l:T Yopish_ToliqEmas}" Foreground="White" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    <ItemsControl ItemsSource="{Binding ToliqEmasSabablar}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6" Margin="0,1">
+                                                    <TextBlock Text="•" Foreground="#FFD27A" FontWeight="ExtraBold" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" Foreground="#FFE7B0" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="{Binding TaxminiyMatn}" Foreground="White" FontSize="12.5" TextWrapping="Wrap" IsVisible="{Binding TaxminiyBor}" Margin="0,4,0,0" />
+                                </StackPanel>
+                            </Border>
+                            <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left" IsVisible="{Binding !HolatToliqEmas}"><StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Kutilgan}" FontSize="38" FontWeight="ExtraBold" LetterSpacing="-1" Foreground="White" VerticalAlignment="Bottom" /><TextBlock Text=" " Foreground="White" VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Bottom" /></StackPanel></Viewbox>
                             <TextBlock Text="{l:T Yopish_SanalganNaqd, Katta=True}" Foreground="#D9FFFFFF" FontSize="11" FontWeight="Bold" LetterSpacing="1" Margin="0,6,0,0" />
-                            <TextBox Classes="dialogKatta oq" Text="{Binding SanalganNaqd}" PlaceholderText="0" ctl:EnterTartib.Guruh="yopish" />
+                            <TextBox Classes="dialogKatta oq" Text="{Binding SanalganNaqd}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:EnterTartib.Guruh="yopish" />
 
                             <Border Classes="qizilTile" Padding="16,12" IsVisible="{Binding HolatKamomat}">
 <StackPanel Spacing="4">
@@ -754,9 +802,6 @@
                             </Border>
                             <Border Background="#26FFFFFF" CornerRadius="16" Padding="16,12" IsVisible="{Binding HolatNaqd}">
                                 <TextBlock Text="{l:T Yopish_NaqdniSanang}" Foreground="White" FontSize="12.5" TextWrapping="Wrap" />
-                            </Border>
-                            <Border Background="#26FFFFFF" CornerRadius="16" Padding="16,12" IsVisible="{Binding HolatToliqEmas}">
-                                <TextBlock Text="{l:T Yopish_ToliqEmas}" Foreground="White" FontSize="12.5" TextWrapping="Wrap" />
                             </Border>
 
                             <TextBlock Text="{l:T Yopish_Izoh, Katta=True}" Foreground="#D9FFFFFF" FontSize="11" FontWeight="Bold" LetterSpacing="1" Margin="0,6,0,0" />

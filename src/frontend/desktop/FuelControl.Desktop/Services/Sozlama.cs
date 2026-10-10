@@ -27,8 +27,17 @@ public sealed class Sozlama
         Converters = { new JsonStringEnumConverter() },
     };
 
+    /// <summary>
+    /// Sinov (harness) uchun: FUELCONTROL_SOZLAMA_PAPKA berilsa, sozlamalar.json shu papkada o'qiladi/yoziladi —
+    /// foydalanuvchining haqiqiy %AppData%\FuelControl\sozlamalar.json iga tegilmaydi. Berilmasa — odatdagidek.
+    /// </summary>
+    public const string PapkaOzgaruvchisi = "FUELCONTROL_SOZLAMA_PAPKA";
+
     private static string Fayl => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FuelControl", "sozlamalar.json");
+        Environment.GetEnvironmentVariable(PapkaOzgaruvchisi) is { Length: > 0 } papka
+            ? papka
+            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "FuelControl"),
+        "sozlamalar.json");
 
     /// <summary>O'rnatuvchi yozadigan standart: {dastur papkasi}\sozlama.json → {"ServerManzili": "http://localhost:5000"}.</summary>
     private static string DasturFayli => Path.Combine(AppContext.BaseDirectory, "sozlama.json");

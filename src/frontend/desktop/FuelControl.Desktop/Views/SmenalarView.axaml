@@ -192,7 +192,7 @@
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate x:DataType="vm:PulSatri">
                                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,2">
-                                                        <TextBlock Text="{Binding Nomi}" Classes="qator" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding Nomi}" Classes="qator" TextWrapping="Wrap" />
                                                         <TextBlock Grid.Column="1" Text="{Binding Qiymat}" FontSize="13" FontWeight="SemiBold" />
                                                     </Grid>
                                                 </DataTemplate>

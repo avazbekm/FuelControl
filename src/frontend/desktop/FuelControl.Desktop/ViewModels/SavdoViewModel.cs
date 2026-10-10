@@ -43,12 +43,31 @@ public sealed record AparatKartasi(Aparat A, YoqilgiBelgi Yoqilgi)
 public sealed record YozuvQatori(int Id, string Tur, string Sarlavha, string Izoh, string Summa, string? Belgi, string BelgiKlassi,
     string? Harflar, string? Raqam, bool OchirishMumkin);
 
-/// <summary>Muddati o'tgan qarz qatori.</summary>
+/// <summary>Plastik summasi qatori (§8.9): nomsiz, bo'sh qator hisobga olinmaydi; manfiy yoki noto'g'ri yozuv — xato.</summary>
+public sealed partial class PlastikQatori(Action ozgardi) : ObservableObject
+{
+    [ObservableProperty] private string _summa = "";
+    /// <summary>Qator tartib raqami (1 dan) — "N-plastik summasi" va "N-qatorni o'chirish" uchun.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SummaYorligi), nameof(OchirishYorligi))]
+    private int _tartib;
+    public string SummaYorligi => Til.F("Yopish_PlastikSummasi", Tartib);
+    public string OchirishYorligi => Til.F("Yopish_QatorniOchir", Tartib);
+    public bool Bosh => Summa.Trim().Length == 0;
+    public long? Qiymat => Bosh || Summa.Contains('-') || Summa.Contains('−') ? null : Format.PulOl(Summa);
+    public bool Xato => !Bosh && Qiymat is null;
+    partial void OnSummaChanged(string value) { OnPropertyChanged(nameof(Xato)); ozgardi(); }
+}
+
+/// <summary>Nasiya kartasi qatori: muddati o'tgan (qizil) yoki muddati yaqin (neytral) qarz (§8.7).</summary>
 public sealed record OtganQarz(NasiyaDto N)
 {
+    public bool Otgan => N.Holati == NasiyaHolati.MuddatiOtgan;
     public string Summa => Format.Pul(N.Qoldiq);
-    public string MuddatEdi => Til.F("Savdo_MuddatEdi", Format.QisqaSana(N.Muddat));
-    public string KunOtdi => Til.F("Nasiya_KunOtdi", -N.MuddatgachaKun);
+    public string MuddatEdi => Til.F(Otgan ? "Savdo_MuddatEdi" : "Savdo_MuddatGacha", Format.QisqaSana(N.Muddat));
+    /// <summary>"N kun o'tdi" / "bugun" / "ertaga" / "N kun qoldi".</summary>
+    public string KunOtdi => QaytishDialogVM.NasiyaKun(N.MuddatgachaKun);
+    public string KunKlassi => Otgan ? "qizil" : N.MuddatgachaKun <= 1 ? "sariq" : "kok";
     public string Raqam => N.MashinaRaqami;
     public bool RaqamBor => !string.IsNullOrWhiteSpace(N.MashinaRaqami);
 }
@@ -111,14 +130,22 @@ public partial class SavdoViewModel : ObservableObject
 
     public SavdoViewModel()
     {
+        PlastikniTozala();
         Yukla();
         Malumot.Ozgardi += Yukla;
         Malumot.AloqaOzgardi += Buyruqlar;
         Til.Ozgardi += () => { Yukla(); OnPropertyChanged(string.Empty); };
-        // Davomiylik matni yangilanib tursin.
-        var t = new DispatcherTimer { Interval = TimeSpan.FromSeconds(30) };
-        t.Tick += (_, _) => { if (SmenaOchiq) { OnPropertyChanged(nameof(SmenaIzoh)); OnPropertyChanged(nameof(Davomiylik)); } };
-        t.Start();
+        // Davomiylik matni yangilanib tursin (har 30 s). DispatcherTimer emas, Task.Delay — taymer ishga tushmay qolardi.
+        _ = DavomiylikniYangilab();
+    }
+
+    private async Task DavomiylikniYangilab()
+    {
+        while (true)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            Dispatcher.UIThread.Post(() => { if (SmenaOchiq) { OnPropertyChanged(nameof(SmenaIzoh)); OnPropertyChanged(nameof(Davomiylik)); } });
+        }
     }
 
     // ================= Holat =================
@@ -151,9 +178,15 @@ public partial class SavdoViewModel : ObservableObject
     public List<AparatKartasi> Aparatlar { get; private set; } = new();
     public string AparatlarIzoh => Til.F("Savdo_AparatlarIzoh", OxirgiYopilgan?.Tugadi is { } t ? Format.QisqaSanaVaqt(t) : "—");
 
-    public List<YozuvQatori> Nasiyalar { get; private set; } = new();
-    public List<YozuvQatori> Qaytishlar { get; private set; } = new();
-    public List<YozuvQatori> Xarajatlar { get; private set; } = new();
+    // Joriy smena yozuvlari (nasiya / qaytish / xarajat) har doim AYNAN hozirgi smena tafsilotidan (T) olinadi:
+    // T almashsa (yangi smena — o'zi ochgan yoki SignalR), ro'yxatlar o'qilish paytida qayta quriladi — oldingi smena
+    // yozuvlari va "N ta" belgilari yangi smena sarlavhasi bilan birga bir lahza ham ko'rinmaydi.
+    private object? _royxatManbasi = new();
+    private List<YozuvQatori> _nasiyalar = new(), _qaytishlar = new(), _xarajatlar = new();
+    public List<YozuvQatori> Nasiyalar { get { RoyxatlarniTekshir(); return _nasiyalar; } }
+    public List<YozuvQatori> Qaytishlar { get { RoyxatlarniTekshir(); return _qaytishlar; } }
+    public List<YozuvQatori> Xarajatlar { get { RoyxatlarniTekshir(); return _xarajatlar; } }
+    private void RoyxatlarniTekshir() { if (!ReferenceEquals(_royxatManbasi, T)) RoyxatlarniQur(); }
     public bool NasiyaYoq => Nasiyalar.Count == 0 && Qaytishlar.Count == 0;
     public string NasiyaSoniBelgi => Til.F("Yopish_Ta", Nasiyalar.Count);
     public string QaytishSoniBelgi => Til.F("Yopish_Ta", Qaytishlar.Count);
@@ -163,13 +196,20 @@ public partial class SavdoViewModel : ObservableObject
     public string XarajatIzoh => Til.F("Savdo_XarajatIzoh", Xarajatlar.Count);
 
     public List<OtganQarz> OtganQarzlar { get; private set; } = new();
-    /// <summary>Karta qarzi bor mijozlar bo'lsa ko'rinadi (§8.7): tepada jami qarzdorlik, ostida muddati o'tganlar.</summary>
+    /// <summary>
+    /// Nasiya kartasi (§8.7, tuzatilgan): faol qarz bo'lsa ko'rinadi. Muddati o'tgan bo'lsa — qizil "Muddati o'tgan qarzlar"
+    /// va o'tganlar ro'yxati; o'tgan yo'q bo'lsa — neytral "Nasiyalar" kartasi, eng yaqin 3 ta muddat ("N kun qoldi") bilan.
+    /// Avval karta har doim qizil va "o'tgan" sarlavhali edi — yangi (muddati bor) nasiya ham "o'tgan" bo'lib ko'rinardi.
+    /// </summary>
     public bool OtganKorinsin => Joriy.Bor(Ruxsat.Nasiyalar) && (Malumot.FaolNasiyalar?.Xulosa.FaolSoni ?? 0) > 0;
+    public bool OtganBor => (Malumot.FaolNasiyalar?.Xulosa.MuddatiOtganSoni ?? 0) > 0;
+    public string NasiyaKartaSarlavha => Til.T(OtganBor ? "Savdo_MuddatiOtganQarzlar" : "Savdo_Nasiyalar");
     public bool OtganRoyxatBor => OtganQarzlar.Count > 0;
     public string JamiQarzdorlik => Til.F("Savdo_JamiQarzdorlik", Format.Pul(Malumot.FaolNasiyalar?.Xulosa.FaolQarz ?? 0),
         Malumot.FaolNasiyalar?.Xulosa.FaolSoni ?? 0);
-    public string OtganIzoh => Til.F("Savdo_MijozSumma", Malumot.FaolNasiyalar?.Xulosa.MuddatiOtganSoni ?? 0,
-        Format.Pul(Malumot.FaolNasiyalar?.Xulosa.MuddatiOtgan ?? 0));
+    public string OtganIzoh => OtganBor
+        ? Til.F("Savdo_MijozSumma", Malumot.FaolNasiyalar?.Xulosa.MuddatiOtganSoni ?? 0, Format.Pul(Malumot.FaolNasiyalar?.Xulosa.MuddatiOtgan ?? 0))
+        : Til.T("Savdo_YaqinMuddatlar");
 
     // Ruxsatlar
     public bool NasiyaYozaOladi => Joriy.Bor(Ruxsat.NasiyaYozish);
@@ -236,7 +276,11 @@ public partial class SavdoViewModel : ObservableObject
     // ================= Yopish ko'rinishi =================
 
     public ObservableCollection<YopishQatori> YopishQatorlari { get; } = new();
-    [ObservableProperty] private string _yopTerminal = "";
+    /// <summary>Plastik summalari (§8.9): terminal, kassa aparati, nollash cheki… — har biri alohida qator; boshida bitta bo'sh qator.</summary>
+    public ObservableCollection<PlastikQatori> PlastikQatorlari { get; } = new();
+    public const int PlastikMaks = 20;   // server cheklovi
+    /// <summary>Yangi qator qo'shildi — ko'rinish unga fokus beradi.</summary>
+    public event Action<PlastikQatori>? PlastikQoshildi;
     [ObservableProperty] private string _yopDepozit = "";
     [ObservableProperty] private string _sanalganNaqd = "";
     [ObservableProperty] private string _izoh = "";
@@ -245,10 +289,50 @@ public partial class SavdoViewModel : ObservableObject
     public string YopishBelgi => Til.F("Yopish_SmenaN", S?.Id ?? 0);
     public string YopishIzohi => S is { } s ? $"{s.Operator.ToliqIsm} · {Format.QisqaSanaVaqt(s.Boshlandi)} {Til.T("Savdo_Dan")} · {s.Davomiylik}" : "";
 
-    private long? TerminalQ => Format.PulOl(YopTerminal);
+    /// <summary>Bo'sh bo'lmagan plastik summalari; birortasi noto'g'ri bo'lsa yoki hammasi bo'sh bo'lsa — null.</summary>
+    private List<long>? PlastikSummalari =>
+        PlastikQatorlari.Any(q => q.Xato) || PlastikQatorlari.All(q => q.Bosh) ? null
+        : PlastikQatorlari.Where(q => !q.Bosh).Select(q => q.Qiymat!.Value).ToList();
+    /// <summary>Yopishdagi terminal (jami plastik) = qatorlar yig'indisi.</summary>
+    private long? TerminalQ => PlastikSummalari?.Sum();
     private long? DepozitQ => Format.PulOl(YopDepozit);
     private long? NaqdQ => Format.PulOl(SanalganNaqd);
-    public bool TerminalXato => YopTerminal.Trim().Length > 0 && TerminalQ is null;
+    public bool TerminalXato => PlastikQatorlari.Any(q => q.Xato);
+    public string JamiPlastikMatn => TerminalQ is { } t ? Format.Pul(t) : "—";
+    /// <summary>"Jami plastik" qatori — ikki va undan ko'p summa yozilganda.</summary>
+    public bool PlastikKopQator => PlastikQatorlari.Count(q => !q.Bosh) >= 2;
+    public bool PlastikQoshMumkin => PlastikQatorlari.Count < PlastikMaks;
+
+    private void PlastikniTozala()
+    {
+        PlastikQatorlari.Clear();
+        PlastikQatorlari.Add(new PlastikQatori(YopishHisobla) { Tartib = 1 });
+    }
+
+    private void PlastikRaqamla()
+    {
+        for (int i = 0; i < PlastikQatorlari.Count; i++) PlastikQatorlari[i].Tartib = i + 1;
+    }
+
+    [RelayCommand]
+    private void PlastikQosh()
+    {
+        if (!PlastikQoshMumkin) return;
+        var q = new PlastikQatori(YopishHisobla);
+        PlastikQatorlari.Add(q);
+        PlastikRaqamla();
+        YopishHisobla();
+        PlastikQoshildi?.Invoke(q);
+    }
+
+    [RelayCommand]
+    private void PlastikOchir(PlastikQatori q)
+    {
+        PlastikQatorlari.Remove(q);
+        if (PlastikQatorlari.Count == 0) PlastikQatorlari.Add(new PlastikQatori(YopishHisobla));
+        PlastikRaqamla();
+        YopishHisobla();
+    }
     public bool DepozitXato => YopDepozit.Trim().Length > 0 && DepozitQ is null;
 
     public bool HammaKorsatkich => YopishQatorlari.Count > 0 && YopishQatorlari.All(q => q.Litr is not null);
@@ -281,6 +365,40 @@ public partial class SavdoViewModel : ObservableObject
     public string Kutilgan => Natija is { } n ? Format.Pul(n.Kutilgan) : "—";
     public long? Farq => Natija is { } n && NaqdQ is not null ? n.Farq : null;
     public bool HolatToliqEmas => Natija is null;
+
+    /// <summary>Hisob chiqmasa — nima yetishmaydi: har noto'g'ri/bo'sh aparat qatori, terminal va depozit alohida.</summary>
+    public List<string> ToliqEmasSabablar
+    {
+        get
+        {
+            var l = new List<string>();
+            foreach (var q in YopishQatorlari)
+            {
+                if (q.Qiymat is { } v && v < q.Oldingi) l.Add(Til.F("Yopish_SababKichik", q.Nomi, q.OldingiMatn));
+                else if (q.Yangi.Trim().Length > 0 && q.Qiymat is null) l.Add(Til.F("Yopish_SababNotogri", q.Nomi));
+                else if (q.Litr is null) l.Add(Til.F("Yopish_SababBosh", q.Nomi));
+            }
+            if (TerminalXato) l.Add(Til.T("Yopish_SababPlastikXato"));
+            else if (TerminalQ is null) l.Add(Til.T("Yopish_SababTerminal"));
+            if (DepozitQ is null) l.Add(Til.T("Yopish_SababDepozit"));
+            return l;
+        }
+    }
+
+    /// <summary>
+    /// Faqat ba'zi aparat qatorlari yetishmasa (terminal va depozit kiritilgan): to'g'ri kiritilgan qatorlar bo'yicha
+    /// taxminiy "kassada bo'lishi kerak" — aniq qaysi aparatlar hisobga olinmaganini aytadi. Yopish baribir to'liq hisob talab qiladi.
+    /// </summary>
+    public string TaxminiyMatn
+    {
+        get
+        {
+            if (Natija is not null || S is not { } s || TerminalQ is not { } t || DepozitQ is not { } d || !YopishQatorlari.Any(q => q.Litr is not null)) return "";
+            var k = SmenaHisobi.Hisobla(s.OchishQaytim, s.OchishTerminal, s.OchishDepozit, JamiSumma, s.QaytganNasiya, s.NasiyaJami, s.XarajatJami, t, d, 0).Kutilgan;
+            return Til.F("Yopish_Taxminiy", Format.Pul(k), string.Join(", ", YopishQatorlari.Where(q => q.Litr is null).Select(q => q.Nomi)));
+        }
+    }
+    public bool TaxminiyBor => TaxminiyMatn.Length > 0;
     public bool HolatNaqd => Natija is not null && NaqdQ is null;
     public bool HolatKamomat => Farq < 0;
     public bool HolatOrtiqcha => Farq > 0;
@@ -292,7 +410,6 @@ public partial class SavdoViewModel : ObservableObject
     private static string Ayir(long? n) => n switch { null => "—", 0 => "0", > 0 => "−" + Format.Pul(n.Value), _ => "+" + Format.Pul(-n.Value) };
     private static string Qosh(long n) => n == 0 ? "0" : "+" + Format.Pul(n);
 
-    partial void OnYopTerminalChanged(string value) => YopishHisobla();
     partial void OnYopDepozitChanged(string value) => YopishHisobla();
     partial void OnSanalganNaqdChanged(string value) => YopishHisobla();
 
@@ -302,17 +419,33 @@ public partial class SavdoViewModel : ObservableObject
                      nameof(ShuSmenaPlastikMatn), nameof(PlastikKam), nameof(DepozitFarqiMatn), nameof(DepozitManfiy),
                      nameof(BQaytim), nameof(BSavdo), nameof(BQaytgan), nameof(BPlastik), nameof(BDepozit), nameof(BNasiya), nameof(BXarajat),
                      nameof(Kutilgan), nameof(Farq), nameof(HolatToliqEmas), nameof(HolatNaqd), nameof(HolatKamomat), nameof(HolatOrtiqcha),
-                     nameof(HolatTeng), nameof(FarqMatn), nameof(KamomatIzoh), nameof(QaydBor), nameof(QaydMatn) })
+                     nameof(HolatTeng), nameof(FarqMatn), nameof(KamomatIzoh), nameof(QaydBor), nameof(QaydMatn),
+                     nameof(ToliqEmasSabablar), nameof(TaxminiyMatn), nameof(TaxminiyBor),
+                     nameof(JamiPlastikMatn), nameof(PlastikKopQator), nameof(PlastikQoshMumkin) })
             OnPropertyChanged(n);
         SmenaniYopCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>Yopish formasi qaysi smena uchun to'ldirilgan. Smena Id o'zgarsa (yangi smena ochildi, boshqa operator ochdi,
+    /// SignalR orqali keldi) forma to'liq tozalanadi; bitta smena ichida yopish sahifasidan chiqib-qaytganda qiymatlar saqlanadi.</summary>
+    private int? _yopishSmenasi;
+
+    private void YopishFormasiniSmenagaMosla()
+    {
+        if (S?.Id == _yopishSmenasi) return;
+        _yopishSmenasi = S?.Id;
+        YopishQatorlari.Clear();   // eski "Yangi, L" qiymatlari yangi smenaga o'tmasin
+        PlastikniTozala();         // plastik — bitta bo'sh qatorga qaytadi
+        YopDepozit = SanalganNaqd = Izoh = YopishXato = "";
     }
 
     [RelayCommand]
     private void YopishniBoshla()
     {
         if (!YopaOladi) return;
+        YopishFormasiniSmenagaMosla();
         YopishQatorlariniQur();
-        YopTerminal = YopDepozit = SanalganNaqd = Izoh = YopishXato = "";
+        YopishXato = "";
         YopishRejimi = true;
         YopishHisobla();
     }
@@ -361,7 +494,7 @@ public partial class SavdoViewModel : ObservableObject
             var izoh = Izoh.Trim();
             await Malumot.SmenaYop(s.Id, new SmenaYopishDto(
                 YopishQatorlari.Select(q => new AparatKorsatkichDto(q.A.Id, q.Qiymat!.Value)).ToArray(),
-                TerminalQ!.Value, DepozitQ!.Value, NaqdQ!.Value, izoh.Length > 0 ? izoh : null));
+                TerminalQ!.Value, DepozitQ!.Value, NaqdQ!.Value, izoh.Length > 0 ? izoh : null, PlastikSummalari!.ToArray()));
             YopishRejimi = false;
         }
         catch (ApiXatosi e) { YopishXato = e.Message; }
@@ -403,19 +536,36 @@ public partial class SavdoViewModel : ObservableObject
 
         Aparatlar = Malumot.Aparatlar.OrderBy(a => a.Raqam).Select(a => new AparatKartasi(a, YoqilgiBelgi.Ol(a.Yoqilgi))).ToList();
 
+        RoyxatlarniQur();
+        var faol = Malumot.FaolNasiyalar?.Royxat ?? [];
+        OtganQarzlar = (OtganBor ? faol.Where(n => n.Holati == NasiyaHolati.MuddatiOtgan) : faol.Where(n => n.Holati == NasiyaHolati.Faol))
+            .OrderBy(n => n.MuddatgachaKun).Take(3).Select(n => new OtganQarz(n)).ToList();
+        YuklaDavomi();
+    }
+
+    private void RoyxatlarniQur()
+    {
         var t = T;
-        Nasiyalar = (t?.Nasiyalar ?? []).OrderBy(n => n.Yozildi).Select(n => new YozuvQatori(n.Id, "nasiya", n.MijozIsmi, Format.Telefon(n.Telefon),
+        _royxatManbasi = t;
+        _nasiyalar = (t?.Nasiyalar ?? []).OrderBy(n => n.Yozildi).Select(n => new YozuvQatori(n.Id, "nasiya", n.MijozIsmi, Format.Telefon(n.Telefon),
             Format.Pul(n.Summa), Til.F("Savdo_MuddatGacha", Format.QisqaSana(n.Muddat)),
             n.MuddatgachaKun <= 3 ? "sariq" : "kok", Format.BoshHarflar(n.MijozIsmi), n.MashinaRaqami, OchiraOladi(n.MuallifId))).ToList();
-        Qaytishlar = (t?.Qaytishlar ?? []).Select(q => new YozuvQatori(q.Id, "qaytish", q.MijozIsmi,
+        _qaytishlar = (t?.Qaytishlar ?? []).Select(q => new YozuvQatori(q.Id, "qaytish", q.MijozIsmi,
             $"{Til.T("Savdo_QarzniQaytardi")} · {Format.Vaqt(q.Vaqt.ToLocalTime())} · {Til.T("Tolov_" + q.Usul).ToLowerInvariant()}",
             "+" + Format.Pul(q.Summa), null, "", null, null, OchiraOladi(q.MuallifId))).ToList();
-        Xarajatlar = (t?.Xarajatlar ?? []).OrderByDescending(x => x.Vaqt).Select(x => new YozuvQatori(x.Id, "xarajat", x.Sabab,
+        _xarajatlar = (t?.Xarajatlar ?? []).OrderByDescending(x => x.Vaqt).Select(x => new YozuvQatori(x.Id, "xarajat", x.Sabab,
             $"{Format.Vaqt(x.Vaqt.ToLocalTime())} · {Til.T(x.Manba == XarajatManbai.Kassa ? "Savdo_Kassadan" : "Savdo_DepozitKartadan")}",
             Format.Pul(x.Summa), null, "", null, null, OchiraOladi(x.MuallifId))).ToList();
-        OtganQarzlar = (Malumot.FaolNasiyalar?.Royxat ?? []).Where(n => n.Holati == NasiyaHolati.MuddatiOtgan)
-            .OrderBy(n => n.MuddatgachaKun).Take(3).Select(n => new OtganQarz(n)).ToList();
+    }
 
+    private void YuklaDavomi()
+    {
+        // Smena almashgan bo'lsa (yopildi / yangisi ochildi) — yopish formasi tozalanadi; ochiq turgan yopish sahifasi yangi smena bilan quriladi.
+        if (_yopishSmenasi is not null && S?.Id != _yopishSmenasi)
+        {
+            YopishFormasiniSmenagaMosla();
+            if (YopishRejimi) YopishQatorlariniQur();
+        }
         // Yozib turilgan qatorlar faqat aparat yoki "oldingi" qiymat o'zgarsa qayta quriladi (fokus yo'qolmasin).
         if (YopishRejimi && QatorImzosi() != string.Join("|", YopishQatorlari.Select(q => $"{q.A.Id}:{q.Oldingi}:{q.Narx}")))
             YopishQatorlariniQur();

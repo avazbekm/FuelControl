@@ -11,6 +11,8 @@ namespace FuelControl.Desktop.Controls;
 /// Enter bilan keyingi maydonga o'tish (§8.4): ctl:EnterTartib.Guruh="yopish" berilgan elementlar oynadagi ko'rinish tartibida navbat bo'ladi.
 /// TextBox'da Enter bosilsa — fokus guruhdagi keyingi ko'rinadigan va faol elementga o'tadi (tugma bo'lsa faqat fokus oladi, bosilmaydi).
 /// Enter shu yerda "ishlatilgan" bo'ladi, shuning uchun IsDefault tugma ham o'zi bosilmaydi.
+/// TextBox'dan tashqari kiritish elementlari (masalan, CalendarDatePicker) ham navbatda qatnashadi; tugmaga ishlov
+/// biriktirilmaydi — fokusdagi tugmada Enter odatdagidek uni bosadi. Ko'p qatorli maydonda Shift+Enter — yangi qator.
 /// </summary>
 public static class EnterTartib
 {
@@ -22,8 +24,9 @@ public static class EnterTartib
 
     static EnterTartib()
     {
-        GuruhProperty.Changed.AddClassHandler<TextBox>((t, e) =>
+        GuruhProperty.Changed.AddClassHandler<Control>((t, e) =>
         {
+            if (t is Button) return;
             t.RemoveHandler(InputElement.KeyDownEvent, KeyBosildi);
             if (e.NewValue is string { Length: > 0 }) t.AddHandler(InputElement.KeyDownEvent, KeyBosildi, RoutingStrategies.Tunnel);
         });

@@ -81,7 +81,7 @@ public static class Malumot
     /// <summary>Yozuvchi amallar mumkinmi: yozish REST orqali, shuning uchun ulanayotganda ham ruxsat; faqat aloqa haqiqatan yo'q bo'lsa o'chadi.</summary>
     public static bool AloqaBor => Holat != AloqaHolati.Yoq;
     private const int UlanishKutish = 6; // soniya — shundan keyin ham ulanmasa "Aloqa yo'q"
-    private static DispatcherTimer? _ulanishTaymeri;
+    private static int _ulanishVersiyasi;
     public static event Action? AloqaOzgardi;
 
     /// <summary>Sessiya tugadi yoki o'z ruxsatlari o'zgardi — qayta kirish kerak. Parametr — sabab matni.</summary>
@@ -90,7 +90,7 @@ public static class Malumot
     private static HubConnection? _hub;
     private static bool _kirilgan;
     private static Bolim _kutilayotgan;
-    private static DispatcherTimer? _taymer;
+    private static int _rejaVersiyasi;
 
     // Ro'yxatda yo'q, lekin sotuv/smenada uchraydigan foydalanuvchilar (masalan, sotuv qilgan boshliq).
     private static readonly Dictionary<int, Foydalanuvchi> Begonalar = new();
@@ -133,7 +133,7 @@ public static class Malumot
     public static async Task Chiqish()
     {
         _kirilgan = false;
-        _taymer?.Stop();
+        _rejaVersiyasi++;   // rejadagi yuklash bekor
         _kutilayotgan = 0;
         var hub = _hub;
         _hub = null;
@@ -259,24 +259,23 @@ public static class Malumot
         catch (ApiXatosi) { }
     }
 
-    /// <summary>Bir nechta xabar ketma-ket kelsa, bitta yuklashga birlashtiriladi.</summary>
+    /// <summary>
+    /// Bir nechta xabar ketma-ket kelsa (300 ms ichida), bitta yuklashga birlashtiriladi.
+    /// DispatcherTimer emas, Task.Delay (KechiktirilganIsh kabi): taymer ishga tushmay qolsa, SignalR xabari
+    /// (masalan, admin xarajat yozdi/o'chirdi) ochiq turgan "Smenani yopish" sahifasini yangilamas edi.
+    /// </summary>
     private static void Rejala(Bolim b)
     {
         if (!_kirilgan) return;
         _kutilayotgan |= b;
-        if (_taymer is null)
+        var r = ++_rejaVersiyasi;
+        _ = Task.Delay(300).ContinueWith(_ => Dispatcher.UIThread.Post(async () =>
         {
-            _taymer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(300) };
-            _taymer.Tick += async (_, _) =>
-            {
-                _taymer!.Stop();
-                var x = _kutilayotgan;
-                _kutilayotgan = 0;
-                if (_kirilgan && x != 0) await JimYukla(x);
-            };
-        }
-        _taymer.Stop();
-        _taymer.Start();
+            if (r != _rejaVersiyasi) return;
+            var x = _kutilayotgan;
+            _kutilayotgan = 0;
+            if (_kirilgan && x != 0) await JimYukla(x);
+        }));
     }
 
     // ================= SignalR =================
@@ -353,24 +352,18 @@ public static class Malumot
 
     private static void HolatniOrnat(AloqaHolati h)
     {
-        _ulanishTaymeri?.Stop();
+        var v = ++_ulanishVersiyasi;   // oldingi "cho'zildi" tekshiruvi bekor
         if (h == AloqaHolati.Ulanmoqda)
         {
-            // Ulanish cho'zilsa — "Aloqa yo'q".
-            _ulanishTaymeri ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(UlanishKutish) };
-            _ulanishTaymeri.Tick -= UlanishTugadi;
-            _ulanishTaymeri.Tick += UlanishTugadi;
-            _ulanishTaymeri.Start();
+            // Ulanish cho'zilsa — "Aloqa yo'q". DispatcherTimer emas, Task.Delay: taymer ishga tushmay, holat "Ulanmoqda"da qotib qolardi.
+            _ = Task.Delay(TimeSpan.FromSeconds(UlanishKutish)).ContinueWith(_ => Dispatcher.UIThread.Post(() =>
+            {
+                if (v == _ulanishVersiyasi && Holat == AloqaHolati.Ulanmoqda) HolatniOrnat(AloqaHolati.Yoq);
+            }));
         }
         if (Holat == h) return;
         Holat = h;
         AloqaOzgardi?.Invoke();
-    }
-
-    private static void UlanishTugadi(object? s, EventArgs e)
-    {
-        _ulanishTaymeri?.Stop();
-        if (Holat == AloqaHolati.Ulanmoqda) HolatniOrnat(AloqaHolati.Yoq);
     }
 
     // ================= Yozuvchi amallar (API → kesh) =================

@@ -45,9 +45,11 @@ public abstract partial class DialogVM : ObservableObject
 
 // ========================= Nasiya yozish =========================
 
-/// <summary>Mavjud mijoz taklifi (§8.2).</summary>
-public sealed record MijozTaklifi(MijozTaklifDto M)
+/// <summary>Mavjud mijoz taklifi (§8.2). Tanlangan — ↑/↓ bilan belgilangan qator (§8.8).</summary>
+public sealed partial class MijozTaklifi(MijozTaklifDto m) : ObservableObject
 {
+    public MijozTaklifDto M { get; } = m;
+    [ObservableProperty] private bool _tanlangan;
     public string Harflar => Format.BoshHarflar(M.MijozIsmi);
     public string Izoh => string.Join(" · ", new[] { Format.Telefon(M.Telefon), M.MashinaRaqami }.Where(x => !string.IsNullOrWhiteSpace(x)));
     public string Qarz => M.FaolQarz > 0 ? Til.F("Nasiya_TaklifQarz", Format.Pul(M.FaolQarz)) : Til.T("Nasiya_TaklifQarzYoq");
@@ -63,6 +65,49 @@ public partial class NasiyaDialogVM : DialogVM
     /// <summary>Mavjud mijozlar takliflari (GET /nasiyalar/mijozlar?q=), 250 ms kechikish bilan.</summary>
     public ObservableCollection<MijozTaklifi> Takliflar { get; } = new();
     public bool TakliflarKorinsin => Takliflar.Count > 0;
+    /// <summary>Takliflar ro'yxati qaysi maydon ostida ochiladi: "ism" (mijoz ismi) yoki "aloqa" (telefon / mashina raqami).
+    /// Ro'yxat ustma-ust (overlay) chiziladi — paydo bo'lganda pastdagi maydonlar va "Saqlash" tugmasi siljimaydi.</summary>
+    private string _taklifManba = "ism";
+    public bool IsmTakliflari => TakliflarKorinsin && _taklifManba == "ism";
+    public bool AloqaTakliflari => TakliflarKorinsin && _taklifManba == "aloqa";
+    private int _tanlanganIndeks = -1;
+
+    private void TakliflarYangilandi()
+    {
+        _tanlanganIndeks = -1;
+        foreach (var n in new[] { nameof(TakliflarKorinsin), nameof(IsmTakliflari), nameof(AloqaTakliflari) }) OnPropertyChanged(n);
+    }
+
+    /// <summary>↑/↓: takliflar ichida yurish (ro'yxat ochiq bo'lsa). Qaytaradi — ishlatildimi.</summary>
+    public bool TaklifniSur(int qadam)
+    {
+        if (!TakliflarKorinsin) return false;
+        var i = _tanlanganIndeks < 0 ? (qadam > 0 ? 0 : Takliflar.Count - 1) : Math.Clamp(_tanlanganIndeks + qadam, 0, Takliflar.Count - 1);
+        for (int k = 0; k < Takliflar.Count; k++) Takliflar[k].Tanlangan = k == i;
+        _tanlanganIndeks = i;
+        return true;
+    }
+
+    /// <summary>Enter: belgilangan taklif bo'lsa — tanlanadi (ism, telefon, mashina to'ladi). Qaytaradi — tanlandimi.</summary>
+    public bool BelgilanganniTanla()
+    {
+        if (!TakliflarKorinsin || _tanlanganIndeks < 0 || _tanlanganIndeks >= Takliflar.Count) return false;
+        Toldir(Takliflar[_tanlanganIndeks].M, faqatBosh: false);
+        return true;
+    }
+
+    /// <summary>Esc yoki fokus boshqa maydonga o'tganda: ro'yxat yopiladi, matn o'zgarmaydi; kutilayotgan qidiruv bekor.</summary>
+    public void TakliflarniYop()
+    {
+        _takliflarYuklash.BekorQil();
+        _soralgan = "";
+        if (Takliflar.Count == 0) return;
+        Takliflar.Clear();
+        TakliflarYangilandi();
+    }
+
+    /// <summary>Saqlashdagi xato qaysi maydonga tegishli — ko'rinish fokusni o'sha yerga o'tkazadi (§8.8).</summary>
+    [ObservableProperty] private string _xatoMaydon = "";
     /// <summary>"Mavjud mijoz · faol qarz X" — tanlangan yoki telefon bo'yicha topilgan mijoz.</summary>
     [ObservableProperty] private string _mavjudIzoh = "";
     public bool MavjudBor => MavjudIzoh.Length > 0;
@@ -74,17 +119,18 @@ public partial class NasiyaDialogVM : DialogVM
 
     public NasiyaDialogVM() => _takliflarYuklash = new Kechiktirgich(TakliflarniYukla, 250);
 
-    partial void OnMijozIsmiChanged(string value) => MaydonOzgardi(value);
-    partial void OnMashinaRaqamiChanged(string value) => MaydonOzgardi(value);
-    partial void OnTelefonChanged(string value) => MaydonOzgardi(Format.TelefonRaqamlari(value));
+    partial void OnMijozIsmiChanged(string value) => MaydonOzgardi(value, "ism");
+    partial void OnMashinaRaqamiChanged(string value) => MaydonOzgardi(value, "aloqa");
+    partial void OnTelefonChanged(string value) => MaydonOzgardi(Format.TelefonRaqamlari(value), "aloqa");
 
     /// <summary>Foydalanuvchi yozganda — oxirgi tahrirlangan maydon bo'yicha qidiriladi (telefon — raqamlari bilan).</summary>
-    private void MaydonOzgardi(string q)
+    private void MaydonOzgardi(string q, string manba)
     {
         if (_toldirilmoqda || !Ochiq) return;
         MavjudIzoh = "";
+        _taklifManba = manba;
         _soralgan = q.Trim();
-        if (_soralgan.Length == 0) { Takliflar.Clear(); OnPropertyChanged(nameof(TakliflarKorinsin)); return; }
+        if (_soralgan.Length == 0) { _takliflarYuklash.BekorQil(); Takliflar.Clear(); TakliflarYangilandi(); return; }
         _takliflarYuklash.Rejala();
     }
 
@@ -104,7 +150,7 @@ public partial class NasiyaDialogVM : DialogVM
         }
         Takliflar.Clear();
         foreach (var m in l) Takliflar.Add(new MijozTaklifi(m));
-        OnPropertyChanged(nameof(TakliflarKorinsin));
+        TakliflarYangilandi();
     }
 
     private void Toldir(MijozTaklifDto m, bool faqatBosh)
@@ -118,8 +164,9 @@ public partial class NasiyaDialogVM : DialogVM
         }
         finally { _toldirilmoqda = false; }
         MavjudIzoh = Til.F("Nasiya_MavjudMijoz", Format.Pul(m.FaolQarz));
+        _takliflarYuklash.BekorQil();
         Takliflar.Clear();
-        OnPropertyChanged(nameof(TakliflarKorinsin));
+        TakliflarYangilandi();
     }
 
     [RelayCommand] private void TaklifniTanla(MijozTaklifi t) => Toldir(t.M, faqatBosh: false);
@@ -144,8 +191,9 @@ public partial class NasiyaDialogVM : DialogVM
         _toldirilmoqda = true;
         MijozIsmi = Telefon = MashinaRaqami = Summa = Izoh = Xato = "";
         _toldirilmoqda = false;
-        MavjudIzoh = ""; _soralgan = "";
-        Takliflar.Clear(); OnPropertyChanged(nameof(TakliflarKorinsin));
+        MavjudIzoh = ""; _soralgan = ""; XatoMaydon = "";
+        _takliflarYuklash.BekorQil();
+        Takliflar.Clear(); TakliflarYangilandi();
         Muddat = DateTime.Today.AddDays(7);
         OnPropertyChanged(nameof(Kontekst));
         Ochiq = true;
@@ -160,17 +208,26 @@ public partial class NasiyaDialogVM : DialogVM
         _ => DateTime.Today.AddMonths(1),
     };
 
+    private Task XatoBer(string kalit, string maydon)
+    {
+        XatoMaydon = "";
+        Xato = Til.T(kalit);
+        XatoMaydon = maydon;
+        return Task.CompletedTask;
+    }
+
     [RelayCommand]
     private Task Saqla()
     {
+        TakliflarniYop();
         // §7.10: ism, summa > 0, muddat majburiy; telefon yoki mashina raqamidan kamida bittasi; muddat bugundan oldin emas.
-        if (string.IsNullOrWhiteSpace(MijozIsmi)) { Xato = Til.T("Nasiya_XatoIsm"); return Task.CompletedTask; }
+        if (string.IsNullOrWhiteSpace(MijozIsmi)) return XatoBer("Nasiya_XatoIsm", "ism");
         var telefon = Format.TelefonSaqlash(Telefon);
-        if (telefon is null) { Xato = Til.T("Nasiya_XatoTelefon"); return Task.CompletedTask; }
-        if (telefon.Length == 0 && string.IsNullOrWhiteSpace(MashinaRaqami)) { Xato = Til.T("Nasiya_XatoAloqa"); return Task.CompletedTask; }
-        if (Format.PulOl(Summa) is not > 0) { Xato = Til.T("Nasiya_XatoSumma"); return Task.CompletedTask; }
-        if (Muddat is not { } m) { Xato = Til.T("Nasiya_XatoMuddat"); return Task.CompletedTask; }
-        if (DateOnly.FromDateTime(m.Date) < Bugun) { Xato = Til.T("Nasiya_XatoMuddatOtgan"); return Task.CompletedTask; }
+        if (telefon is null) return XatoBer("Nasiya_XatoTelefon", "telefon");
+        if (telefon.Length == 0 && string.IsNullOrWhiteSpace(MashinaRaqami)) return XatoBer("Nasiya_XatoAloqa", "telefon");
+        if (Format.PulOl(Summa) is not > 0) return XatoBer("Nasiya_XatoSumma", "summa");
+        if (Muddat is not { } m) return XatoBer("Nasiya_XatoMuddat", "muddat");
+        if (DateOnly.FromDateTime(m.Date) < Bugun) return XatoBer("Nasiya_XatoMuddatOtgan", "muddat");
         var izoh = Izoh.Trim();
         return Bajar(() => Malumot.NasiyaYoz(new NasiyaYaratishDto(MijozIsmi.Trim(), telefon, MashinaRaqami.Trim().ToUpperInvariant(),
             Format.PulOl(Summa)!.Value, DateOnly.FromDateTime(m.Date), izoh.Length > 0 ? izoh : null)));
@@ -274,7 +331,20 @@ public partial class QaytishDialogVM : DialogVM
         var d = await Malumot.Api.Nasiyalar("faol", q);
         if (!dolzarb() || q != Qidiruv.Trim() || d is null) return;
         _serverNatija = d.Royxat;
+        // Qator bosilib turgan paytda ro'yxat almashsa, tugma qayta yaratiladi va bosish yo'qoladi — natija qo'yib yuborilgach qo'llanadi
+        if (_ushlangan) { _kechikkan = true; return; }
         Filtrla();
+    }
+
+    private bool _ushlangan, _kechikkan;
+
+    /// <summary>Ko'rinish: ro'yxatdagi qator bosilganda true, qo'yib yuborilganda (bosish ishlangach) false.</summary>
+    public void RoyxatniUshla(bool ha)
+    {
+        _ushlangan = ha;
+        if (ha || !_kechikkan) return;
+        _kechikkan = false;
+        if (Tanlangan is null) Filtrla();
     }
     partial void OnTanlanganChanged(NasiyaDto? value) { Summa = ""; Yangila(); }
     partial void OnSummaChanged(string value) => Yangila();

@@ -7,6 +7,17 @@
              x:DataType="vm:MainViewModel">
 
     <UserControl.Styles>
+        <Style Selector="Border.taklifOyna">
+            <Setter Property="Background" Value="{DynamicResource DialogFon}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ShishaChegara}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="BoxShadow" Value="0 12 32 0 #3314285A" />
+        </Style>
+        <Style Selector="Button.taklif.tanlangan">
+            <Setter Property="Background" Value="{DynamicResource BadgeKokFon}" />
+        </Style>
         <Style Selector="Border.dialog.smena">
             <Setter Property="Width" Value="600" />
             <Setter Property="Padding" Value="30,28" />
@@ -28,7 +39,7 @@
 
     <Panel>
         <!-- ===================== Nasiya yozish ===================== -->
-        <Border Classes="parda" DataContext="{Binding NasiyaDialog}" x:DataType="vm:NasiyaDialogVM" IsVisible="{Binding Ochiq}">
+        <Border x:Name="NasiyaParda" Classes="parda" DataContext="{Binding NasiyaDialog}" x:DataType="vm:NasiyaDialogVM" IsVisible="{Binding Ochiq}">
             <Border Classes="dialog smena">
                 <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="14">
@@ -42,50 +53,83 @@
                         </StackPanel>
                         <Button Grid.Column="2" Classes="yopX" Command="{Binding YopCommand}" ToolTip.Tip="{l:T Yopish}"><ctl:Ikon Nomi="x" Olcham="15" /></Button>
                     </Grid>
-                    <StackPanel>
-                        <TextBlock Text="{l:T Nasiya_MijozIsmi, Katta=True}" Classes="yorliq" />
-                        <TextBox Text="{Binding MijozIsmi}" PlaceholderText="{l:T Nasiya_IsmPlaceholder}" MinHeight="46" CornerRadius="23" ctl:AvtoFokus.Yoqilgan="True" />
+                    <StackPanel ZIndex="10">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <TextBlock Text="{l:T Nasiya_MijozIsmi, Katta=True}" Classes="yorliq" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right" VerticalAlignment="Top" IsVisible="{Binding MavjudBor}">
+                                <ctl:Ikon Nomi="user" Olcham="13" Rang="{DynamicResource Yashil}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding MavjudIzoh}" FontWeight="SemiBold" FontSize="12.5" Foreground="{DynamicResource Yashil}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBox x:Name="NasiyaIsm" Text="{Binding MijozIsmi}" PlaceholderText="{l:T Nasiya_IsmPlaceholder}" MinHeight="46" CornerRadius="23" ctl:AvtoFokus.Yoqilgan="True" />
+                        <!-- Takliflar: maydon ostida ustma-ust (Height=0 Canvas — tartibga hech qanday joy, hatto oraliq ham qo'shmaydi), ochilish/yopilishda pastdagi maydonlar va "Saqlash" siljimaydi -->
+                        <Canvas Height="0" ZIndex="10" IsVisible="{Binding IsmTakliflari}">
+                            <Border Canvas.Top="4" Width="{Binding $parent[Canvas].Bounds.Width}" MaxHeight="268" Classes="taklifOyna">
+                                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{l:T Nasiya_MavjudMijozlar, Katta=True}" Classes="yorliq" Margin="8,4,0,2" />
+                                        <ItemsControl ItemsSource="{Binding Takliflar}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:MijozTaklifi">
+                                                    <Button Classes="karta taklif" Classes.tanlangan="{Binding Tanlangan}" CornerRadius="14" Focusable="False"
+                                                            Command="{Binding $parent[ItemsControl].((vm:NasiyaDialogVM)DataContext).TaklifniTanlaCommand}" CommandParameter="{Binding}">
+                                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="8,6">
+                                                            <Border Classes="avatar" Width="32" Height="32"><TextBlock Text="{Binding Harflar}" FontSize="11.5" /></Border>
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                                                <TextBlock Text="{Binding M.MijozIsmi}" FontWeight="Bold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
+                                                                <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding Izoh}" Classes="izoh" /></Viewbox>
+                                                            </StackPanel>
+                                                            <Border Grid.Column="2" Classes="badge" ctl:Klass.Nomi="{Binding QarzKlassi}" VerticalAlignment="Center"><TextBlock Text="{Binding Qarz}" /></Border>
+                                                        </Grid>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Border>
+                        </Canvas>
                     </StackPanel>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="14" ZIndex="9">
                         <StackPanel>
                             <TextBlock Text="{l:T Nasiya_Telefon, Katta=True}" Classes="yorliq" />
-                            <TextBox Text="{Binding Telefon}" ctl:TelefonMaydon.Yoqilgan="True" MinHeight="46" CornerRadius="23" FontWeight="SemiBold" />
+                            <TextBox x:Name="NasiyaTelefon" Text="{Binding Telefon}" ctl:TelefonMaydon.Yoqilgan="True" ctl:EnterTartib.Guruh="nasiya" MinHeight="46" CornerRadius="23" FontWeight="SemiBold" />
                         </StackPanel>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="{l:T Nasiya_MashinaRaqami, Katta=True}" Classes="yorliq" />
-                            <TextBox Text="{Binding MashinaRaqami}" PlaceholderText="01 A 777 BC" MinHeight="46" CornerRadius="23" FontWeight="ExtraBold" FontSize="16" LetterSpacing="1" />
+                            <TextBox x:Name="NasiyaMashina" Text="{Binding MashinaRaqami}" PlaceholderText="01 A 777 BC" ctl:EnterTartib.Guruh="nasiya" MinHeight="46" CornerRadius="23" FontWeight="ExtraBold" FontSize="16" LetterSpacing="1" />
                         </StackPanel>
+                        <!-- Takliflar: maydon ostida ustma-ust (Height=0 Canvas — tartibga hech qanday joy, hatto oraliq ham qo'shmaydi), ochilish/yopilishda pastdagi maydonlar va "Saqlash" siljimaydi -->
+                        <Canvas Height="0" ZIndex="10" Grid.ColumnSpan="2" VerticalAlignment="Bottom" IsVisible="{Binding AloqaTakliflari}">
+                            <Border Canvas.Top="4" Width="{Binding $parent[Canvas].Bounds.Width}" MaxHeight="268" Classes="taklifOyna">
+                                <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{l:T Nasiya_MavjudMijozlar, Katta=True}" Classes="yorliq" Margin="8,4,0,2" />
+                                        <ItemsControl ItemsSource="{Binding Takliflar}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:MijozTaklifi">
+                                                    <Button Classes="karta taklif" Classes.tanlangan="{Binding Tanlangan}" CornerRadius="14" Focusable="False"
+                                                            Command="{Binding $parent[ItemsControl].((vm:NasiyaDialogVM)DataContext).TaklifniTanlaCommand}" CommandParameter="{Binding}">
+                                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="8,6">
+                                                            <Border Classes="avatar" Width="32" Height="32"><TextBlock Text="{Binding Harflar}" FontSize="11.5" /></Border>
+                                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                                                <TextBlock Text="{Binding M.MijozIsmi}" FontWeight="Bold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
+                                                                <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding Izoh}" Classes="izoh" /></Viewbox>
+                                                            </StackPanel>
+                                                            <Border Grid.Column="2" Classes="badge" ctl:Klass.Nomi="{Binding QarzKlassi}" VerticalAlignment="Center"><TextBlock Text="{Binding Qarz}" /></Border>
+                                                        </Grid>
+                                                    </Button>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Border>
+                        </Canvas>
                     </Grid>
-                    <Border Classes="yashilTile" Padding="14,8" IsVisible="{Binding MavjudBor}">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <ctl:Ikon Nomi="user" Olcham="14" Rang="{DynamicResource YashilTileMatn}" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding MavjudIzoh}" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource YashilTileMatn}" />
-                        </StackPanel>
-                    </Border>
-                    <Border Classes="ichki" Padding="8,6" IsVisible="{Binding TakliflarKorinsin}">
-                        <StackPanel Spacing="2">
-                            <TextBlock Text="{l:T Nasiya_MavjudMijozlar, Katta=True}" Classes="yorliq" Margin="8,4,0,2" />
-                            <ItemsControl ItemsSource="{Binding Takliflar}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:MijozTaklifi">
-                                        <Button Classes="karta" CornerRadius="14" Command="{Binding $parent[ItemsControl].((vm:NasiyaDialogVM)DataContext).TaklifniTanlaCommand}" CommandParameter="{Binding}">
-                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="8,6">
-                                                <Border Classes="avatar" Width="32" Height="32"><TextBlock Text="{Binding Harflar}" FontSize="11.5" /></Border>
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                                    <TextBlock Text="{Binding M.MijozIsmi}" FontWeight="Bold" FontSize="13.5" TextTrimming="CharacterEllipsis" />
-                                                    <TextBlock Text="{Binding Izoh}" Classes="izoh" TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-                                                <Border Grid.Column="2" Classes="badge" ctl:Klass.Nomi="{Binding QarzKlassi}" VerticalAlignment="Center"><TextBlock Text="{Binding Qarz}" /></Border>
-                                            </Grid>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </Border>
                     <StackPanel>
                         <TextBlock Text="{l:T Nasiya_QarzSummasi, Katta=True}" Classes="yorliq" />
-                        <TextBox Classes="dialogKatta" Text="{Binding Summa}" PlaceholderText="0" />
+                        <TextBox x:Name="NasiyaSumma" Classes="dialogKatta" Text="{Binding Summa}" PlaceholderText="0" ctl:EnterTartib.Guruh="nasiya" />
                     </StackPanel>
                     <StackPanel Spacing="10">
                         <TextBlock Text="{l:T Nasiya_Muddat, Katta=True}" Classes="yorliq" Margin="0" />
@@ -97,20 +141,21 @@
                         </StackPanel>
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                             <TextBlock Text="{l:T Nasiya_Sana}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
-                            <CalendarDatePicker Grid.Column="1" SelectedDate="{Binding Muddat}" HorizontalAlignment="Stretch" MinHeight="46" CornerRadius="23" SelectedDateFormat="Custom" CustomDateFormatString="dd.MM.yyyy" />
+                            <CalendarDatePicker x:Name="NasiyaMuddat" Grid.Column="1" SelectedDate="{Binding Muddat}" HorizontalAlignment="Stretch" MinHeight="46" CornerRadius="23" SelectedDateFormat="Custom" CustomDateFormatString="dd.MM.yyyy" ctl:EnterTartib.Guruh="nasiya" />
                             <Border Grid.Column="2" Classes="badge kok"><TextBlock Text="{Binding MuddatBelgi}" /></Border>
                         </Grid>
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="{l:T Nasiya_Izoh, Katta=True}" Classes="yorliq" />
-                        <TextBox Text="{Binding Izoh}" PlaceholderText="{l:T Nasiya_IzohPlaceholder}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="72"
+                        <TextBox x:Name="NasiyaIzoh" Text="{Binding Izoh}" PlaceholderText="{l:T Nasiya_IzohPlaceholder}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="72" ctl:EnterTartib.Guruh="nasiya"
                                  VerticalContentAlignment="Top" Padding="18,12" CornerRadius="20" />
                     </StackPanel>
-                    <Border Classes="malumot"><TextBlock Text="{l:T Nasiya_YozishIzoh}" /></Border>
-                    <TextBlock Text="{Binding Xato}" Classes="xatoMatn" IsVisible="{Binding Xato, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <Border Classes="malumot"><TextBlock Text="{l:T Nasiya_YozishIzoh}" TextWrapping="Wrap" /></Border>
+                    <!-- Xato tugmalar yonida; Enter bilan tugma faqat fokus oladi (IsDefault yo'q — Enter hech qachon o'zi saqlamaydi) -->
+                    <TextBlock x:Name="NasiyaXato" Text="{Binding Xato}" Classes="xatoMatn" TextWrapping="Wrap" IsVisible="{Binding Xato, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                     <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
                         <Button Content="{l:T BekorQilish}" Command="{Binding YopCommand}" />
-                        <Button Classes="primary" MinWidth="110" Content="{l:T Saqlash}" Command="{Binding SaqlaCommand}" IsDefault="True" />
+                        <Button x:Name="NasiyaSaqla" Classes="primary" MinWidth="110" Content="{l:T Saqlash}" Command="{Binding SaqlaCommand}" ctl:EnterTartib.Guruh="nasiya" />
                     </StackPanel>
                 </StackPanel>
                 </ScrollViewer>
@@ -140,7 +185,7 @@
                             <TextBox.InnerLeftContent><ctl:Ikon Nomi="search" Olcham="16" Margin="14,0,0,0" Rang="{DynamicResource MatnIkkilamchi}" /></TextBox.InnerLeftContent>
                         </TextBox>
                         <TextBlock Text="{l:T Nasiya_QarzdorYoq}" Classes="izoh" IsVisible="{Binding TopilmadiKorinsin}" Margin="4" />
-                        <ItemsControl ItemsSource="{Binding Topilganlar}">
+                        <ItemsControl x:Name="QaytishRoyxat" ItemsSource="{Binding Topilganlar}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="vm:QarzdorQatori">
                                     <Button Classes="karta" Margin="0,2" Command="{Binding $parent[ItemsControl].((vm:QaytishDialogVM)DataContext).TanlaCommand}" CommandParameter="{Binding}">
