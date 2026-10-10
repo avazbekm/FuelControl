@@ -25,6 +25,14 @@ public static class Dtolar
             null, null, null, 0, 0, 0, 0, y.NasiyaJami, y.QaytganNasiya, y.XarajatJami, 0, 0, s.Izoh, []);
     }
 
+    /// <summary>
+    /// Yopilgan smenaning pul natijalari yashirilgan nusxasi (SignalR: keyingi operator va boshqa kuzatuvchilarga, docs 8.10). Id, OperatorId,
+    /// OperatorIsmi, Boshlandi va Tugadi qoladi; qolgani - ochish qoldiqlari, savdo, litr, plastik (+ qismlari), depozit, nasiya, qaytgan, xarajat,
+    /// kutilgan, farq - 0, yopish terminal/depozit va sanalgan naqd - null, izoh - null, PlastikSummalari - bo'sh.
+    /// </summary>
+    public static SmenaDto PulSiz(this SmenaDto d) =>
+        new(d.Id, d.OperatorId, d.OperatorIsmi, d.Boshlandi, d.Tugadi, 0, 0, 0, null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, []);
+
     public static NasiyaDto Dto(this Nasiya n, DateOnly bugun) => new(n.Id, n.SmenaId, n.KimYozdi, n.MijozIsmi, n.Telefon, n.MashinaRaqami,
         n.Summa, n.Qaytgan, n.Qoldiq, n.Muddat, NasiyaXizmati.Holat(n, bugun), NasiyaXizmati.MuddatgachaKun(n, bugun), n.Yozildi, n.Yopildi, n.Izoh, n.OperatorId);
 

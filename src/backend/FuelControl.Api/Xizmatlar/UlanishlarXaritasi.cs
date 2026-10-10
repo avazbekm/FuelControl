@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using FuelControl.Api.Auth;
+using FuelControl.Contracts;
+using FuelControl.Contracts.Dto;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FuelControl.Api.Xizmatlar;
@@ -20,6 +22,34 @@ public sealed class UlanishlarXaritasi(IHubContext<SotuvHub> hub, ILogger<Ulanis
     public void Olib(string connectionId) => _ulanishlar.TryRemove(connectionId, out _);
 
     public int Soni(int foydalanuvchiId) => _ulanishlar.Values.Count(x => x.FoydalanuvchiId == foydalanuvchiId);
+
+    /// <summary>
+    /// Yopilgan smena hodisasi (yopish, ko'rsatkich tuzatish) qabul qiluvchilari: to'liq natija - "Smenalar" ruxsatlilar va smena egasi;
+    /// kuzatuvchilarning qolgani (masalan, keyingi operator) uchun pul natijalari yashirilgan nusxa (docs 8.10). Ruxsat ulanish paytida
+    /// belgilanadi, o'zgarsa ulanish uziladi (<see cref="Uz"/>), shuning uchun xarita ulanish guruhlari bilan bir xil ma'lumotga tayanadi.
+    /// </summary>
+    public (List<string> Toliq, List<string> Yashirin) SmenaQabulqiluvchilari(int egasiId)
+    {
+        List<string> toliq = [], yashirin = [];
+        foreach (var (id, (foydalanuvchiId, kontekst)) in _ulanishlar)
+        {
+            var u = kontekst.User!;
+            if (foydalanuvchiId == egasiId || u.Bor(Ruxsat.Smenalar)) toliq.Add(id);
+            else if (SotuvHub.Kuzatuvchimi(u)) yashirin.Add(id);
+        }
+        return (toliq, yashirin);
+    }
+
+    /// <summary>
+    /// Yopilgan smenaning SmenaOzgardi hodisasi: to'liq DTO faqat "Smenalar" ruxsatlilarga va egasiga; qolgan kuzatuvchilarga pul maydonlari
+    /// nollangan nusxa - keyingi operator oldingi operatorning natijasini ulanish darajasida ham olmaydi.
+    /// </summary>
+    public async Task YopilganSmena(SmenaDto toliq)
+    {
+        var (toliqIdlar, yashirinIdlar) = SmenaQabulqiluvchilari(toliq.OperatorId);
+        if (toliqIdlar.Count > 0) await hub.Clients.Clients(toliqIdlar).SendAsync(Xabarlar.SmenaOzgardi, toliq);
+        if (yashirinIdlar.Count > 0) await hub.Clients.Clients(yashirinIdlar).SendAsync(Xabarlar.SmenaOzgardi, toliq.PulSiz());
+    }
 
     public async Task Uz(int foydalanuvchiId)
     {

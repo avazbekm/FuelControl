@@ -31,6 +31,14 @@ public sealed record SmenaKorsatkichDto(int AparatId, int AparatRaqam, string Yo
 public sealed record SmenaTafsilotDto(SmenaDto Smena, SmenaKorsatkichDto[] Korsatkichlar,
     NasiyaDto[] Nasiyalar, NasiyaQaytishiDto[] Qaytishlar, XarajatDto[] Xarajatlar);
 
+/// <summary>
+/// GET /smenalar/oxirgi/topshirish - keyingi operator uchun oldingi (oxirgi yopilgan) smenaning topshirish ma'lumoti. Pul natijasi YO'Q
+/// (savdo, plastik, terminal, kamomat... ko'rsatilmaydi): to'liq natija /smenalar/oxirgi da, faqat boshliq (Smenalar ruxsati) va shu smenaning
+/// operatoriga. OperatorId - klient "bu mening smenammi"ni ism bo'yicha emas, shu Id bo'yicha hal qiladi (o'ziniki bo'lsa to'liq natija
+/// /smenalar/oxirgi dan olinadi, 403 chiqmaydi). Tugadi - UTC. YopishDepozit - yopilgandagi depozit karta qoldig'i (faqat ma'lumot uchun).
+/// </summary>
+public sealed record SmenaTopshirishDto(int Id, int OperatorId, string OperatorIsmi, DateTime Tugadi, long? YopishDepozit);
+
 /// <summary>Boshqaruv grafigi uchun: Sana - smena ochilgan Toshkent sanasi.</summary>
 public sealed record SmenaQisqaDto(int Id, DateOnly Sana, string OperatorIsmi, long Savdo, decimal Litr, long Farq);
 

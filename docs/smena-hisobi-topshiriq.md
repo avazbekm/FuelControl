@@ -269,6 +269,19 @@ Olib tashlanadi: barcha `/sotuvlar` yo'llari. `/operatorlar/{id}/hisob` saqlanad
      - Server summalarni smenada saqlaydi; migratsiya qo'shimcha ustun bilan.
      - `SmenaDto` oxiriga `long[] PlastikSummalari` qo'shiladi; eski smenalarda bo'sh massiv.
    - **Ko'rinishi:** Smenalar tafsiloti va smena Excel eksportida plastik qismlari bilan chiqadi, masalan "7 830 000 + 300 000 + 150 000 = 8 280 000; ochishda 200 000 → shu smena 8 080 000". Eski smenalarda bitta raqam ko'rinadi.
+10. **Savdo (smena yopiq): "Oxirgi smena" kartasi (2026-10-10).** Keyingi operator oldingi operatorning pul natijasini ko'rmasligi kerak.
+   - **Natija qismi** (savdo, litr, plastik, depozit farqi, nasiya, xarajat, kamomat yoki ortiqcha) faqat ikki kishiga ko'rinadi: boshliqqa (`Smenalar` ruxsati) va shu smenaning operatoriga (`OperatorId` = joriy foydalanuvchi).
+   - **Qolganlar**, ya'ni keyingi operator, faqat "Oldingi smena" topshirish blokini ko'radi:
+     - "#N · operator · DD.MM HH:mm da yopildi";
+     - "Yopilgandagi depozit karta qoldig'i: X".
+     Qiymat faqat ma'lumot uchun. U ochish formasiga avtomatik yozilmaydi, chunki qoldiqlar qo'lda kiritiladi (1-bo'lim).
+   - **Terminal ko'rsatilmaydi.** Plastik endi bir necha summa yig'indisi (8.9) va terminal ekranidagi joriy summaga teng emas. Operator terminal summasini terminalning o'zidan yozadi.
+   - **Server:**
+     - `GET /smenalar/oxirgi` to'liq `SmenaTafsilotDto` ni faqat `Smenalar` ruxsati bor foydalanuvchiga yoki shu smenaning operatoriga beradi, boshqalarga 403.
+     - Yangi `GET /smenalar/oxirgi/topshirish` endpointi `SmenaTopshirishDto(int Id, int OperatorId, string OperatorIsmi, DateTime Tugadi, long? YopishDepozit)` qaytaradi, yopilgan smena bo'lmasa 204. Ruxsati `/smenalar/joriy` bilan bir xil.
+   - **Klient tartibi** (403 hech qachon chiqmasligi kerak):
+     1. `Smenalar` ruxsati bo'lsa, `/smenalar/oxirgi` chaqiriladi va to'liq karta ko'rsatiladi.
+     2. Aks holda `/smenalar/oxirgi/topshirish` chaqiriladi. `OperatorId` joriy foydalanuvchiga teng bo'lsa, `/smenalar/oxirgi` dan to'liq karta olinadi. Teng bo'lmasa, faqat topshirish bloki ko'rsatiladi.
 
 ## 9. Ish tartibi
 

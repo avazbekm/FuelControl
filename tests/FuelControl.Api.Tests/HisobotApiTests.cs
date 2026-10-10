@@ -144,8 +144,10 @@ public sealed class HisobotApiTests : ApiBaza
         Assert.Equal((bosh.Id, ali.Id), (tafsilot.Qaytishlar.Single().MuallifId, tafsilot.Nasiya.MuallifId));
 
         await Oqi<SmenaDto>(await Yop(op, smena.Id, Oxirgi(await Aparatlar(op), 10m), naqd: 0));
-        var oxirgi = await Oqi<SmenaTafsilotDto>(await ruxsatsiz.GetAsync("/smenalar/oxirgi"));            // ruxsati joriy bilan bir xil: kirgan har kim
+        var oxirgi = await Oqi<SmenaTafsilotDto>(await op.GetAsync("/smenalar/oxirgi"));                  // o'z smenasi: to'liq natija
         Assert.Equal(smena.Id, oxirgi.Smena.Id);
+        Assert.Equal(HttpStatusCode.Forbidden, (await ruxsatsiz.GetAsync("/smenalar/oxirgi")).StatusCode);   // boshqa operator natijani ko'rmaydi (docs 8.10)
+        Assert.Equal(smena.Id, (await Oqi<SmenaTopshirishDto>(await ruxsatsiz.GetAsync("/smenalar/oxirgi/topshirish"))).Id);   // topshirish: kirgan har kim
         Assert.Equal((5, 1, 0, 1), (oxirgi.Korsatkichlar.Length, oxirgi.Nasiyalar.Length, oxirgi.Qaytishlar.Length, oxirgi.Xarajatlar.Length));
         Assert.Equal(ali.Id, oxirgi.Nasiyalar[0].MuallifId);
         Assert.Equal(HttpStatusCode.Unauthorized, (await Ilova.CreateClient().GetAsync("/smenalar/oxirgi")).StatusCode);

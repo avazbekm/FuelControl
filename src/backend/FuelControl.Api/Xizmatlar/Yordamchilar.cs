@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using FuelControl.Api.Auth;
 using FuelControl.Api.Data;
 using FuelControl.Contracts;
@@ -15,6 +16,10 @@ public sealed class SotuvHub(UlanishlarXaritasi ulanishlar) : Hub
     public const string Kuzatuvchilar = "kuzatuvchi";
     public static string Egasi(int foydalanuvchiId) => $"f-{foydalanuvchiId}";
 
+    /// <summary>Smena, nasiya, xarajat va aparat o'zgarishlarini ko'ra oladiganlar (operativ ish va hisobot ruxsatlari).</summary>
+    public static bool Kuzatuvchimi(ClaimsPrincipal u) =>
+        u.Bor(Ruxsat.Savdo) || u.Bor(Ruxsat.Nasiyalar) || u.Bor(Ruxsat.Smenalar) || u.Bor(Ruxsat.Hisobotlar) || u.Bor(Ruxsat.Boshqaruv);
+
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         ulanishlar.Olib(Context.ConnectionId);
@@ -26,9 +31,7 @@ public sealed class SotuvHub(UlanishlarXaritasi ulanishlar) : Hub
         ulanishlar.Qosh(Context);
         var u = Context.User!;
         await Groups.AddToGroupAsync(Context.ConnectionId, Egasi(u.FoydalanuvchiId()));
-        // Smena, nasiya, xarajat va aparat o'zgarishlarini ko'ra oladiganlar (operativ ish va hisobot ruxsatlari).
-        if (u.Bor(Ruxsat.Savdo) || u.Bor(Ruxsat.Nasiyalar) || u.Bor(Ruxsat.Smenalar) || u.Bor(Ruxsat.Hisobotlar) || u.Bor(Ruxsat.Boshqaruv))
-            await Groups.AddToGroupAsync(Context.ConnectionId, Kuzatuvchilar);
+        if (Kuzatuvchimi(u)) await Groups.AddToGroupAsync(Context.ConnectionId, Kuzatuvchilar);
         await base.OnConnectedAsync();
     }
 }

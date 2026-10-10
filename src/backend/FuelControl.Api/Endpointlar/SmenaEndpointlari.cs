@@ -34,13 +34,26 @@ public static class SmenaEndpointlari
             return smena is null ? Results.NoContent() : Results.Ok(await db.SmenaTafsiloti(smena));
         }).Produces<SmenaTafsilotDto>().Produces(204);
 
-        // Oxirgi yopilgan smena (Tugadi bo'yicha eng yangisi); yo'q bo'lsa 204. Ruxsat - /smenalar/joriy bilan bir xil (kirgan har kim).
-        s.MapGet("/oxirgi", async (FuelControlDbContext db) =>
+        // Oxirgi yopilgan smena (Tugadi bo'yicha eng yangisi); yo'q bo'lsa 204. Pul natijasi (savdo, plastik, kamomat...) bo'lgani uchun faqat
+        // boshliqqa ("Smenalar" ruxsati) va shu smenaning operatoriga; keyingi operator /oxirgi/topshirish dan foydalanadi (boshqalarga 403).
+        s.MapGet("/oxirgi", async (HttpContext ctx, FuelControlDbContext db) =>
         {
-            var smena = await db.Smenalar.AsNoTracking().Where(x => x.Tugadi != null)
-                .OrderByDescending(x => x.Tugadi).ThenByDescending(x => x.Id).FirstOrDefaultAsync();
-            return smena is null ? Results.NoContent() : Results.Ok(await db.SmenaTafsiloti(smena));
-        }).Produces<SmenaTafsilotDto>().Produces(204);
+            var smena = await OxirgiYopilgan(db);
+            if (smena is null) return Results.NoContent();
+            if (smena.OperatorId != ctx.User.FoydalanuvchiId() && !ctx.User.Bor(Ruxsat.Smenalar))
+                throw new BiznesXatosi("Oxirgi smena natijasini faqat boshliq (\"Smenalar\" ruxsati) yoki shu smenaning operatori ko'ra oladi.", 403);
+            return Results.Ok(await db.SmenaTafsiloti(smena));
+        }).Produces<SmenaTafsilotDto>().Produces(204).ProducesProblem(403);
+
+        // Keyingi operator uchun topshirish ma'lumoti: kim va qachon yopgan, yopilgandagi depozit qoldig'i - pul natijasisiz. Yopilgan smena
+        // yo'q bo'lsa 204. Ruxsat - /smenalar/joriy bilan bir xil (kirgan har kim).
+        s.MapGet("/oxirgi/topshirish", async (FuelControlDbContext db) =>
+        {
+            var smena = await OxirgiYopilgan(db);
+            if (smena is null) return Results.NoContent();
+            var ism = await db.Foydalanuvchilar.AsNoTracking().Where(f => f.Id == smena.OperatorId).Select(f => f.ToliqIsm).FirstOrDefaultAsync() ?? "";
+            return Results.Ok(new SmenaTopshirishDto(smena.Id, smena.OperatorId, ism, smena.Tugadi!.Value, smena.YopishDepozit));
+        }).Produces<SmenaTopshirishDto>().Produces(204);
 
         s.MapGet("/{id:int}", async (int id, HttpContext ctx, FuelControlDbContext db) =>
         {
@@ -75,7 +88,7 @@ public static class SmenaEndpointlari
         }).RuxsatKerak(Ruxsat.SmenaOchish).Produces<SmenaDto>(201).ProducesProblem(409).ProducesProblem(400);
 
         // Operator faqat o'zi ochgan smenani yopadi ("Smenalar" ruxsati borlar - istalganini). Formula - Core.SmenaHisoblagich.
-        s.MapPost("/{id:int}/yop", async (int id, SmenaYopishDto so, HttpContext ctx, FuelControlDbContext db, IHubContext<SotuvHub> hub) =>
+        s.MapPost("/{id:int}/yop", async (int id, SmenaYopishDto so, HttpContext ctx, FuelControlDbContext db, IHubContext<SotuvHub> hub, UlanishlarXaritasi ulanishlar) =>
         {
             var (dto, aparatlar) = await Tranzaksiya.Bajar(db, async () =>
             {
@@ -96,14 +109,14 @@ public static class SmenaEndpointlari
                 await db.SaveChangesAsync();
                 return (await db.SmenaDtosi(smena), await db.AparatDtolari());
             });
-            await hub.Kuzatuvchilarga(Xabarlar.SmenaOzgardi, dto);
+            await ulanishlar.YopilganSmena(dto);                       // to'liq natija faqat Smenalar ruxsatlilarga va egasiga (docs 8.10)
             foreach (var a in aparatlar) await hub.Kuzatuvchilarga(Xabarlar.AparatOzgardi, a);
             await hub.Bildir(Bolimlar.Harakatlar);
             return Results.Ok(dto);
         }).RuxsatKerak(Ruxsat.SmenaYopish).Produces<SmenaDto>().ProducesProblem(400).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
 
         // Faqat oxirgi yopilgan smena, sabab majburiy. Smena qayta hisoblanadi, farq o'zgarishi operator hisobiga tuzatuvchi harakat bo'lib yoziladi.
-        s.MapPut("/{id:int}/korsatkich", async (int id, KorsatkichTuzatishDto t, HttpContext ctx, FuelControlDbContext db, IHubContext<SotuvHub> hub) =>
+        s.MapPut("/{id:int}/korsatkich", async (int id, KorsatkichTuzatishDto t, HttpContext ctx, FuelControlDbContext db, IHubContext<SotuvHub> hub, UlanishlarXaritasi ulanishlar) =>
         {
             var (tafsilot, aparat) = await Tranzaksiya.Bajar(db, async () =>
             {
@@ -127,7 +140,7 @@ public static class SmenaEndpointlari
                 await db.SaveChangesAsync();
                 return (await db.SmenaTafsiloti(smena), await db.AparatDtosi(a));
             });
-            await hub.Kuzatuvchilarga(Xabarlar.SmenaOzgardi, tafsilot.Smena);
+            await ulanishlar.YopilganSmena(tafsilot.Smena);
             await hub.Kuzatuvchilarga(Xabarlar.AparatOzgardi, aparat);
             await hub.Bildir(Bolimlar.Harakatlar);
             return Results.Ok(tafsilot);
@@ -135,6 +148,10 @@ public static class SmenaEndpointlari
     }
 
     private static BiznesXatosi OchiqSmenaBor() => new("Smena allaqachon ochiq: avval uni yoping.", 409);
+
+    /// <summary>Oxirgi yopilgan smena (Tugadi bo'yicha eng yangisi) yoki null.</summary>
+    private static Task<Smena?> OxirgiYopilgan(FuelControlDbContext db) =>
+        db.Smenalar.AsNoTracking().Where(x => x.Tugadi != null).OrderByDescending(x => x.Tugadi).ThenByDescending(x => x.Id).FirstOrDefaultAsync();
 
     /// <summary>Aparat ko'rsatkichlari ro'yxati -> lug'at; bir aparat ikki marta berilsa 400.</summary>
     internal static Dictionary<int, decimal> Korsatkichlar(AparatKorsatkichDto[]? royxat)
