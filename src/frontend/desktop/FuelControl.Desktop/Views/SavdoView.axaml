@@ -467,6 +467,22 @@
                     </Border>
 
                     <StackPanel Grid.Column="1" Spacing="18">
+                        <!-- §8.10: boshqa operator uchun — oldingi smena topshirish ma'lumoti (natija, kamomat ko'rsatilmaydi) -->
+                        <Border Classes="card" Padding="20,18" IsVisible="{Binding TopshirishBor}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="{l:T Savdo_OldingiSmena}" FontSize="15" FontWeight="ExtraBold" />
+                                <TextBlock Text="{Binding TopshirishSarlavha}" Classes="izoh" TextWrapping="Wrap" />
+                                <Border Classes="ichki" Padding="14,10" IsVisible="{Binding TopshirishDepozitBor}">
+                                    <StackPanel Spacing="2">
+                                        <TextBlock Text="{l:T Savdo_YopilgandagiDepozit}" Classes="qator" TextWrapping="Wrap" />
+                                        <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left">
+                                            <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding TopshirishDepozit}" FontSize="18" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" " VerticalAlignment="Bottom" /><TextBlock Text="{l:T Som}" FontSize="12" VerticalAlignment="Bottom" /></StackPanel>
+                                        </Viewbox>
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock Text="{l:T Savdo_TopshirishIzoh}" Classes="izoh" FontSize="12" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
                         <Border Classes="card" Padding="20,18" IsVisible="{Binding OxirgiBor}">
                             <StackPanel Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">

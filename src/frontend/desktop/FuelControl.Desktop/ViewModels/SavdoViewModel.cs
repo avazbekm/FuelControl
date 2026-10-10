@@ -159,7 +159,7 @@ public partial class SavdoViewModel : ObservableObject
 
     public string SmenaIzoh => S is { } s
         ? $"#{s.Id} · {s.Operator.ToliqIsm} · {Format.QisqaSanaVaqt(s.Boshlandi)} {Til.T("Savdo_Dan")} · {s.Davomiylik}"
-        : OxirgiYopilgan is { } o ? Til.F("Savdo_OxirgiSmenaYopdi", o.Id, o.Operator.ToliqIsm) : "";
+        : OxirgiQisqa is { } o ? Til.F("Savdo_OxirgiSmenaYopdi", o.Id, o.Ism) : "";
 
     // ================= Ochiq smena =================
 
@@ -176,7 +176,7 @@ public partial class SavdoViewModel : ObservableObject
     public string XarajatJami => Format.Pul(S?.XarajatJami ?? 0);
 
     public List<AparatKartasi> Aparatlar { get; private set; } = new();
-    public string AparatlarIzoh => Til.F("Savdo_AparatlarIzoh", OxirgiYopilgan?.Tugadi is { } t ? Format.QisqaSanaVaqt(t) : "—");
+    public string AparatlarIzoh => Til.F("Savdo_AparatlarIzoh", OxirgiQisqa?.Tugadi is { } t ? Format.QisqaSanaVaqt(t) : "—");
 
     // Joriy smena yozuvlari (nasiya / qaytish / xarajat) har doim AYNAN hozirgi smena tafsilotidan (T) olinadi:
     // T almashsa (yangi smena — o'zi ochgan yoki SignalR), ro'yxatlar o'qilish paytida qayta quriladi — oldingi smena
@@ -236,7 +236,18 @@ public partial class SavdoViewModel : ObservableObject
     public string JoriyHarflar => Joriy.BoshHarflar;
 
     public Smena? OxirgiYopilgan => Malumot.OxirgiYopilgan;
+    /// <summary>To'liq natija kartasi — faqat boshliq yoki smena egasi uchun (Malumot shunga qarab yuklaydi).</summary>
     public bool OxirgiBor => OxirgiYopilgan is not null;
+
+    // §8.10: boshqa operator uchun — "Oldingi smena" topshirish bloki (natija, kamomat ko'rsatilmaydi; ochish formasiga o'zi yozilmaydi)
+    private static SmenaTopshirishDto? Topshirish => Malumot.OxirgiTopshirish;
+    public bool TopshirishBor => OxirgiYopilgan is null && Topshirish is not null;
+    public string TopshirishSarlavha => Topshirish is { } t ? Til.F("Savdo_OldingiSmenaIzoh", t.Id, t.OperatorIsmi, Format.QisqaSanaVaqt(t.Tugadi.ToLocalTime())) : "";
+    public string TopshirishDepozit => Format.Pul(Topshirish?.YopishDepozit ?? 0);
+    public bool TopshirishDepozitBor => Topshirish?.YopishDepozit is not null;
+    /// <summary>Oxirgi yopilgan smena (qaysi manbadan bo'lsa ham): sarlavha va aparatlar izohi uchun.</summary>
+    private (int Id, string Ism, DateTime? Tugadi)? OxirgiQisqa => OxirgiYopilgan is { } o ? (o.Id, o.Operator.ToliqIsm, o.Tugadi)
+        : Topshirish is { } t ? (t.Id, t.OperatorIsmi, t.Tugadi) : null;
     public string OxirgiSarlavha => Til.F("Savdo_OxirgiSmena", OxirgiYopilgan?.Id ?? 0);
     public string OxirgiIzoh => OxirgiYopilgan is { } o ? $"{o.Operator.ToliqIsm} · {Til.F("Savdo_Soat", (int)Math.Round(((o.Tugadi ?? o.Boshlandi) - o.Boshlandi).TotalHours))}" : "";
     public string OxirgiSavdo => Format.Pul(OxirgiYopilgan?.Savdo ?? 0);
@@ -252,7 +263,7 @@ public partial class SavdoViewModel : ObservableObject
     public string OxirgiFarqIzoh => OxirgiYopilgan is { } o
         ? o.Farq < 0 ? Til.F("Savdo_OylikdanAyirildi", o.Operator.ToliqIsm) : Til.F("Savdo_HisobigaYozildi", o.Operator.ToliqIsm)
         : "";
-    public string AparatlarHolatiIzoh => OxirgiYopilgan is { } o ? Til.F("Savdo_SmenaYopilgandanKeyin", o.Id) : Til.T("Savdo_HozirgiHolat");
+    public string AparatlarHolatiIzoh => OxirgiQisqa is { } o ? Til.F("Savdo_SmenaYopilgandanKeyin", o.Id) : Til.T("Savdo_HozirgiHolat");
 
     private bool OchishMumkin() => Malumot.AloqaBor && OchaOladi && !SmenaOchiq && !AparatYoq &&
         Format.PulOl(OchQaytim) is not null && Format.PulOl(OchTerminal) is not null && Format.PulOl(OchDepozit) is not null;

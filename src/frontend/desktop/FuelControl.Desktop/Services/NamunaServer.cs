@@ -208,8 +208,17 @@ public sealed class NamunaServer : INamunaServer
                     .OrderByDescending(x => x.Boshlandi).Select(Yigindili).ToList();
             case "smenalar" when get && s[1] == "joriy":
                 return Ochiq is { } js ? Tafsilot(js) : null;
+            case "smenalar" when get && s[1] == "oxirgi" && s.Length == 3 && s[2] == "topshirish":
+                return _smenalar.Where(x => x.Tugadi is not null).MaxBy(x => x.Tugadi) is { } tx
+                    ? new SmenaTopshirishDto(tx.Id, tx.OperatorId, tx.OperatorIsmi, tx.Tugadi!.Value, tx.YopishDepozit) : null;
             case "smenalar" when get && s[1] == "oxirgi":
-                return _smenalar.Where(x => x.Tugadi is not null).MaxBy(x => x.Tugadi) is { } ox ? Tafsilot(ox) : null;
+            {
+                // §8.10: to'liq natija faqat boshliq (Smenalar ruxsati) yoki smena egasiga
+                if (_smenalar.Where(x => x.Tugadi is not null).MaxBy(x => x.Tugadi) is not { } ox) return null;
+                var men = _foydalanuvchilar.First(f => f.Id == _joriyFoydalanuvchi);
+                if (!men.Ruxsatlar.Contains(Ruxsat.Smenalar) && ox.OperatorId != men.Id) throw Xato("Ruxsat yo'q", 403);
+                return Tafsilot(ox);
+            }
             case "smenalar" when get:
                 return Tafsilot(_smenalar.First(x => x.Id == int.Parse(s[1])));
             case "smenalar" when s[1] == "och":

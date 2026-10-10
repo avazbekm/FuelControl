@@ -49,6 +49,8 @@ public static class Malumot
     public static Smena? JoriySmena { get; private set; }
     /// <summary>Oxirgi yopilgan smena (GET /smenalar/oxirgi) — Savdo ochish formasidagi "Oxirgi smena" uchun.</summary>
     public static Smena? OxirgiYopilgan { get; private set; }
+    /// <summary>§8.10: oxirgi yopilgan smena topshirish ma'lumoti (natijasiz) — to'liq natija ko'rish huquqi bo'lmaganlar uchun; aks holda null.</summary>
+    public static SmenaTopshirishDto? OxirgiTopshirish { get; private set; }
 
     /// <summary>Qarzi bor nasiyalar (holat=faol, muddati o'tganlar ham) va umumiy xulosa. Nasiyalar ruxsati bo'lmasa null.</summary>
     public static NasiyalarDto? FaolNasiyalar { get; private set; }
@@ -151,7 +153,7 @@ public static class Malumot
     {
         Foydalanuvchilar.Clear(); Yoqilgilar.Clear(); Aparatlar.Clear(); Smenalar.Clear();
         Harakatlar.Clear(); Audit.Clear(); NarxTarixi.Clear(); Begonalar.Clear(); OyStatistikasi.Clear();
-        Joriy = null; JoriySmena = null; OxirgiYopilgan = null; FaolNasiyalar = null;
+        Joriy = null; JoriySmena = null; OxirgiYopilgan = null; OxirgiTopshirish = null; FaolNasiyalar = null;
         JoriyFoydalanuvchi = new Foydalanuvchi();
     }
 
@@ -208,7 +210,7 @@ public static class Malumot
         {
             Joriy = await Api.JoriySmena();
             JoriySmena = Joriy is null ? null : SmenaniQoy(Joriy.Smena, xabar: false);
-            OxirgiYopilgan = await Api.OxirgiSmena() is { } ox ? SmenaKorinishi(ox.Smena) : null;
+            await OxirginiYukla();
             // Boshqa joyda yopilgan smena keshda ochiq bo'lib qolmasin.
             if (JoriySmena is null && Smenalar.Any(s => s.Ochiqmi)) b |= Bolim.Smenalar;
         }
@@ -257,6 +259,31 @@ public static class Malumot
     {
         try { await Yukla(b); }
         catch (ApiXatosi) { }
+    }
+
+    /// <summary>
+    /// §8.10 klient tartibi: boshliq (Smenalar ruxsati) → /smenalar/oxirgi (to'liq natija). Aks holda → /smenalar/oxirgi/topshirish;
+    /// smena o'ziniki bo'lsa (OperatorId == men) → /smenalar/oxirgi (server egasiga beradi). Boshqa operatorning natijasi (kamomat...) so'ralmaydi.
+    /// </summary>
+    private static async Task OxirginiYukla()
+    {
+        if (JoriyFoydalanuvchi.Bor(Ruxsat.Smenalar))
+        {
+            OxirgiTopshirish = null;
+            OxirgiYopilgan = await Api.OxirgiSmena() is { } ox ? SmenaKorinishi(ox.Smena) : null;
+            return;
+        }
+        var t = await Api.OxirgiTopshirish();
+        if (t is not null && t.OperatorId == JoriyFoydalanuvchi.Id)
+        {
+            OxirgiTopshirish = null;
+            OxirgiYopilgan = await Api.OxirgiSmena() is { } o ? SmenaKorinishi(o.Smena) : null;
+        }
+        else
+        {
+            OxirgiYopilgan = null;
+            OxirgiTopshirish = t;
+        }
     }
 
     /// <summary>

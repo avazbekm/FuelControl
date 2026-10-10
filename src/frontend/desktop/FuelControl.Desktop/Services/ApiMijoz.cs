@@ -96,6 +96,8 @@ public sealed class ApiMijoz
     public Task<SmenaTafsilotDto?> JoriySmena() => Ol<SmenaTafsilotDto>("smenalar/joriy");
     /// <summary>Oxirgi yopilgan smena (butun shoxobcha bo'yicha); yo'q bo'lsa null (204).</summary>
     public Task<SmenaTafsilotDto?> OxirgiSmena() => Ol<SmenaTafsilotDto>("smenalar/oxirgi");
+    /// <summary>§8.10: natijasiz topshirish ma'lumoti — har kim uchun (to'liq natija faqat boshliq yoki smena egasiga).</summary>
+    public Task<SmenaTopshirishDto?> OxirgiTopshirish() => Ol<SmenaTopshirishDto>("smenalar/oxirgi/topshirish");
     public Task<SmenaTafsilotDto?> SmenaTafsiloti(int id) => Ol<SmenaTafsilotDto>($"smenalar/{id}");
     public Task<SmenaDto?> SmenaOch(SmenaOchishDto d) => Yubor<SmenaDto>(HttpMethod.Post, "smenalar/och", d);
     public Task<SmenaDto?> SmenaYop(int id, SmenaYopishDto d) => Yubor<SmenaDto>(HttpMethod.Post, $"smenalar/{id}/yop", d);
