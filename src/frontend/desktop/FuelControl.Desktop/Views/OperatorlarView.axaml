@@ -121,7 +121,7 @@
                     </UniformGrid>
                     <StackPanel>
                         <TextBlock Text="{l:T SummaSom, Katta=True}" Classes="yorliq" />
-                        <TextBox Text="{Binding AvansSumma}" Classes="katta" PlaceholderText="0" ctl:AvtoFokus.Yoqilgan="True" />
+                        <TextBox Text="{Binding AvansSumma}" ctl:PulMaydon.Yoqilgan="True" Classes="katta" PlaceholderText="0" ctl:AvtoFokus.Yoqilgan="True" />
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="{l:T Izoh, Katta=True}" Classes="yorliq" />

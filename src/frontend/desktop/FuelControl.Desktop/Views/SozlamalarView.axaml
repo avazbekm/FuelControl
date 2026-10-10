@@ -374,7 +374,7 @@
                 </StackPanel>
                 <StackPanel>
                     <TextBlock Text="{l:T Narx, Katta=True}" Classes="yorliq" />
-                    <TextBox Text="{Binding YNarx}" TextAlignment="Right" PlaceholderText="0" />
+                    <TextBox Text="{Binding YNarx}" ctl:PulMaydon.Yoqilgan="True" TextAlignment="Right" PlaceholderText="0" />
                 </StackPanel>
                 <StackPanel>
                     <TextBlock Text="{l:T Rang, Katta=True}" Classes="yorliq" />
@@ -434,7 +434,7 @@
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <StackPanel>
                         <TextBlock Text="{l:T OylikMaosh, Katta=True}" Classes="yorliq" />
-                        <TextBox Text="{Binding FMaosh}" TextAlignment="Right" PlaceholderText="0" />
+                        <TextBox Text="{Binding FMaosh}" ctl:PulMaydon.Yoqilgan="True" TextAlignment="Right" PlaceholderText="0" />
                     </StackPanel>
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="{l:T PinYokiParol, Katta=True}" Classes="yorliq" />

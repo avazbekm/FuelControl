@@ -129,7 +129,7 @@
                     </Grid>
                     <StackPanel>
                         <TextBlock Text="{l:T Nasiya_QarzSummasi, Katta=True}" Classes="yorliq" />
-                        <TextBox x:Name="NasiyaSumma" Classes="dialogKatta" Text="{Binding Summa}" PlaceholderText="0" ctl:EnterTartib.Guruh="nasiya" />
+                        <TextBox x:Name="NasiyaSumma" Classes="dialogKatta" Text="{Binding Summa}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:EnterTartib.Guruh="nasiya" />
                     </StackPanel>
                     <StackPanel Spacing="10">
                         <TextBlock Text="{l:T Nasiya_Muddat, Katta=True}" Classes="yorliq" Margin="0" />
@@ -239,7 +239,7 @@
                         <StackPanel>
                             <TextBlock Text="{l:T Nasiya_QaytarilganSumma, Katta=True}" Classes="yorliq" />
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                <TextBox Classes="dialogKatta" Classes.xato="{Binding SummaKop}" Text="{Binding Summa}" PlaceholderText="0" />
+                                <TextBox Classes="dialogKatta" Classes.xato="{Binding SummaKop}" Text="{Binding Summa}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" />
                                 <Button Grid.Column="1" Content="{Binding ToliqMatn}" Command="{Binding ToliqCommand}" FontWeight="SemiBold" />
                             </Grid>
                         </StackPanel>
@@ -293,7 +293,7 @@
                     </Grid>
                     <StackPanel>
                         <TextBlock Text="{l:T Xarajat_Summa, Katta=True}" Classes="yorliq" />
-                        <TextBox Classes="dialogKatta" Text="{Binding Summa}" PlaceholderText="0" ctl:AvtoFokus.Yoqilgan="True" />
+                        <TextBox Classes="dialogKatta" Text="{Binding Summa}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:AvtoFokus.Yoqilgan="True" />
                     </StackPanel>
                     <StackPanel Spacing="10">
                         <TextBlock Text="{l:T Xarajat_NimaUchun, Katta=True}" Classes="yorliq" Margin="0" />
@@ -412,7 +412,7 @@
                         </StackPanel>
                         <StackPanel Grid.Column="1">
                             <TextBlock Text="{l:T Narx_YangiNarx, Katta=True}" Classes="yorliq" />
-                            <TextBox Classes="orta" Text="{Binding YangiNarx}" PlaceholderText="0" ctl:AvtoFokus.Yoqilgan="True" ctl:EnterTartib.Guruh="narx" />
+                            <TextBox Classes="orta" Text="{Binding YangiNarx}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:AvtoFokus.Yoqilgan="True" ctl:EnterTartib.Guruh="narx" />
                         </StackPanel>
                     </Grid>
 

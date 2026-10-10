@@ -427,7 +427,7 @@
                                             <TextBlock Text="{l:T Savdo_QaytimPuli}" FontWeight="Bold" FontSize="14.5" TextWrapping="Wrap" />
                                             <TextBlock Text="{l:T Savdo_QaytimIzoh}" Classes="izoh" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <TextBox Grid.Column="2" Classes="orta" MaxWidth="280" VerticalAlignment="Center" Text="{Binding OchQaytim}" PlaceholderText="0" ctl:AvtoFokus.Yoqilgan="True" ctl:EnterTartib.Guruh="ochish" />
+                                        <TextBox Grid.Column="2" Classes="orta" MaxWidth="280" VerticalAlignment="Center" Text="{Binding OchQaytim}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:AvtoFokus.Yoqilgan="True" ctl:EnterTartib.Guruh="ochish" />
                                     </Grid>
                                 </Border>
                                 <Border Classes="ichki">
@@ -439,7 +439,7 @@
                                             <TextBlock Text="{l:T Savdo_TerminalSumma}" FontWeight="Bold" FontSize="14.5" TextWrapping="Wrap" />
                                             <TextBlock Text="{l:T Savdo_TerminalSummaIzoh}" Classes="izoh" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <TextBox Grid.Column="2" Classes="orta" MaxWidth="280" VerticalAlignment="Center" Text="{Binding OchTerminal}" PlaceholderText="0" ctl:EnterTartib.Guruh="ochish" />
+                                        <TextBox Grid.Column="2" Classes="orta" MaxWidth="280" VerticalAlignment="Center" Text="{Binding OchTerminal}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:EnterTartib.Guruh="ochish" />
                                     </Grid>
                                 </Border>
                                 <Border Classes="ichki">
@@ -451,7 +451,7 @@
                                             <TextBlock Text="{l:T Savdo_DepozitQoldigi}" FontWeight="Bold" FontSize="14.5" TextWrapping="Wrap" />
                                             <TextBlock Text="{l:T Savdo_DepozitQoldigiIzoh}" Classes="izoh" TextWrapping="Wrap" />
                                         </StackPanel>
-                                        <TextBox Grid.Column="2" Classes="orta" MaxWidth="280" VerticalAlignment="Center" Text="{Binding OchDepozit}" PlaceholderText="0" ctl:EnterTartib.Guruh="ochish" />
+                                        <TextBox Grid.Column="2" Classes="orta" MaxWidth="280" VerticalAlignment="Center" Text="{Binding OchDepozit}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:EnterTartib.Guruh="ochish" />
                                     </Grid>
                                 </Border>
                                 <TextBlock Text="{Binding OchishXato}" Classes="xatoMatn" IsVisible="{Binding OchishXato, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
