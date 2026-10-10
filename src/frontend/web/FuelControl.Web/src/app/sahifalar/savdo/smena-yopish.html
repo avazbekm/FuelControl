@@ -82,10 +82,19 @@
           <div class="ikki-plitka">
             <div class="plitka katta">
               <div class="qator"><span class="ikon-doira moviy kichik-doira"><ikon nomi="card" [olcham]="17" [qalinlik]="2" /></span><span class="kichik-sarlavha">{{ til.t('Yopish_PlastikTerminal') }}</span></div>
-              <label class="yorliq" for="plastik-k">{{ til.t('Yopish_TerminalSummasi') }}</label>
-              <son-kiritish [(qiymat)]="terminal" [sinf]="'kiritish pul'" inputId="plastik-k" />
-              <span class="yordam-matn">{{ til.t('Yopish_TerminalIzoh') }}</span>
+              <span class="yorliq" id="plastik-l">{{ til.t('Yopish_PlastikSummalari') }}</span>
+              <div class="plastik-qatorlar" role="group" aria-labelledby="plastik-l">
+                @for (v of plastik(); track $index; let i = $index) {
+                  <div class="plastik-qator">
+                    <son-kiritish [qiymat]="v" (qiymatChange)="plastikOzgar(i, $event)" [sinf]="'kiritish pul'" [inputId]="plastikId(i)" [ariaLabel]="til.t('Yopish_PlastikSummasi', i + 1)" />
+                    <button type="button" class="plastik-ochir" [attr.aria-label]="til.t('Yopish_QatorniOchir', i + 1)" (click)="plastikOchir(i)"><ikon nomi="x" [olcham]="16" [qalinlik]="2.2" /></button>
+                  </div>
+                }
+              </div>
+              <button type="button" class="tugma kichik plastik-qosh" [disabled]="plastik().length >= PLASTIK_MAX" (click)="plastikQosh()"><ikon nomi="plus" [olcham]="15" [qalinlik]="2.4" /> {{ til.t('Yopish_PlastikQosh') }}</button>
+              <span class="yordam-matn">{{ til.t('Yopish_PlastikIzoh') }}</span>
               <div class="hisob-qator">
+                <span class="juft"><span class="ikkilamchi">{{ til.t('Yopish_JamiPlastik') }}</span><b class="o-qiymat" data-test="jami-plastik">{{ terminal() != null ? pul(terminal()!) : '—' }}</b></span>
                 <span class="juft"><span class="ikkilamchi">{{ til.t('Yopish_OchishdaYozilgan') }}</span><span class="o-qiymat">{{ pul(t.smena.ochishTerminal) }}</span></span>
                 <span class="juft"><b>{{ til.t('Yopish_ShuSmenaPlastik') }}</b><b class="qalin">{{ plastikSmena() != null ? pul(plastikSmena()!) : '—' }}</b></span>
               </div>
@@ -155,7 +164,16 @@
         <div class="chiziq"></div>
         <div class="kutilgan">
           <span class="yorliq oq">{{ til.t('Yopish_KassadaBolishiKerak') }}</span>
-          <span class="katta-son" data-test="kutilgan">{{ hisob() ? pul(hisob()!.kutilgan) : '—' }} <small>{{ til.t('Som') }}</small></span>
+          @if (hisob(); as h) {
+            <span class="katta-son" data-test="kutilgan">{{ pul(h.kutilgan) }} <small>{{ til.t('Som') }}</small></span>
+          } @else {
+            <!-- Hisob chiqmasa "— so'm" o'rniga: nima yetishmasligi (qaysi aparat, nega) va kiritilganlar bo'yicha taxminiy natija -->
+            <div class="sabab-blok" data-test="sabablar" role="status">
+              <b>{{ til.t('Yopish_ToliqEmas') }}</b>
+              <ul>@for (s of sabablar(); track $index) { <li>{{ s }}</li> }</ul>
+              @if (taxminiy(); as x) { <span class="taxminiy" data-test="taxminiy">{{ x }}</span> }
+            </div>
+          }
         </div>
         <div class="naqd-maydon">
           <label class="yorliq oq" for="naqd-k">{{ til.t('Yopish_SanalganNaqd') }}</label>
@@ -179,12 +197,11 @@
               <div class="farq-karta teng"><ikon nomi="check" [olcham]="22" [qalinlik]="2.4" /><span>{{ til.t('Savdo_FarqYoq') }}</span></div>
             }
             @case ('naqd') { <div class="farq-karta eslatma">{{ til.t('Yopish_NaqdniSanang') }}</div> }
-            @default { <div class="farq-karta eslatma">{{ til.t('Yopish_ToliqEmas') }}</div> }
           }
         </div>
         <div class="naqd-maydon">
           <label class="yorliq oq" for="izoh-k">{{ til.t('Yopish_Izoh') }}</label>
-          <input id="izoh-k" class="kiritish izoh-kiritish" data-enter-otkaz [(ngModel)]="izoh" [placeholder]="til.t('Yopish_IzohPlaceholder')" autocomplete="off" />
+          <input id="izoh-k" class="kiritish izoh-kiritish" data-enter-otkaz [ngModel]="izoh()" (ngModelChange)="izoh.set($event)" [placeholder]="til.t('Yopish_IzohPlaceholder')" autocomplete="off" />
         </div>
         @if (yopishXato()) { <div class="yopish-xato" role="alert">{{ yopishXato() }}</div> }
         @if (yopsaBoladi()) {

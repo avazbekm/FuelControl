@@ -31,28 +31,28 @@ interface Xatolar { ism?: string; aloqa?: string; telefon?: string; summa?: stri
       <form class="forma-ustun" enterKeyingi (ngSubmit)="saqla()" (input)="qaytaTekshir()" (change)="qaytaTekshir()" autocomplete="off" novalidate>
         <!-- Mijoz: ism, telefon, mashina raqami + mavjud mijoz takliflari -->
         <div class="mijoz-guruh" (focusout)="fokusChiqdi($event)" (keydown)="taklifTugma($event)">
-          <div class="maydon">
+          <div class="maydon ism-maydon">
             <label for="nd-ism">{{ til.t('Nasiya_MijozIsmi') }}</label>
             <input id="nd-ism" class="kiritish" [class.xato]="xatolar().ism" name="ism" [ngModel]="ism()" (ngModelChange)="ismOzgar($event)"
-                   [placeholder]="til.t('Nasiya_IsmPlaceholder')" autocomplete="off" data-avto role="combobox" aria-autocomplete="list"
+                   (keydown.enter)="ismEnter($event)" enterkeyhint="next" [placeholder]="til.t('Nasiya_IsmPlaceholder')" autocomplete="off" data-avto role="combobox" aria-autocomplete="list"
                    [attr.aria-expanded]="takliflarOchiq()" aria-controls="nd-takliflar" [attr.aria-invalid]="!!xatolar().ism" />
             @if (xatolar().ism) { <span class="xato-matn" role="alert">{{ xatolar().ism }}</span> }
+            @if (takliflarOchiq()) {
+              <div class="takliflar" id="nd-takliflar" role="listbox" (mousedown)="$event.preventDefault()">
+                <span class="taklif-sarlavha">{{ til.t('Nasiya_MavjudMijozlar') }}</span>
+                @for (m of takliflar(); track $index) {
+                  <button type="button" role="option" class="taklif" [class.faol]="$index === faolIndeks()" [attr.aria-selected]="$index === faolIndeks()" (click)="tanla(m)">
+                    <span class="avatar">{{ harflar(m.mijozIsmi) }}</span>
+                    <span class="taklif-matn">
+                      <b>{{ m.mijozIsmi }}</b>
+                      <span>{{ telFormat(m.telefon) }}@if (m.telefon && m.mashinaRaqami) { · }{{ m.mashinaRaqami }}</span>
+                    </span>
+                    <span class="taklif-qarz" [class.bor]="m.faolQarz > 0">{{ m.faolQarz > 0 ? til.t('Nasiya_TaklifQarz', pul(m.faolQarz)) : til.t('Nasiya_TaklifQarzYoq') }}</span>
+                  </button>
+                }
+              </div>
+            }
           </div>
-          @if (takliflarOchiq()) {
-            <div class="takliflar" id="nd-takliflar" role="listbox" (mousedown)="$event.preventDefault()">
-              <span class="taklif-sarlavha">{{ til.t('Nasiya_MavjudMijozlar') }}</span>
-              @for (m of takliflar(); track $index) {
-                <button type="button" role="option" class="taklif" [class.faol]="$index === faolIndeks()" [attr.aria-selected]="$index === faolIndeks()" (click)="tanla(m)">
-                  <span class="avatar">{{ harflar(m.mijozIsmi) }}</span>
-                  <span class="taklif-matn">
-                    <b>{{ m.mijozIsmi }}</b>
-                    <span>{{ telFormat(m.telefon) }}@if (m.telefon && m.mashinaRaqami) { · }{{ m.mashinaRaqami }}</span>
-                  </span>
-                  <span class="taklif-qarz" [class.bor]="m.faolQarz > 0">{{ m.faolQarz > 0 ? til.t('Nasiya_TaklifQarz', pul(m.faolQarz)) : til.t('Nasiya_TaklifQarzYoq') }}</span>
-                </button>
-              }
-            </div>
-          }
           <div class="ikki-ustun">
             <div class="maydon">
               <label for="nd-tel">{{ til.t('Nasiya_Telefon') }}</label>
@@ -91,10 +91,11 @@ interface Xatolar { ism?: string; aloqa?: string; telefon?: string; summa?: stri
         </div>
         <div class="maydon">
           <label for="nd-izoh">{{ til.t('Nasiya_Izoh') }}</label>
-          <textarea id="nd-izoh" class="kiritish" name="izoh" rows="2" [(ngModel)]="izoh" [placeholder]="til.t('Nasiya_IzohPlaceholder')"></textarea>
+          <textarea id="nd-izoh" class="kiritish" name="izoh" rows="2" data-enter-keyingi [(ngModel)]="izoh" [placeholder]="til.t('Nasiya_IzohPlaceholder')"></textarea>
         </div>
         <div class="malumot-blok"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Nasiya_YozishIzoh') }}</span></div>
-        @if (serverXato()) { <div class="xato-matn" role="alert">{{ serverXato() }}</div> }
+        @if (birinchiXato(); as m) { <div class="xato-matn" role="alert">{{ m }}</div> }
+        @if (serverXato()) { <div class="xato-matn" id="nd-xato" role="alert">{{ serverXato() }}</div> }
         <div class="amallar">
           <button type="button" class="tugma" (click)="ochiq.set(false)">{{ til.t('BekorQilish') }}</button>
           <button type="submit" class="tugma asosiy" [disabled]="band()">
@@ -110,9 +111,12 @@ interface Xatolar { ism?: string; aloqa?: string; telefon?: string; summa?: stri
     .sana-yorliq { font-size: 13px; font-weight: 600; color: var(--matn-3); }
     .kiritish.sana { flex: 1 1 180px; min-width: 0; width: auto; }
     .aloqa-xato { margin-top: -8px; }
+    .ism-maydon { position: relative; }
+    /* Ro'yxat maydon ustida suzadi (absolut): yopilganda ostidagi tarkib (Saqlash tugmasi) siljimaydi — aks holda mousedown/mouseup orasida tugma qochib, birinchi bosish yo'qolardi. */
     .takliflar {
+      position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 30;
       display: flex; flex-direction: column; gap: 2px; padding: 8px; max-height: 232px; overflow-y: auto; border-radius: 20px;
-      background: var(--plitka-fon); border: 1px solid var(--plitka-chegara); box-shadow: 0 10px 26px rgba(28, 54, 110, 0.10);
+      background: var(--dialog); border: 1px solid var(--plitka-chegara); box-shadow: 0 14px 34px rgba(28, 54, 110, 0.18);
     }
     .taklif-sarlavha { padding: 2px 8px 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--matn-2); }
     .taklif { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; border-radius: 14px; background: transparent; cursor: pointer; text-align: left; color: inherit; min-height: 48px; }
@@ -147,6 +151,8 @@ export class NasiyaDialog {
   protected readonly band = signal(false);
   protected readonly xatolar = signal<Xatolar>({});
   protected readonly serverXato = signal<string | null>(null);
+  /** Birinchi maydon xatosi — "Saqlash" tugmasi yonida ko'rsatiladi (maydon ko'rinish oynasidan tashqarida bo'lsa ham sabab ko'rinsin). */
+  protected readonly birinchiXato = computed(() => { const x = this.xatolar(); return x.ism ?? x.telefon ?? x.aloqa ?? x.summa ?? x.muddat ?? null; });
   private urinildi = false;
   protected readonly ism = signal('');
   protected readonly raqam = signal('');
@@ -251,13 +257,29 @@ export class NasiyaDialog {
     if (!e.relatedTarget || !guruh.contains(e.relatedTarget as Node)) this.takliflarniYop();
   }
 
+  /**
+   * Mijoz ismida Enter (docs §8.8): ism bo'sh — fokus joyida; takliflardan biri tanlangan bo'lsa — `taklifTugma` uni qo'yadi;
+   * aks holda (yangi mijoz, ro'yxat yopiq yoki hech narsa tanlanmagan) takliflar yopiladi va EnterKeyingi fokusni Telefon'ga o'tkazadi.
+   */
+  protected ismEnter(e: Event) {
+    if ((e as KeyboardEvent).isComposing) return;
+    if (!this.ism().trim()) { e.preventDefault(); e.stopPropagation(); return; }
+    if (!(this.takliflarOchiq() && this.faolIndeks() >= 0)) this.takliflarniYop();
+  }
+
+  /** Taklif tanlangach fokus birinchi bo'sh maydonga o'tadi: Telefon → Mashina raqami → Summa (odatda Summa). */
+  private boshMaydonga() {
+    const id = !telefonRaqamlar(this.tel()) ? 'nd-tel' : !this.raqam().trim() ? 'nd-raqam' : 'nd-summa';
+    document.getElementById(id)?.focus();
+  }
+
   /** Klaviatura: ↑/↓ — tanlash, Enter — tanlangan taklifni qo'yish, Esc — yopish (dialog yopilmaydi). */
   protected taklifTugma(e: KeyboardEvent) {
     if (!this.takliflarOchiq()) return;
     const n = this.takliflar().length;
     if (e.key === 'ArrowDown') { e.preventDefault(); this.faolIndeks.update((i) => (i + 1) % n); }
     else if (e.key === 'ArrowUp') { e.preventDefault(); this.faolIndeks.update((i) => (i <= 0 ? n - 1 : i - 1)); }
-    else if (e.key === 'Enter' && this.faolIndeks() >= 0) { e.preventDefault(); e.stopPropagation(); this.tanla(this.takliflar()[this.faolIndeks()]); }
+    else if (e.key === 'Enter' && this.faolIndeks() >= 0) { e.preventDefault(); e.stopPropagation(); this.tanla(this.takliflar()[this.faolIndeks()]); this.boshMaydonga(); }
     else if (e.key === 'Escape') { e.stopPropagation(); this.takliflarniYop(); }
   }
 
@@ -285,7 +307,7 @@ export class NasiyaDialog {
   async saqla() {
     this.serverXato.set(null);
     this.urinildi = true;
-    if (!this.tekshir()) return;
+    if (!this.tekshir()) { this.xatoMaydonga(); return; }
     this.band.set(true);
     try {
       await this.server.nasiyaYarat({ mijozIsmi: this.ism().trim(), telefon: this.tel(), mashinaRaqami: this.raqam().trim().toUpperCase(), summa: this.summa()!, muddat: this.sana(), izoh: this.izoh.trim() || null });
@@ -294,8 +316,18 @@ export class NasiyaDialog {
       this.saqlandi.emit();
     } catch (e) {
       this.serverXato.set(xatoMatni(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy')));
+      setTimeout(() => document.getElementById('nd-xato')?.scrollIntoView({ block: 'nearest' }), 50);
     } finally {
       this.band.set(false);
     }
+  }
+
+  /** Tekshiruv o'tmasa fokus birinchi xato maydonga o'tadi (ism → telefon/aloqa → summa → muddat). */
+  private xatoMaydonga() {
+    const x = this.xatolar();
+    const id = x.ism ? 'nd-ism' : x.telefon || x.aloqa ? 'nd-tel' : x.summa ? 'nd-summa' : x.muddat ? 'nd-sana' : null;
+    const el = id ? document.getElementById(id) : null;
+    el?.focus();
+    el?.scrollIntoView({ block: 'center' });
   }
 }

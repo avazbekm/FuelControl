@@ -2318,6 +2318,7 @@ export interface components {
             /** Format: int64 */
             farq: number;
             izoh: null | string;
+            plastikSummalari: number[];
         };
         SmenaKorsatkichDto: {
             /** Format: int32 */
@@ -2374,6 +2375,7 @@ export interface components {
             /** Format: int64 */
             sanalganNaqd: number;
             izoh: null | string;
+            plastikSummalari?: null | number[];
         };
         TolovTaqsimotiDto: {
             /** Format: int64 */

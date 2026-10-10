@@ -46,6 +46,13 @@
 .hisob-qator { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid var(--chiziq); font-size: 13.5px; font-variant-numeric: tabular-nums; }
 .juft { display: flex; justify-content: space-between; gap: 10px; }
 .o-qiymat { font-weight: 600; }
+.plastik-qatorlar { display: flex; flex-direction: column; gap: 8px; }
+.plastik-qator { display: flex; align-items: center; gap: 8px; }
+.plastik-qator > son-kiritish { display: contents; }
+:host ::ng-deep .plastik-qator .kiritish { flex: 1 1 auto; min-width: 0; }
+.plastik-ochir { flex: none; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; border: 0; cursor: pointer; color: var(--matn-3); background: var(--tugma-fon); }
+.plastik-ochir:hover { color: var(--qizil); }
+.plastik-qosh { align-self: flex-start; }
 .ogoh { padding: 8px 12px; border-radius: 12px; font-size: 12.5px; font-weight: 600; }
 .qizil-ogoh { background: var(--b-qizil-fon); color: var(--b-qizil); }
 .sariq-ogoh { background: var(--b-sariq-fon); color: var(--b-sariq); }
@@ -94,6 +101,12 @@
 .farq-karta.ort { background: #D9F5E6; border: 1px solid #9FE3BF; }
 .farq-karta.ort b, .farq-karta.ort .farq-son { color: #0E7A4A; }
 .farq-karta.teng { background: #D9F5E6; border: 1px solid #9FE3BF; color: #0E7A4A; font-size: 15px; font-weight: 800; }
+.sabab-blok { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 16px; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff; font-size: 12.5px; line-height: 1.4; }
+.sabab-blok b { font-weight: 600; }
+.sabab-blok ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.sabab-blok li { position: relative; padding-left: 14px; font-weight: 600; color: #FFE7B0; }
+.sabab-blok li::before { content: '•'; position: absolute; left: 2px; font-weight: 800; color: #FFD27A; }
+.sabab-blok .taxminiy { margin-top: 4px; }
 .farq-karta.eslatma { display: block; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.3); font-size: 13.5px; font-weight: 600; color: #fff; }
 .yopish-xato { padding: 10px 14px; border-radius: 14px; background: #FFE1E1; color: #B3261E; font-size: 13px; font-weight: 600; }
 .yopish-katta { min-height: 56px; box-shadow: 0 10px 24px rgba(8, 60, 36, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.45); }

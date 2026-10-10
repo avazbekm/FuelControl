@@ -53,5 +53,11 @@ export function smenaHisobla(k: HisobKirish): HisobNatijasi {
   return { jamiLitr, savdo, plastik, depozitFarqi, kutilgan, farq: k.sanalganNaqd == null ? null : k.sanalganNaqd - kutilgan };
 }
 
+/** Yopishdagi plastik ifodasi: bir nechta summa bo'lsa "7 830 000 + 300 000 = 8 130 000", aks holda (eski smena ham) bitta raqam. */
+export function plastikIfodasi(s: { plastikSummalari?: number[] | null; yopishTerminal: number | null }, pul: (n: number | null) => string): string {
+  const q = s.plastikSummalari ?? [];
+  return q.length > 1 ? `${q.map((x) => pul(x)).join(' + ')} = ${pul(s.yopishTerminal)}` : pul(s.yopishTerminal);
+}
+
 /** NaqdSavdo (hisobot) = Savdo − Plastik − Depozit(farqi) − Nasiya. */
 export const naqdSavdo = (savdo: number, plastik: number, depozitFarqi: number, nasiya: number) => savdo - plastik - depozitFarqi - nasiya;

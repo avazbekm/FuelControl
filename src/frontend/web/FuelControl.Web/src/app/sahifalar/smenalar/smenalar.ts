@@ -6,6 +6,7 @@ import { Server } from '../../core/server';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { Malumot, OperatorElement, jonliYangila } from '../../core/malumot';
 import { davomiylikSD, isoKun, ishoraPul, kunQisqa, kunQosh, litr, oyBoshi, oyOxiri, oyQosh, pul, sana, soat } from '../../core/format';
+import { plastikIfodasi } from '../../core/hisob';
 import type { NasiyaDto, NasiyaQaytishiDto, SmenaDto, SmenaKorsatkichDto, SmenaTafsilotDto, XarajatDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { smenaExcel } from './smena-excel';
@@ -137,7 +138,7 @@ export class SmenalarSahifa {
       { yorliq: T('Smenalar_SavdoAparatlar'), qiymat: ishoraPul(s.savdo) },
     ];
     if (s.qaytganNasiya > 0) r.push({ yorliq: T('Smenalar_QaytganNasiya'), qiymat: ishoraPul(s.qaytganNasiya) });
-    r.push({ yorliq: T('Smenalar_PlastikSatr', pul(s.yopishTerminal), pul(s.ochishTerminal)), qiymat: ishoraPul(-s.plastik) });
+    r.push({ yorliq: T('Smenalar_PlastikSatr', plastikIfodasi(s, pul), pul(s.ochishTerminal)), qiymat: ishoraPul(-s.plastik) });
     r.push({ yorliq: T('Smenalar_DepozitSatr', pul(s.ochishDepozit), pul(s.yopishDepozit)), qiymat: ishoraPul(-s.depozitFarqi) });
     if (s.nasiyaJami > 0) r.push({ yorliq: T('Smenalar_NasiyaSatr', this.nomlar(t.nasiyalar.map((n) => n.mijozIsmi))), qiymat: ishoraPul(-s.nasiyaJami) });
     if (s.xarajatJami > 0) r.push({ yorliq: T('Smenalar_XarajatSatr', this.nomlar(t.xarajatlar.map((x) => this.kichik(x.sabab)))), qiymat: ishoraPul(-s.xarajatJami) });

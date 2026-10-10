@@ -2429,6 +2429,16 @@
   "Жами",
   "Итого"
  ],
+ "Savdo_Nasiyalar": [
+  "Nasiyalar",
+  "Насиялар",
+  "Долги"
+ ],
+ "Savdo_YaqinMuddatlar": [
+  "Muddati o'tgan qarz yo'q · eng yaqin muddatlar",
+  "Муддати ўтган қарз йўқ · энг яқин муддатлар",
+  "Просроченных нет · ближайшие сроки"
+ ],
  "Savdo_MuddatiOtganQarzlar": [
   "Muddati o'tgan qarzlar",
   "Муддати ўтган қарзлар",
@@ -2818,6 +2828,71 @@
   "Kassadagi naqdni sanab, yuqoriga yozing.",
   "Кассадаги нақдни санаб, юқорига ёзинг.",
   "Пересчитайте наличные в кассе и введите выше."
+ ],
+ "Yopish_SababKichik": [
+  "{0}: yangi ko'rsatkich oldingisidan ({1}) kichik",
+  "{0}: янги кўрсаткич олдингисидан ({1}) кичик",
+  "{0}: новое показание меньше предыдущего ({1})"
+ ],
+ "Yopish_SababNotogri": [
+  "{0}: ko'rsatkich noto'g'ri yozilgan",
+  "{0}: кўрсаткич нотўғри ёзилган",
+  "{0}: показание введено неверно"
+ ],
+ "Yopish_SababBosh": [
+  "{0}: ko'rsatkich kiritilmagan",
+  "{0}: кўрсаткич киритилмаган",
+  "{0}: показание не введено"
+ ],
+ "Yopish_SababTerminal": [
+  "Plastik: kamida bitta summa kiriting (0 ham bo'ladi)",
+  "Пластик: камида битта сумма киритинг (0 ҳам бўлади)",
+  "Пластик: введите хотя бы одну сумму (можно 0)"
+ ],
+ "Yopish_SababPlastikXato": [
+  "Plastik: summa noto'g'ri yozilgan",
+  "Пластик: сумма нотўғри ёзилган",
+  "Пластик: сумма введена неверно"
+ ],
+ "Yopish_PlastikSummalari": [
+  "Plastik summalari",
+  "Пластик суммалари",
+  "Суммы по карте"
+ ],
+ "Yopish_PlastikIzoh": [
+  "Terminaldagi har bir summani alohida qatorga yozing (tungi nollash cheki ham). Bo'sh qatorlar hisobga olinmaydi.",
+  "Терминалдаги ҳар бир суммани алоҳида қаторга ёзинг (тунги ноллаш чеки ҳам). Бўш қаторлар ҳисобга олинмайди.",
+  "Каждую сумму с терминала — отдельной строкой (включая ночной чек обнуления). Пустые строки не учитываются."
+ ],
+ "Yopish_QatorniOchir": [
+  "{0}-qatorni o'chirish",
+  "{0}-қаторни ўчириш",
+  "Удалить строку {0}"
+ ],
+ "Yopish_PlastikSummasi": [
+  "{0}-plastik summasi",
+  "{0}-пластик суммаси",
+  "Сумма по карте {0}"
+ ],
+ "Yopish_PlastikQosh": [
+  "Plastik qo'shish",
+  "Пластик қўшиш",
+  "Добавить сумму"
+ ],
+ "Yopish_JamiPlastik": [
+  "Jami plastik",
+  "Жами пластик",
+  "Итого по карте"
+ ],
+ "Yopish_SababDepozit": [
+  "Depozit: karta qoldig'ini kiriting",
+  "Депозит: карта қолдиғини киритинг",
+  "Депозит: введите остаток карты"
+ ],
+ "Yopish_Taxminiy": [
+  "Kiritilganlar bo'yicha hozircha: {0} so'm ({1} hisobga olinmagan)",
+  "Киритилганлар бўйича ҳозирча: {0} сўм ({1} ҳисобга олинмаган)",
+  "По введённым данным пока: {0} сум (не учтены: {1})"
  ],
  "Yopish_ToliqEmas": [
   "Hisob chiqishi uchun barcha aparat ko'rsatkichlarini, plastik va depozitni to'g'ri kiriting.",

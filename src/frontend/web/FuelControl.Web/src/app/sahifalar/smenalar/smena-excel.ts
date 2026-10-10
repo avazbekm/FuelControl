@@ -1,5 +1,6 @@
 import type { SmenaTafsilotDto } from '../../api/model';
 import { kunSoat, kunToliq, pul } from '../../core/format';
+import { plastikIfodasi } from '../../core/hisob';
 
 type T = (kalit: string, ...args: unknown[]) => string;
 type Hujayra = { value?: string | number; type?: StringConstructor | NumberConstructor; format?: string; fontWeight?: 'bold'; backgroundColor?: string; align?: 'left' | 'right' | 'center' };
@@ -35,7 +36,7 @@ export async function smenaExcel(t: SmenaTafsilotDto, T: T): Promise<void> {
   m.push(pulQator('Smenalar_Qaytim', s.ochishQaytim));
   m.push(pulQator('Smenalar_SavdoAparatlar', s.savdo));
   m.push(pulQator('Smenalar_QaytganNasiya', s.qaytganNasiya));
-  m.push(qator(T('Smenalar_PlastikSatr', pul(s.yopishTerminal), pul(s.ochishTerminal)), son(-s.plastik)));
+  m.push(qator(T('Smenalar_PlastikSatr', plastikIfodasi(s, pul), pul(s.ochishTerminal)), son(-s.plastik)));
   m.push(qator(T('Smenalar_DepozitSatr', pul(s.ochishDepozit), pul(s.yopishDepozit)), son(-s.depozitFarqi)));
   m.push(qator(T('Smenalar_NasiyalarJami'), son(-s.nasiyaJami)));
   m.push(qator(T('Smenalar_XarajatlarJami'), son(-s.xarajatJami)));
