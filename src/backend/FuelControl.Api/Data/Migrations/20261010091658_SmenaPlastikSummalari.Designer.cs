@@ -3,6 +3,7 @@ using System;
 using FuelControl.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FuelControl.Api.Data.Migrations
 {
     [DbContext(typeof(FuelControlDbContext))]
-    partial class FuelControlDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261010091658_SmenaPlastikSummalari")]
+    partial class SmenaPlastikSummalari
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.12");

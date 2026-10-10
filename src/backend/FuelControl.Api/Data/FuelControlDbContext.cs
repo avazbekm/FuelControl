@@ -1,4 +1,5 @@
 using FuelControl.Contracts;
+using System.Globalization;
 using FuelControl.Core.Modellar;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -30,6 +31,21 @@ public static class RuxsatMatni
         }
         return natija;
     }
+}
+
+/// <summary>
+/// Smenaning plastik qismlari bazada bitta ustunda, vergul bilan ajratilgan sonlar ("7830000,300000,150000"); bo'sh matn - bo'sh massiv
+/// (eski smenalar, migratsiyadagi standart qiymat). Ro'yxat har doim smena bilan birga o'qiladi/yoziladi va elementlar bo'yicha so'rov yo'q,
+/// shuning uchun alohida jadval ham, JSON ham kerak emas. O'qishda yaroqsiz bo'laklar o'tkazib yuboriladi.
+/// </summary>
+public static class PlastikMatni
+{
+    public static string Yoz(long[] v) => string.Join(',', v.Select(x => x.ToString(CultureInfo.InvariantCulture)));
+
+    public static long[] Oqi(string? v) =>
+        (v ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(x => long.TryParse(x, NumberStyles.None, CultureInfo.InvariantCulture, out _))
+            .Select(x => long.Parse(x, NumberStyles.None, CultureInfo.InvariantCulture)).ToArray();
 }
 
 public sealed class FuelControlDbContext(DbContextOptions<FuelControlDbContext> options) : DbContext(options)
@@ -64,6 +80,12 @@ public sealed class FuelControlDbContext(DbContextOptions<FuelControlDbContext> 
             v => v.Aggregate(0, (h, x) => HashCode.Combine(h, (int)x)),
             v => v.ToList());
 
+        var plastikKonverter = new ValueConverter<long[], string>(v => PlastikMatni.Yoz(v), v => PlastikMatni.Oqi(v));
+        var plastikTaqqoslagich = new ValueComparer<long[]>(
+            (a, b) => a!.SequenceEqual(b!),
+            v => v.Aggregate(0, (h, x) => HashCode.Combine(h, x)),
+            v => v.ToArray());
+
         m.Entity<Foydalanuvchi>(e =>
         {
             e.HasIndex(x => x.Login).IsUnique();
@@ -84,6 +106,7 @@ public sealed class FuelControlDbContext(DbContextOptions<FuelControlDbContext> 
         m.Entity<Smena>(e =>
         {
             e.Ignore(x => x.Ochiqmi);
+            e.Property(x => x.PlastikSummalari).HasConversion(plastikKonverter, plastikTaqqoslagich);
             e.HasIndex(x => new { x.OperatorId, x.Tugadi });
             // Butun shoxobchada bir vaqtda faqat bitta ochiq smena. Kafolat — bazada: IX_Smenalar_BittaOchiq
             // (UNIQUE ((1)) WHERE Tugadi IS NULL) migratsiyada SQL bilan yaratiladi (EF modeli ifodali indeksni bilmaydi).

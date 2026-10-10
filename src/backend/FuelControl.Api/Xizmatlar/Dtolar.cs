@@ -19,10 +19,10 @@ public static class Dtolar
         if (!s.Ochiqmi)
             return new SmenaDto(s.Id, s.OperatorId, operatorIsmi, s.Boshlandi, s.Tugadi, s.OchishQaytim, s.OchishTerminal, s.OchishDepozit,
                 s.YopishTerminal, s.YopishDepozit, s.SanalganNaqd, s.JamiLitr, s.Savdo, s.Plastik, s.DepozitFarqi,
-                s.NasiyaJami, s.QaytganNasiya, s.XarajatJami, s.Kutilgan, s.Farq, s.Izoh);
+                s.NasiyaJami, s.QaytganNasiya, s.XarajatJami, s.Kutilgan, s.Farq, s.Izoh, s.PlastikSummalari);
         var y = jonli ?? SmenaHisoblagich.Yigindilar.Bosh;
         return new SmenaDto(s.Id, s.OperatorId, operatorIsmi, s.Boshlandi, null, s.OchishQaytim, s.OchishTerminal, s.OchishDepozit,
-            null, null, null, 0, 0, 0, 0, y.NasiyaJami, y.QaytganNasiya, y.XarajatJami, 0, 0, s.Izoh);
+            null, null, null, 0, 0, 0, 0, y.NasiyaJami, y.QaytganNasiya, y.XarajatJami, 0, 0, s.Izoh, []);
     }
 
     public static NasiyaDto Dto(this Nasiya n, DateOnly bugun) => new(n.Id, n.SmenaId, n.KimYozdi, n.MijozIsmi, n.Telefon, n.MashinaRaqami,

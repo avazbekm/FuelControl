@@ -110,6 +110,7 @@ public abstract class ApiBaza : IAsyncLifetime
     protected static AparatKorsatkichDto[] Oxirgi(AparatDto[] aparatlar, params decimal[] litrlar) =>
         aparatlar.Select((a, i) => new AparatKorsatkichDto(a.Id, a.TotalLitr + (i < litrlar.Length ? litrlar[i] : 0))).ToArray();
 
-    protected Task<HttpResponseMessage> Yop(HttpClient mijoz, int smenaId, AparatKorsatkichDto[] korsatkichlar, long terminal = 50_000, long depozit = 200_000, long naqd = 0, string? izoh = null) =>
-        mijoz.PostAsJsonAsync($"/smenalar/{smenaId}/yop", new SmenaYopishDto(korsatkichlar, terminal, depozit, naqd, izoh), Json);
+    protected Task<HttpResponseMessage> Yop(HttpClient mijoz, int smenaId, AparatKorsatkichDto[] korsatkichlar, long terminal = 50_000, long depozit = 200_000, long naqd = 0, string? izoh = null,
+        long[]? plastik = null) =>
+        mijoz.PostAsJsonAsync($"/smenalar/{smenaId}/yop", new SmenaYopishDto(korsatkichlar, terminal, depozit, naqd, izoh, plastik), Json);
 }

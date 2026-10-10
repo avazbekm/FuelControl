@@ -6,6 +6,8 @@ namespace FuelControl.Contracts.Dto;
 /// Yopilgan smenada: Plastik = YopishTerminal - OchishTerminal, DepozitFarqi = YopishDepozit - OchishDepozit (manfiy bo'lishi mumkin),
 /// Kutilgan = OchishQaytim + Savdo + QaytganNasiya - Plastik - DepozitFarqi - NasiyaJami - XarajatJami, Farq = SanalganNaqd - Kutilgan
 /// (manfiy - kamomat, musbat - ortiqcha).
+/// PlastikSummalari - yopishda kiritilgan plastik qismlari (terminal, kassa aparati, nollash cheki...): yig'indisi YopishTerminal'ga teng;
+/// ochiq smenada va qismlarsiz yopilgan (eski) smenalarda bo'sh massiv - u holda faqat YopishTerminal ko'rsatiladi.
 /// </summary>
 public sealed record SmenaDto(
     int Id, int OperatorId, string OperatorIsmi, DateTime Boshlandi, DateTime? Tugadi,
@@ -13,7 +15,7 @@ public sealed record SmenaDto(
     long? YopishTerminal, long? YopishDepozit, long? SanalganNaqd,
     decimal JamiLitr, long Savdo, long Plastik, long DepozitFarqi,
     long NasiyaJami, long QaytganNasiya, long XarajatJami,
-    long Kutilgan, long Farq, string? Izoh);
+    long Kutilgan, long Farq, string? Izoh, long[] PlastikSummalari);
 
 /// <summary>
 /// Smenaning bitta aparat segmenti. Odatda aparatga bitta qator; ochiq smenada narx o'zgargan bo'lsa ikkita (NarxOzgarishida = true:
@@ -38,10 +40,14 @@ public sealed record SmenaOchishDto(long Qaytim, long Terminal, long Depozit);
 public sealed record AparatKorsatkichDto(int AparatId, decimal Qiymat);
 
 /// <summary>
-/// Smenani yopish: har faol aparat uchun pult ko'rsatkichi majburiy va oldingisidan kichik bo'lmasligi shart; Terminal - bitta raqam
-/// (tungi nollash cheki + nollashdan keyingi savdo); Depozit - karta qoldig'i; SanalganNaqd - kassada sanalgan naqd. Pul maydonlari >= 0.
+/// Smenani yopish: har faol aparat uchun pult ko'rsatkichi majburiy va oldingisidan kichik bo'lmasligi shart; Terminal - plastikning jami
+/// summasi (tungi nollash cheki + nollashdan keyingi savdo + kassa aparati...); Depozit - karta qoldig'i; SanalganNaqd - kassada sanalgan naqd.
+/// Pul maydonlari >= 0. Smena plastigi = Terminal - OchishTerminal (formula o'zgarmagan).
+/// PlastikSummalari (ixtiyoriy): plastik qismlari. Berilsa, har biri >= 0, ko'pi bilan 20 ta va yig'indisi Terminal'ga teng bo'lishi shart
+/// (aks holda 400); smenada saqlanadi va SmenaDto.PlastikSummalari bo'lib qaytadi. Berilmasa (eski klientlar) - eski xatti-harakat: faqat Terminal.
 /// </summary>
-public sealed record SmenaYopishDto(AparatKorsatkichDto[] Korsatkichlar, long Terminal, long Depozit, long SanalganNaqd, string? Izoh);
+public sealed record SmenaYopishDto(AparatKorsatkichDto[] Korsatkichlar, long Terminal, long Depozit, long SanalganNaqd, string? Izoh,
+    long[]? PlastikSummalari = null);
 
 /// <summary>Faqat oxirgi yopilgan smena uchun (KorsatkichTuzatish ruxsati), Sabab majburiy.</summary>
 public sealed record KorsatkichTuzatishDto(int AparatId, decimal Qiymat, string Sabab);

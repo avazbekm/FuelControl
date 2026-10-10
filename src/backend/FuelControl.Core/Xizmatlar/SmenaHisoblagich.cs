@@ -27,7 +27,28 @@ public static class SmenaHisoblagich
 
     public sealed record TuzatishNatijasi(Natija Eski, Natija Yangi, decimal EskiOxiri, decimal YangiOxiri, HisobHarakati? Harakat);
 
+    /// <summary>Yopishda kiritiladigan plastik qismlarining eng ko'p soni.</summary>
+    public const int MaksPlastikSummalari = 20;
+
     public static decimal Yaxlitla(decimal qiymat) => Math.Round(qiymat, 2, MidpointRounding.AwayFromZero);
+
+    /// <summary>
+    /// Yopishdagi plastik qismlarini tekshiradi: berilmasa (null, eski klient) - bo'sh massiv; berilsa har biri >= 0, ko'pi bilan
+    /// <see cref="MaksPlastikSummalari"/> ta va yig'indisi terminalga (plastikning jami summasi) teng bo'lishi shart, aks holda ArgumentException (400).
+    /// </summary>
+    public static long[] PlastikniTekshir(IReadOnlyList<long>? summalar, long terminal)
+    {
+        if (summalar is null) return [];
+        if (summalar.Count > MaksPlastikSummalari)
+            throw new ArgumentException($"Plastik summalari ko'pi bilan {MaksPlastikSummalari} ta bo'lishi mumkin ({summalar.Count} ta berilgan).");
+        if (summalar.Any(x => x < 0)) throw new ArgumentException("Plastik summasi manfiy bo'lishi mumkin emas.");
+        long jami = 0;
+        try { foreach (var x in summalar) jami = checked(jami + x); }
+        catch (OverflowException) { throw new ArgumentException("Plastik summalari yig'indisi juda katta."); }
+        if (jami != terminal)
+            throw new ArgumentException($"Plastik summalari yig'indisi ({Format.Pul(jami)}) terminalga ({Format.Pul(terminal)}) teng bo'lishi kerak.");
+        return summalar.ToArray();
+    }
 
     public static decimal Litr(decimal boshi, decimal oxiri) => Yaxlitla(oxiri - boshi);
 
@@ -127,15 +148,17 @@ public static class SmenaHisoblagich
     /// <summary>
     /// Smenani yopadi. Har aparat uchun pult ko'rsatkichi majburiy va oldingisidan kichik bo'lmasligi shart; oxirgi segment joriy narxda
     /// (yoqilgiNarxlari: YoqilgiTuriId -> narx). Aparatning TotalLitr'i yangi ko'rsatkichga teng bo'ladi, bak qoldig'idan smenada sotilgan
-    /// litr ayriladi. Kamomat/ortiqcha bo'lsa operator hisobiga yoziladigan harakat qaytariladi (Smena #N).
+    /// litr ayriladi. Kamomat/ortiqcha bo'lsa operator hisobiga yoziladigan harakat qaytariladi (Smena #N). plastikSummalari - ixtiyoriy
+    /// plastik qismlari (<see cref="PlastikniTekshir"/>); formula o'zgarmaydi: Plastik = terminal - OchishTerminal.
     /// </summary>
     public static YopishNatijasi Yop(Smena smena, IReadOnlyCollection<Aparat> aparatlar, IReadOnlyDictionary<int, long> yoqilgiNarxlari,
         IReadOnlyCollection<SmenaKorsatkichi> mavjud, IReadOnlyDictionary<int, decimal> korsatkichlar,
-        long terminal, long depozit, long sanalganNaqd, string? izoh, Yigindilar y, DateTime vaqtUtc)
+        long terminal, long depozit, long sanalganNaqd, string? izoh, Yigindilar y, DateTime vaqtUtc, IReadOnlyList<long>? plastikSummalari = null)
     {
         if (!smena.Ochiqmi) throw new InvalidOperationException("Smena allaqachon yopilgan.");
         if (terminal < 0 || depozit < 0 || sanalganNaqd < 0)
             throw new ArgumentException("Terminal, depozit va sanalgan naqd manfiy bo'lishi mumkin emas.");
+        var plastik = PlastikniTekshir(plastikSummalari, terminal);
         var yetishmaydi = aparatlar.Where(a => !korsatkichlar.ContainsKey(a.Id)).Select(a => a.Raqam).OrderBy(x => x).ToList();
         if (yetishmaydi.Count > 0)
             throw new ArgumentException($"Barcha aparatlarning pult ko'rsatkichi majburiy. Yetishmaydi: {string.Join(", ", yetishmaydi)}-aparat.");
@@ -160,6 +183,7 @@ public static class SmenaHisoblagich
         // Hamma tekshiruvdan keyingina o'zgartiramiz.
         smena.Tugadi = vaqtUtc;
         smena.YopishTerminal = terminal; smena.YopishDepozit = depozit; smena.SanalganNaqd = sanalganNaqd;
+        smena.PlastikSummalari = plastik;
         smena.Izoh = string.IsNullOrWhiteSpace(izoh) ? null : izoh.Trim();
         Qollash(smena, natija);
         foreach (var a in aparatlar)

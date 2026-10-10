@@ -22,6 +22,12 @@ public sealed class Smena
     public long? SanalganNaqd { get; set; }
     public string? Izoh { get; set; }
 
+    /// <summary>
+    /// Yopishda kiritilgan plastik qismlari (terminal, kassa aparati, nollash cheki...); yig'indisi YopishTerminal'ga teng. Qismlarsiz
+    /// yopilgan (eski klient) va eski smenalarda bo'sh - u holda faqat YopishTerminal ko'rsatiladi. Bazada vergul bilan ajratilgan matn.
+    /// </summary>
+    public long[] PlastikSummalari { get; set; } = [];
+
     // Yopishda hisoblanadi (server — yagona haqiqat manbai).
     public decimal JamiLitr { get; set; }
     public long Savdo { get; set; }

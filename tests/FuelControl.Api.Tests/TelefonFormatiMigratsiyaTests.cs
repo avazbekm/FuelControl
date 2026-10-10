@@ -51,11 +51,14 @@ public sealed class TelefonFormatiMigratsiyaTests : IDisposable
         var op = new Foydalanuvchi { ToliqIsm = "Op", Login = "op", ParolXeshi = "x" };
         db.Foydalanuvchilar.Add(op);
         await db.SaveChangesAsync();
-        var smena = new Smena { OperatorId = op.Id, Boshlandi = DateTime.UtcNow.AddHours(-3), Tugadi = DateTime.UtcNow.AddHours(-1) };
-        db.Smenalar.Add(smena);
-        await db.SaveChangesAsync();
+        // Smena SQL bilan: joriy modelda keyingi migratsiyalar qo'shgan ustunlar (masalan, PlastikSummalari) bu eski sxemada hali yo'q.
+        await db.Database.ExecuteSqlRawAsync("""
+            INSERT INTO "Smenalar" ("Id","OperatorId","Boshlandi","Tugadi","OchishQaytim","OchishTerminal","OchishDepozit","YopishTerminal","YopishDepozit","SanalganNaqd",
+                "Izoh","JamiLitr","Savdo","Plastik","DepozitFarqi","NasiyaJami","QaytganNasiya","XarajatJami","Kutilgan","Farq")
+            VALUES (1,1,'2026-10-01 03:00:00','2026-10-01 05:00:00',0,0,0,0,0,0,NULL,'0',0,0,0,0,0,0,0,0);
+            """);
         foreach (var tel in eskiTelefonlar)
-            db.Nasiyalar.Add(new Nasiya { SmenaId = smena.Id, OperatorId = op.Id, KimYozdi = "Op", MijozIsmi = "Mijoz", Telefon = tel, MashinaRaqami = "",
+            db.Nasiyalar.Add(new Nasiya { SmenaId = 1, OperatorId = op.Id, KimYozdi = "Op", MijozIsmi = "Mijoz", Telefon = tel, MashinaRaqami = "",
                 Summa = 1000, Muddat = new DateOnly(2026, 10, 20), Yozildi = DateTime.UtcNow });
         await db.SaveChangesAsync();
 

@@ -248,6 +248,27 @@ Olib tashlanadi: barcha `/sotuvlar` yo'llari. `/operatorlar/{id}/hisob` saqlanad
    - **Savdo sahifasi.** "Muddati o'tgan qarzlar" kartasining tepasida "Jami qarzdorlik 2 510 000 · 7 ta mijoz" qatori chiqadi. Muddati o'tganlar ro'yxati uning ostida qoladi.
    - **Boshqaruv.** Nasiya KPI plitkasida asosiy raqam jami qarzdorlik bo'ladi. Ostida qizil rangda "muddati o'tgan 480 000 · 2 ta" yoziladi. Plitka nomi "Nasiya qarzdorligi".
    - Barcha raqamlar `NasiyalarXulosaDto` dan olinadi: `FaolQarz`, `FaolSoni`, `MuddatiOtgan`, `MuddatiOtganSoni`. Jami qatori esa klientda joriy ro'yxatdan hisoblanadi.
+8. **Nasiya yozish: Enter bilan maydondan maydonga o'tish (2026-10-10).** Desktop va web'da bir xil ishlaydi.
+   - **Mijoz ismi** maydonida Enter bosilganda:
+     - takliflar ro'yxati ochiq bo'lsa va unda element tanlangan bo'lsa, o'sha mijoz tanlanadi (ism, telefon va mashina raqami to'ladi), fokus esa birinchi bo'sh maydonga, odatda Summa'ga o'tadi;
+     - taklif yo'q bo'lsa (yangi mijoz) yoki ro'yxat yopiq bo'lsa, fokus **Telefon** maydoniga o'tadi. Ism bo'sh bo'lsa, fokus joyida qoladi.
+   - Keyingi tartib: Telefon → Mashina raqami → Summa → Muddat → Izoh → "Saqlash" tugmasi. Tugma Enter bilan o'zi bosilmaydi, faqat fokus oladi (8.4 bilan bir xil).
+   - Takliflar ro'yxati ochiq bo'lsa, ↑/↓ unda yuradi, Esc uni yopadi va matn o'zgarmaydi.
+9. **Plastik bir nechta summa bilan kiritiladi (2026-10-10).** Plastik summasi bir necha joydan olinadi: terminaldagi savdo, kassa aparatidagi summa, kechasi 00:00 da avtomatik chiqadigan nollash cheki. Shuning uchun yopishda bitta maydon emas, ro'yxat bo'ladi. Desktop va web'da bir xil ishlaydi.
+   - **Ochishda** terminal summasi o'zgarishsiz bitta raqam bo'lib qoladi (`OchishTerminal`).
+   - **Yopishda** "Plastik" bo'limida summalar ro'yxati bo'ladi:
+     - boshida bitta bo'sh qator turadi;
+     - "+ Plastik qo'shish" yangi qator qo'shadi va unga fokus beradi;
+     - har qatorda faqat summa va o'chirish (×) tugmasi bo'ladi, qatorga nom yoki "qayerdan" yozilmaydi;
+     - bo'sh qatorlar hisobga olinmaydi, kamida bitta qiymat kerak (0 ham mumkin);
+     - manfiy summa mumkin emas.
+   - **Hisob:** jami plastik = qatorlar yig'indisi. Shu smena plastigi = jami − `OchishTerminal`. Kassa formulasi (1-bo'lim) o'zgarmaydi. Ekranda "Jami plastik" va "Shu smena plastik" ko'rinadi.
+   - **Enter tartibi (8.4):** aparatlar → plastik qatorlari ketma-ket → depozit → sanalgan naqd → "Smenani yopish" tugmasi.
+   - **Shartnoma** (qo'shimcha, eski klientlar buzilmaydi):
+     - `SmenaYopishDto` oxiriga `long[]? PlastikSummalari = null` qo'shiladi. Berilsa, har biri ≥ 0, ko'pi bilan 20 ta, va `Terminal` ularning yig'indisiga teng bo'lishi shart, aks holda 400. Berilmasa, eski xatti-harakat saqlanadi.
+     - Server summalarni smenada saqlaydi; migratsiya qo'shimcha ustun bilan.
+     - `SmenaDto` oxiriga `long[] PlastikSummalari` qo'shiladi; eski smenalarda bo'sh massiv.
+   - **Ko'rinishi:** Smenalar tafsiloti va smena Excel eksportida plastik qismlari bilan chiqadi, masalan "7 830 000 + 300 000 + 150 000 = 8 280 000; ochishda 200 000 → shu smena 8 080 000". Eski smenalarda bitta raqam ko'rinadi.
 
 ## 9. Ish tartibi
 

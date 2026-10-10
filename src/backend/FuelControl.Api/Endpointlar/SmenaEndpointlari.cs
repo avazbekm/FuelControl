@@ -88,7 +88,7 @@ public static class SmenaEndpointlari
                 var narxlar = await db.Yoqilgilar.ToDictionaryAsync(y => y.Id, y => y.Narx);
                 var mavjud = await db.SmenaKorsatkichlari.Where(x => x.SmenaId == id).ToListAsync();
                 var natija = SmenaHisoblagich.Yop(smena, aparatlar, narxlar, mavjud, Korsatkichlar(so.Korsatkichlar),
-                    so.Terminal, so.Depozit, so.SanalganNaqd, so.Izoh, await db.Yigindilar(id), DateTime.UtcNow);
+                    so.Terminal, so.Depozit, so.SanalganNaqd, so.Izoh, await db.Yigindilar(id), DateTime.UtcNow, so.PlastikSummalari);
 
                 db.SmenaKorsatkichlari.AddRange(natija.YangiSegmentlar);
                 if (natija.Harakat is { } h) db.Harakatlar.Add(h);
