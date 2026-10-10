@@ -24,10 +24,12 @@
 .PARAMETER SkipTunnel
     O'rnatuvchi cloudflared'siz yig'ilgan bo'lsa (build.ps1 -SkipCloudflared), tunnel sinovini o'tkazib yuboradi.
 .PARAMETER OldSetup
-    Avvalgi versiya o'rnatuvchisi (joriy API shaklidagi reliz, >= 0.1.0; masalan, Output\FuelControl-Setup-0.1.0.exe). Berilsa, mijoz
-    qurilmasidagi reja sinaladi: eski versiya o'rnatiladi va unda ma'lumot yaratiladi (yoqilg'i, aparat, operator, nasiya, yopilgan smena)
-    -> o'chiriladi (ma'lumot papkasi SAQLANADI) -> yangisi /ADMINPAROL'siz o'rnatiladi (eski parol, operator va yaratilgan ma'lumot joyida,
-    desktop sozlama.json va yorliqlar to'g'ri) -> /ADMINPAROL berilsa ham e'tiborga olinmaydi -> ma'lumot papkasi o'chirilib toza o'rnatiladi.
+    Avvalgi versiya o'rnatuvchisi (joriy API shaklidagi reliz, >= 0.1.0; masalan, Output\FuelControl-Setup-0.1.1.exe). Berilsa, mijoz
+    qurilmasidagi reja sinaladi: eski versiya o'rnatiladi va unda ma'lumot yaratiladi (yoqilg'i, aparat, operator, nasiya, yopilgan smena,
+    yana bitta OCHIQ smena) -> o'chiriladi (ma'lumot papkasi SAQLANADI; baza sxemasi o'qiladi: yangi migratsiya hali yo'q) -> yangisi
+    /ADMINPAROL'siz o'rnatiladi (eski parol, operator va yaratilgan ma'lumot joyida, desktop sozlama.json va yorliqlar to'g'ri; yangi
+    migratsiya eski bazaga qo'llanadi: API va bazaning o'zidan tekshiriladi, eski ochiq smena yangi qoidalar bilan yopiladi) ->
+    /ADMINPAROL berilsa ham e'tiborga olinmaydi -> ma'lumot papkasi o'chirilib toza o'rnatiladi.
 .PARAMETER KeepFiles
     Muvaffaqiyatli tugaganda ham ish papkasini o'chirmaydi.
 
@@ -100,6 +102,75 @@ function Count-Json([int] $port, [string] $token, [string] $path) { @(Get-Json $
 function Post-Json([int] $port, [string] $token, [string] $path, $body) {
     Invoke-RestMethod "http://127.0.0.1:$port$path" -Method Post -Headers @{ Authorization = "Bearer $token" } -ContentType 'application/json; charset=utf-8' `
         -Body ([Text.Encoding]::UTF8.GetBytes(($body | ConvertTo-Json -Depth 6)))
+}
+
+# POST -> (HTTP kod, javob matni): 400/403 kabi kutilgan xatolarni tekshirish uchun (Post-Json bunda istisno tashlaydi).
+function Post-Xato([int] $port, [string] $token, [string] $path, $body) {
+    try { [void](Post-Json $port $token $path $body); [pscustomobject] @{ Kod = 200; Matn = '' } }
+    catch { [pscustomobject] @{ Kod = [int] $_.Exception.Response.StatusCode; Matn = "$($_.ErrorDetails.Message)" } }
+}
+
+# Baza faylini o'qish (faqat SELECT/PRAGMA): Windows bilan keladigan winsqlite3.dll - qo'shimcha paket yoki dastur kerak emas.
+# Har qator - ustunlar '|' bilan birlashtirilgan matn (NULL - bo'sh). Baza yopiq bo'lishi kerak (API to'xtatilgan).
+$script:SqliteKodi = @'
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+public static class SqliteOqish
+{
+    [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)] static extern int sqlite3_open_v2(byte[] fayl, out IntPtr db, int bayroqlar, IntPtr vfs);
+    [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)] static extern int sqlite3_close(IntPtr db);
+    [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)] static extern IntPtr sqlite3_errmsg(IntPtr db);
+    [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)] static extern int sqlite3_prepare_v2(IntPtr db, byte[] sql, int bayt, out IntPtr stmt, IntPtr qoldiq);
+    [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)] static extern int sqlite3_step(IntPtr stmt);
+    [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)] static extern int sqlite3_column_count(IntPtr stmt);
+    [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)] static extern IntPtr sqlite3_column_text(IntPtr stmt, int ustun);
+    [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)] static extern int sqlite3_finalize(IntPtr stmt);
+
+    static byte[] Utf8(string s) { return Encoding.UTF8.GetBytes(s + (char)0); }
+
+    public static string[] Soro(string fayl, string sql)
+    {
+        IntPtr db;
+        if (sqlite3_open_v2(Utf8(fayl), out db, 2, IntPtr.Zero) != 0) // 2 = SQLITE_OPEN_READWRITE (bazani yaratmaydi)
+        {
+            var xabar = db == IntPtr.Zero ? "xotira yetmadi" : Marshal.PtrToStringUTF8(sqlite3_errmsg(db));
+            if (db != IntPtr.Zero) sqlite3_close(db);
+            throw new InvalidOperationException("SQLite ochilmadi (" + fayl + "): " + xabar);
+        }
+        try
+        {
+            IntPtr stmt;
+            if (sqlite3_prepare_v2(db, Utf8(sql), -1, out stmt, IntPtr.Zero) != 0)
+                throw new InvalidOperationException("SQLite: " + Marshal.PtrToStringUTF8(sqlite3_errmsg(db)) + " [" + sql + "]");
+            try
+            {
+                var qatorlar = new List<string>();
+                int n = sqlite3_column_count(stmt), kod;
+                while ((kod = sqlite3_step(stmt)) == 100) // SQLITE_ROW
+                {
+                    var ustunlar = new string[n];
+                    for (int i = 0; i < n; i++)
+                    {
+                        var p = sqlite3_column_text(stmt, i);
+                        ustunlar[i] = p == IntPtr.Zero ? "" : Marshal.PtrToStringUTF8(p);
+                    }
+                    qatorlar.Add(string.Join("|", ustunlar));
+                }
+                if (kod != 101) throw new InvalidOperationException("SQLite step kodi " + kod + ": " + Marshal.PtrToStringUTF8(sqlite3_errmsg(db))); // 101 = SQLITE_DONE
+                return qatorlar.ToArray();
+            }
+            finally { sqlite3_finalize(stmt); }
+        }
+        finally { sqlite3_close(db); }
+    }
+}
+'@
+
+function Sql-Qatorlar([string] $fayl, [string] $sql) {
+    if (-not ('SqliteOqish' -as [type])) { Add-Type -TypeDefinition $script:SqliteKodi }
+    , @([SqliteOqish]::Soro($fayl, $sql))
 }
 
 function Login([int] $port, [string] $pwd, [string] $login = 'admin') {
@@ -303,11 +374,23 @@ try {
             $kors = @(Get-Json $p4 $r.token '/aparatlar' | ForEach-Object { @{ aparatId = $_.id; qiymat = [decimal]$_.totalLitr + $(if ($_.id -eq $apr.id) { [decimal]100 } else { [decimal]0 }) } })
             $yop = Post-Json $p4 $r.token "/smenalar/$($sm.id)/yop" @{ korsatkichlar = $kors; terminal = 50000; depozit = 200000; sanalganNaqd = 1134500; izoh = $null }
             Check (($yop.savdo -eq 1234500) -and ($yop.farq -eq 0)) "eski versiyada yaratildi: yoqilg'i, aparat 91, operator, nasiya, yopilgan smena (savdo $($yop.savdo), farq $($yop.farq))"
+            # Ikkinchi smena OCHIQ qoldiriladi: mijoz yangilashni smena davom etayotganda ham o'rnatishi mumkin.
+            $sm2 = Post-Json $p4 $r.token '/smenalar/och' @{ qaytim = 80000; terminal = 70000; depozit = 300000 }
+            Check (($null -ne $sm2.id) -and ($sm2.id -ne $sm.id) -and ($null -eq $sm2.tugadi)) "eski versiyada ikkinchi smena ochildi va yangilash paytida ochiq turadi (id $($sm2.id))"
         }
         Stop-Api
         Uninstall-One $app6
         Check (-not (Test-Path "$app6\unins000.exe")) "eski versiya o'chirildi"
         Check (Test-Path "$data6\fuelcontrol.db") "o'chirishdan keyin baza SAQLANDI"
+        # Eski versiya yaratgan haqiqiy baza (API to'xtagan, baza yopiq): yangi reliz migratsiyasi hali qo'llanmagan.
+        $plastikMig = '20261010091658_SmenaPlastikSummalari'     # shu reliz eski bazaga qo'llaydigan migratsiya (keyingi relizda yangilang)
+        $dbFayl = "$data6\fuelcontrol.db"
+        $repoMig = @(Get-ChildItem -LiteralPath (Join-Path $Repo 'src\backend\FuelControl.Api\Data\Migrations') -Filter '*.cs' |
+            ForEach-Object { [regex]::Match($_.Name, '^(\d{14}_\w+)\.cs$') } | Where-Object { $_.Success } | ForEach-Object { $_.Groups[1].Value })
+        $eskiMig = Sql-Qatorlar $dbFayl 'SELECT MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId'
+        Check (($repoMig -contains $plastikMig) -and ($eskiMig.Count -gt 0) -and ($eskiMig -notcontains $plastikMig)) "eski baza: $($eskiMig.Count) ta migratsiya qo'llangan (oxirgisi $($eskiMig[-1])), $plastikMig hali yo'q"
+        $eskiUstun = Sql-Qatorlar $dbFayl 'PRAGMA table_info(Smenalar)'
+        Check (($eskiUstun.Count -gt 0) -and (@($eskiUstun | Where-Object { $_.Split('|')[1] -eq 'PlastikSummalari' }).Count -eq 0)) "eski baza: Smenalar jadvalida PlastikSummalari ustuni yo'q (eski sxema)"
         Check (-not (Test-Path -LiteralPath (Join-Path $menyu 'FuelControl.lnk'))) "o'chirishda Start menyu yorlig'i ketdi"
         if (-not $hadLnk) { Check (-not (Test-Path -LiteralPath $lnk)) "o'chirishda ish stoli yorlig'i ketdi" }
 
@@ -325,7 +408,8 @@ try {
         if ($up) {
             $r = Login $p4 $eskiParol
             Check ($null -ne $r) "eski admin paroli ishlaydi"
-            Check ($null -ne (Login $p4 $opParol $opLogin)) "eski operator ($opLogin) o'z paroli bilan kiradi"
+            $op = Login $p4 $opParol $opLogin
+            Check ($null -ne $op) "eski operator ($opLogin) o'z paroli bilan kiradi"
             if ($r) {
                 $tk = $r.token
                 $y = @(Get-Json $p4 $tk '/yoqilgilar')
@@ -334,21 +418,56 @@ try {
                 Check (($a.Count -eq 1) -and ($a[0].raqam -eq 91) -and ([decimal]$a[0].totalLitr -eq [decimal]184742.30) -and ($a[0].bakQoldiq -eq 4900)) "aparat joyida: 91-aparat, total 184742.30, bak 4900 (smena yopilgandan keyingi holat)"
                 Check ((Count-Json $p4 $tk '/foydalanuvchilar') -eq 2) "foydalanuvchilar joyida: admin + $opLogin"
                 $s = @(Get-Json $p4 $tk '/smenalar')
-                Check (($s.Count -eq 1) -and ($s[0].savdo -eq 1234500) -and ($s[0].farq -eq 0) -and ($null -ne $s[0].tugadi)) "yopilgan smena joyida: savdo 1 234 500, farq 0"
-                if ($s.Count -eq 1) {
-                    $d = Get-Json $p4 $tk "/smenalar/$($s[0].id)"
+                $s1 = @($s | Where-Object { $_.id -eq $sm.id })
+                Check (($s.Count -eq 2) -and ($s1.Count -eq 1) -and ($s1[0].savdo -eq 1234500) -and ($s1[0].farq -eq 0) -and ($null -ne $s1[0].tugadi)) "yopilgan smena joyida: savdo 1 234 500, farq 0 (jami 2 ta smena: yopilgan va ochiq)"
+                if ($s1.Count -eq 1) {
+                    $d = Get-Json $p4 $tk "/smenalar/$($s1[0].id)"
                     Check ((@($d.korsatkichlar).Count -eq 1) -and ([decimal]$d.korsatkichlar[0].boshi -eq [decimal]184642.30) -and ([decimal]$d.korsatkichlar[0].litr -eq [decimal]100)) "smena tafsiloti ochiladi: segment 184642.30 -> 184742.30, 100 litr"
                 }
                 $n = Get-Json $p4 $tk '/nasiyalar'
                 Check ((@($n.royxat).Count -eq 1) -and ($n.royxat[0].telefon -eq '+998 90 123 45 67') -and ($n.royxat[0].qoldiq -eq 200000)) "nasiya joyida: +998 90 123 45 67, qoldiq 200000"
-                Check ((Invoke-WebRequest "$api6/smenalar/joriy" -Headers @{ Authorization = "Bearer $tk" } -UseBasicParsing).StatusCode -eq 204) "ochiq smena yo'q (204)"
+                $j = Get-Json $p4 $tk '/smenalar/joriy'
+                Check (($j.smena.id -eq $sm2.id) -and ($null -eq $j.smena.tugadi) -and ($j.smena.ochishQaytim -eq 80000) -and ($j.smena.ochishTerminal -eq 70000) -and ($j.smena.ochishDepozit -eq 300000)) "ochiq smena joyida (eski versiyada ochilgan, id $($sm2.id)): ochilish qoldiqlari 80 000 / 70 000 / 300 000"
                 foreach ($yol in '/boshqaruv', '/hisobot', '/xarajatlar') {
                     $kod = try { (Invoke-WebRequest "$api6$yol" -Headers @{ Authorization = "Bearer $tk" } -UseBasicParsing).StatusCode } catch { 0 }
                     Check ($kod -eq 200) "GET $yol -> $kod"
                 }
+
+                # SmenaPlastikSummalari migratsiyasi eski bazada: eski smena o'qiladi, eski versiyada ochilgan smena yangi qoidalar bilan yopiladi.
+                $d1 = Get-Json $p4 $tk "/smenalar/$($sm.id)"
+                Check (($d1.smena.PSObject.Properties.Name -contains 'plastikSummalari') -and (@($d1.smena.plastikSummalari).Count -eq 0) -and ($d1.smena.yopishTerminal -eq 50000) -and ($d1.smena.plastik -eq 0)) "eski yopilgan smena yangi sxemada o'qiladi: plastikSummalari = [], terminal 50 000 o'zgarmagan"
+                $kors2 = @(Get-Json $p4 $tk '/aparatlar' | ForEach-Object { @{ aparatId = $_.id; qiymat = [decimal]$_.totalLitr + [decimal]50 } })
+                $xato = Post-Xato $p4 $tk "/smenalar/$($sm2.id)/yop" @{ korsatkichlar = $kors2; terminal = 115000; depozit = 300000; sanalganNaqd = 652250; izoh = $null; plastikSummalari = @(60000, 50000) }
+                Check (($xato.Kod -eq 400) -and ($xato.Matn -match 'Plastik summalari')) "yangi qoida ishlaydi: qismlar yig'indisi terminalga teng emas -> 400 (kod $($xato.Kod))"
+                Check ((Get-Json $p4 $tk '/smenalar/joriy').smena.id -eq $sm2.id) "xato urinishdan keyin smena ochiq qoldi"
+                $yop2 = Post-Json $p4 $tk "/smenalar/$($sm2.id)/yop" @{ korsatkichlar = $kors2; terminal = 115000; depozit = 300000; sanalganNaqd = 652250; izoh = $null; plastikSummalari = @(60000, 55000) }
+                Check (($yop2.savdo -eq 617250) -and ($yop2.plastik -eq 45000) -and ($yop2.farq -eq 0) -and (($yop2.plastikSummalari -join ',') -eq '60000,55000')) "eski versiyada ochilgan smena yangi versiyada yopildi: savdo 617 250, plastik 45 000, farq 0, qismlar 60 000 + 55 000"
+                $d2 = Get-Json $p4 $tk "/smenalar/$($sm2.id)"
+                Check (($null -ne $d2.smena.tugadi) -and (($d2.smena.plastikSummalari -join ',') -eq '60000,55000') -and ($d2.smena.yopishTerminal -eq 115000)) "plastik qismlari migratsiya qilingan bazadan qayta o'qiladi: 60 000 + 55 000 = 115 000"
+                if ($op) {
+                    $kodOxirgi = try { (Invoke-WebRequest "$api6/smenalar/oxirgi" -Headers @{ Authorization = "Bearer $($op.token)" } -UseBasicParsing).StatusCode } catch { [int] $_.Exception.Response.StatusCode }
+                    $tp = Get-Json $p4 $op.token '/smenalar/oxirgi/topshirish'
+                    Check (($kodOxirgi -eq 403) -and ($tp.id -eq $sm2.id) -and ($tp.PSObject.Properties.Name -notcontains 'savdo')) "8.10: operatorga /smenalar/oxirgi -> $kodOxirgi, /oxirgi/topshirish pul natijasisiz (smena $($tp.id))"
+                }
             }
         }
         Stop-Api
+
+        # API to'xtadi, baza yopiq: migratsiya natijasi bazaning o'zidan ham tekshiriladi.
+        $yangiMig = Sql-Qatorlar $dbFayl 'SELECT MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId'
+        Check (@($eskiMig | Where-Object { $yangiMig -notcontains $_ }).Count -eq 0) "yangilashdan keyin eski $($eskiMig.Count) ta migratsiya yozuvi o'z joyida"
+        Check ($yangiMig -contains $plastikMig) "migratsiyalar tarixida $plastikMig bor (yangi versiya birinchi ishga tushganda qo'llangan)"
+        Check ((@($repoMig | Where-Object { $yangiMig -notcontains $_ }).Count -eq 0) -and (@($yangiMig | Where-Object { $repoMig -notcontains $_ }).Count -eq 0)) "baza tarixi repodagi $($repoMig.Count) ta migratsiya bilan bir xil: kutilayotgan ham, begona ham yo'q"
+        $ustunlar = Sql-Qatorlar $dbFayl 'PRAGMA table_info(Smenalar)'
+        $plUstun = @($ustunlar | Where-Object { $_.Split('|')[1] -eq 'PlastikSummalari' })
+        Check (($plUstun.Count -eq 1) -and ($plUstun[0] -match '^\d+\|PlastikSummalari\|TEXT\|1\|''''\|0$')) "Smenalar.PlastikSummalari ustuni qo'shildi: TEXT NOT NULL DEFAULT ''"
+        $qiymatlar = Sql-Qatorlar $dbFayl 'SELECT Id, PlastikSummalari FROM Smenalar ORDER BY Id'
+        Check (($qiymatlar.Count -eq 2) -and ($qiymatlar[0] -eq "$($sm.id)|") -and ($qiymatlar[1] -eq "$($sm2.id)|60000,55000")) "eski smena qatori yangi ustunda bo'sh, yangi yopilgan smena '60000,55000' ko'rinishida saqlangan"
+        Check ((Sql-Qatorlar $dbFayl 'PRAGMA integrity_check')[0] -eq 'ok') "baza yaxlitligi: PRAGMA integrity_check = ok"
+        $fk = Sql-Qatorlar $dbFayl 'PRAGMA foreign_key_check'
+        Check ($fk.Count -eq 0) "begona kalit buzilishi yo'q (PRAGMA foreign_key_check bo'sh)"
+        $idx = Sql-Qatorlar $dbFayl "SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'IX_Smenalar_BittaOchiq'"
+        Check ($idx.Count -eq 1) "'bitta ochiq smena' indeksi (IX_Smenalar_BittaOchiq) yangilashdan keyin ham bor"
         Uninstall-One $app6
 
         '-- 8b. Baza bor bo''lsa /ADMINPAROL berilsa ham e''tiborga olinmaydi --'
