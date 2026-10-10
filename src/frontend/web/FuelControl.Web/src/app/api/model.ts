@@ -44,6 +44,7 @@ export type SmenaKorsatkichDto = S['SmenaKorsatkichDto'];
 export type SmenaOchishDto = S['SmenaOchishDto'];
 export type SmenaQisqaDto = S['SmenaQisqaDto'];
 export type SmenaTafsilotDto = S['SmenaTafsilotDto'];
+export type SmenaTopshirishDto = S['SmenaTopshirishDto'];
 export type SmenaYopishDto = S['SmenaYopishDto'];
 export type TolovTaqsimotiDto = S['TolovTaqsimotiDto'];
 export type TolovTuri = S['TolovTuri'];

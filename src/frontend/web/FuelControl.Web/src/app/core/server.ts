@@ -4,7 +4,7 @@ import type {
   AparatDto, AparatTahrirlashDto, AparatYaratishDto, AuditYozuviDto, BakKirimDto, BakKirimYaratishDto, BoshqaruvDto, FoydalanuvchiDto,
   FoydalanuvchiTahrirlashDto, HisobotDto, HisobotGuruhi, KorsatkichTuzatishDto, LoginJavobi, NarxTarixiDto, NasiyaDto, NasiyalarDto,
   NasiyaQaytishiYaratishDto, MijozTaklifDto, NasiyaTafsilotDto, NasiyaYaratishDto, OperatorHisobDto, Rol, Ruxsat, SmenaDto, SmenaOchishDto, SmenaTafsilotDto,
-  SmenaYopishDto, XarajatDto, XarajatYaratishDto, YoqilgiTahrirlashDto, YoqilgiTuriDto, ZaxiraJavobi,
+  SmenaTopshirishDto, SmenaYopishDto, XarajatDto, XarajatYaratishDto, YoqilgiTahrirlashDto, YoqilgiTuriDto, ZaxiraJavobi,
 } from '../api/model';
 
 /**
@@ -23,7 +23,12 @@ export class Server {
   smenalar(dan?: string, gacha?: string, operatorId?: number): Promise<SmenaDto[]> {
     return ol(api.GET('/smenalar', { params: { query: { dan, gacha, operatorId } } }));
   }
+  /** To'liq natija (faqat `Smenalar` ruxsati yoki shu smenaning operatori; boshqalarga 403 — chaqirilmaydi, docs §8.10). */
   async oxirgiYopilgan(): Promise<SmenaTafsilotDto | null> { return (await ol(api.GET('/smenalar/oxirgi'))) ?? null; }
+  /** Keyingi operator uchun oldingi smena topshiruvi (natijasiz); yopilgan smena yo'q bo'lsa null (204). */
+  async topshirish(): Promise<SmenaTopshirishDto | null> {
+    return (await ol(api.GET('/smenalar/oxirgi/topshirish'))) ?? null;
+  }
   smenaOch(d: SmenaOchishDto): Promise<SmenaDto> { return ol(api.POST('/smenalar/och', { body: d })); }
   smenaYop(id: number, d: SmenaYopishDto): Promise<SmenaDto> { return ol(api.POST('/smenalar/{id}/yop', { params: { path: { id } }, body: d })); }
   korsatkichTuzat(id: number, d: KorsatkichTuzatishDto): Promise<SmenaTafsilotDto> {

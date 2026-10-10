@@ -1060,6 +1060,57 @@ export interface paths {
                     };
                     content?: never;
                 };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/smenalar/oxirgi/topshirish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SmenaTopshirishDto"];
+                    };
+                };
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
         };
         put?: never;
@@ -2365,6 +2416,17 @@ export interface components {
             nasiyalar: components["schemas"]["NasiyaDto"][];
             qaytishlar: components["schemas"]["NasiyaQaytishiDto"][];
             xarajatlar: components["schemas"]["XarajatDto"][];
+        };
+        SmenaTopshirishDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            operatorId: number;
+            operatorIsmi: string;
+            /** Format: date-time */
+            tugadi: string;
+            /** Format: int64 */
+            yopishDepozit: null | number;
         };
         SmenaYopishDto: {
             korsatkichlar: components["schemas"]["AparatKorsatkichDto"][];

@@ -2439,6 +2439,26 @@
   "Муддати ўтган қарз йўқ · энг яқин муддатлар",
   "Просроченных нет · ближайшие сроки"
  ],
+ "Savdo_OldingiSmena": [
+  "Oldingi smena",
+  "Олдинги смена",
+  "Предыдущая смена"
+ ],
+ "Savdo_OldingiSmenaIzoh": [
+  "#{0} · {1} · {2} da yopildi",
+  "#{0} · {1} · {2} да ёпилди",
+  "№{0} · {1} · закрыта {2}"
+ ],
+ "Savdo_YopilgandagiDepozit": [
+  "Yopilgandagi depozit karta qoldig'i",
+  "Ёпилгандаги депозит карта қолдиғи",
+  "Остаток депозитной карты при закрытии"
+ ],
+ "Savdo_TopshirishIzoh": [
+  "Ma'lumot uchun — ochish formasiga o'zi yozilmaydi. Kartadagi hozirgi qoldiqni tekshirib yozing.",
+  "Маълумот учун — очиш формасига ўзи ёзилмайди. Картадаги ҳозирги қолдиқни текшириб ёзинг.",
+  "Для справки — в форму открытия не подставляется. Проверьте и введите текущий остаток карты."
+ ],
  "Savdo_MuddatiOtganQarzlar": [
   "Muddati o'tgan qarzlar",
   "Муддати ўтган қарзлар",

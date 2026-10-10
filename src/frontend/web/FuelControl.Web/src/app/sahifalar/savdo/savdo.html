@@ -225,7 +225,7 @@
         <h1>{{ til.t('Savdo') }}</h1>
         <div class="qator orala holat-qator">
           <span class="pill kul katta"><span class="nuqta kul-nuqta"></span>{{ til.t('Savdo_SmenaYopiq') }}</span>
-          @if (oxirgi(); as o) { <span class="sarlavha-izoh">{{ til.t('Savdo_OxirgiSmenaYopdi', o.smena.id, o.smena.operatorIsmi) }}</span> }
+          @if (oxirgiMalumot(); as o) { <span class="sarlavha-izoh">{{ til.t('Savdo_OxirgiSmenaYopdi', o.id, o.operatorIsmi) }}</span> }
         </div>
       </div>
     </header>
@@ -288,12 +288,22 @@
               <div class="ortiqcha-blok"><ikon nomi="check" [olcham]="16" [qalinlik]="2.4" /><span class="bosh-joy farq-matn"><b class="yashil">{{ til.t('Savdo_FarqYoq') }}</b></span></div>
             }
           </section>
+        } @else if (topshirish(); as tp) {
+          <!-- Boshliq/egasi bo'lmaganlarga: natijasiz topshirish bloki (docs §8.10) — qiymat ochish formasiga avtomatik yozilmaydi, terminal ko'rsatilmaydi -->
+          <section class="shisha karta" aria-labelledby="topshirish-s" data-test="topshirish">
+            <div class="qator ora"><h2 id="topshirish-s">{{ til.t('Savdo_OldingiSmena') }}</h2><span class="pill kul">{{ til.t('Savdo_Yopilgan') }}</span></div>
+            <span class="karta-izoh kichik-bosh">{{ til.t('Savdo_OldingiSmenaIzoh', tp.id, tp.operatorIsmi, kunSoatQisqa(tp.tugadi)) }}</span>
+            <dl class="dl-oddiy">
+              <dt>{{ til.t('Savdo_YopilgandagiDepozit') }}</dt><dd class="qalin">{{ tp.yopishDepozit != null ? pul(tp.yopishDepozit) : '—' }}</dd>
+            </dl>
+            <span class="karta-izoh kichik-bosh">{{ til.t('Savdo_TopshirishIzoh') }}</span>
+          </section>
         }
 
         @if (aparatlar().length) {
         <section class="shisha karta" aria-labelledby="holat-s">
           <h2 id="holat-s">{{ til.t('Savdo_AparatlarHolati') }}</h2>
-          <span class="karta-izoh kichik-bosh">{{ oxirgi() ? til.t('Savdo_SmenaYopilgandanKeyin', oxirgi()!.smena.id) : til.t('Savdo_HozirgiHolat') }}</span>
+          <span class="karta-izoh kichik-bosh">{{ oxirgiMalumot() ? til.t('Savdo_SmenaYopilgandanKeyin', oxirgiMalumot()!.id) : til.t('Savdo_HozirgiHolat') }}</span>
           <div class="holat-jadval">
             <span class="yorliq">{{ til.t('Savdo_Aparat') }}</span><span class="yorliq o">{{ til.t('Savdo_Pult') }}</span><span class="yorliq o">{{ til.t('Savdo_Bak') }}</span>
             @for (a of aparatlar(); track a.id) {

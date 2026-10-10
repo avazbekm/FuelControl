@@ -8,7 +8,7 @@ import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { jonliYangila } from '../../core/malumot';
 import { davomiylikSD, harflar, ishoraPul, kunQisqa, litr, litrQisqa, pul, sana, soat } from '../../core/format';
 import { telefonFormat } from '../../core/telefon';
-import type { AparatDto, NasiyaDto, NasiyalarXulosaDto, SmenaDto, SmenaTafsilotDto, YoqilgiTuriDto } from '../../api/model';
+import type { AparatDto, NasiyaDto, NasiyalarXulosaDto, SmenaDto, SmenaTafsilotDto, SmenaTopshirishDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { AparatYoq } from '../../ui/aparat-yoq';
 import { YoqilgiPill, MashinaRaqami } from '../../ui/belgilar';
@@ -46,7 +46,15 @@ export class SavdoSahifa {
   protected readonly yuklandi = signal(false);
   protected readonly xato = signal<string | null>(null);
   protected readonly joriy = signal<SmenaTafsilotDto | null>(null);
+  /** Oxirgi yopilgan smenaning TO'LIQ natijasi — faqat boshliq (`Smenalar`) yoki shu smenaning operatori uchun; qolganlarda null. */
   protected readonly oxirgi = signal<SmenaTafsilotDto | null>(null);
+  /** Topshirish ma'lumoti (natijasiz) — boshliq/egasi bo'lmaganlar uchun. */
+  protected readonly topshirish = signal<SmenaTopshirishDto | null>(null);
+  /** Oxirgi yopilgan smena haqida natijasiz ma'lumot (kim, qachon, yopilgandagi depozit) — qaysi manba bo'lsa. */
+  protected readonly oxirgiMalumot = computed(() => {
+    const o = this.oxirgi()?.smena;
+    return o ? { id: o.id, operatorIsmi: o.operatorIsmi, tugadi: o.tugadi, yopishDepozit: o.yopishDepozit } : this.topshirish();
+  });
   protected readonly aparatlar = signal<AparatDto[]>([]);
   private readonly yoqilgilar = signal<YoqilgiTuriDto[]>([]);
   protected readonly muddatiOtgan = signal<NasiyaDto[]>([]);
@@ -82,9 +90,9 @@ export class SavdoSahifa {
     if (!jim) this.yuklandi.set(false);
     try {
       const [j, ap, yo, otgan, ox] = await Promise.all([
-        this.server.joriySmena(), this.server.aparatlar(), this.server.yoqilgilar(), this.server.nasiyalar('otgan'), this.server.oxirgiYopilgan(),
+        this.server.joriySmena(), this.server.aparatlar(), this.server.yoqilgilar(), this.server.nasiyalar('otgan'), this.oxirgiOl(),
       ]);
-      this.joriy.set(j); this.aparatlar.set(ap); this.yoqilgilar.set(yo); this.oxirgi.set(ox);
+      this.joriy.set(j); this.aparatlar.set(ap); this.yoqilgilar.set(yo); this.oxirgi.set(ox.tafsilot); this.topshirish.set(ox.topshirish);
       this.muddatiOtgan.set(otgan.royxat.filter((n) => n.holati === 'MuddatiOtgan').sort((a, b) => a.muddatgachaKun - b.muddatgachaKun || a.id - b.id)); // eng ko'p o'tgani birinchi
       this.qarzXulosa.set(otgan.xulosa);
       this.xato.set(null);
@@ -95,13 +103,24 @@ export class SavdoSahifa {
     }
   }
 
+  /**
+   * Oxirgi yopilgan smena (docs §8.10), 403 hech qachon chaqirilmaydi: `Smenalar` ruxsati bo'lsa — to'liq tafsilot;
+   * aks holda topshirish ma'lumoti, va u shu foydalanuvchining o'z smenasi bo'lsa — to'liq tafsilot ham.
+   */
+  private async oxirgiOl(): Promise<{ tafsilot: SmenaTafsilotDto | null; topshirish: SmenaTopshirishDto | null }> {
+    if (this.auth.bor('Smenalar')) return { tafsilot: await this.server.oxirgiYopilgan(), topshirish: null };
+    const tp = await this.server.topshirish();
+    const egasi = !!tp && tp.operatorId === this.auth.foydalanuvchi()?.id;
+    return { tafsilot: egasi ? await this.server.oxirgiYopilgan() : null, topshirish: tp };
+  }
+
   protected rang(id: number): string { return this.yoqilgilar().find((y) => y.id === id)?.rang ?? '#2563EB'; }
   protected narx(id: number): number { return this.yoqilgilar().find((y) => y.id === id)?.narx ?? 0; }
   protected oxirgiKirim(a: AparatDto): string {
     return a.oxirgiKirimVaqti ? this.til.t('Bak_OxirgiKirim', kunQisqa(a.oxirgiKirimVaqti), litrQisqa(a.oxirgiKirimLitr ?? 0)) : this.til.t('Bak_KirimYoq');
   }
   protected oxirgiYopilganVaqt(): string {
-    const o = this.oxirgi()?.smena.tugadi;
+    const o = this.oxirgiMalumot()?.tugadi;
     return o ? `${kunQisqa(o)} ${soat(o)}` : '—';
   }
 
