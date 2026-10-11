@@ -56,7 +56,7 @@
             <div class="plitka mini"><span class="kap">{{ til.t('Boshqaruv_QaytimPuli') }}</span><span class="v">{{ pul(j.ochishQaytim) }}</span></div>
             <div class="plitka mini"><span class="kap">{{ til.t('Boshqaruv_TerminalOchishda') }}</span><span class="v">{{ pul(j.ochishTerminal) }}</span></div>
             <div class="plitka mini"><span class="kap">{{ til.t('Boshqaruv_DepozitOchishda') }}</span><span class="v">{{ pul(j.ochishDepozit) }}</span></div>
-            <div class="plitka mini"><span class="kap">{{ til.t('Boshqaruv_NasiyaSoni', joriyTafsilot()?.nasiyalar?.length ?? 0) }}</span><span class="v">{{ pul(j.nasiyaJami) }}</span></div>
+            <div class="plitka mini"><span class="kap">{{ til.t('Boshqaruv_NasiyaSoni', nasiyaSoni()) }}</span><span class="v">{{ pul(j.nasiyaJami) }}</span></div>
             <div class="plitka mini"><span class="kap">{{ til.t('Boshqaruv_QaytganNasiya') }}</span><span class="v yashil-matn">{{ pul(j.qaytganNasiya) }}</span></div>
             <div class="plitka mini"><span class="kap">{{ til.t('Boshqaruv_XarajatSoni', joriyTafsilot()?.xarajatlar?.length ?? 0) }}</span><span class="v">{{ pul(j.xarajatJami) }}</span></div>
           </div>

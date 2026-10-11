@@ -1,27 +1,41 @@
-import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, model, output, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Til } from '../../core/til';
 import { Auth } from '../../core/auth';
 import { Server } from '../../core/server';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { harflar, kunOy, pul } from '../../core/format';
-import { telefonFormat } from '../../core/telefon';
+import { telefonFormat, telefonRaqamlar } from '../../core/telefon';
 import type { NasiyaDto, SmenaDto, TolovTuri } from '../../api/model';
 import { Ikon } from '../ikon';
 import { Oyna } from '../oyna';
 import { EnterKeyingi } from '../enter-keyingi';
 import { SonKiritish } from '../son-kiritish';
 import { MashinaRaqami } from '../belgilar';
+import { MijozMaydonlari, type MijozXatolari } from '../mijoz-maydonlari';
 
 const USULLAR: TolovTuri[] = ['Naqd', 'Plastik', 'Depozit'];
 
-/** "Qarz qaytdi" dialogi (docs/dizayn/NasiyaQaytdi): qarzdorni topadi, to'liq yoki qisman qaytishni yozadi. */
+/**
+ * "Qarz qaytdi" dialogi (docs/dizayn/NasiyaQaytdi): qarzdorni topadi, to'liq yoki qisman qaytishni yozadi.
+ * "Eski qarz (dasturda yo'q)" rejimi (docs §8.11): dasturdan oldingi qarzdor olib kelgan summa — mijoz, summa, usul, izoh; ochiq smena kassasiga qo'shiladi.
+ */
 @Component({
   selector: 'qarz-qaytdi-dialog',
-  imports: [FormsModule, Ikon, Oyna, SonKiritish, MashinaRaqami, EnterKeyingi],
+  imports: [FormsModule, Ikon, Oyna, SonKiritish, MashinaRaqami, EnterKeyingi, MijozMaydonlari],
   template: `
     <oyna [(ochiq)]="ochiq" [sarlavha]="til.t('Nasiya_QarzQaytdi')" [tagsarlavha]="smenaMatn()" ikon="undo" ikonRang="yashil">
-      <form class="forma-ustun" enterKeyingi (ngSubmit)="saqla()" autocomplete="off" novalidate>
+      <form class="forma-ustun" enterKeyingi (ngSubmit)="saqla()" autocomplete="off" novalidate (input)="eskiQaytaTekshir()" (change)="eskiQaytaTekshir()">
+        @if (nasiyaId() == null) {
+          <div class="maydon">
+            <div class="segment rejim" role="group" [attr.aria-label]="til.t('Nasiya_QarzQaytdi')">
+              <button type="button" [class.tanlangan]="rejim() === 'mavjud'" [attr.aria-pressed]="rejim() === 'mavjud'" (click)="rejimTanla('mavjud')">{{ til.t('Nasiya_MavjudRejim') }}</button>
+              <button type="button" data-test="rejim-eski" [class.tanlangan]="rejim() === 'eski'" [attr.aria-pressed]="rejim() === 'eski'" [disabled]="smenaYoq()" (click)="rejimTanla('eski')">{{ til.t('Nasiya_EskiQarzRejim') }}</button>
+            </div>
+            @if (smenaYoq()) { <div class="malumot-blok" data-test="eski-smena-kerak"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Nasiya_EskiQarzSmenaKerak') }}</span></div> }
+          </div>
+        }
+        @if (rejim() === 'mavjud') {
         <div class="maydon">
           <label for="qq-qidir">{{ til.t('Nasiya_QarzdorniToping') }}</label>
           <div class="qidiruv-oram">
@@ -92,10 +106,31 @@ const USULLAR: TolovTuri[] = ['Naqd', 'Plastik', 'Depozit'];
         }
 
         <div class="malumot-blok"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Nasiya_QaytishIzoh') }}</span></div>
-        @if (xato()) { <div class="xato-matn" role="alert">{{ xato() }}</div> }
+        } @else {
+          <mijoz-maydonlari prefiks="eq" keyingi="eq-summa" [faol]="ochiq()" [(ism)]="eIsm" [(tel)]="eTel" [(raqam)]="eRaqam" [xatolar]="eXatolar()" (tanlandi)="eMijozTanlandi()" />
+          <div class="maydon">
+            <label for="eq-summa">{{ til.t('Nasiya_QaytarilganSumma') }}</label>
+            <son-kiritish [(qiymat)]="eSumma" [sinf]="eXatolar().summa ? 'kiritish katta xato' : 'kiritish katta'" inputId="eq-summa" />
+            @if (eXatolar().summa) { <span class="xato-matn" role="alert">{{ eXatolar().summa }}</span> }
+          </div>
+          <div class="maydon">
+            <span class="yorliq" id="eq-usul-l">{{ til.t('Nasiya_QandayTolandi') }}</span>
+            <div class="segment" role="group" aria-labelledby="eq-usul-l">
+              @for (u of usullar; track u) {
+                <button type="button" [class.tanlangan]="usul() === u" [attr.aria-pressed]="usul() === u" (click)="usul.set(u)">{{ til.t('Tolov_' + u) }}</button>
+              }
+            </div>
+          </div>
+          <div class="maydon">
+            <label for="eq-izoh">{{ til.t('Nasiya_Izoh') }}</label>
+            <textarea id="eq-izoh" class="kiritish" name="eizoh" rows="2" data-enter-keyingi [(ngModel)]="eIzoh" [placeholder]="til.t('Nasiya_EskiQarzIzohMisol')"></textarea>
+          </div>
+          <div class="malumot-blok" data-test="eski-izoh"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Nasiya_EskiQarzIzoh') }}</span></div>
+        }
+        @if (xato()) { <div class="xato-matn" id="qq-xato" role="alert">{{ xato() }}</div> }
         <div class="amallar">
           <button type="button" class="tugma" (click)="ochiq.set(false)">{{ til.t('BekorQilish') }}</button>
-          <button type="submit" class="tugma asosiy" [disabled]="band() || !tanlangan()">
+          <button type="submit" class="tugma asosiy" [disabled]="band() || (rejim() === 'mavjud' && !tanlangan()) || (rejim() === 'eski' && smenaYoq())">
             @if (band()) { <span class="aylanma"></span> } @else { <ikon nomi="check" [olcham]="16" [qalinlik]="2.4" /> } {{ til.t('Saqlash') }}
           </button>
         </div>
@@ -127,6 +162,7 @@ const USULLAR: TolovTuri[] = ['Naqd', 'Plastik', 'Depozit'];
     .qoladi .summa { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
     .qarzdorlar { max-height: 280px; overflow-y: auto; }
     .qarzdorlar .element { color: inherit; }
+    .segment.rejim button:disabled { opacity: 0.5; cursor: not-allowed; }
     @media (max-width: 480px) { .to-rtlik { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   `,
 })
@@ -147,6 +183,19 @@ export class QarzQaytdiDialog {
   protected readonly harflar = harflar;
   protected readonly usullar = USULLAR;
   protected readonly joriy = signal<SmenaDto | null>(null);
+  protected readonly smenaYuklandi = signal(false);
+  /** Eski qarz uchun ochiq smena shart (docs §8.11): smena yo'qligi aniq bo'lsa rejim tanlanmaydi. */
+  protected readonly smenaYoq = computed(() => this.smenaYuklandi() && !this.joriy());
+  protected readonly rejim = signal<'mavjud' | 'eski'>('mavjud');
+  // Eski qarz rejimi
+  private readonly mijoz = viewChild(MijozMaydonlari);
+  protected readonly eIsm = signal('');
+  protected readonly eTel = signal('');
+  protected readonly eRaqam = signal('');
+  protected readonly eSumma = signal<number | null>(null);
+  protected eIzoh = '';
+  protected readonly eXatolar = signal<MijozXatolari & { summa?: string }>({});
+  private eUrinildi = false;
   protected readonly smenaMatn = computed(() => (this.joriy() ? this.til.t('Smena_Operator', this.joriy()!.id, this.joriy()!.operatorIsmi) : ''));
   protected readonly qidiruv = signal('');
   protected readonly royxat = signal<NasiyaDto[]>([]);
@@ -184,8 +233,10 @@ export class QarzQaytdiDialog {
 
   private async boshlash(id: number | null) {
     this.qidiruv.set(''); this.summa.set(null); this.usul.set('Naqd'); this.xato.set(null); this.tanlangan.set(null); this.royxat.set([]); this.yuklandi.set(false);
-    this.joriy.set(null);
-    this.server.joriySmena().then((t) => { this.joriy.set(t?.smena ?? null); this.smenaHisobiga = !!t; }).catch(() => undefined);
+    this.joriy.set(null); this.smenaYuklandi.set(false);
+    this.rejim.set('mavjud'); this.eIsm.set(''); this.eTel.set(''); this.eRaqam.set(''); this.eSumma.set(null); this.eIzoh = ''; this.eXatolar.set({}); this.eUrinildi = false;
+    this.mijoz()?.tozala();
+    this.server.joriySmena().then((t) => { this.joriy.set(t?.smena ?? null); this.smenaHisobiga = !!t; }).catch(() => undefined).finally(() => this.smenaYuklandi.set(true));
     try {
       if (id != null) {
         const t = await this.server.nasiya(id);
@@ -234,7 +285,59 @@ export class QarzQaytdiDialog {
     return n.izoh ? `${s} · “${n.izoh}”` : s;
   }
 
+  protected rejimTanla(r: 'mavjud' | 'eski') {
+    if (this.rejim() === r) return;
+    this.rejim.set(r);
+    this.xato.set(null);
+    if (r === 'eski' && matchMedia('(pointer: fine)').matches) setTimeout(() => document.getElementById('eq-ism')?.focus(), 60);
+  }
+
+  protected eMijozTanlandi() { this.eXatolar.set({}); this.eUrinildi = false; }
+
+  /** Maydon darajasidagi tekshiruv (server qoidalari bilan bir xil): ism va summa majburiy, telefon bo'lsa 9 raqam; telefon/raqam ixtiyoriy. */
+  private eTekshir(): boolean {
+    const x: MijozXatolari & { summa?: string } = {};
+    if (!this.eIsm().trim()) x.ism = this.til.t('Nasiya_XatoIsm');
+    const tel = telefonRaqamlar(this.eTel());
+    if (tel && tel.length !== 9) x.telefon = this.til.t('Nasiya_XatoTelefon');
+    const s = this.eSumma();
+    if (!s || s <= 0) x.summa = this.til.t('Nasiya_XatoSumma');
+    this.eXatolar.set(x);
+    return Object.keys(x).length === 0;
+  }
+
+  /** Birinchi yuborishdan keyin maydonlar o'zgarganda xatolar darhol yangilanadi. */
+  protected eskiQaytaTekshir() {
+    if (this.rejim() === 'eski' && this.eUrinildi) queueMicrotask(() => this.eTekshir());
+  }
+
+  private async eskiSaqla() {
+    this.xato.set(null);
+    this.eUrinildi = true;
+    if (!this.eTekshir()) {
+      const x = this.eXatolar();
+      const el = document.getElementById(x.ism ? 'eq-ism' : x.telefon ? 'eq-tel' : 'eq-summa');
+      el?.focus();
+      el?.scrollIntoView({ block: 'center' });
+      return;
+    }
+    this.band.set(true);
+    try {
+      const tel = this.eTel();
+      await this.server.eskiQarz({ mijozIsmi: this.eIsm().trim(), telefon: telefonRaqamlar(tel) ? tel : '', mashinaRaqami: this.eRaqam().trim().toUpperCase(), summa: this.eSumma()!, usul: this.usul(), izoh: this.eIzoh.trim() || null });
+      this.ochiq.set(false);
+      this.bildirish.korsat(this.til.t('Saqlandi'));
+      this.saqlandi.emit();
+    } catch (e) {
+      this.xato.set(xatoMatni(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy')));
+      setTimeout(() => document.getElementById('qq-xato')?.scrollIntoView({ block: 'nearest' }), 50);
+    } finally {
+      this.band.set(false);
+    }
+  }
+
   async saqla() {
+    if (this.rejim() === 'eski') return this.eskiSaqla();
     const n = this.tanlangan();
     const s = this.summa();
     if (!n) return;

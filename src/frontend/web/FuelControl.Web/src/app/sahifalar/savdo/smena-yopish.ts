@@ -8,7 +8,7 @@ import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { jonliYangila } from '../../core/malumot';
 import { YopishQoralama } from '../../core/yopish-qoralama';
 import { davomiylikSD, ishoraPul, kunQisqa, litr, pul, soat } from '../../core/format';
-import { segmentLitri, segmentSummasi, smenaHisobla } from '../../core/hisob';
+import { berilganNasiyalar, segmentLitri, segmentSummasi, smenaHisobla } from '../../core/hisob';
 import type { AparatDto, SmenaKorsatkichDto, SmenaTafsilotDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { Oyna } from '../../ui/oyna';
@@ -44,6 +44,8 @@ interface Qator {
   styleUrl: './smena-yopish.scss',
 })
 export class SmenaYopishSahifa {
+  /** "Nasiya berildi" ro'yxati: eski qarz nasiyalarisiz (docs §8.11). */
+  protected readonly oddiy = berilganNasiyalar;
   protected readonly til = inject(Til);
   protected readonly auth = inject(Auth);
   private readonly server = inject(Server);

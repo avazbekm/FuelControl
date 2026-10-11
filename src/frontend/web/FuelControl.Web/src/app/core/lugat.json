@@ -3619,6 +3619,96 @@
   "Қарз қайтди",
   "Возврат долга"
  ],
+ "Nasiya_MavjudRejim": [
+  "Mavjud nasiya",
+  "Мавжуд насия",
+  "Существующий долг"
+ ],
+ "Nasiya_EskiQarzRejim": [
+  "Eski qarz (dasturda yo'q)",
+  "Эски қарз (дастурда йўқ)",
+  "Старый долг (нет в программе)"
+ ],
+ "Nasiya_EskiQarzIzohMisol": [
+  "Masalan: eski daftardagi qarz",
+  "Масалан: эски дафтардаги қарз",
+  "Например: долг из старой тетради"
+ ],
+ "Nasiya_EskiQarzBelgi": [
+  "Eski qarz",
+  "Эски қарз",
+  "Старый долг"
+ ],
+ "Nasiya_EskiQarzIzoh": [
+  "Faqat olib kelingan summa yoziladi, pul joriy smena kassasiga qo'shiladi.",
+  "Фақат олиб келинган сумма ёзилади, пул жорий смена кассасига қўшилади.",
+  "Записывается только принесённая сумма, деньги добавляются в кассу текущей смены."
+ ],
+ "Nasiya_EskiQarzSmenaKerak": [
+  "Eski qarzni yozish uchun ochiq smena kerak.",
+  "Эски қарзни ёзиш учун очиқ смена керак.",
+  "Чтобы записать старый долг, нужна открытая смена."
+ ],
+ "Nasiya_EskiQarzOchirish": [
+  "Eski qarz yozuvi butunlay o'chiriladi (to'lov ham).",
+  "Эски қарз ёзуви бутунлай ўчирилади (тўлов ҳам).",
+  "Запись старого долга будет удалена полностью (вместе с оплатой)."
+ ],
+ "Hisobot_KpiEskiQarz": [
+  "Eski qarzlardan tushgan",
+  "Эски қарзлардан тушган",
+  "Поступило по старым долгам"
+ ],
+ "Hisobot_KpiEskiQarzIzoh": [
+  "{0} ta to'lov · savdoga kirmaydi",
+  "{0} та тўлов · савдога кирмайди",
+  "Оплат: {0} · не входит в продажи"
+ ],
+ "Nasiyalar_Operator": [
+  "Operator",
+  "Оператор",
+  "Оператор"
+ ],
+ "Nasiyalar_OperatorHammasi": [
+  "Hammasi",
+  "Ҳаммаси",
+  "Все"
+ ],
+ "Nasiyalar_OpBergan": [
+  "Bergan nasiyasi",
+  "Берган насияси",
+  "Выдано в долг"
+ ],
+ "Nasiyalar_OpQaytgan": [
+  "Qaytgan",
+  "Қайтган",
+  "Возвращено"
+ ],
+ "Nasiyalar_OpQoldiq": [
+  "Qoldiq",
+  "Қолдиқ",
+  "Остаток"
+ ],
+ "Nasiyalar_OpSoni": [
+  "{0} ta nasiya",
+  "{0} та насия",
+  "Долгов: {0}"
+ ],
+ "Nasiyalar_OpFaol": [
+  "{0} ta faol",
+  "{0} та фаол",
+  "Активных: {0}"
+ ],
+ "Nasiyalar_OpEskiQarz": [
+  "Eski qarzdan qabul qilgan",
+  "Эски қарздан қабул қилган",
+  "Принято по старым долгам"
+ ],
+ "Nasiyalar_ExcelOperator": [
+  "Operator: {0}",
+  "Оператор: {0}",
+  "Оператор: {0}"
+ ],
  "Nasiya_QarzdorniToping": [
   "Qarzdorni toping",
   "Қарздорни топинг",

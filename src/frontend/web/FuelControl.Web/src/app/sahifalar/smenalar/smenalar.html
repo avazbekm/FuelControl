@@ -217,11 +217,11 @@
         @if (yozuvBor()) {
           <div class="yozuvlar">
             @if (tafsilot(); as t) {
-              @if (t.nasiyalar.length) {
+              @if (nasiyalar().length) {
                 <div class="yozuv-guruh">
-                  <span class="yorliq">{{ til.t('Smenalar_Nasiyalar') }} · {{ t.nasiyalar.length }}</span>
+                  <span class="yorliq">{{ til.t('Smenalar_Nasiyalar') }} · {{ nasiyalar().length }}</span>
                   <ul>
-                    @for (n of t.nasiyalar; track n.id) {
+                    @for (n of nasiyalar(); track n.id) {
                       <li>
                         <span class="matn"><span class="nomi">{{ n.mijozIsmi }}</span><span class="izoh">{{ n.mashinaRaqami }} · {{ nasiyaMuddat(n) }}</span></span>
                         <span class="summa">{{ pul(n.summa) }}</span>
@@ -241,7 +241,7 @@
                   <ul>
                     @for (q of t.qaytishlar; track q.id) {
                       <li>
-                        <span class="matn"><span class="nomi">{{ q.mijozIsmi }}</span><span class="izoh">{{ tolovNomi(q) }} · {{ yozuvVaqti(q.vaqt) }}</span></span>
+                        <span class="matn"><span class="nomi">{{ q.mijozIsmi }}@if (q.eskiQarz) { <span class="pill binafsha eski-belgi" data-test="eski-belgi">{{ til.t('Nasiya_EskiQarzBelgi') }}</span> }</span><span class="izoh">{{ tolovNomi(q) }} · {{ yozuvVaqti(q.vaqt) }}</span>@if (q.eskiQarz && ochirTasdiq() === 'qaytish:' + q.id) { <span class="izoh eski-ogoh">{{ til.t('Nasiya_EskiQarzOchirish') }}</span> }</span>
                         <span class="summa yashil">+{{ pul(q.summa) }}</span>
                         @if (ochirishMumkin()) {
                           <button type="button" class="ochir" [class.tasdiq]="ochirTasdiq() === 'qaytish:' + q.id" [attr.aria-label]="til.t('Smenalar_Ochirish')" (click)="ochirSoragan('qaytish', q.id)">

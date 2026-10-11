@@ -5,6 +5,7 @@ import { Auth } from '../../core/auth';
 import { Server } from '../../core/server';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { jonliYangila } from '../../core/malumot';
+import { berilganNasiyalar } from '../../core/hisob';
 import { davomiylikSD, harflar, isoKun, ishoraPul, kunQisqa, litr, litrQisqa, pul, soat } from '../../core/format';
 import type { AparatDto, BoshqaruvDto, SmenaDto, SmenaTafsilotDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
@@ -37,6 +38,8 @@ export class BoshqaruvSahifa {
 
   protected readonly data = signal<BoshqaruvDto | null>(null);
   protected readonly joriyTafsilot = signal<SmenaTafsilotDto | null>(null);
+  /** Joriy smenada berilgan nasiyalar soni (eski qarz nasiyalarisiz, docs §8.11). */
+  protected readonly nasiyaSoni = computed(() => berilganNasiyalar(this.joriyTafsilot()?.nasiyalar ?? []).length);
   protected readonly yoqilgilar = signal<YoqilgiTuriDto[]>([]);
   protected readonly yuklandi = signal(false);
   protected readonly yangilanmoqda = signal(false);

@@ -1,6 +1,6 @@
 import type { SmenaTafsilotDto } from '../../api/model';
 import { kunSoat, kunToliq, pul } from '../../core/format';
-import { plastikIfodasi } from '../../core/hisob';
+import { berilganNasiyalar, plastikIfodasi } from '../../core/hisob';
 
 type T = (kalit: string, ...args: unknown[]) => string;
 type Hujayra = { value?: string | number; type?: StringConstructor | NumberConstructor; format?: string; fontWeight?: 'bold'; backgroundColor?: string; align?: 'left' | 'right' | 'center' };
@@ -45,10 +45,11 @@ export async function smenaExcel(t: SmenaTafsilotDto, T: T): Promise<void> {
   m.push(qator(s.farq < 0 ? T('Smenalar_Kamomat') : s.farq > 0 ? T('Smenalar_Ortiqcha') : T('Smenalar_ColFarq'), son(s.farq, PUL, true), true));
   if (s.izoh) m.push(qator(T('Smenalar_Izoh'), s.izoh));
 
-  if (t.nasiyalar.length || t.qaytishlar.length || t.xarajatlar.length) {
+  const nasiyalar = berilganNasiyalar(t.nasiyalar);
+  if (nasiyalar.length || t.qaytishlar.length || t.xarajatlar.length) {
     m.push([]);
-    for (const n of t.nasiyalar) m.push([matn(T('Smenalar_Nasiyalar')), matn(`${n.mijozIsmi} · ${n.mashinaRaqami} · ${kunToliq(n.muddat)}`), son(n.summa)]);
-    for (const q of t.qaytishlar) m.push([matn(T('Smenalar_Qaytishlar')), matn(`${q.mijozIsmi} · ${T('Tolov_' + q.usul)}`), son(q.summa)]);
+    for (const n of nasiyalar) m.push([matn(T('Smenalar_Nasiyalar')), matn(`${n.mijozIsmi} · ${n.mashinaRaqami} · ${kunToliq(n.muddat)}`), son(n.summa)]);
+    for (const q of t.qaytishlar) m.push([matn(T('Smenalar_Qaytishlar')), matn(`${q.mijozIsmi} · ${T('Tolov_' + q.usul)}${q.eskiQarz ? ` · ${T('Nasiya_EskiQarzBelgi')}` : ''}`), son(q.summa)]);
     for (const x of t.xarajatlar) m.push([matn(T('Smenalar_Xarajatlar')), matn(`${x.sabab}`), son(x.summa)]);
   }
 

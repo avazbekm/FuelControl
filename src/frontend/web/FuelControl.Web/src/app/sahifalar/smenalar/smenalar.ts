@@ -6,7 +6,7 @@ import { Server } from '../../core/server';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { Malumot, OperatorElement, jonliYangila } from '../../core/malumot';
 import { davomiylikSD, isoKun, ishoraPul, kunQisqa, kunQosh, litr, oyBoshi, oyOxiri, oyQosh, pul, sana, soat } from '../../core/format';
-import { plastikIfodasi } from '../../core/hisob';
+import { berilganNasiyalar, plastikIfodasi } from '../../core/hisob';
 import type { NasiyaDto, NasiyaQaytishiDto, SmenaDto, SmenaKorsatkichDto, SmenaTafsilotDto, XarajatDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { smenaExcel } from './smena-excel';
@@ -52,6 +52,8 @@ export class SmenalarSahifa {
   protected readonly joriy = signal<SmenaTafsilotDto | null>(null);
   protected readonly oxirgiYopilganId = signal<number | null>(null);
   protected readonly tafsilot = signal<SmenaTafsilotDto | null>(null);
+  /** "Nasiya berildi" ro'yxati: eski qarz nasiyalarisiz (docs §8.11). */
+  protected readonly nasiyalar = computed(() => berilganNasiyalar(this.tafsilot()?.nasiyalar ?? []));
   protected readonly yuklandi = signal(false);
   protected readonly xato = signal<string | null>(null);
   protected readonly tafsilotYuklanmoqda = signal(false);
@@ -140,7 +142,7 @@ export class SmenalarSahifa {
     if (s.qaytganNasiya > 0) r.push({ yorliq: T('Smenalar_QaytganNasiya'), qiymat: ishoraPul(s.qaytganNasiya) });
     r.push({ yorliq: T('Smenalar_PlastikSatr', plastikIfodasi(s, pul), pul(s.ochishTerminal)), qiymat: ishoraPul(-s.plastik) });
     r.push({ yorliq: T('Smenalar_DepozitSatr', pul(s.ochishDepozit), pul(s.yopishDepozit)), qiymat: ishoraPul(-s.depozitFarqi) });
-    if (s.nasiyaJami > 0) r.push({ yorliq: T('Smenalar_NasiyaSatr', this.nomlar(t.nasiyalar.map((n) => n.mijozIsmi))), qiymat: ishoraPul(-s.nasiyaJami) });
+    if (s.nasiyaJami > 0) r.push({ yorliq: T('Smenalar_NasiyaSatr', this.nomlar(berilganNasiyalar(t.nasiyalar).map((n) => n.mijozIsmi))), qiymat: ishoraPul(-s.nasiyaJami) });
     if (s.xarajatJami > 0) r.push({ yorliq: T('Smenalar_XarajatSatr', this.nomlar(t.xarajatlar.map((x) => this.kichik(x.sabab)))), qiymat: ishoraPul(-s.xarajatJami) });
     r.push({ yorliq: T('Smenalar_KassadaKerak'), qiymat: pul(s.kutilgan), qalin: true, ustChiziq: true });
     r.push({ yorliq: T('Smenalar_SanalganNaqd'), qiymat: pul(s.sanalganNaqd ?? 0), qalin: true });
@@ -150,7 +152,7 @@ export class SmenalarSahifa {
   protected readonly ochirishMumkin = computed(() => this.ochiq() && this.auth.bor('Smenalar'));
   protected readonly yozuvBor = computed(() => {
     const t = this.tafsilot();
-    return !!t && (t.nasiyalar.length > 0 || t.qaytishlar.length > 0 || t.xarajatlar.length > 0);
+    return !!t && (berilganNasiyalar(t.nasiyalar).length > 0 || t.qaytishlar.length > 0 || t.xarajatlar.length > 0);
   });
 
   constructor() {

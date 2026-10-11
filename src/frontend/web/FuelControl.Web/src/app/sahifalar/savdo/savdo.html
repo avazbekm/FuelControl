@@ -118,10 +118,10 @@
       <section class="shisha karta" aria-labelledby="nasiya-s">
         <div class="qator sarlavha-bloki">
           <span class="ikon-doira to-rang"><ikon nomi="book" [olcham]="19" [qalinlik]="2" /></span>
-          <div class="bosh-joy"><h2 id="nasiya-s">{{ til.t('Savdo_Nasiya') }}</h2><span class="karta-izoh">{{ til.t('Savdo_NasiyaShuSmenada', t.nasiyalar.length, pul(t.smena.nasiyaJami)) }}</span></div>
+          <div class="bosh-joy"><h2 id="nasiya-s">{{ til.t('Savdo_Nasiya') }}</h2><span class="karta-izoh">{{ til.t('Savdo_NasiyaShuSmenada', oddiy(t.nasiyalar).length, pul(t.smena.nasiyaJami)) }}</span></div>
         </div>
         <ul class="royxat-ul">
-          @for (n of t.nasiyalar; track n.id) {
+          @for (n of oddiy(t.nasiyalar); track n.id) {
             <li>
               <span class="avatar katta">{{ harflar(n.mijozIsmi) }}</span>
               <div class="bosh-joy ikki-qator">
@@ -143,10 +143,10 @@
         @for (q of t.qaytishlar; track q.id) {
           <div class="qaytish-qator">
             <span class="yashil"><ikon nomi="undo" [olcham]="16" [qalinlik]="2" /></span>
-            <span class="matn"><b>{{ q.mijozIsmi }}</b> {{ til.t('Savdo_QarzniQaytardi') }} · {{ soatMin(q.vaqt) }} · {{ til.t('Tolov_' + q.usul).toLowerCase() }}</span>
+            <span class="matn"><b>{{ q.mijozIsmi }}</b>@if (q.eskiQarz) { <span class="pill binafsha eski-belgi" data-test="eski-belgi">{{ til.t('Nasiya_EskiQarzBelgi') }}</span> } {{ til.t('Savdo_QarzniQaytardi') }} · {{ soatMin(q.vaqt) }} · {{ til.t('Tolov_' + q.usul).toLowerCase() }}</span>
             <span class="plyus">+{{ pul(q.summa) }}</span>
             @if (ochirish(q.muallifId)) {
-              <button type="button" class="tugma ikonli kichik shaffof ochir" (click)="qaytishOchir(q.id)" [attr.aria-label]="til.t('Ochirish')" [title]="til.t('Ochirish')"><ikon nomi="trash" [olcham]="16" /></button>
+              <button type="button" class="tugma ikonli kichik shaffof ochir" (click)="qaytishOchir(q)" [attr.aria-label]="til.t('Ochirish')" [title]="til.t('Ochirish')"><ikon nomi="trash" [olcham]="16" /></button>
             }
           </div>
         }

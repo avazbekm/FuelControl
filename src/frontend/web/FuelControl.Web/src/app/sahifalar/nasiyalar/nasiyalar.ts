@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Til } from '../../core/til';
 import { Auth } from '../../core/auth';
 import { Server } from '../../core/server';
@@ -7,7 +7,7 @@ import { jonliYangila } from '../../core/malumot';
 import { isoKun, kunQisqa, kunToliq, pul } from '../../core/format';
 import { telefonFormat } from '../../core/telefon';
 import { qidiruvMos } from '../../core/qidiruv';
-import type { NasiyaDto, NasiyalarXulosaDto, SmenaDto } from '../../api/model';
+import type { NasiyaDto, NasiyaOperatorXulosaDto, NasiyalarXulosaDto, SmenaDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { MashinaRaqami } from '../../ui/belgilar';
 import { NasiyaDialog } from '../../ui/dialoglar/nasiya-dialog';
@@ -45,6 +45,12 @@ export class NasiyalarSahifa {
 
   protected readonly hammasi = signal<NasiyaDto[]>([]);
   protected readonly xulosa = signal<NasiyalarXulosaDto | null>(null);
+  /** Tanlangan operator bo'yicha xulosa (server `operatorId` berilganda to'ldiradi, docs §8.12). */
+  protected readonly operator = signal<NasiyaOperatorXulosaDto | null>(null);
+  /** Operator filtri: null — hammasi. Server tomonda filtrlanadi (`GET /nasiyalar?operatorId=`). */
+  protected readonly operatorId = signal<number | null>(null);
+  /** Tanlov ro'yxati — filtrsiz yuklangan nasiya yozuvlaridagi operatorlar (`muallifId` = Nasiya.OperatorId). */
+  protected readonly operatorlar = signal<{ id: number; ism: string }[]>([]);
   protected readonly joriy = signal<SmenaDto | null>(null);
   protected readonly yuklandi = signal(false);
   protected readonly eksportBand = signal(false);
@@ -81,9 +87,9 @@ export class NasiyalarSahifa {
       .sort((a, b) => guruh(a) - guruh(b) || a.muddat.localeCompare(b.muddat) || a.id - b.id);
   });
 
-  /** Ko'rinib turgan ro'yxat (joriy filtr + qidiruv) bo'yicha jami: klientda hisoblanadi, sahifa yuqoridagi KPI (butun baza) bilan farq qilishi mumkin. */
+  /** Ko'rinib turgan ro'yxat (joriy filtr + qidiruv) bo'yicha jami: klientda hisoblanadi, sahifa yuqoridagi KPI (butun baza) bilan farq qilishi mumkin. Eski qarz yozuvlari kirmaydi (docs §8.12). */
   protected readonly jami = computed(() => {
-    const r = this.royxat();
+    const r = this.royxat().filter((n) => !n.eskiQarz);
     return { soni: r.length, summa: r.reduce((a, n) => a + n.summa, 0), qaytgan: r.reduce((a, n) => a + n.qaytgan, 0), qoldiq: r.reduce((a, n) => a + n.qoldiq, 0) };
   });
 
@@ -97,22 +103,43 @@ export class NasiyalarSahifa {
     const fn = () => this.tor.set(mq.matches);
     mq.addEventListener('change', fn);
     inject(DestroyRef).onDestroy(() => mq.removeEventListener('change', fn));
-    this.yukla();
+    effect(() => { this.operatorId(); untracked(() => this.yukla()); });
     jonliYangila(() => this.yukla(true), (h) => h.turi === 'NasiyaOzgardi' || h.turi === 'SmenaOzgardi');
   }
 
+  private yuklashTartibi = 0;
+
   protected async yukla(jim = false) {
+    const tartib = ++this.yuklashTartibi;
+    const op = this.operatorId();
     try {
-      const [r, j] = await Promise.all([this.server.nasiyalar(), this.server.joriySmena()]);
+      const [r, j] = await Promise.all([this.server.nasiyalar(undefined, undefined, op ?? undefined), this.server.joriySmena()]);
+      if (tartib !== this.yuklashTartibi) return; // eskirgan javob (operator tez almashtirilgan)
       this.hammasi.set(r.royxat);
       this.xulosa.set(r.xulosa);
+      this.operator.set(op != null ? r.operator : null);
+      if (op == null) this.operatorlar.set(this.operatorlarYigish(r.royxat));
       this.joriy.set(j?.smena ?? null);
       this.xato.set(null);
     } catch (e) {
       if (!jim) this.xato.set(xatoMatni(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy')));
     } finally {
-      this.yuklandi.set(true);
+      if (tartib === this.yuklashTartibi) this.yuklandi.set(true);
     }
+  }
+
+  private operatorlarYigish(r: NasiyaDto[]): { id: number; ism: string }[] {
+    const m = new Map<number, string>();
+    for (const n of r) if (!m.has(n.muallifId)) m.set(n.muallifId, n.operatorIsmi);
+    return [...m].map(([id, ism]) => ({ id, ism })).sort((a, b) => a.ism.localeCompare(b.ism));
+  }
+
+  protected operatorTanla(v: string) { this.operatorId.set(v ? Number(v) : null); }
+
+  /** Tanlangan operator ismi (Excel sarlavhasi va audit izohi uchun); filtr yo'q bo'lsa null. */
+  private operatorIsmi(): string | null {
+    const id = this.operatorId();
+    return id == null ? null : this.operator()?.operatorIsmi ?? this.operatorlar().find((o) => o.id === id)?.ism ?? null;
   }
 
   /** Ko'rinib turgan ro'yxatni .xlsx ga chiqaradi va auditga yozadi (Hisobotlar eksporti kabi). */
@@ -122,10 +149,11 @@ export class NasiyalarSahifa {
     this.eksportBand.set(true);
     try {
       const fayl = `nasiyalar-${isoKun()}.xlsx`;
-      await nasiyalarExcel(r, { T: (k, ...a) => this.til.t(k, ...a), holat: (n) => this.belgiMatn(n), fayl });
+      const op = this.operatorIsmi();
+      await nasiyalarExcel(r, { T: (k, ...a) => this.til.t(k, ...a), holat: (n) => this.belgiMatn(n), fayl, operator: op });
       this.bildirish.korsat(this.til.t('FaylSaqlandi'));
       const q = this.qidiruv().trim();
-      const izoh = `${kunToliq(isoKun())} · ${this.til.t(this.filtrlar().find((f) => f.k === this.filtr())!.kalit)}${q ? ` · "${q}"` : ''} · ${r.length}`;
+      const izoh = `${kunToliq(isoKun())} · ${this.til.t(this.filtrlar().find((f) => f.k === this.filtr())!.kalit)}${op ? ` · ${this.til.t('Nasiyalar_ExcelOperator', op)}` : ''}${q ? ` · "${q}"` : ''} · ${r.length}`;
       void this.server.auditEksport('Nasiyalar', `${izoh} — ${fayl}`);
     } catch (e) {
       this.bildirish.xato(e, this.til.t('AloqaYoq'), this.til.t('Xato_Umumiy'));

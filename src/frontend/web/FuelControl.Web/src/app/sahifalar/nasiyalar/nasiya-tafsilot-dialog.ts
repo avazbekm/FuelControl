@@ -23,13 +23,16 @@ import { MashinaRaqami } from '../../ui/belgilar';
       @if (t(); as t) {
         <div class="qator ora orala tepa">
           <mashina-raqami [qiymat]="t.nasiya.mashinaRaqami" />
-          <span class="pill katta" [class]="holatRang()">{{ holatMatn() }}</span>
+          <span class="qator kichik-gap">
+            @if (t.nasiya.eskiQarz) { <span class="pill katta binafsha" data-test="eski-belgi">{{ til.t('Nasiya_EskiQarzBelgi') }}</span> }
+            @if (!t.nasiya.eskiQarz) { <span class="pill katta" [class]="holatRang()">{{ holatMatn() }}</span> }
+          </span>
         </div>
         <div class="tortlik">
           <div class="kichik-plitka"><span class="kap">{{ til.t('Nasiya_Qarz') }}</span><span class="qiymat">{{ pul(t.nasiya.summa) }}</span></div>
           <div class="kichik-plitka"><span class="kap">{{ til.t('Nasiya_Qaytgan') }}</span><span class="qiymat yashil">{{ pul(t.nasiya.qaytgan) }}</span></div>
           <div class="kichik-plitka"><span class="kap">{{ til.t('Nasiya_Qoldiq') }}</span><span class="qiymat">{{ pul(t.nasiya.qoldiq) }}</span></div>
-          <div class="kichik-plitka" [class.otgan]="t.nasiya.holati === 'MuddatiOtgan'"><span class="kap">{{ til.t('Nasiya_MuddatYorliq') }}</span><span class="qiymat" [class.qizil]="t.nasiya.holati === 'MuddatiOtgan'">{{ kunToliq(t.nasiya.muddat) }}</span></div>
+          <div class="kichik-plitka" [class.otgan]="t.nasiya.holati === 'MuddatiOtgan'"><span class="kap">{{ til.t('Nasiya_MuddatYorliq') }}</span><span class="qiymat" [class.qizil]="t.nasiya.holati === 'MuddatiOtgan'" data-test="muddat">{{ t.nasiya.eskiQarz ? '—' : kunToliq(t.nasiya.muddat) }}</span></div>
         </div>
         <span class="ikkilamchi kichik-matn">{{ yozilganMatn() }}</span>
 
@@ -41,6 +44,7 @@ import { MashinaRaqami } from '../../ui/belgilar';
                 <span class="qator orala kichik-gap">
                   <b class="son">+{{ pul(q.summa) }}</b>
                   <span class="pill" [class]="usulRang(q.usul)">{{ til.t('Tolov_' + q.usul) }}</span>
+                  @if (q.eskiQarz) { <span class="pill binafsha" data-test="eski-belgi">{{ til.t('Nasiya_EskiQarzBelgi') }}</span> }
                   @if (q.smenaId == null) { <span class="pill kul">{{ til.t('Nasiyalar_SmenadanTashqari') }}</span> }
                 </span>
                 <span class="ikkilamchi kichik-matn">{{ kunQisqa(q.vaqt) }} {{ soat(q.vaqt) }} · {{ q.kimYozdi }}@if (q.smenaId != null) { · #{{ q.smenaId }} }@if (q.izoh) { · “{{ q.izoh }}” }</span>
@@ -54,14 +58,14 @@ import { MashinaRaqami } from '../../ui/belgilar';
           }
         </div>
 
-        @if (nasiyaniOchirsaBoladi() && t.qaytishlar.length > 0) {
+        @if (nasiyaniOchirsaBoladi() && t.qaytishlar.length > 0 && !t.nasiya.eskiQarz) {
           <div class="malumot-blok"><ikon nomi="info" [olcham]="16" [qalinlik]="2" /><span>{{ til.t('Nasiyalar_QaytishiBorOchirilmaydi') }}</span></div>
         }
 
         @if (surov(); as s) {
           <div class="ogohlik-blok surov" role="alert">
             <ikon nomi="warning" [olcham]="16" [qalinlik]="2" />
-            <span class="bosh-joy">{{ til.t(s.tur === 'nasiya' ? 'Nasiyalar_OchirishSavol' : 'Nasiyalar_QaytishOchirishSavol') }}</span>
+            <span class="bosh-joy">{{ surovMatn(s) }}</span>
             <button type="button" class="tugma kichik" (click)="surov.set(null)">{{ til.t('BekorQilish') }}</button>
             <button type="button" class="tugma kichik xavfli toliq" [disabled]="band()" (click)="ochir(s)">
               @if (band()) { <span class="aylanma"></span> } {{ til.t('Nasiyalar_HaOchirish') }}
@@ -70,7 +74,7 @@ import { MashinaRaqami } from '../../ui/belgilar';
         }
 
         <div class="amallar">
-          @if (nasiyaniOchirsaBoladi() && t.qaytishlar.length === 0) {
+          @if (nasiyaniOchirsaBoladi() && (t.qaytishlar.length === 0 || t.nasiya.eskiQarz)) {
             <button type="button" class="tugma xavfli ochirish" (click)="surov.set({ tur: 'nasiya', id: t.nasiya.id })">{{ til.t('Nasiyalar_Ochirish') }}</button>
           }
           <button type="button" class="tugma" (click)="ochiq.set(false)">{{ til.t('Yopish') }}</button>
@@ -164,6 +168,12 @@ export class NasiyaTafsilotDialog {
   });
   protected usulRang(u: string) { return u === 'Naqd' ? 'yashil' : u === 'Plastik' ? 'moviy' : 'binafsha'; }
 
+  /** Tasdiq savoli: eski qarz yozuvi o'chirilsa nasiyasi ham, to'lovi ham o'chadi (docs §8.11). */
+  protected surovMatn(s: { tur: 'nasiya' | 'qaytish'; id: number }): string {
+    if (this.n()?.eskiQarz) return this.til.t('Nasiya_EskiQarzOchirish');
+    return this.til.t(s.tur === 'nasiya' ? 'Nasiyalar_OchirishSavol' : 'Nasiyalar_QaytishOchirishSavol');
+  }
+
   protected qaytishniOchirsaBoladi(q: NasiyaQaytishiDto): boolean {
     if (q.smenaId == null) return this.boshliq();
     const j = this.joriy();
@@ -190,8 +200,10 @@ export class NasiyaTafsilotDialog {
   protected async ochir(s: { tur: 'nasiya' | 'qaytish'; id: number }) {
     this.band.set(true);
     try {
-      if (s.tur === 'nasiya') {
-        await this.server.nasiyaOchir(s.id);
+      if (s.tur === 'nasiya' || this.n()?.eskiQarz) {
+        // Eski qarzda qaytish va nasiya birga o'chadi (server): tafsilot yopiladi.
+        if (s.tur === 'nasiya') await this.server.nasiyaOchir(s.id);
+        else await this.server.qaytishOchir(s.id);
         this.ochiq.set(false);
       } else {
         await this.server.qaytishOchir(s.id);

@@ -31,7 +31,16 @@
       <button type="button" class="tugma" (click)="yukla()"><ikon nomi="refresh" [olcham]="16" /> {{ til.t('Yangilash') }}</button>
     </div>
   } @else {
-    @if (xulosa(); as x) {
+    @if (operatorId() != null) {
+      @if (operator(); as o) {
+        <div class="kpi-qator" data-test="operator-kpi">
+          <kpi-karta [nom]="til.t('Nasiyalar_OpBergan')" [qiymat]="pul(o.berilgan)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_OpSoni', o.soni)" />
+          <kpi-karta [nom]="til.t('Nasiyalar_OpQaytgan')" [qiymat]="pul(o.qaytgan)" [birlik]="til.t('Som')" ton="yashil" />
+          <kpi-karta [nom]="til.t('Nasiyalar_OpQoldiq')" [qiymat]="pul(o.qoldiq)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_OpFaol', o.faolSoni)" />
+          <kpi-karta [nom]="til.t('Nasiyalar_OpEskiQarz')" [qiymat]="pul(o.eskiQarzQabul)" [birlik]="til.t('Som')" />
+        </div>
+      }
+    } @else if (xulosa(); as x) {
       <div class="kpi-qator">
         <kpi-karta [nom]="til.t('Nasiyalar_JamiQarzdorlik')" [qiymat]="pul(x.faolQarz)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_JamiQarzIzoh', x.faolSoni, pul(x.muddatiOtgan))" />
         <kpi-karta [nom]="til.t('Nasiyalar_MuddatiOtgan')" [qiymat]="pul(x.muddatiOtgan)" [birlik]="til.t('Som')" [izoh]="til.t('Nasiyalar_MijozSoni', x.muddatiOtganSoni)" ton="qizil" [qizilKarta]="true" />
@@ -49,6 +58,15 @@
             </button>
           }
         </div>
+        @if (operatorlar().length) {
+          <label class="operator-tanlov">
+            <span class="yorliq">{{ til.t('Nasiyalar_Operator') }}</span>
+            <select class="kiritish" data-test="operator-tanlov" (change)="operatorTanla($any($event.target).value)">
+              <option value="" [selected]="operatorId() == null">{{ til.t('Nasiyalar_OperatorHammasi') }}</option>
+              @for (o of operatorlar(); track o.id) { <option [value]="o.id" [selected]="operatorId() === o.id">{{ o.ism }}</option> }
+            </select>
+          </label>
+        }
         <div class="qidiruv-oram">
           <span class="qidiruv-ikon"><ikon nomi="search" [olcham]="17" [qalinlik]="2" /></span>
           <input class="qidiruv" type="search" [attr.aria-label]="til.t('Nasiya_Qidiruv')" [placeholder]="til.t(tor() ? 'Nasiyalar_QidiruvQisqa' : 'Nasiya_Qidiruv')" [value]="qidiruv()" (input)="qidiruv.set($any($event.target).value)" autocomplete="off" />
@@ -66,13 +84,17 @@
           @for (n of royxat(); track n.id) {
             <div class="qator-grid satr" [class.otgan]="n.holati === 'MuddatiOtgan'" [class.yopilgan]="n.holati === 'Yopilgan'" role="button" tabindex="0"
                  (click)="tafsilotOch(n.id)" (keydown.enter)="tafsilotOch(n.id)">
-              <span class="ustun mijoz"><span class="ism">{{ n.mijozIsmi }}</span><span class="tel">{{ tel(n.telefon) }}</span></span>
+              <span class="ustun mijoz"><span class="ism">{{ n.mijozIsmi }}@if (n.eskiQarz) { <span class="pill binafsha eski-belgi" data-test="eski-belgi">{{ til.t('Nasiya_EskiQarzBelgi') }}</span> }</span><span class="tel">{{ tel(n.telefon) }}</span></span>
               <span><mashina-raqami [qiymat]="n.mashinaRaqami" /></span>
               <span class="ustun yozildi"><span class="sana">{{ yozilgan(n) }}</span>#{{ n.smenaId }} · {{ qisqaIsm(n.operatorIsmi) }}</span>
               <span class="o son">{{ pul(n.summa) }}</span>
               <span class="o son yashil-matn">{{ pul(n.qaytgan) }}</span>
               <span class="o son qoldiq">{{ pul(n.qoldiq) }}</span>
-              <span class="ustun muddat"><span class="sana">{{ kunToliq(n.muddat) }}</span><span class="pill" [class]="belgiRang(n)">{{ belgiMatn(n) }}</span></span>
+              <span class="ustun muddat">
+                @if (n.eskiQarz) { <span class="ikkilamchi" data-test="muddat-yoq">—</span> } @else {
+                  <span class="sana">{{ kunToliq(n.muddat) }}</span><span class="pill" [class]="belgiRang(n)">{{ belgiMatn(n) }}</span>
+                }
+              </span>
               <span class="amal">
                 @if (n.holati !== 'Yopilgan' && qaytishMumkin()) {
                   <button type="button" class="qaytdi" [attr.aria-label]="til.t('Nasiyalar_QaytdiAria', n.mijozIsmi)" (click)="$event.stopPropagation(); qaytishOch(n.id)">
@@ -113,17 +135,17 @@
           <div class="nk" [class.otgan]="n.holati === 'MuddatiOtgan'" [class.yopilgan]="n.holati === 'Yopilgan'" role="button" tabindex="0"
                (click)="tafsilotOch(n.id)" (keydown.enter)="tafsilotOch(n.id)">
             <div class="nk-tepa">
-              <span class="ustun mijoz"><span class="ism">{{ n.mijozIsmi }}</span><span class="tel">{{ tel(n.telefon) }}</span></span>
+              <span class="ustun mijoz"><span class="ism">{{ n.mijozIsmi }}@if (n.eskiQarz) { <span class="pill binafsha eski-belgi" data-test="eski-belgi">{{ til.t('Nasiya_EskiQarzBelgi') }}</span> }</span><span class="tel">{{ tel(n.telefon) }}</span></span>
               <span class="ustun nk-qoldiq"><span class="yorliq">{{ til.t('Nasiya_Qoldiq') }}</span><span class="qoldiq son">{{ pul(n.qoldiq) }}</span></span>
             </div>
             <div class="nk-orta">
               <mashina-raqami [qiymat]="n.mashinaRaqami" />
-              <span class="pill" [class]="belgiRang(n)">{{ belgiMatn(n) }}</span>
+              @if (!n.eskiQarz) { <span class="pill" [class]="belgiRang(n)">{{ belgiMatn(n) }}</span> }
             </div>
             <div class="nk-tafsilot son">
               <span><span class="yorliq">{{ til.t('Nasiya_Qarz') }}</span>{{ pul(n.summa) }}</span>
               <span><span class="yorliq">{{ til.t('Nasiya_Qaytgan') }}</span><span class="yashil-matn">{{ pul(n.qaytgan) }}</span></span>
-              <span><span class="yorliq">{{ til.t('Nasiya_MuddatYorliq') }}</span>{{ kunOy(n.muddat) }}</span>
+              <span><span class="yorliq">{{ til.t('Nasiya_MuddatYorliq') }}</span>{{ n.eskiQarz ? '—' : kunOy(n.muddat) }}</span>
             </div>
             <div class="nk-past">
               <span class="ikkilamchi kichik-matn">{{ til.t('Nasiyalar_YozilganQisqa', yozilgan(n), n.smenaId, qisqaIsm(n.operatorIsmi)) }}</span>

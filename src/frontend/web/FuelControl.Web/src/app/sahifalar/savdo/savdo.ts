@@ -8,7 +8,8 @@ import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { jonliYangila } from '../../core/malumot';
 import { davomiylikSD, harflar, ishoraPul, kunQisqa, litr, litrQisqa, pul, sana, soat } from '../../core/format';
 import { telefonFormat } from '../../core/telefon';
-import type { AparatDto, NasiyaDto, NasiyalarXulosaDto, SmenaDto, SmenaTafsilotDto, SmenaTopshirishDto, YoqilgiTuriDto } from '../../api/model';
+import { berilganNasiyalar } from '../../core/hisob';
+import type { AparatDto, NasiyaDto, NasiyaQaytishiDto, NasiyalarXulosaDto, SmenaDto, SmenaTafsilotDto, SmenaTopshirishDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { AparatYoq } from '../../ui/aparat-yoq';
 import { YoqilgiPill, MashinaRaqami } from '../../ui/belgilar';
@@ -147,9 +148,11 @@ export class SavdoSahifa {
     if (!confirm(this.til.t('Savdo_OchirishTasdiq', n.mijozIsmi))) return;
     await this.amal(() => this.server.nasiyaOchir(n.id));
   }
-  protected async qaytishOchir(id: number) {
-    if (!confirm(this.til.t('Savdo_OchirishTasdiq', ''))) return;
-    await this.amal(() => this.server.qaytishOchir(id));
+  protected readonly oddiy = berilganNasiyalar<NasiyaDto>;
+  /** Eski qarz qaytishi o'chirilsa nasiyasi ham o'chadi (docs §8.11) — tasdiq matni shuni aytadi. */
+  protected async qaytishOchir(q: NasiyaQaytishiDto) {
+    if (!confirm(q.eskiQarz ? this.til.t('Nasiya_EskiQarzOchirish') : this.til.t('Savdo_OchirishTasdiq', ''))) return;
+    await this.amal(() => this.server.qaytishOchir(q.id));
   }
   protected async xarajatOchir(id: number) {
     if (!confirm(this.til.t('Savdo_OchirishTasdiq', ''))) return;

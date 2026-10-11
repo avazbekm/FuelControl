@@ -34,6 +34,8 @@ export async function hisobotExcel(n: HisobotDto, p: Parametr): Promise<void> {
   ];
   for (const q of n.qatorlar) d1.push(qator(q, p.nomi(q), p.ikkinchi(q), false));
   d1.push(qator(n.jami, T('Jami'), '', true));
+  // Eski qarz to'lovlari "Qaytgan" ustuniga tushadi (savdoga kirmaydi); izohda to'lovlar soni.
+  if (n.eskiQarzQaytgan > 0) d1.push([matn(T('Hisobot_KpiEskiQarz')), matn(T('Hisobot_KpiEskiQarzIzoh', n.eskiQarzSoni)), ...Array(5).fill({}), son(n.eskiQarzQaytgan)]);
   if (n.avans > 0) d1.push([matn(T('Hisobot_KpiAvans')), matn(''), ...Array(10).fill({}), son(n.avans)]);
 
   const d2: Hujayra[][] = [sarlavha([

@@ -61,3 +61,8 @@ export function plastikIfodasi(s: { plastikSummalari?: number[] | null; yopishTe
 
 /** NaqdSavdo (hisobot) = Savdo − Plastik − Depozit(farqi) − Nasiya. */
 export const naqdSavdo = (savdo: number, plastik: number, depozitFarqi: number, nasiya: number) => savdo - plastik - depozitFarqi - nasiya;
+
+/** Smenaning "Nasiya berildi" ro'yxati: eski qarz nasiyalari (docs §8.11) kirmaydi — ular NasiyaJami'ga ham kirmaydi, faqat qaytish qatori "Eski qarz" belgisi bilan chiqadi. Server ham chiqarib tashlaydi, bu himoya. */
+export function berilganNasiyalar<T extends { eskiQarz: boolean }>(royxat: T[]): T[] {
+  return royxat.filter((n) => !n.eskiQarz);
+}

@@ -1390,6 +1390,7 @@ export interface paths {
                 query?: {
                     holat?: string;
                     q?: string;
+                    operatorId?: number;
                 };
                 header?: never;
                 path?: never;
@@ -1590,6 +1591,72 @@ export interface paths {
                 };
             };
         };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/nasiyalar/eski-qarz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["EskiQarzYaratishDto"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NasiyaTafsilotDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -2062,6 +2129,15 @@ export interface components {
             oyTolovlar: components["schemas"]["TolovTaqsimotiDto"];
             oxirgiYopilganlar: components["schemas"]["SmenaDto"][];
         };
+        EskiQarzYaratishDto: {
+            mijozIsmi: string;
+            telefon: string;
+            mashinaRaqami: string;
+            /** Format: int64 */
+            summa: number;
+            usul: components["schemas"]["TolovTuri"];
+            izoh: null | string;
+        };
         FoydalanuvchiDto: {
             /** Format: int32 */
             id: number;
@@ -2133,6 +2209,10 @@ export interface components {
             aparatlar: components["schemas"]["HisobotAparatDto"][];
             /** Format: int64 */
             avans: number;
+            /** Format: int64 */
+            eskiQarzQaytgan: number;
+            /** Format: int32 */
+            eskiQarzSoni: number;
         };
         HisobotQatoriDto: {
             guruh: string;
@@ -2230,12 +2310,14 @@ export interface components {
             izoh: null | string;
             /** Format: int32 */
             muallifId: number;
+            eskiQarz: boolean;
         };
         /** @enum {unknown} */
         NasiyaHolati: "Faol" | "MuddatiOtgan" | "Yopilgan";
         NasiyalarDto: {
             xulosa: components["schemas"]["NasiyalarXulosaDto"];
             royxat: components["schemas"]["NasiyaDto"][];
+            operator: null | components["schemas"]["NasiyaOperatorXulosaDto"];
         };
         NasiyalarXulosaDto: {
             /** Format: int64 */
@@ -2255,6 +2337,23 @@ export interface components {
             /** Format: int32 */
             oyQaytganSoni: number;
         };
+        NasiyaOperatorXulosaDto: {
+            /** Format: int32 */
+            operatorId: number;
+            operatorIsmi: string;
+            /** Format: int32 */
+            soni: number;
+            /** Format: int64 */
+            berilgan: number;
+            /** Format: int64 */
+            qaytgan: number;
+            /** Format: int64 */
+            qoldiq: number;
+            /** Format: int32 */
+            faolSoni: number;
+            /** Format: int64 */
+            eskiQarzQabul: number;
+        };
         NasiyaQaytishiDto: {
             /** Format: int32 */
             id: number;
@@ -2272,6 +2371,7 @@ export interface components {
             izoh: null | string;
             /** Format: int32 */
             muallifId: number;
+            eskiQarz: boolean;
         };
         NasiyaQaytishiYaratishDto: {
             /** Format: int64 */

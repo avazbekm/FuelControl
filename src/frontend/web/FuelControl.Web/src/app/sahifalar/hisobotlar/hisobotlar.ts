@@ -83,6 +83,9 @@ export class HisobotlarSahifa {
     ];
     const avans = this.natija()?.avans ?? 0;
     if (avans > 0) r.push({ kalit: 'Hisobot_KpiAvans', qiymat: pul(avans), izoh: T('Hisobot_KpiAvansIzoh') });
+    // Eski qarz to'lovlari (docs §8.11): savdoga kirmaydi, faqat yopilgan smenalardan; to'lov bo'lmasa plitka chiqmaydi.
+    const eski = this.natija()?.eskiQarzQaytgan ?? 0;
+    if (eski > 0) r.push({ kalit: 'Hisobot_KpiEskiQarz', qiymat: pul(eski), izoh: T('Hisobot_KpiEskiQarzIzoh', this.natija()?.eskiQarzSoni ?? 0) });
     return r;
   });
 

@@ -122,8 +122,8 @@
           </div>
           <div class="yozuv-panjara">
             <div class="plitka yozuv">
-              <span class="yozuv-bosh"><b>{{ til.t('Yopish_NasiyaBerildi') }}</b><span class="pill" style="background: #FFE9DA; color: #9A3412">{{ til.t('Yopish_Ta', t.nasiyalar.length) }}</span></span>
-              @for (n of t.nasiyalar; track n.id) { <span class="yozuv-qator"><span>{{ n.mijozIsmi }}</span><b>{{ pul(n.summa) }}</b></span> }
+              <span class="yozuv-bosh"><b>{{ til.t('Yopish_NasiyaBerildi') }}</b><span class="pill" style="background: #FFE9DA; color: #9A3412">{{ til.t('Yopish_Ta', oddiy(t.nasiyalar).length) }}</span></span>
+              @for (n of oddiy(t.nasiyalar); track n.id) { <span class="yozuv-qator"><span>{{ n.mijozIsmi }}</span><b>{{ pul(n.summa) }}</b></span> }
               <span class="yozuv-qator jami"><span>{{ til.t('Yopish_Jami') }}</span><span>{{ pul(t.smena.nasiyaJami) }}</span></span>
               @if (auth.bor('NasiyaYozish')) {
                 <button type="button" class="tugma yozuv-tugma" (click)="nasiyaOchiq.set(true)"><ikon nomi="plus" [olcham]="15" [qalinlik]="2.4" /> {{ til.t('Nasiya_Yozish') }}</button>
@@ -131,7 +131,7 @@
             </div>
             <div class="plitka yozuv">
               <span class="yozuv-bosh"><b>{{ til.t('Yopish_QaytganNasiya') }}</b><span class="pill yashil">{{ til.t('Yopish_Ta', t.qaytishlar.length) }}</span></span>
-              @for (q of t.qaytishlar; track q.id) { <span class="yozuv-qator"><span>{{ q.mijozIsmi }} · {{ til.t('Tolov_' + q.usul).toLowerCase() }}</span><b>{{ pul(q.summa) }}</b></span> }
+              @for (q of t.qaytishlar; track q.id) { <span class="yozuv-qator"><span>{{ q.mijozIsmi }} · {{ til.t('Tolov_' + q.usul).toLowerCase() }}@if (q.eskiQarz) { <span class="pill binafsha eski-belgi" data-test="eski-belgi">{{ til.t('Nasiya_EskiQarzBelgi') }}</span> }</span><b>{{ pul(q.summa) }}</b></span> }
               <span class="yozuv-qator jami"><span>{{ til.t('Yopish_Jami') }}</span><span>{{ pul(t.smena.qaytganNasiya) }}</span></span>
               @if (auth.bor('QarzQaytdi')) {
                 <button type="button" class="tugma yozuv-tugma" (click)="qaytishOchiq.set(true)"><ikon nomi="undo" [olcham]="15" [qalinlik]="2" /> {{ til.t('Nasiya_QarzQaytdi') }}</button>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { api, ol } from '../api/api';
 import type {
   AparatDto, AparatTahrirlashDto, AparatYaratishDto, AuditYozuviDto, BakKirimDto, BakKirimYaratishDto, BoshqaruvDto, FoydalanuvchiDto,
-  FoydalanuvchiTahrirlashDto, HisobotDto, HisobotGuruhi, KorsatkichTuzatishDto, LoginJavobi, NarxTarixiDto, NasiyaDto, NasiyalarDto,
+  EskiQarzYaratishDto, FoydalanuvchiTahrirlashDto, HisobotDto, HisobotGuruhi, KorsatkichTuzatishDto, LoginJavobi, NarxTarixiDto, NasiyaDto, NasiyalarDto,
   NasiyaQaytishiYaratishDto, MijozTaklifDto, NasiyaTafsilotDto, NasiyaYaratishDto, OperatorHisobDto, Rol, Ruxsat, SmenaDto, SmenaOchishDto, SmenaTafsilotDto,
   SmenaTopshirishDto, SmenaYopishDto, XarajatDto, XarajatYaratishDto, YoqilgiTahrirlashDto, YoqilgiTuriDto, ZaxiraJavobi,
 } from '../api/model';
@@ -36,8 +36,9 @@ export class Server {
   }
 
   // ---- Nasiya
-  nasiyalar(holat?: 'faol' | 'otgan' | 'yopilgan', q?: string): Promise<NasiyalarDto> {
-    return ol(api.GET('/nasiyalar', { params: { query: { holat, q: q?.trim() || undefined } } }));
+  /** `operatorId` berilsa server shu operator yozgan nasiyalarni qaytaradi va `operator` xulosasini to'ldiradi (docs §8.12). */
+  nasiyalar(holat?: 'faol' | 'otgan' | 'yopilgan', q?: string, operatorId?: number): Promise<NasiyalarDto> {
+    return ol(api.GET('/nasiyalar', { params: { query: { holat, q: q?.trim() || undefined, operatorId } } }));
   }
   /** Mavjud mijozlar (nasiya yozuvlaridan): ism, telefon yoki mashina raqami bo'yicha, eng ko'pi 8 ta; `q` bo'sh bo'lsa — oxirgi mijozlar. */
   mijozlar(q: string): Promise<MijozTaklifDto[]> { return ol(api.GET('/nasiyalar/mijozlar', { params: { query: { q: q.trim() || undefined } } })); }
@@ -46,6 +47,8 @@ export class Server {
   nasiyaQaytishi(id: number, d: NasiyaQaytishiYaratishDto): Promise<NasiyaDto> {
     return ol(api.POST('/nasiyalar/{id}/qaytish', { params: { path: { id } }, body: d }));
   }
+  /** Dasturdan oldingi qarz to'lovi (docs §8.11): ochiq smena kerak, aks holda 409. */
+  eskiQarz(d: EskiQarzYaratishDto): Promise<NasiyaTafsilotDto> { return ol(api.POST('/nasiyalar/eski-qarz', { body: d })); }
   async nasiyaOchir(id: number): Promise<void> { await ol(api.DELETE('/nasiyalar/{id}', { params: { path: { id } } })); }
   async qaytishOchir(id: number): Promise<void> { await ol(api.DELETE('/nasiyalar/qaytishlar/{id}', { params: { path: { id } } })); }
 
