@@ -281,6 +281,9 @@ namespace FuelControl.Api.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("EskiQarz")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Izoh")
                         .HasColumnType("TEXT");
 

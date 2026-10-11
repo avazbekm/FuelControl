@@ -33,6 +33,35 @@ public static class NasiyaXizmati
     }
 
     /// <summary>
+    /// Eski qarz to'lovi (dasturdan oldingi qarz): ochiq smenaga bog'langan, darhol yopilgan nasiya (EskiQarz = true, Summa = Qaytgan = to'lov,
+    /// Muddat = bugun - Toshkent) va shu summaga yagona qaytish (smena hisobiga, tanlangan usulda). Ism majburiy; telefon va mashina raqami
+    /// ixtiyoriy, lekin telefon berilsa aynan 9 raqam bo'lishi shart (+998 XX XXX XX XX ga keltiriladi). Qaytishning NasiyaId'sini chaqiruvchi
+    /// nasiya saqlangandan keyin qo'yadi. Izoh ikkalasiga ham yoziladi (nasiyalar ro'yxatida ham, savdodagi qaytishlarda ham ko'rinsin).
+    /// </summary>
+    public static (Nasiya Nasiya, NasiyaQaytishi Qaytish) EskiQarz(int smenaId, int operatorId, string kim, string? mijozIsmi, string? telefon,
+        string? mashinaRaqami, long summa, TolovTuri usul, string? izoh, DateTime vaqtUtc)
+    {
+        if (string.IsNullOrWhiteSpace(mijozIsmi)) throw new ArgumentException("Mijoz ismi kiritilishi shart.");
+        if (summa <= 0) throw new ArgumentException("Eski qarz summasi musbat bo'lishi kerak.");
+        if (!Enum.IsDefined(usul)) throw new ArgumentException("To'lov usuli noto'g'ri.");
+        var tel = TelefonRaqami.Normallashtir(telefon);
+        if (mijozIsmi.Trim().Length > MaksIsm || (mashinaRaqami?.Trim().Length ?? 0) > MaksMashina || (izoh?.Trim().Length ?? 0) > MaksIzoh)
+            throw new ArgumentException("Ism, mashina raqami yoki izoh juda uzun.");
+        var matn = string.IsNullOrWhiteSpace(izoh) ? null : izoh.Trim();
+        var nasiya = new Nasiya
+        {
+            SmenaId = smenaId, OperatorId = operatorId, KimYozdi = kim, MijozIsmi = mijozIsmi.Trim(),
+            Telefon = tel, MashinaRaqami = mashinaRaqami?.Trim() ?? "",
+            Summa = summa, Qaytgan = summa, Muddat = Vaqt.Sana(vaqtUtc), Yozildi = vaqtUtc, Yopildi = vaqtUtc, Izoh = matn, EskiQarz = true,
+        };
+        var qaytish = new NasiyaQaytishi
+        {
+            SmenaId = smenaId, Summa = summa, Usul = usul, Vaqt = vaqtUtc, OperatorId = operatorId, KimYozdi = kim, Izoh = matn,
+        };
+        return (nasiya, qaytish);
+    }
+
+    /// <summary>
     /// Qarz qaytishi (to'liq yoki qisman): summa musbat va qoldiqdan oshmasligi kerak. smenaId - smena hisobiga yozilsa o'sha ochiq smena,
     /// aks holda null (smena hisobiga ta'sir qilmaydi).
     /// </summary>
@@ -66,13 +95,14 @@ public static class NasiyaXizmati
     public static bool QidiruvgaMos(Nasiya n, string? q) => NasiyaQidiruvi.Tayyorla(q).Daraja(n) is not null;
 
     /// <summary>
-    /// Nasiyalar ro'yxati: ?holat va ?q bo'yicha saralanadi. So'rovsiz - qarzi borlar muddat bo'yicha (muddati o'tgani birinchi), keyin yopilganlar;
-    /// so'rov bilan - aynan va boshidan mos kelganlar oldin, keyin qolganlari, har bir guruhda yangisi oldinda.
+    /// Nasiyalar ro'yxati: ?holat, ?q va ?operatorId (Nasiya.OperatorId) bo'yicha saralanadi - uchalasi birga ishlaydi. So'rovsiz - qarzi borlar
+    /// muddat bo'yicha (muddati o'tgani birinchi), keyin yopilganlar; so'rov bilan - aynan va boshidan mos kelganlar oldin, keyin qolganlari, har bir
+    /// guruhda yangisi oldinda. Eski qarz to'lovlari ham ro'yxatda (yopilgan, EskiQarz belgisi bilan).
     /// </summary>
-    public static List<Nasiya> Royxat(IEnumerable<Nasiya> nasiyalar, string? holat, string? q, DateOnly bugun)
+    public static List<Nasiya> Royxat(IEnumerable<Nasiya> nasiyalar, string? holat, string? q, DateOnly bugun, int? operatorId = null)
     {
         var sorov = NasiyaQidiruvi.Tayyorla(q);
-        var mos = nasiyalar.Where(n => HolatFiltri(holat, n, bugun)).Select(n => (N: n, D: sorov.Daraja(n))).Where(x => x.D is not null).ToList();
+        var mos = nasiyalar.Where(n => operatorId is null || n.OperatorId == operatorId).Where(n => HolatFiltri(holat, n, bugun)).Select(n => (N: n, D: sorov.Daraja(n))).Where(x => x.D is not null).ToList();
         return (sorov.Bosh
                 ? mos.OrderBy(x => x.N.Qoldiq > 0 ? 0 : 1).ThenBy(x => x.N.Muddat).ThenByDescending(x => x.N.Id)
                 : mos.OrderBy(x => x.D).ThenByDescending(x => x.N.Yozildi).ThenByDescending(x => x.N.Id))
@@ -127,9 +157,23 @@ public static class NasiyaXizmati
     {
         var qarzdorlar = nasiyalar.Where(n => n.Qoldiq > 0).ToList();
         var otgan = qarzdorlar.Where(n => n.Muddat < bugun).ToList();
-        var oyBerilgan = nasiyalar.Where(n => n.Yozildi >= oyBoshiUtc && n.Yozildi < keyingiOyBoshiUtc).ToList();
+        var oyBerilgan = nasiyalar.Where(n => !n.EskiQarz && n.Yozildi >= oyBoshiUtc && n.Yozildi < keyingiOyBoshiUtc).ToList();
         var oyQaytgan = qaytishlar.Where(q => q.Vaqt >= oyBoshiUtc && q.Vaqt < keyingiOyBoshiUtc).ToList();
         return new NasiyalarXulosaDto(qarzdorlar.Sum(n => n.Qoldiq), qarzdorlar.Count, otgan.Sum(n => n.Qoldiq), otgan.Count,
             oyBerilgan.Sum(n => n.Summa), oyBerilgan.Count, oyQaytgan.Sum(q => q.Summa), oyQaytgan.Count);
+    }
+
+    /// <summary>
+    /// Bitta operatorning (Nasiya.OperatorId) nasiyalari bo'yicha yig'indilar - butun vaqt. Eski qarz to'lovlari Soni/Berilgan/Qaytgan/Qoldiq/FaolSoni
+    /// ga kirmaydi, faqat EskiQarzQabul da (ularning summasi). Ism: berilgan (foydalanuvchining hozirgi ismi), bo'lmasa nasiyalardagi eng yangi ism.
+    /// </summary>
+    public static NasiyaOperatorXulosaDto OperatorXulosa(IEnumerable<Nasiya> nasiyalar, int operatorId, string? hozirgiIsm = null)
+    {
+        var uniki = nasiyalar.Where(n => n.OperatorId == operatorId).ToList();
+        var oddiy = uniki.Where(n => !n.EskiQarz).ToList();
+        var ism = !string.IsNullOrWhiteSpace(hozirgiIsm) ? hozirgiIsm
+            : uniki.OrderByDescending(n => n.Yozildi).ThenByDescending(n => n.Id).Select(n => n.KimYozdi).FirstOrDefault() ?? "";
+        return new NasiyaOperatorXulosaDto(operatorId, ism, oddiy.Count, oddiy.Sum(n => n.Summa), oddiy.Sum(n => n.Qaytgan), oddiy.Sum(n => n.Qoldiq),
+            oddiy.Count(n => n.Qoldiq > 0), uniki.Where(n => n.EskiQarz).Sum(n => n.Summa));
     }
 }

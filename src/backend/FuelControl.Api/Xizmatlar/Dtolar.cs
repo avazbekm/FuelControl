@@ -34,10 +34,11 @@ public static class Dtolar
         new(d.Id, d.OperatorId, d.OperatorIsmi, d.Boshlandi, d.Tugadi, 0, 0, 0, null, null, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, null, []);
 
     public static NasiyaDto Dto(this Nasiya n, DateOnly bugun) => new(n.Id, n.SmenaId, n.KimYozdi, n.MijozIsmi, n.Telefon, n.MashinaRaqami,
-        n.Summa, n.Qaytgan, n.Qoldiq, n.Muddat, NasiyaXizmati.Holat(n, bugun), NasiyaXizmati.MuddatgachaKun(n, bugun), n.Yozildi, n.Yopildi, n.Izoh, n.OperatorId);
+        n.Summa, n.Qaytgan, n.Qoldiq, n.Muddat, NasiyaXizmati.Holat(n, bugun), NasiyaXizmati.MuddatgachaKun(n, bugun), n.Yozildi, n.Yopildi, n.Izoh, n.OperatorId, n.EskiQarz);
 
-    public static NasiyaQaytishiDto Dto(this NasiyaQaytishi q, string mijozIsmi) =>
-        new(q.Id, q.NasiyaId, mijozIsmi, q.SmenaId, q.Summa, q.Usul, q.Vaqt, q.KimYozdi, q.Izoh, q.OperatorId);
+    /// <summary>eskiQarz - qaytish tegishli nasiyaning EskiQarz belgisi (qaytishning o'zida alohida ustun yo'q).</summary>
+    public static NasiyaQaytishiDto Dto(this NasiyaQaytishi q, string mijozIsmi, bool eskiQarz) =>
+        new(q.Id, q.NasiyaId, mijozIsmi, q.SmenaId, q.Summa, q.Usul, q.Vaqt, q.KimYozdi, q.Izoh, q.OperatorId, eskiQarz);
 
     public static XarajatDto Dto(this Xarajat x) => new(x.Id, x.SmenaId, x.Summa, x.Sabab, x.Manba, x.Vaqt, x.KimYozdi, x.OperatorId);
 
@@ -55,9 +56,12 @@ public static class Dtolar
     public static Task<Dictionary<int, string>> OperatorIsmlari(this FuelControlDbContext db) =>
         db.Foydalanuvchilar.AsNoTracking().ToDictionaryAsync(f => f.Id, f => f.ToliqIsm);
 
-    /// <summary>Smenaga yozilgan nasiya, smena hisobiga yozilgan qaytishlar va xarajatlar yig'indisi.</summary>
+    /// <summary>
+    /// Smenaga yozilgan nasiya (eski qarz to'lovlari bundan tashqari: ular berilgan nasiya emas), smena hisobiga yozilgan qaytishlar
+    /// (eski qarz to'lovlari shu yerga kiradi) va xarajatlar yig'indisi.
+    /// </summary>
     public static async Task<SmenaHisoblagich.Yigindilar> Yigindilar(this FuelControlDbContext db, int smenaId) => new(
-        await db.Nasiyalar.Where(n => n.SmenaId == smenaId).SumAsync(n => n.Summa),
+        await db.Nasiyalar.Where(n => n.SmenaId == smenaId && !n.EskiQarz).SumAsync(n => n.Summa),
         await db.NasiyaQaytishlari.Where(q => q.SmenaId == smenaId).SumAsync(q => q.Summa),
         await db.Xarajatlar.Where(x => x.SmenaId == smenaId).SumAsync(x => x.Summa));
 
@@ -99,13 +103,20 @@ public static class Dtolar
         var segmentlar = (await db.SmenaKorsatkichlari.AsNoTracking().Where(x => x.SmenaId == smena.Id).ToListAsync())
             .OrderBy(x => aparatlar[x.AparatId].Raqam).ThenBy(x => x.Tartib)
             .Select(x => x.Dto(aparatlar[x.AparatId], yoqilgilar.GetValueOrDefault(aparatlar[x.AparatId].YoqilgiTuriId, "?"))).ToArray();
-        var nasiyalar = await db.Nasiyalar.AsNoTracking().Where(n => n.SmenaId == smena.Id).OrderBy(n => n.Yozildi).ThenBy(n => n.Id).ToListAsync();
+        // "Nasiya berildi" ro'yxati NasiyaJami bilan mos bo'lishi uchun eski qarz nasiyalari chiqarib tashlanadi; ularning qaytishi esa
+        // Qaytishlar ro'yxatida EskiQarz = true bilan qoladi.
+        var nasiyalar = await db.Nasiyalar.AsNoTracking().Where(n => n.SmenaId == smena.Id && !n.EskiQarz).OrderBy(n => n.Yozildi).ThenBy(n => n.Id).ToListAsync();
         var qaytishlar = await db.NasiyaQaytishlari.AsNoTracking().Where(q => q.SmenaId == smena.Id).OrderBy(q => q.Vaqt).ThenBy(q => q.Id).ToListAsync();
-        var mijozlar = await db.Nasiyalar.AsNoTracking().Where(n => qaytishlar.Select(q => q.NasiyaId).Contains(n.Id)).ToDictionaryAsync(n => n.Id, n => n.MijozIsmi);
+        var mijozlar = await db.Nasiyalar.AsNoTracking().Where(n => qaytishlar.Select(q => q.NasiyaId).Contains(n.Id))
+            .ToDictionaryAsync(n => n.Id, n => (n.MijozIsmi, n.EskiQarz));
         var xarajatlar = await db.Xarajatlar.AsNoTracking().Where(x => x.SmenaId == smena.Id).OrderBy(x => x.Vaqt).ThenBy(x => x.Id).ToListAsync();
         return new SmenaTafsilotDto(await db.SmenaDtosi(smena), segmentlar,
             nasiyalar.Select(n => n.Dto(bugun)).ToArray(),
-            qaytishlar.Select(q => q.Dto(mijozlar.GetValueOrDefault(q.NasiyaId, "?"))).ToArray(),
+            qaytishlar.Select(q =>
+            {
+                var (ism, eskiQarz) = mijozlar.TryGetValue(q.NasiyaId, out var m) ? m : ("?", false);
+                return q.Dto(ism, eskiQarz);
+            }).ToArray(),
             xarajatlar.Select(x => x.Dto()).ToArray());
     }
 }

@@ -78,8 +78,9 @@ public static class HisobotXizmati
     }
 
     public static HisobotDto Tuz(HisobotGuruhi guruh, IReadOnlyCollection<Smena> qatorSmenalari, IReadOnlyDictionary<int, string> ismlar,
-        HisobotAparatDto[] aparatlar, long avans, IReadOnlyDictionary<int, int>? xarajatSonlari = null) =>
-        new(Qatorlar(guruh, qatorSmenalari, ismlar, xarajatSonlari), Qator("Jami", null, null, qatorSmenalari, true, xarajatSonlari), aparatlar, avans);
+        HisobotAparatDto[] aparatlar, long avans, IReadOnlyDictionary<int, int>? xarajatSonlari = null, long eskiQarzQaytgan = 0, int eskiQarzSoni = 0) =>
+        new(Qatorlar(guruh, qatorSmenalari, ismlar, xarajatSonlari), Qator("Jami", null, null, qatorSmenalari, true, xarajatSonlari), aparatlar, avans,
+            eskiQarzQaytgan, eskiQarzSoni);
 }
 
 public static class BoshqaruvXizmati

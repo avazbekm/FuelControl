@@ -57,10 +57,12 @@ public sealed class TelefonFormatiMigratsiyaTests : IDisposable
                 "Izoh","JamiLitr","Savdo","Plastik","DepozitFarqi","NasiyaJami","QaytganNasiya","XarajatJami","Kutilgan","Farq")
             VALUES (1,1,'2026-10-01 03:00:00','2026-10-01 05:00:00',0,0,0,0,0,0,NULL,'0',0,0,0,0,0,0,0,0);
             """);
+        // Nasiya ham SQL bilan: joriy modeldagi EskiQarz ustuni bu eski sxemada hali yo'q (EF uni ham INSERT qilardi).
         foreach (var tel in eskiTelefonlar)
-            db.Nasiyalar.Add(new Nasiya { SmenaId = 1, OperatorId = op.Id, KimYozdi = "Op", MijozIsmi = "Mijoz", Telefon = tel, MashinaRaqami = "",
-                Summa = 1000, Muddat = new DateOnly(2026, 10, 20), Yozildi = DateTime.UtcNow });
-        await db.SaveChangesAsync();
+            await db.Database.ExecuteSqlAsync($"""
+                INSERT INTO "Nasiyalar" ("SmenaId","OperatorId","KimYozdi","MijozIsmi","Telefon","MashinaRaqami","Summa","Qaytgan","Muddat","Yozildi","Yopildi","Izoh")
+                VALUES (1, {op.Id}, 'Op', 'Mijoz', {tel}, '', 1000, 0, '2026-10-20', '2026-10-01 03:00:00', NULL, NULL)
+                """);
 
         await db.Database.MigrateAsync();                  // TelefonFormati
 

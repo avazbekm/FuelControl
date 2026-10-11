@@ -17,7 +17,10 @@ public static class SmenaHisoblagich
     public sealed record Natija(decimal JamiLitr, long Savdo, long Plastik, long DepozitFarqi,
         long NasiyaJami, long QaytganNasiya, long XarajatJami, long Kutilgan, long Farq);
 
-    /// <summary>Smena davomida yozilgan nasiya, smena hisobiga yozilgan qaytishlar va xarajatlar yig'indisi.</summary>
+    /// <summary>
+    /// Smena davomida yozilgan nasiya (eski qarz to'lovlari bundan tashqari - ular berilgan nasiya emas), smena hisobiga yozilgan qaytishlar
+    /// (eski qarz to'lovlari shu yerga kiradi) va xarajatlar yig'indisi.
+    /// </summary>
     public sealed record Yigindilar(long NasiyaJami, long QaytganNasiya, long XarajatJami)
     {
         public static readonly Yigindilar Bosh = new(0, 0, 0);
@@ -56,7 +59,7 @@ public static class SmenaHisoblagich
 
     public static Yigindilar SmenaYigindilari(int smenaId, IEnumerable<Nasiya> nasiyalar,
         IEnumerable<NasiyaQaytishi> qaytishlar, IEnumerable<Xarajat> xarajatlar) =>
-        new(nasiyalar.Where(n => n.SmenaId == smenaId).Sum(n => n.Summa),
+        new(nasiyalar.Where(n => n.SmenaId == smenaId && !n.EskiQarz).Sum(n => n.Summa),
             qaytishlar.Where(q => q.SmenaId == smenaId).Sum(q => q.Summa),
             xarajatlar.Where(x => x.SmenaId == smenaId).Sum(x => x.Summa));
 

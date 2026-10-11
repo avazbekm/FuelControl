@@ -40,6 +40,14 @@ public static class AuditMatnlari
     public static string QaytishOchirildi(Nasiya n, NasiyaQaytishi q) =>
         $"{n.MijozIsmi} · {Format.Pul(q.Summa)} {UsulMatni(q.Usul)} · qolgan qarz {Format.Pul(n.Qoldiq)}";
 
+    /// <summary>Bobur Aliyev · 300 000 naqd · smena #42 (dasturdan oldingi qarzning to'lovi)</summary>
+    public static string EskiQarzToLandi(Nasiya n, NasiyaQaytishi q) =>
+        $"{n.MijozIsmi} · {Format.Pul(q.Summa)} {UsulMatni(q.Usul)} · smena #{n.SmenaId}";
+
+    /// <summary>Eski qarz to'lovi o'chirilganda nasiya yozuvi va uning qaytishi birga ketadi: bitta yozuv.</summary>
+    public static string EskiQarzOchirildi(Nasiya n, NasiyaQaytishi q) =>
+        $"{n.MijozIsmi} · {Format.Pul(q.Summa)} {UsulMatni(q.Usul)} · smena #{n.SmenaId} · nasiya yozuvi ham o'chirildi";
+
     /// <summary>Lampochka va tozalash vositasi · 85 000 · kassadan · smena #42</summary>
     public static string Xarajat(Xarajat x) => $"{x.Sabab} · {Format.Pul(x.Summa)} · {ManbaMatni(x.Manba)} · smena #{x.SmenaId}";
 

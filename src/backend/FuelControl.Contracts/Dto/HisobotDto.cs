@@ -14,5 +14,10 @@ public sealed record HisobotQatoriDto(string Guruh, DateOnly? Sana, string? Oper
 public sealed record HisobotAparatDto(int AparatId, int Raqam, string YoqilgiNomi,
     decimal BakBoshida, decimal Kirim, decimal Sotildi, decimal BakOxirida, long Savdo);
 
-/// <summary>Avans - davrdagi avanslar yig'indisi (musbat son).</summary>
-public sealed record HisobotDto(HisobotQatoriDto[] Qatorlar, HisobotQatoriDto Jami, HisobotAparatDto[] Aparatlar, long Avans);
+/// <summary>
+/// Avans - davrdagi avanslar yig'indisi (musbat son). EskiQarzQaytgan / EskiQarzSoni - hisobot qatorlariga kirgan (davr + operator filtri,
+/// yopilgan) smenalarga yozilgan eski qarz to'lovlarining yig'indisi va soni: Jami.QaytganNasiya ning shu qismi (boshliq uchun
+/// "Eski qarzlardan tushgan", "{0} ta to'lov").
+/// </summary>
+public sealed record HisobotDto(HisobotQatoriDto[] Qatorlar, HisobotQatoriDto Jami, HisobotAparatDto[] Aparatlar, long Avans,
+    long EskiQarzQaytgan, int EskiQarzSoni);

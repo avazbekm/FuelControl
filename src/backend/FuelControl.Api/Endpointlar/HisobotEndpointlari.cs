@@ -53,7 +53,15 @@ public static class HisobotEndpointlari
             var bak = HisobotXizmati.Aparatlar(aparatlar, yoqilgilar, yopilganlar, segmentlar, kirimlar, tuzatishlar, danUtc, gachaUtc);
             var xarajatSonlari = await db.Xarajatlar.AsNoTracking().GroupBy(x => x.SmenaId)
                 .Select(x => new { SmenaId = x.Key, Soni = x.Count() }).ToDictionaryAsync(x => x.SmenaId, x => x.Soni);
-            return HisobotXizmati.Tuz(g, qatorSmenalari, await db.OperatorIsmlari(), bak, avans, xarajatSonlari);
+
+            // Eski qarz to'lovlari: hisobot qatorlariga kirgan (davr + operator filtri, yopilgan) smenalarga yozilganlar - Jami.QaytganNasiya ning qismi.
+            var qatorIdlari = qatorSmenalari.Select(x => x.Id).ToHashSet();
+            var eskiQarzlar = (await db.NasiyaQaytishlari.AsNoTracking()
+                    .Where(q => q.SmenaId != null && db.Nasiyalar.Any(n => n.Id == q.NasiyaId && n.EskiQarz))
+                    .Select(q => new { q.SmenaId, q.Summa }).ToListAsync())
+                .Where(q => qatorIdlari.Contains(q.SmenaId!.Value)).ToList();
+            return HisobotXizmati.Tuz(g, qatorSmenalari, await db.OperatorIsmlari(), bak, avans, xarajatSonlari,
+                eskiQarzlar.Sum(q => q.Summa), eskiQarzlar.Count);
         }).RuxsatKerak(Ruxsat.Hisobotlar).RequireAuthorization().Produces<HisobotDto>().ProducesProblem(400);
 
         app.MapGet("/boshqaruv", async (FuelControlDbContext db) =>

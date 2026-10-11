@@ -282,6 +282,34 @@ Olib tashlanadi: barcha `/sotuvlar` yo'llari. `/operatorlar/{id}/hisob` saqlanad
    - **Klient tartibi** (403 hech qachon chiqmasligi kerak):
      1. `Smenalar` ruxsati bo'lsa, `/smenalar/oxirgi` chaqiriladi va to'liq karta ko'rsatiladi.
      2. Aks holda `/smenalar/oxirgi/topshirish` chaqiriladi. `OperatorId` joriy foydalanuvchiga teng bo'lsa, `/smenalar/oxirgi` dan to'liq karta olinadi. Teng bo'lmasa, faqat topshirish bloki ko'rsatiladi.
+11. **Eski qarz to'lovi (2026-10-11).** Dasturdan oldingi qarzdorlar pul olib keladi, lekin bu qarz dasturda yo'q. Pulni kassaga qo'shib qo'yish mumkin emas, aks holda yopishda ortiqcha chiqadi. Foydalanuvchi qarori: faqat olib kelingan summa yoziladi, "qolgan qarz" maydoni bo'lmaydi.
+   - **Ekran:** "Qarz qaytdi" oynasida "Eski qarz (dasturda yo'q)" rejimi bo'ladi. Unda quyidagilar kiritiladi:
+     - mijoz ismi (majburiy, mijoz takliflari bilan), telefon va mashina raqami (ixtiyoriy);
+     - summa;
+     - to'lov usuli: Naqd, Plastik yoki Depozit (mavjud `TolovTuri`);
+     - izoh.
+   - **Kim kiritadi:** `QarzQaytdi` ruxsati borlar, ya'ni operator ham, boshliq ham. Ochiq smena majburiy, chunki pul joriy smena kassasiga kiradi. Ochiq smena bo'lmasa server 409 qaytaradi, xuddi nasiya, qaytish va xarajat kabi.
+   - **Server:** `POST /nasiyalar/eski-qarz` endpointi `EskiQarzYaratishDto(string MijozIsmi, string Telefon, string MashinaRaqami, long Summa, TolovTuri Usul, string? Izoh)` qabul qiladi. U bitta tranzaksiyada uch ish qiladi:
+     1. Ochiq smenaga bog'langan `Nasiya` yaratadi: `EskiQarz = true`, Summa = to'lov, Muddat = bugun, darhol yopilgan.
+     2. Shu summaga `NasiyaQaytishi` yozadi: `SmenaId` = ochiq smena, usul tanlangani.
+     3. `NasiyaTafsilotDto` qaytaradi.
+     Migratsiya bitta qo'shimcha ustun: `Nasiyalar.EskiQarz`.
+   - **Hisob:** eski qarz nasiyasi `NasiyaJami` ga, "oy berilgan"ga va operatorning "bergan nasiya"siga **kirmaydi**. Uning qaytishi esa `QaytganNasiya` ga kiradi. Natijada kassa formulasi o'zgarishsiz to'g'ri chiqadi: naqd bo'lsa kutilgan naqd ortadi, plastik yoki depozit bo'lsa ular orqali muvozanatlanadi.
+   - **O'chirish:** eski qarz qaytishi o'chirilsa, uning nasiyasi ham birga o'chadi. Teskarisi ham shunday. Qoidalar mavjud qaytish o'chirish bilan bir xil.
+   - **Ko'rinish:**
+     - `NasiyaDto` va `NasiyaQaytishiDto` oxiriga `bool EskiQarz` qo'shiladi.
+     - Nasiyalar ro'yxatida, Savdo'dagi qaytishlarda va smena tafsilotida "Eski qarz" belgisi chiqadi.
+     - Hisobotda boshliq uchun alohida "Eski qarzlardan tushgan" summasi: `HisobotDto` oxiriga `long EskiQarzQaytgan, int EskiQarzSoni`.
+     - Audit yozuvi: "Eski qarz to'landi".
+     - Eski qarz nasiyasi smenaning "Nasiya berildi" ro'yxatida chiqmaydi: server `SmenaTafsilotDto.Nasiyalar` dan chiqarib tashlaydi, klient ham himoya uchun filtrlaydi. Uning qaytishi esa qaytishlar ro'yxatida belgi bilan ko'rinadi.
+     - Nasiyalar ro'yxatining Jami qatoriga va Excel Jami'ga eski qarz yozuvlari kirmaydi.
+     - O'chirish nasiya tafsilotidan ham mumkin, qaytishi bilan birga. Tasdiq matni `Nasiya_EskiQarzOchirish`.
+12. **Nasiyalar: operator bo'yicha filtr (2026-10-11).** Foydalanuvchiga masalan Qaxxorning jami nasiyalari kerak.
+   - **Server:** `GET /nasiyalar` ga `operatorId` parametri qo'shiladi (`Nasiya.OperatorId` bo'yicha). U `holat` va `q` bilan birga ishlaydi.
+   - `NasiyalarDto` oxiriga `NasiyaOperatorXulosaDto? Operator` qo'shiladi, faqat `operatorId` berilganda to'ldiriladi:
+     `NasiyaOperatorXulosaDto(int OperatorId, string OperatorIsmi, int Soni, long Berilgan, long Qaytgan, long Qoldiq, int FaolSoni, long EskiQarzQabul)`.
+     Eski qarz yozuvlari `Soni`, `Berilgan`, `Qaytgan` va `Qoldiq` ga kirmaydi, faqat `EskiQarzQabul` da ko'rinadi.
+   - **Ekran:** Nasiyalar bo'limida "Operator: Hammasi / …" tanlovi bo'ladi. Ro'yxat nasiya yozuvlaridagi operatorlardan olinadi: `NasiyaDto.MuallifId` (= `Nasiya.OperatorId`, nasiyani yozgan odam) va `OperatorIsmi`. Operator tanlanganda umumiy KPI'lar yashirinadi, o'rniga operator KPI'lari chiqadi. Operator tanlansa, KPI'lar shu operator bo'yicha chiqadi: bergan, qaytgan, qoldiq, soni va alohida "eski qarzdan qabul qilgan". Excel eksporti filtrni hisobga oladi, sarlavhada operator ismi yoziladi.
 
 ## 9. Ish tartibi
 

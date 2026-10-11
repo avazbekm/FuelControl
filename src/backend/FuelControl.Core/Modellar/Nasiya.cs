@@ -23,6 +23,12 @@ public sealed class Nasiya
     public DateTime? Yopildi { get; set; }
     public string? Izoh { get; set; }
 
+    /// <summary>
+    /// Dasturdan oldingi qarzning to'lovi (POST /nasiyalar/eski-qarz): "berilgan nasiya" emas - smena NasiyaJami, "oy berilgan" va operatorning
+    /// "berilgan"iga kirmaydi; darhol yopilgan (Qaytgan = Summa) va yagona qaytishi bilan birga yaratiladi/o'chadi.
+    /// </summary>
+    public bool EskiQarz { get; set; }
+
     public long Qoldiq => Summa - Qaytgan;
 }
 
