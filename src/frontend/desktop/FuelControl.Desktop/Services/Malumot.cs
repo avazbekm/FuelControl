@@ -431,6 +431,13 @@ public static class Malumot
         return n;
     }
 
+    public static async Task<NasiyaTafsilotDto> EskiQarzYoz(EskiQarzYaratishDto d)
+    {
+        var t = (await Api.EskiQarz(d))!;
+        await JimYukla(Bolim.JoriySmena | Bolim.Nasiyalar | Bolim.Audit);
+        return t;
+    }
+
     public static async Task NasiyaOchir(int id) { await Api.NasiyaOchir(id); await JimYukla(Bolim.JoriySmena | Bolim.Nasiyalar | Bolim.Audit); }
     public static async Task QaytishOchir(int id) { await Api.QaytishOchir(id); await JimYukla(Bolim.JoriySmena | Bolim.Nasiyalar | Bolim.Audit); }
 

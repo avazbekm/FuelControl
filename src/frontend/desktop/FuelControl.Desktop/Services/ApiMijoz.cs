@@ -104,14 +104,17 @@ public sealed class ApiMijoz
     public Task<SmenaTafsilotDto?> KorsatkichTuzat(int id, KorsatkichTuzatishDto d) => Yubor<SmenaTafsilotDto>(HttpMethod.Put, $"smenalar/{id}/korsatkich", d);
 
     // ---------- Nasiya / xarajat / bak ----------
-    public Task<NasiyalarDto?> Nasiyalar(string? holat = null, string? q = null) =>
-        Ol<NasiyalarDto>("nasiyalar" + Sorov(("holat", holat), ("q", string.IsNullOrWhiteSpace(q) ? null : q.Trim())));
+    /// <summary>operatorId berilsa — faqat shu operator yozgan nasiyalar va javobda Operator xulosasi (§8.12).</summary>
+    public Task<NasiyalarDto?> Nasiyalar(string? holat = null, string? q = null, int? operatorId = null) =>
+        Ol<NasiyalarDto>("nasiyalar" + Sorov(("holat", holat), ("q", string.IsNullOrWhiteSpace(q) ? null : q.Trim()), ("operatorId", operatorId)));
     /// <summary>Mavjud mijozlar (§8.2): nasiya yozuvlaridan, eng ko'pi 8 ta; q bo'sh bo'lsa — oxirgilari.</summary>
     public Task<List<MijozTaklifDto>?> MijozTakliflari(string? q) =>
         Ol<List<MijozTaklifDto>>("nasiyalar/mijozlar" + Sorov(("q", string.IsNullOrWhiteSpace(q) ? null : q.Trim())));
     public Task<NasiyaTafsilotDto?> NasiyaTafsiloti(int id) => Ol<NasiyaTafsilotDto>($"nasiyalar/{id}");
     public Task<NasiyaDto?> NasiyaYoz(NasiyaYaratishDto d) => Yubor<NasiyaDto>(HttpMethod.Post, "nasiyalar", d);
     public Task<NasiyaDto?> QarzQaytdi(int nasiyaId, NasiyaQaytishiYaratishDto d) => Yubor<NasiyaDto>(HttpMethod.Post, $"nasiyalar/{nasiyaId}/qaytish", d);
+    /// <summary>§8.11: dasturdan oldingi qarz to'lovi — ochiq smena hisobiga qaytish sifatida yoziladi.</summary>
+    public Task<NasiyaTafsilotDto?> EskiQarz(EskiQarzYaratishDto d) => Yubor<NasiyaTafsilotDto>(HttpMethod.Post, "nasiyalar/eski-qarz", d);
     public Task NasiyaOchir(int id) => Yubor<object>(HttpMethod.Delete, $"nasiyalar/{id}", null);
     public Task QaytishOchir(int id) => Yubor<object>(HttpMethod.Delete, $"nasiyalar/qaytishlar/{id}", null);
 

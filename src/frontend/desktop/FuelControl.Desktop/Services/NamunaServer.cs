@@ -85,8 +85,8 @@ public sealed class NamunaServer : INamunaServer
         _nasiyalar.Add(Nasiya(94, 39, 3, "Nodir Xasanov", "+998 88 640 07 07", "01 D 128 EA", 165_000, 0, b.AddDays(11), Utc(b.AddDays(-3), 11, 30), null));
         _nasiyalar.Add(Nasiya(95, 40, 2, "Rustam Ergashev", "+998 90 909 30 30", "01 345 KBA", 1_200_000, 0, b.AddDays(29), Utc(b.AddDays(-2), 16, 0), null));
         _nasiyalar.Add(Nasiya(93, 39, 3, "Ulug'bek Nazarov", "+998 91 333 44 55", "01 K 515 KA", 450_000, 450_000, b.AddDays(4), Utc(b.AddDays(-3), 10, 0), null));
-        _qaytishlar.Add(new NasiyaQaytishiDto(201, 90, "Bobur Aliyev", 42, 300_000, TolovTuri.Naqd, Utc(b, 11, 20), "Alisher Karimov", null, 2));
-        _qaytishlar.Add(new NasiyaQaytishiDto(195, 93, "Ulug'bek Nazarov", 40, 450_000, TolovTuri.Plastik, Utc(b.AddDays(-2), 13, 0), "Alisher Karimov", null, 2));
+        _qaytishlar.Add(new NasiyaQaytishiDto(201, 90, "Bobur Aliyev", 42, 300_000, TolovTuri.Naqd, Utc(b, 11, 20), "Alisher Karimov", null, 2, false));
+        _qaytishlar.Add(new NasiyaQaytishiDto(195, 93, "Ulug'bek Nazarov", 40, 450_000, TolovTuri.Plastik, Utc(b.AddDays(-2), 13, 0), "Alisher Karimov", null, 2, false));
         _xarajatlar.Add(new XarajatDto(301, 42, 85_000, "Lampochka va tozalash vositasi", XarajatManbai.Kassa, Utc(b, 10, 15), "Alisher Karimov", 2));
         _xarajatlar.Add(new XarajatDto(302, 42, 1_500_000, "Boshliq naqd oldi", XarajatManbai.Kassa, Utc(b, 12, 40), "Alisher Karimov", 2));
 
@@ -111,13 +111,13 @@ public sealed class NamunaServer : INamunaServer
 
     private string Ism(int id) => _foydalanuvchilar.First(f => f.Id == id).ToliqIsm;
 
-    private NasiyaDto Nasiya(int id, int smenaId, int op, string mijoz, string tel, string raqam, long summa, long qaytgan, DateOnly muddat, DateTime yozildi, string? izoh)
+    private NasiyaDto Nasiya(int id, int smenaId, int op, string mijoz, string tel, string raqam, long summa, long qaytgan, DateOnly muddat, DateTime yozildi, string? izoh, bool eski = false)
     {
         var qoldiq = summa - qaytgan;
         var kun = muddat.DayNumber - _bugun.DayNumber;
         var holat = qoldiq == 0 ? NasiyaHolati.Yopilgan : kun < 0 ? NasiyaHolati.MuddatiOtgan : NasiyaHolati.Faol;
         return new NasiyaDto(id, smenaId, Ism(op), mijoz, tel, raqam, summa, qaytgan, qoldiq, muddat, holat, kun, yozildi,
-            qoldiq == 0 ? yozildi.AddDays(1) : null, izoh, op);
+            qoldiq == 0 ? yozildi.AddDays(1) : null, izoh, op, eski);
     }
 
     private void Audit(string kim, string amal, string tafsilot, string tur, DateTime? vaqt = null) =>
@@ -128,7 +128,7 @@ public sealed class NamunaServer : INamunaServer
     /// <summary>Ochiq smenada nasiya/qaytish/xarajat yig'indilari joriy bo'lsin.</summary>
     private SmenaDto Yigindili(SmenaDto s) => s.Tugadi is not null ? s : s with
     {
-        NasiyaJami = _nasiyalar.Where(n => n.SmenaId == s.Id).Sum(n => n.Summa),
+        NasiyaJami = _nasiyalar.Where(n => n.SmenaId == s.Id && !n.EskiQarz).Sum(n => n.Summa),
         QaytganNasiya = _qaytishlar.Where(q => q.SmenaId == s.Id).Sum(q => q.Summa),
         XarajatJami = _xarajatlar.Where(x => x.SmenaId == s.Id).Sum(x => x.Summa),
     };
@@ -139,7 +139,7 @@ public sealed class NamunaServer : INamunaServer
         var k = _korsatkichlar.TryGetValue(s.Id, out var l) ? l.ToArray()
             : s.Tugadi is null ? [] : _aparatlar.Select(a => Segment(a, a.TotalLitr - s.JamiLitr / 5, a.TotalLitr, false)).ToArray();
         return new SmenaTafsilotDto(s, k,
-            _nasiyalar.Where(n => n.SmenaId == s.Id).ToArray(),
+            _nasiyalar.Where(n => n.SmenaId == s.Id && !n.EskiQarz).ToArray(),
             _qaytishlar.Where(q => q.SmenaId == s.Id).ToArray(),
             _xarajatlar.Where(x => x.SmenaId == s.Id).ToArray());
     }
@@ -228,7 +228,7 @@ public sealed class NamunaServer : INamunaServer
             case "nasiyalar" when get && s.Length == 2 && s[1] == "mijozlar":
                 return MijozTakliflari(q.GetValueOrDefault("q"));
             case "nasiyalar" when get && s.Length == 1:
-                return Nasiyalar(q.GetValueOrDefault("holat"), q.GetValueOrDefault("q"));
+                return Nasiyalar(q.GetValueOrDefault("holat"), q.GetValueOrDefault("q"), q.TryGetValue("operatorId", out var opq) ? int.Parse(opq) : null);
             case "nasiyalar" when get:
                 var nid = int.Parse(s[1]);
                 return new NasiyaTafsilotDto(_nasiyalar.First(x => x.Id == nid), _qaytishlar.Where(x => x.NasiyaId == nid).ToArray());
@@ -236,10 +236,22 @@ public sealed class NamunaServer : INamunaServer
                 return NasiyaYoz((NasiyaYaratishDto)tana!);
             case "nasiyalar" when usul == HttpMethod.Post && s.Length == 3:
                 return QarzQaytdi(int.Parse(s[1]), (NasiyaQaytishiYaratishDto)tana!);
+            case "nasiyalar" when usul == HttpMethod.Post && s.Length == 2 && s[1] == "eski-qarz":
+                return EskiQarz((EskiQarzYaratishDto)tana!);
             case "nasiyalar" when usul == HttpMethod.Delete:
+            {
+                // §8.11: eski qarz juftligi (nasiya + qaytishi) qaysi tomondan o'chirilsa ham birga o'chadi
+                var nId = s[1] == "qaytishlar" ? _qaytishlar.FirstOrDefault(x => x.Id == int.Parse(s[2]))?.NasiyaId : int.Parse(s[1]);
+                var eski = _nasiyalar.Any(x => x.Id == nId && x.EskiQarz);
                 if (s[1] == "qaytishlar") _qaytishlar.RemoveAll(x => x.Id == int.Parse(s[2]));
-                else _nasiyalar.RemoveAll(x => x.Id == int.Parse(s[1]));
+                if (s[1] != "qaytishlar" || eski)
+                {
+                    if (!eski && _qaytishlar.Any(x => x.NasiyaId == nId)) throw Xato("Qaytishlari bor nasiyani o'chirib bo'lmaydi", 409);
+                    _qaytishlar.RemoveAll(x => x.NasiyaId == nId);
+                    _nasiyalar.RemoveAll(x => x.Id == nId);
+                }
                 return null;
+            }
             case "xarajatlar" when get:
                 return _xarajatlar.Where(x => !q.TryGetValue("smenaId", out var sid) || x.SmenaId == int.Parse(sid)).ToList();
             case "xarajatlar" when usul == HttpMethod.Post:
@@ -355,23 +367,37 @@ public sealed class NamunaServer : INamunaServer
         var n = _nasiyalar[i];
         if (d.Summa <= 0 || d.Summa > n.Qoldiq) throw Xato("Summa qoldiqdan katta");
         var smenaId = d.SmenaHisobiga ? (Ochiq ?? throw Xato("Ochiq smena yo'q")).Id : (int?)null;
-        _qaytishlar.Add(new NasiyaQaytishiDto(_keyingiId++, id, n.MijozIsmi, smenaId, d.Summa, d.Usul, DateTime.UtcNow, Ism(_joriyFoydalanuvchi), d.Izoh, _joriyFoydalanuvchi));
+        _qaytishlar.Add(new NasiyaQaytishiDto(_keyingiId++, id, n.MijozIsmi, smenaId, d.Summa, d.Usul, DateTime.UtcNow, Ism(_joriyFoydalanuvchi), d.Izoh, _joriyFoydalanuvchi, false));
         var op = _foydalanuvchilar.First(f => f.ToliqIsm == n.OperatorIsmi).Id;
         _nasiyalar[i] = Nasiya(n.Id, n.SmenaId, op, n.MijozIsmi, n.Telefon, n.MashinaRaqami, n.Summa, n.Qaytgan + d.Summa, n.Muddat, n.Yozildi, n.Izoh);
         Audit(Ism(_joriyFoydalanuvchi), "Qarz qaytdi", $"{n.MijozIsmi} · {Format.Pul(d.Summa)}", "nasiya");
         return _nasiyalar[i];
     }
 
-    private NasiyalarDto Nasiyalar(string? holat, string? q)
+    /// <summary>§8.11: eski qarz — ochiq smenaga bog'langan, darhol yopilgan nasiya + shu summadagi qaytish (smena hisobiga).</summary>
+    private NasiyaTafsilotDto EskiQarz(EskiQarzYaratishDto d)
+    {
+        var s = Ochiq ?? throw Xato("Eski qarzni yozish uchun ochiq smena kerak.", 409);
+        if (string.IsNullOrWhiteSpace(d.MijozIsmi) || d.Summa <= 0) throw Xato("Ism va summa majburiy");
+        var hozir = DateTime.UtcNow;
+        var n = Nasiya(_keyingiId++, s.Id, _joriyFoydalanuvchi, d.MijozIsmi, d.Telefon, d.MashinaRaqami, d.Summa, d.Summa, _bugun, hozir, d.Izoh, eski: true) with { Yopildi = hozir };
+        var qt = new NasiyaQaytishiDto(_keyingiId++, n.Id, n.MijozIsmi, s.Id, d.Summa, d.Usul, hozir, Ism(_joriyFoydalanuvchi), d.Izoh, _joriyFoydalanuvchi, true);
+        _nasiyalar.Add(n);
+        _qaytishlar.Add(qt);
+        Audit(Ism(_joriyFoydalanuvchi), "Eski qarz qaytdi", $"{d.MijozIsmi} · {Format.Pul(d.Summa)}", "nasiya");
+        return new NasiyaTafsilotDto(n, [qt]);
+    }
+
+    private NasiyalarDto Nasiyalar(string? holat, string? q, int? operatorId = null)
     {
         var oy = _bugun.AddDays(1 - _bugun.Day);
         var faol = _nasiyalar.Where(n => n.Qoldiq > 0).ToList();
         var otgan = faol.Where(n => n.Holati == NasiyaHolati.MuddatiOtgan).ToList();
-        var oyB = _nasiyalar.Where(n => DateOnly.FromDateTime(n.Yozildi.ToLocalTime()) >= oy).ToList();
+        var oyB = _nasiyalar.Where(n => !n.EskiQarz && DateOnly.FromDateTime(n.Yozildi.ToLocalTime()) >= oy).ToList();
         var oyQ = _qaytishlar.Where(x => DateOnly.FromDateTime(x.Vaqt.ToLocalTime()) >= oy).ToList();
         var xulosa = new NasiyalarXulosaDto(faol.Sum(n => n.Qoldiq), faol.Count, otgan.Sum(n => n.Qoldiq), otgan.Count,
             oyB.Sum(n => n.Summa), oyB.Count, oyQ.Sum(x => x.Summa), oyQ.Count);
-        var royxat = _nasiyalar.Where(n => holat switch
+        var royxat = _nasiyalar.Where(n => operatorId is null || n.MuallifId == operatorId).Where(n => holat switch
             {
                 "faol" => n.Qoldiq > 0,
                 "otgan" => n.Holati == NasiyaHolati.MuddatiOtgan,
@@ -383,7 +409,14 @@ public sealed class NamunaServer : INamunaServer
         royxat = string.IsNullOrWhiteSpace(q)
             ? royxat.OrderBy(n => n.Qoldiq > 0 ? 0 : 1).ThenBy(n => n.Muddat).ToArray()
             : NasiyaQidiruv.Filtrla(royxat, q).ToArray();
-        return new NasiyalarDto(xulosa, royxat);
+        NasiyaOperatorXulosaDto? opX = null;
+        if (operatorId is { } oid)
+        {
+            var l = _nasiyalar.Where(n => n.MuallifId == oid && !n.EskiQarz).ToList();
+            opX = new NasiyaOperatorXulosaDto(oid, Ism(oid), l.Count, l.Sum(n => n.Summa), l.Sum(n => n.Qaytgan),
+                l.Sum(n => n.Qoldiq), l.Count(n => n.Qoldiq > 0), _nasiyalar.Where(n => n.MuallifId == oid && n.EskiQarz).Sum(n => n.Summa));
+        }
+        return new NasiyalarDto(xulosa, royxat, opX);
     }
 
     /// <summary>§8.2: mijozlar nasiyalardan — telefon bo'yicha, telefon yo'q bo'lsa ism + mashina raqami bo'yicha guruhlanadi.</summary>
@@ -445,6 +478,8 @@ public sealed class NamunaServer : INamunaServer
             return new HisobotAparatDto(a.Id, a.Raqam, a.YoqilgiNomi, a.BakQoldiq + sotildi, 0, sotildi, a.BakQoldiq,
                 SmenaHisobi.Summa(sotildi, _yoqilgilar.First(y => y.Id == a.YoqilgiTuriId).Narx));
         }).ToArray();
-        return new HisobotDto(qatorlar.ToArray(), Qator("Jami", null, null, sm, true), aparat, 2_000_000);
+        var smIdlar = sm.Select(x => x.Id).ToHashSet();
+        var eskiQ = _qaytishlar.Where(x => x.EskiQarz && x.SmenaId is { } si && smIdlar.Contains(si)).ToList();
+        return new HisobotDto(qatorlar.ToArray(), Qator("Jami", null, null, sm, true), aparat, 2_000_000, eskiQ.Sum(x => x.Summa), eskiQ.Count);
     }
 }

@@ -203,8 +203,10 @@ public partial class SmenalarViewModel : ObservableObject
                 l.Add(new(Til.F("Smenalar_PlastikSatr", yopishdagi, Format.Pul(d.OchishTerminal)), Minus(d.Plastik)));
                 l.Add(new(Til.F("Smenalar_DepozitSatr", Format.Pul(d.OchishDepozit), Format.Pul(d.YopishDepozit ?? 0)), Minus(d.DepozitFarqi)));
             }
-            foreach (var q in t.Qaytishlar) l.Add(new($"{Til.T("Smenalar_QaytganNasiya")} · {q.MijozIsmi}", Plus(q.Summa)));
-            foreach (var n in t.Nasiyalar) l.Add(new(Til.F("Smenalar_NasiyaSatr", n.MijozIsmi), Minus(n.Summa)));
+            foreach (var q in t.Qaytishlar)
+                l.Add(new($"{Til.T(q.EskiQarz ? "Nasiya_EskiQarzBelgi" : "Smenalar_QaytganNasiya")} · {q.MijozIsmi}", Plus(q.Summa)));
+            // §8.11: eski qarz nasiyasi kutilgan naqddan ayirilmaydi — ro'yxatda ham yo'q
+            foreach (var n in t.Nasiyalar.Where(n => !n.EskiQarz)) l.Add(new(Til.F("Smenalar_NasiyaSatr", n.MijozIsmi), Minus(n.Summa)));
             foreach (var x in t.Xarajatlar)
                 l.Add(new(Til.F("Smenalar_XarajatSatr", x.Sabab) + (x.Manba == XarajatManbai.Depozit ? $" ({Til.T("Smenalar_ManbaDepozit")})" : ""), Minus(x.Summa)));
             return l;

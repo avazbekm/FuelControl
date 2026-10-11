@@ -39,9 +39,9 @@ public sealed record AparatKartasi(Aparat A, YoqilgiBelgi Yoqilgi)
         : Til.T("Bak_KirimYoq");
 }
 
-/// <summary>Ro'yxat qatori (nasiya, qaytish, xarajat) — o'chirish tugmasi bilan.</summary>
+/// <summary>Ro'yxat qatori (nasiya, qaytish, xarajat) — o'chirish tugmasi bilan. Eski — §8.11 eski qarz qaytishi (o'chirilsa nasiyasi bilan birga).</summary>
 public sealed record YozuvQatori(int Id, string Tur, string Sarlavha, string Izoh, string Summa, string? Belgi, string BelgiKlassi,
-    string? Harflar, string? Raqam, bool OchirishMumkin);
+    string? Harflar, string? Raqam, bool OchirishMumkin, bool Eski = false);
 
 /// <summary>Plastik summasi qatori (§8.9): nomsiz, bo'sh qator hisobga olinmaydi; manfiy yoki noto'g'ri yozuv — xato.</summary>
 public sealed partial class PlastikQatori(Action ozgardi) : ObservableObject
@@ -522,7 +522,9 @@ public partial class SavdoViewModel : ObservableObject
     [RelayCommand]
     private async Task Ochir(YozuvQatori q)
     {
-        if (!await Bildirish.Tasdiqla(Til.T("Ochirish"), Til.F("Savdo_OchirishTasdiq", $"{q.Sarlavha} · {q.Summa}"), Til.T("Ochirish"), xavfli: true))
+        var savol = Til.F("Savdo_OchirishTasdiq", $"{q.Sarlavha} · {q.Summa}");
+        if (q.Eski) savol = $"{Til.T("Nasiya_EskiQarzOchirish")}\n{savol}";
+        if (!await Bildirish.Tasdiqla(Til.T("Ochirish"), savol, Til.T("Ochirish"), xavfli: true))
             return;
         try
         {
@@ -558,12 +560,13 @@ public partial class SavdoViewModel : ObservableObject
     {
         var t = T;
         _royxatManbasi = t;
-        _nasiyalar = (t?.Nasiyalar ?? []).OrderBy(n => n.Yozildi).Select(n => new YozuvQatori(n.Id, "nasiya", n.MijozIsmi, Format.Telefon(n.Telefon),
+        // §8.11: eski qarz nasiyasi "Nasiya berildi"da chiqmaydi (server ham chiqaradi) — faqat qaytish qatori belgi bilan
+        _nasiyalar = (t?.Nasiyalar ?? []).Where(n => !n.EskiQarz).OrderBy(n => n.Yozildi).Select(n => new YozuvQatori(n.Id, "nasiya", n.MijozIsmi, Format.Telefon(n.Telefon),
             Format.Pul(n.Summa), Til.F("Savdo_MuddatGacha", Format.QisqaSana(n.Muddat)),
             n.MuddatgachaKun <= 3 ? "sariq" : "kok", Format.BoshHarflar(n.MijozIsmi), n.MashinaRaqami, OchiraOladi(n.MuallifId))).ToList();
-        _qaytishlar = (t?.Qaytishlar ?? []).Select(q => new YozuvQatori(q.Id, "qaytish", q.MijozIsmi,
-            $"{Til.T("Savdo_QarzniQaytardi")} · {Format.Vaqt(q.Vaqt.ToLocalTime())} · {Til.T("Tolov_" + q.Usul).ToLowerInvariant()}",
-            "+" + Format.Pul(q.Summa), null, "", null, null, OchiraOladi(q.MuallifId))).ToList();
+        _qaytishlar = (t?.Qaytishlar ?? []).Select(q => new YozuvQatori(q.Id, "qaytish", q.EskiQarz ? $"{q.MijozIsmi} · {Til.T("Nasiya_EskiQarzBelgi")}" : q.MijozIsmi,
+            $"{Til.T(q.EskiQarz ? "Nasiya_EskiQarzBelgi" : "Savdo_QarzniQaytardi")} · {Format.Vaqt(q.Vaqt.ToLocalTime())} · {Til.T("Tolov_" + q.Usul).ToLowerInvariant()}",
+            "+" + Format.Pul(q.Summa), null, "", null, null, OchiraOladi(q.MuallifId), q.EskiQarz)).ToList();
         _xarajatlar = (t?.Xarajatlar ?? []).OrderByDescending(x => x.Vaqt).Select(x => new YozuvQatori(x.Id, "xarajat", x.Sabab,
             $"{Format.Vaqt(x.Vaqt.ToLocalTime())} · {Til.T(x.Manba == XarajatManbai.Kassa ? "Savdo_Kassadan" : "Savdo_DepozitKartadan")}",
             Format.Pul(x.Summa), null, "", null, null, OchiraOladi(x.MuallifId))).ToList();

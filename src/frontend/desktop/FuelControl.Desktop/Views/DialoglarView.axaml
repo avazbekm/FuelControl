@@ -44,15 +44,27 @@
                 <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Spacing="14">
                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                        <Border Classes="ikonDoira" Background="{DynamicResource BadgeOlovFon}">
-                            <ctl:Ikon Nomi="receipt" Olcham="19" Rang="{DynamicResource BadgeOlovMatn}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
+                        <Panel>
+                            <Border Classes="ikonDoira" Background="{DynamicResource BadgeOlovFon}" IsVisible="{Binding NasiyaRejim}">
+                                <ctl:Ikon Nomi="receipt" Olcham="19" Rang="{DynamicResource BadgeOlovMatn}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <Border Classes="ikonDoira" Background="{DynamicResource BadgeYashilFon}" IsVisible="{Binding EskiRejim}">
+                                <ctl:Ikon Nomi="undo" Olcham="19" Rang="{DynamicResource BadgeYashilMatn}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                        </Panel>
                         <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                            <TextBlock Classes="dSarlavha" Text="{l:T Nasiya_Yozish}" />
+                            <TextBlock Classes="dSarlavha" Text="{Binding Sarlavha}" TextWrapping="Wrap" />
                             <TextBlock Classes="izoh" FontSize="13" Text="{Binding Kontekst}" />
                         </StackPanel>
                         <Button Grid.Column="2" Classes="yopX" Command="{Binding YopCommand}" ToolTip.Tip="{l:T Yopish}"><ctl:Ikon Nomi="x" Olcham="15" /></Button>
                     </Grid>
+                    <!-- §8.11: "Qarz qaytdi" rejimlari (bu dialog — eski qarz rejimi) -->
+                    <Border Classes="segmentYoli" IsVisible="{Binding EskiRejim}">
+                        <UniformGrid Columns="2">
+                            <Button Classes="segment" Command="{Binding OrqagaCommand}"><TextBlock Text="{l:T Nasiya_MavjudRejim}" TextTrimming="CharacterEllipsis" /></Button>
+                            <Button Classes="segment tanlangan"><TextBlock Text="{l:T Nasiya_EskiQarzRejim}" TextTrimming="CharacterEllipsis" /></Button>
+                        </UniformGrid>
+                    </Border>
                     <StackPanel ZIndex="10">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                             <TextBlock Text="{l:T Nasiya_MijozIsmi, Katta=True}" Classes="yorliq" />
@@ -128,10 +140,21 @@
                         </Canvas>
                     </Grid>
                     <StackPanel>
-                        <TextBlock Text="{l:T Nasiya_QarzSummasi, Katta=True}" Classes="yorliq" />
+                        <TextBlock Text="{Binding SummaYorligi}" Classes="yorliq" />
                         <TextBox x:Name="NasiyaSumma" Classes="dialogKatta" Text="{Binding Summa}" ctl:PulMaydon.Yoqilgan="True" PlaceholderText="0" ctl:EnterTartib.Guruh="nasiya" />
                     </StackPanel>
-                    <StackPanel Spacing="10">
+                    <!-- §8.11 eski qarz: muddat o'rniga to'lov usuli -->
+                    <StackPanel IsVisible="{Binding EskiRejim}">
+                        <TextBlock Text="{l:T Nasiya_QandayTolandi, Katta=True}" Classes="yorliq" />
+                        <Border Classes="segmentYoli">
+                            <UniformGrid Columns="3">
+                                <Button Classes="segment" Classes.tanlangan="{Binding UsulNaqd}" Content="{l:T Tolov_Naqd}" Command="{Binding UsulTanlaCommand}" CommandParameter="Naqd" />
+                                <Button Classes="segment" Classes.tanlangan="{Binding UsulPlastik}" Content="{l:T Tolov_Plastik}" Command="{Binding UsulTanlaCommand}" CommandParameter="Plastik" />
+                                <Button Classes="segment" Classes.tanlangan="{Binding UsulDepozit}" Content="{l:T Tolov_Depozit}" Command="{Binding UsulTanlaCommand}" CommandParameter="Depozit" />
+                            </UniformGrid>
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Spacing="10" IsVisible="{Binding NasiyaRejim}">
                         <TextBlock Text="{l:T Nasiya_Muddat, Katta=True}" Classes="yorliq" Margin="0" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button Classes="chip" MinHeight="44" Classes.tanlangan="{Binding Kun3}" Content="{l:T Nasiya_Muddat3Kun}" Command="{Binding MuddatTanlaCommand}" CommandParameter="3" />
@@ -147,10 +170,11 @@
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="{l:T Nasiya_Izoh, Katta=True}" Classes="yorliq" />
-                        <TextBox x:Name="NasiyaIzoh" Text="{Binding Izoh}" PlaceholderText="{l:T Nasiya_IzohPlaceholder}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="72" ctl:EnterTartib.Guruh="nasiya"
+                        <TextBox x:Name="NasiyaIzoh" Text="{Binding Izoh}" PlaceholderText="{Binding IzohPlaceholder}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="72" ctl:EnterTartib.Guruh="nasiya"
                                  VerticalContentAlignment="Top" Padding="18,12" CornerRadius="20" />
                     </StackPanel>
-                    <Border Classes="malumot"><TextBlock Text="{l:T Nasiya_YozishIzoh}" TextWrapping="Wrap" /></Border>
+                    <Border Classes="malumot" IsVisible="{Binding NasiyaRejim}"><TextBlock Text="{l:T Nasiya_YozishIzoh}" TextWrapping="Wrap" /></Border>
+                    <Border Classes="malumot" IsVisible="{Binding EskiRejim}"><TextBlock Text="{l:T Nasiya_EskiQarzIzoh}" TextWrapping="Wrap" /></Border>
                     <!-- Xato tugmalar yonida; Enter bilan tugma faqat fokus oladi (IsDefault yo'q — Enter hech qachon o'zi saqlamaydi) -->
                     <TextBlock x:Name="NasiyaXato" Text="{Binding Xato}" Classes="xatoMatn" TextWrapping="Wrap" IsVisible="{Binding Xato, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                     <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
@@ -177,6 +201,19 @@
                         </StackPanel>
                         <Button Grid.Column="2" Classes="yopX" Command="{Binding YopCommand}" ToolTip.Tip="{l:T Yopish}"><ctl:Ikon Nomi="x" Olcham="15" /></Button>
                     </Grid>
+
+                    <!-- §8.11: rejim — mavjud nasiya yoki dasturda yo'q eski qarz (eski qarz faqat ochiq smenada) -->
+                    <StackPanel Spacing="6" IsVisible="{Binding RoyxatKorinsin}">
+                        <Border Classes="segmentYoli">
+                            <UniformGrid Columns="2">
+                                <Button Classes="segment tanlangan"><TextBlock Text="{l:T Nasiya_MavjudRejim}" TextTrimming="CharacterEllipsis" /></Button>
+                                <Button Classes="segment" IsEnabled="{Binding EskiQarzMumkin}" Command="{Binding EskiQarzCommand}">
+                                    <TextBlock Text="{l:T Nasiya_EskiQarzRejim}" TextTrimming="CharacterEllipsis" />
+                                </Button>
+                            </UniformGrid>
+                        </Border>
+                        <TextBlock Text="{l:T Nasiya_EskiQarzSmenaKerak}" Classes="izoh" FontSize="12.5" TextWrapping="Wrap" IsVisible="{Binding EskiQarzMumkinEmas}" />
+                    </StackPanel>
 
                     <!-- Qarzdorni tanlash -->
                     <StackPanel IsVisible="{Binding RoyxatKorinsin}" Spacing="8">

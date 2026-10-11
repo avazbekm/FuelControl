@@ -178,6 +178,45 @@ public partial class NasiyaDialogVM : DialogVM
     private DateTime? _muddat;
 
     public string Kontekst => Dialoglar.SmenaMatni;
+
+    // §8.11: "Eski qarz (dasturda yo'q)" rejimi — xuddi shu maydonlar (takliflar, Enter zanjiri), muddat o'rniga to'lov usuli.
+    // Eski qarz nasiyasi va uning qaytishi bitta so'rovda yoziladi: pul joriy smenaga "qaytgan nasiya" bo'lib tushadi, qolgan qarz yozilmaydi.
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NasiyaRejim), nameof(Sarlavha), nameof(SummaYorligi), nameof(IzohPlaceholder))]
+    private bool _eskiRejim;
+    public bool NasiyaRejim => !EskiRejim;
+    public string IzohPlaceholder => Til.T(EskiRejim ? "Nasiya_EskiQarzIzohMisol" : "Nasiya_IzohPlaceholder");
+    public string Sarlavha => Til.T(EskiRejim ? "Nasiya_QarzQaytdi" : "Nasiya_Yozish");
+    public string SummaYorligi => Til.T(EskiRejim ? "Nasiya_QaytarilganSumma" : "Nasiya_QarzSummasi").ToUpperInvariant();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UsulNaqd), nameof(UsulPlastik), nameof(UsulDepozit))]
+    private TolovTuri _usul = TolovTuri.Naqd;
+    public bool UsulNaqd => Usul == TolovTuri.Naqd;
+    public bool UsulPlastik => Usul == TolovTuri.Plastik;
+    public bool UsulDepozit => Usul == TolovTuri.Depozit;
+    [RelayCommand] private void UsulTanla(string u) => Usul = Enum.Parse<TolovTuri>(u);
+
+    /// <summary>"Qarz qaytdi" dialogidan: eski qarz rejimida ochiladi; qidiruvdagi ism (raqam bo'lmasa) mijoz ismiga o'tadi.</summary>
+    public void OchEski(string ism)
+    {
+        Och();
+        EskiRejim = true;
+        Usul = TolovTuri.Naqd;
+        _toldirilmoqda = true;
+        MijozIsmi = ism.Trim().Any(char.IsLetter) ? ism.Trim() : "";
+        _toldirilmoqda = false;
+    }
+
+    /// <summary>Eski qarz rejimidan "Mavjud nasiya" rejimiga (qarzdor qidiruvi) qaytish.</summary>
+    [RelayCommand]
+    private void Orqaga()
+    {
+        var ism = MijozIsmi;
+        Ochiq = false;
+        Dialoglar.Qaytish.Och(null, ism);
+    }
+
     private static DateOnly Bugun => DateOnly.FromDateTime(DateTime.Today);
     private int? Kunlar => Muddat is { } m ? DateOnly.FromDateTime(m.Date).DayNumber - Bugun.DayNumber : null;
     public bool Kun3 => Kunlar == 3;
@@ -192,6 +231,7 @@ public partial class NasiyaDialogVM : DialogVM
         MijozIsmi = Telefon = MashinaRaqami = Summa = Izoh = Xato = "";
         _toldirilmoqda = false;
         MavjudIzoh = ""; _soralgan = ""; XatoMaydon = "";
+        EskiRejim = false;
         _takliflarYuklash.BekorQil();
         Takliflar.Clear(); TakliflarYangilandi();
         Muddat = DateTime.Today.AddDays(7);
@@ -224,8 +264,16 @@ public partial class NasiyaDialogVM : DialogVM
         if (string.IsNullOrWhiteSpace(MijozIsmi)) return XatoBer("Nasiya_XatoIsm", "ism");
         var telefon = Format.TelefonSaqlash(Telefon);
         if (telefon is null) return XatoBer("Nasiya_XatoTelefon", "telefon");
-        if (telefon.Length == 0 && string.IsNullOrWhiteSpace(MashinaRaqami)) return XatoBer("Nasiya_XatoAloqa", "telefon");
+        // §8.11: eski qarzda faqat ism majburiy (telefon/mashina ixtiyoriy, berilsa telefon formati tekshiriladi)
+        if (!EskiRejim && telefon.Length == 0 && string.IsNullOrWhiteSpace(MashinaRaqami)) return XatoBer("Nasiya_XatoAloqa", "telefon");
         if (Format.PulOl(Summa) is not > 0) return XatoBer("Nasiya_XatoSumma", "summa");
+        if (EskiRejim)
+        {
+            if (Malumot.JoriySmena is null) return XatoBer("Nasiya_EskiQarzSmenaKerak", "");
+            var iz = Izoh.Trim();
+            return Bajar(() => Malumot.EskiQarzYoz(new EskiQarzYaratishDto(MijozIsmi.Trim(), telefon, MashinaRaqami.Trim().ToUpperInvariant(),
+                Format.PulOl(Summa)!.Value, Usul, iz.Length > 0 ? iz : null)));
+        }
         if (Muddat is not { } m) return XatoBer("Nasiya_XatoMuddat", "muddat");
         if (DateOnly.FromDateTime(m.Date) < Bugun) return XatoBer("Nasiya_XatoMuddatOtgan", "muddat");
         var izoh = Izoh.Trim();
@@ -299,15 +347,31 @@ public partial class QaytishDialogVM : DialogVM
         _ => Til.F("Nasiya_KunQoldi", kun),
     };
 
-    public void Och(NasiyaDto? n)
+    /// <summary>§8.11: dasturda yo'q eski qarz to'lovi — faqat ochiq smenada (pul smena hisobiga tushadi).</summary>
+    public bool EskiQarzMumkin => Malumot.JoriySmena is not null;
+    public bool EskiQarzMumkinEmas => !EskiQarzMumkin;
+
+    [RelayCommand]
+    private void EskiQarz()
+    {
+        if (!EskiQarzMumkin) return;
+        var q = Qidiruv;
+        Ochiq = false;
+        Dialoglar.Nasiya.OchEski(q);
+    }
+
+    public void Och(NasiyaDto? n, string qidiruv = "")
     {
         _serverNatija = null;
         Qidiruv = Summa = Izoh = Xato = "";
         Usul = TolovTuri.Naqd;
         SmenaHisobiga = Malumot.JoriySmena is not null;
         Tanlangan = n;
+        if (qidiruv.Length > 0) Qidiruv = qidiruv;
         Filtrla();
         OnPropertyChanged(nameof(Kontekst));
+        OnPropertyChanged(nameof(EskiQarzMumkin));
+        OnPropertyChanged(nameof(EskiQarzMumkinEmas));
         OnPropertyChanged(nameof(SmenaTanlovKorinsin));
         Ochiq = true;
     }

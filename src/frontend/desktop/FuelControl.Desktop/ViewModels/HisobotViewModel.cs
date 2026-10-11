@@ -224,6 +224,10 @@ public partial class HisobotViewModel : ObservableObject
     public string XarajatIzoh => Til.F("Hisobot_KpiXarajatYozuv", J.XarajatSoni);
     public string JamiKamomat => Format.Pul(J.Kamomat);
     public string OrtiqchaIzoh => Til.F("Hisobot_KpiOrtiqcha", Format.Pul(J.Ortiqcha));
+    // §8.11: eski qarzlardan tushgan pul (QaytganNasiya ichida; savdoga kirmaydi) — faqat bo'lsa ko'rinadi
+    public bool EskiQarzBor => (_n?.EskiQarzQaytgan ?? 0) > 0;
+    public string EskiQarz => Format.Pul(_n?.EskiQarzQaytgan ?? 0);
+    public string EskiQarzIzoh => Til.F("Hisobot_KpiEskiQarzIzoh", _n?.EskiQarzSoni ?? 0);
     public string JamiAvans => Format.Pul(_n?.Avans ?? 0);
 
     // Aparat jadvali jami

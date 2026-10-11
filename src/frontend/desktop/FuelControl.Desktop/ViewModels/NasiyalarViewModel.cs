@@ -14,6 +14,7 @@ namespace FuelControl.Desktop.ViewModels;
 /// <summary>Qaytish qatori (nasiya tafsilotida).</summary>
 public sealed record QaytishQatori(NasiyaQaytishiDto Q, bool OchirishMumkin)
 {
+    public bool Eski => Q.EskiQarz;
     public string Vaqt => Format.QisqaSanaVaqt(Q.Vaqt.ToLocalTime());
     public string Summa => "+" + Format.Pul(Q.Summa);
     public string Izoh => $"{Til.T("Tolov_" + Q.Usul)} · {Q.KimYozdi} · " +
@@ -33,19 +34,21 @@ public partial class NasiyaQatori : ObservableObject
     public bool RaqamBor => !string.IsNullOrWhiteSpace(N.MashinaRaqami);
     public bool HududBor => Hudud.Length > 0;
     public string Yozilgan => Format.QisqaSana(N.Yozildi.ToLocalTime());
+    /// <summary>§8.11: dasturdan oldingi qarz to'lovi — berilgan nasiya emas (jamiga kirmaydi), muddati yo'q.</summary>
+    public bool Eski => N.EskiQarz;
     public string Kim => $"#{N.SmenaId} · {QisqaIsm(N.OperatorIsmi)}";
     public string Summa => Format.Pul(N.Summa);
     public string Qaytgan => Format.Pul(N.Qaytgan);
     public bool QaytganBor => N.Qaytgan > 0;
     public string Qoldiq => Format.Pul(N.Qoldiq);
-    public string Muddat => Format.Sana(N.Muddat);
+    public string Muddat => Eski ? "—" : Format.Sana(N.Muddat);
     public bool Faol => N.Qoldiq > 0;
     public bool Otgan => N.Holati == NasiyaHolati.MuddatiOtgan;
     public bool Yopilgan => N.Holati == NasiyaHolati.Yopilgan;
-    public string Belgi => Yopilgan ? Til.F("Nasiyalar_YopilganSana", N.Yopildi is { } y ? Format.QisqaSana(y.ToLocalTime()) : "")
+    public string Belgi => Eski ? Til.T("Nasiya_EskiQarzBelgi") : Yopilgan ? Til.F("Nasiyalar_YopilganSana", N.Yopildi is { } y ? Format.QisqaSana(y.ToLocalTime()) : "")
         : QaytishDialogVM.NasiyaKun(N.MuddatgachaKun);
     /// <summary>Muddat belgisi: o'tgan — qizil, 3 kun ichida — sariq, qolgan — ko'k, yopilgan — yashil.</summary>
-    public string BelgiKlassi => Yopilgan ? "yashil" : Otgan ? "qizil" : N.MuddatgachaKun <= 3 ? "sariq" : "kok";
+    public string BelgiKlassi => Eski ? "kulrang" : Yopilgan ? "yashil" : Otgan ? "qizil" : N.MuddatgachaKun <= 3 ? "sariq" : "kok";
     public string QaytdiIzoh => Til.F("Nasiyalar_QaytdiAria", N.MijozIsmi);
 
     [ObservableProperty] private bool _ochiq;
@@ -62,6 +65,12 @@ public partial class NasiyaQatori : ObservableObject
         var q = ism.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         return q.Length >= 2 ? $"{q[0]} {q[1][0]}." : ism;
     }
+}
+
+/// <summary>Operator filtri elementi (§8.12): Id null — "Hammasi".</summary>
+public sealed record OperatorTanlovi(int? Id, string Ism)
+{
+    public override string ToString() => Ism;
 }
 
 /// <summary>Davlat raqami: "40 C 919 DA" → hudud "40" va asosiy qism "C 919 DA".</summary>
@@ -87,7 +96,50 @@ public static class DavlatRaqam
 public partial class NasiyalarViewModel : ObservableObject
 {
     public ObservableCollection<NasiyaQatori> Qatorlar { get; } = new();
+    /// <summary>Ro'yxat manbai: operator tanlanmagan — hamma nasiyalar, tanlangan — GET /nasiyalar?operatorId= javobi.</summary>
     private NasiyalarDto? _malumot;
+    /// <summary>Hamma nasiyalar — operator tanlovi ro'yxati shundan (yozuvlardagi MuallifId va OperatorIsmi).</summary>
+    private NasiyalarDto? _hammasi;
+
+    // ================= §8.12: operator filtri =================
+    public List<OperatorTanlovi> Operatorlar { get; private set; } = new();
+    [ObservableProperty] private OperatorTanlovi? _operator;
+    public bool OperatorTanlangan => Operator?.Id is not null;
+    public bool UmumiyKpi => !OperatorTanlangan;
+    private NasiyaOperatorXulosaDto? OX => OperatorTanlangan ? _malumot?.Operator : null;
+    public string OpBergan => Format.Pul(OX?.Berilgan ?? 0);
+    public string OpBerganIzoh => Til.F("Nasiyalar_OpSoni", OX?.Soni ?? 0);
+    public string OpQaytgan => Format.Pul(OX?.Qaytgan ?? 0);
+    public string OpQoldiq => Format.Pul(OX?.Qoldiq ?? 0);
+    /// <summary>FaolSoni — qoldig'i bor nasiyalar soni (mijozlar emas).</summary>
+    public string OpQoldiqIzoh => Til.F("Nasiyalar_OpFaol", OX?.FaolSoni ?? 0);
+    public string OpEskiQarz => Format.Pul(OX?.EskiQarzQabul ?? 0);
+    public string OpIsm => OX?.OperatorIsmi ?? Operator?.Ism ?? "";
+
+    private bool _operatorlarQurilmoqda;
+
+    partial void OnOperatorChanged(OperatorTanlovi? value)
+    {
+        if (_operatorlarQurilmoqda) return;
+        // Tanlov almashdi: eski operator ro'yxati/KPI'lari yangisi kelguncha ko'rinmasin
+        _malumot = value?.Id is null ? _hammasi : null;
+        Filtrla();
+        if (value?.Id is not null) _yuklash.Rejala();
+    }
+
+    private void OperatorlarniQur()
+    {
+        var l = (_hammasi?.Royxat ?? []).GroupBy(n => n.MuallifId)
+            .Select(g => new OperatorTanlovi(g.Key, g.OrderByDescending(n => n.Yozildi).First().OperatorIsmi))
+            .OrderBy(o => o.Ism, StringComparer.CurrentCultureIgnoreCase).ToList();
+        l.Insert(0, new OperatorTanlovi(null, Til.T("Nasiyalar_OperatorHammasi")));
+        var id = Operator?.Id;
+        _operatorlarQurilmoqda = true;
+        Operatorlar = l;
+        OnPropertyChanged(nameof(Operatorlar));
+        Operator = l.FirstOrDefault(o => o.Id == id) ?? l[0];
+        _operatorlarQurilmoqda = false;
+    }
     private readonly KechiktirilganIsh _yuklash;
 
     [ObservableProperty] private string _qidiruv = "";
@@ -119,9 +171,11 @@ public partial class NasiyalarViewModel : ObservableObject
     public bool BoshQator => Qatorlar.Count == 0;
     // Jami qatori — joriy filtr va qidiruv bo'yicha ko'rinib turgan ro'yxatdan (§8.7).
     public bool JamiBor => Qatorlar.Count > 0;
-    public string JamiQarz => Format.Pul(Qatorlar.Sum(q => q.N.Summa));
-    public string JamiQaytgan => Format.Pul(Qatorlar.Sum(q => q.N.Qaytgan));
-    public string JamiQoldiq => Format.Pul(Qatorlar.Sum(q => q.N.Qoldiq));
+    // §8.11: eski qarz yozuvlari berilgan nasiya emas — jamiga kirmaydi (jadvalda belgi bilan ko'rinadi)
+    private IEnumerable<NasiyaDto> JamiManba => Qatorlar.Where(q => !q.Eski).Select(q => q.N);
+    public string JamiQarz => Format.Pul(JamiManba.Sum(n => n.Summa));
+    public string JamiQaytgan => Format.Pul(JamiManba.Sum(n => n.Qaytgan));
+    public string JamiQoldiq => Format.Pul(JamiManba.Sum(n => n.Qoldiq));
     public bool EksportKorinsin => Joriy.Bor(Ruxsat.Eksport);
 
     private static Foydalanuvchi Joriy => Malumot.JoriyFoydalanuvchi;
@@ -136,20 +190,26 @@ public partial class NasiyalarViewModel : ObservableObject
         Malumot.Ozgardi += () =>
         {
             if (Malumot.Kirilgan && Joriy.Bor(Ruxsat.Nasiyalar)) _yuklash.Rejala();
-            else if (!Malumot.Kirilgan) { _malumot = null; Filtrla(); }
+            else if (!Malumot.Kirilgan) { _malumot = _hammasi = null; Operator = null; OperatorlarniQur(); Filtrla(); }
             foreach (var n in new[] { nameof(QarzQaytdiOladi), nameof(NasiyaYozaOladi), nameof(SmenaOchiq), nameof(NasiyaYozishIzoh) }) OnPropertyChanged(n);
             NasiyaYozCommand.NotifyCanExecuteChanged();
             ExcelCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(EksportKorinsin));
         };
-        Til.Ozgardi += () => { Filtrla(); OnPropertyChanged(string.Empty); };
+        Til.Ozgardi += () => { OperatorlarniQur(); Filtrla(); OnPropertyChanged(string.Empty); };
+        OperatorlarniQur();
     }
 
     private async Task Yukla(Func<bool> dolzarb)
     {
-        var d = await Malumot.Api.Nasiyalar();
+        var hammasi = await Malumot.Api.Nasiyalar();
         if (!dolzarb() || !Malumot.Kirilgan) return;
+        var opId = Operator?.Id;
+        var d = opId is { } id ? await Malumot.Api.Nasiyalar(operatorId: id) : hammasi;
+        if (!dolzarb() || !Malumot.Kirilgan || Operator?.Id != opId) return;
+        _hammasi = hammasi;
         _malumot = d;
+        OperatorlarniQur();
         Filtrla();
     }
 
@@ -197,7 +257,8 @@ public partial class NasiyalarViewModel : ObservableObject
         {
             var t = (await Malumot.Api.NasiyaTafsiloti(q.N.Id))!;
             q.Qaytishlar = t.Qaytishlar.OrderByDescending(x => x.Vaqt).Select(x => new QaytishQatori(x, QaytishOchiriladimi(x))).ToList();
-            q.OchirishMumkin = t.Qaytishlar.Length == 0 && YozuvOchiriladimi(q.N.SmenaId, q.N.MuallifId);
+            // §8.11: eski qarz nasiyasi qaytishi bilan birga o'chadi (qaytishi bo'lsa ham)
+            q.OchirishMumkin = (t.Qaytishlar.Length == 0 || q.Eski) && YozuvOchiriladimi(q.N.SmenaId, q.N.MuallifId);
             q.Yuklandi = true;
         }
         catch (ApiXatosi e) { Bildirish.Xato(e.Message); }
@@ -226,15 +287,17 @@ public partial class NasiyalarViewModel : ObservableObject
         var qatorlar = Qatorlar.Select(q => (new object?[]
         {
             q.N.MijozIsmi, Format.Telefon(q.N.Telefon), q.N.MashinaRaqami, Format.Sana(q.N.Yozildi.ToLocalTime()), "#" + q.N.SmenaId,
-            q.N.OperatorIsmi, q.N.Summa, q.N.Qaytgan, q.N.Qoldiq, Format.Sana(q.N.Muddat), q.Belgi,
+            q.N.OperatorIsmi, q.N.Summa, q.N.Qaytgan, q.N.Qoldiq, q.Eski ? null : Format.Sana(q.N.Muddat),
+            q.Belgi,   // eski qarz: faqat Nasiya_EskiQarzBelgi (har doim yopiq)
         }, false)).ToList();
         object?[] jami = [Til.T("Jami"), null, null, null, null, null,
-            Qatorlar.Sum(q => q.N.Summa), Qatorlar.Sum(q => q.N.Qaytgan), Qatorlar.Sum(q => q.N.Qoldiq), null, null];
+            JamiManba.Sum(n => n.Summa), JamiManba.Sum(n => n.Qaytgan), JamiManba.Sum(n => n.Qoldiq), null, null];
         var filtr = Filtr switch { "faol" => Til.T("Nasiyalar_Faol"), "otgan" => Til.T("Nasiyalar_MuddatiOtgan"), "yopilgan" => Til.T("Nasiyalar_Yopilgan"), _ => Til.T("Nasiyalar_Hammasi") };
-        var izoh = $"{Format.Sana(DateTime.Today)} · {filtr}" + (Qidiruv.Trim().Length > 0 ? $" · \"{Qidiruv.Trim()}\"" : "") + $" · {Qatorlar.Count}";
+        var opMatn = OperatorTanlangan ? Til.F("Nasiyalar_ExcelOperator", OpIsm) : null;
+        var izoh = $"{Format.Sana(DateTime.Today)} · {filtr}" + (opMatn is null ? "" : $" · {opMatn}") + (Qidiruv.Trim().Length > 0 ? $" · \"{Qidiruv.Trim()}\"" : "") + $" · {Qatorlar.Count}";
         try
         {
-            var fayl = ExcelEksport.Saqla("Nasiyalar", $"nasiyalar-{DateTime.Today:yyyy-MM-dd}.xlsx", Til.T("Nasiyalar_ExcelSarlavha"), izoh, ustunlar, qatorlar, jami);
+            var fayl = ExcelEksport.Saqla("Nasiyalar", $"nasiyalar-{DateTime.Today:yyyy-MM-dd}.xlsx", opMatn is null ? Til.T("Nasiyalar_ExcelSarlavha") : $"{Til.T("Nasiyalar_ExcelSarlavha")} · {opMatn}", izoh, ustunlar, qatorlar, jami);
             await Malumot.EksportniYoz("Nasiyalar", $"{izoh} — {System.IO.Path.GetFileName(fayl)}");
             Bildirish.Malumot($"{Til.T("FaylSaqlandi")}: {fayl}");
         }
@@ -248,7 +311,7 @@ public partial class NasiyalarViewModel : ObservableObject
     [RelayCommand]
     private async Task NasiyaOchir(NasiyaQatori q)
     {
-        if (!await Bildirish.Tasdiqla(Til.T("Nasiyalar_Ochirish"), Til.T("Nasiyalar_OchirishSavol"), Til.T("Nasiyalar_HaOchirish"), xavfli: true)) return;
+        if (!await Bildirish.Tasdiqla(Til.T("Nasiyalar_Ochirish"), Til.T(q.Eski ? "Nasiya_EskiQarzOchirish" : "Nasiyalar_OchirishSavol"), Til.T("Nasiyalar_HaOchirish"), xavfli: true)) return;
         try { await Malumot.NasiyaOchir(q.N.Id); }
         catch (ApiXatosi e) { Bildirish.Xato(e.Message); }
     }
@@ -256,7 +319,7 @@ public partial class NasiyalarViewModel : ObservableObject
     [RelayCommand]
     private async Task QaytishOchir(QaytishQatori q)
     {
-        if (!await Bildirish.Tasdiqla(Til.T("Ochirish"), Til.T("Nasiyalar_QaytishOchirishSavol"), Til.T("Nasiyalar_HaOchirish"), xavfli: true)) return;
+        if (!await Bildirish.Tasdiqla(Til.T("Ochirish"), Til.T(q.Eski ? "Nasiya_EskiQarzOchirish" : "Nasiyalar_QaytishOchirishSavol"), Til.T("Nasiyalar_HaOchirish"), xavfli: true)) return;
         try { await Malumot.QaytishOchir(q.Q.Id); }
         catch (ApiXatosi e) { Bildirish.Xato(e.Message); }
     }
