@@ -105,12 +105,14 @@ public static class YoqilgiAparatEndpointlari
         {
             if (s.BoshlangichTotalLitr < 0) throw new BiznesXatosi("Totalizator manfiy bo'lmasligi kerak.");
             if (s.BoshlangichBakQoldiq < 0) throw new BiznesXatosi("Bak qoldig'i manfiy bo'lmasligi kerak.");
+            var krug = PultKrugi.Normallashtir(s.KrugHajmi);                  // null yoki 0 - krug yo'q; manfiy - 400
             var yoqilgi = await db.Yoqilgilar.FindAsync(s.YoqilgiTuriId) ?? throw new BiznesXatosi("Yoqilg'i topilmadi.", 404);
             if (await db.Aparatlar.AnyAsync(x => x.Raqam == s.Raqam)) throw new BiznesXatosi("Bunday raqamli aparat bor.", 409);
             var e = new Aparat
             {
                 Raqam = s.Raqam, YoqilgiTuriId = s.YoqilgiTuriId,
                 TotalLitr = SmenaHisoblagich.Yaxlitla(s.BoshlangichTotalLitr), BakQoldiq = SmenaHisoblagich.Yaxlitla(s.BoshlangichBakQoldiq),
+                KrugHajmi = krug,
             };
             db.Aparatlar.Add(e);
             Audit.Yoz(db, ctx.User.Ism(), "Aparat yaratildi", AuditMatnlari.AparatYaratildi(e, yoqilgi.Nomi), AuditTurlari.Sozlama);
@@ -122,6 +124,7 @@ public static class YoqilgiAparatEndpointlari
         }).RuxsatKerak(Ruxsat.Sozlamalar).Produces<AparatDto>(201).ProducesProblem(400).ProducesProblem(404).ProducesProblem(409);
 
         // TotalLitr yoki BakQoldiq berilsa va farq qilsa - qo'lda tuzatiladi: Sabab majburiy, auditga yoziladi (bak tuzatishi tarixga ham yoziladi).
+        // KrugHajmi (docs 8.16): null - o'zgarmaydi, 0 - krug o'chadi, > 0 - o'rnatiladi, manfiy - 400; ochiq smenada ham o'zgaradi.
         a.MapPut("/{id:int}", async (int id, AparatTahrirlashDto s, HttpContext ctx, FuelControlDbContext db, IHubContext<SotuvHub> hub) =>
         {
             var dto = await Tranzaksiya.Bajar(db, async () =>
@@ -130,6 +133,10 @@ public static class YoqilgiAparatEndpointlari
                 var yoqilgi = await db.Yoqilgilar.FindAsync(s.YoqilgiTuriId) ?? throw new BiznesXatosi("Yoqilg'i topilmadi.", 404);
                 if (await db.Aparatlar.AnyAsync(x => x.Raqam == s.Raqam && x.Id != id)) throw new BiznesXatosi("Bunday raqamli aparat bor.", 409);
                 if (s.TotalLitr < 0) throw new BiznesXatosi("Totalizator manfiy bo'lmasligi kerak.");
+                // Krug hajmi: null - o'zgarmaydi (eski klient maydonni yubormaydi), 0 - o'chiriladi, > 0 - o'rnatiladi, manfiy - 400. Bu faqat ko'rinish
+                // sozlamasi, shuning uchun ochiq smenadagi 409 qoidasi (TotalLitr va yoqilg'i) unga tegishli emas.
+                var yangiKrug = PultKrugi.Normallashtir(s.KrugHajmi);
+                var krugOzgardi = s.KrugHajmi is not null && yangiKrug != e.KrugHajmi;
                 var kim = ctx.User.Ism();
                 var hozir = DateTime.UtcNow;
 
@@ -140,8 +147,8 @@ public static class YoqilgiAparatEndpointlari
                 if (segmentBor && (e.YoqilgiTuriId != s.YoqilgiTuriId || (yangiTotal is { } yt && yt != e.TotalLitr)))
                     throw new BiznesXatosi("Bu aparatda ochiq smenada narx o'zgarishi qayd etilgan: pult ko'rsatkichi yoki yoqilg'ini smena yopilgandan keyin o'zgartiring.", 409);
 
-                if (e.Raqam != s.Raqam || e.YoqilgiTuriId != s.YoqilgiTuriId)
-                    Audit.Yoz(db, kim, "Aparat o'zgartirildi", AuditMatnlari.AparatOzgartirildi(e.Raqam, s.Raqam, yoqilgi.Nomi), AuditTurlari.Sozlama);
+                if (e.Raqam != s.Raqam || e.YoqilgiTuriId != s.YoqilgiTuriId || krugOzgardi)
+                    Audit.Yoz(db, kim, "Aparat o'zgartirildi", AuditMatnlari.AparatOzgartirildi(e.Raqam, s.Raqam, yoqilgi.Nomi, krugOzgardi, yangiKrug), AuditTurlari.Sozlama);
                 if (yangiTotal is { } yangi && yangi != e.TotalLitr)
                 {
                     if (string.IsNullOrWhiteSpace(s.Sabab)) throw new BiznesXatosi("Pult ko'rsatkichini tuzatish sababi majburiy.");
@@ -158,6 +165,7 @@ public static class YoqilgiAparatEndpointlari
                     }
                 }
                 e.Raqam = s.Raqam; e.YoqilgiTuriId = s.YoqilgiTuriId;
+                if (krugOzgardi) e.KrugHajmi = yangiKrug;
                 await db.SaveChangesAsync();
                 return await db.AparatDtosi(e);
             });

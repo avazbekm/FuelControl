@@ -59,15 +59,24 @@ public static class AuditMatnlari
     public static string KorsatkichTuzatildi(int smenaId, int aparatRaqami, decimal eski, decimal yangi, string sabab) =>
         $"Smena #{smenaId} · {aparatRaqami}-aparat yangi ko'rsatkich {Format.Litr(eski)} dan {Format.Litr(yangi)} ga · sabab: {sabab.Trim()}";
 
+    /// <summary>Smena #4 · 4-aparat narx o'zgarishidagi ko'rsatkich 1 099 797.58 dan 109 797.58 ga · sabab: yozishda xato</summary>
+    public static string NarxKorsatkichiTuzatildi(int smenaId, int aparatRaqami, decimal eski, decimal yangi, string sabab) =>
+        $"Smena #{smenaId} · {aparatRaqami}-aparat narx o'zgarishidagi ko'rsatkich {Format.Litr(eski)} dan {Format.Litr(yangi)} ga · sabab: {sabab.Trim()}";
+
     public static string NarxOzgardi(string yoqilgi, long eski, long yangi, int segmentSoni) =>
         $"{yoqilgi}: {Format.Pul(eski)} dan {Format.Pul(yangi)} ga" + (segmentSoni > 0 ? $" · ochiq smenada {segmentSoni} ta aparat ko'rsatkichi qayd etildi" : "");
 
     /// <summary>6-aparat, AI-92 · pult 1 234.50 L · bak 0.00 L</summary>
     public static string AparatYaratildi(Aparat a, string yoqilgiNomi) =>
-        $"{a.Raqam}-aparat, {yoqilgiNomi} · pult {Format.Litr(a.TotalLitr)} L · bak {Format.Litr(a.BakQoldiq)} L";
+        $"{a.Raqam}-aparat, {yoqilgiNomi} · pult {Format.Litr(a.TotalLitr)} L · bak {Format.Litr(a.BakQoldiq)} L" + (a.KrugHajmi is null ? "" : " · " + Krug(a.KrugHajmi));
 
-    public static string AparatOzgartirildi(int eskiRaqam, int yangiRaqam, string yoqilgiNomi) =>
-        eskiRaqam == yangiRaqam ? $"{yangiRaqam}-aparat · yoqilg'i {yoqilgiNomi}" : $"{eskiRaqam}-aparat raqami {yangiRaqam} ga o'zgardi · yoqilg'i {yoqilgiNomi}";
+    /// <summary>"krug 10 000 L" yoki "krug yo'q".</summary>
+    public static string Krug(decimal? hajm) => hajm is { } h ? $"krug {Format.LitrIxcham(h)} L" : "krug yo'q";
+
+    /// <summary>5-aparat · yoqilg'i Dizel · krug 10 000 L (krugOzgardi bo'lsa matn oxirida yangi holat)</summary>
+    public static string AparatOzgartirildi(int eskiRaqam, int yangiRaqam, string yoqilgiNomi, bool krugOzgardi = false, decimal? yangiKrug = null) =>
+        (eskiRaqam == yangiRaqam ? $"{yangiRaqam}-aparat · yoqilg'i {yoqilgiNomi}" : $"{eskiRaqam}-aparat raqami {yangiRaqam} ga o'zgardi · yoqilg'i {yoqilgiNomi}")
+        + (krugOzgardi ? " · " + Krug(yangiKrug) : "");
 
     public static string BakTuzatildi(int aparatRaqami, decimal eski, decimal yangi, string sabab) =>
         $"{aparatRaqami}-aparat bak qoldig'i {Format.Litr(eski)} dan {Format.Litr(yangi)} ga · sabab: {sabab.Trim()}";

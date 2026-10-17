@@ -46,7 +46,7 @@ public static class Dtolar
         new(k.Id, k.AparatId, aparatRaqami, k.Litr, k.QoldiqOldin, k.QoldiqKeyin, k.Vaqt, k.Hujjat, k.KimYozdi);
 
     public static AparatDto Dto(this Aparat a, string yoqilgiNomi, BakKirim? oxirgiKirim) =>
-        new(a.Id, a.Raqam, a.YoqilgiTuriId, yoqilgiNomi, a.TotalLitr, a.BakQoldiq, oxirgiKirim?.Vaqt, oxirgiKirim?.Litr);
+        new(a.Id, a.Raqam, a.YoqilgiTuriId, yoqilgiNomi, a.TotalLitr, a.BakQoldiq, oxirgiKirim?.Vaqt, oxirgiKirim?.Litr, a.KrugHajmi);
 
     public static SmenaKorsatkichDto Dto(this SmenaKorsatkichi k, Aparat a, string yoqilgiNomi) =>
         new(k.AparatId, a.Raqam, yoqilgiNomi, k.Boshi, k.Oxiri, k.Narx, k.Litr, k.Summa, k.NarxOzgarishida);

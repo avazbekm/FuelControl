@@ -311,6 +311,122 @@ Olib tashlanadi: barcha `/sotuvlar` yo'llari. `/operatorlar/{id}/hisob` saqlanad
      Eski qarz yozuvlari `Soni`, `Berilgan`, `Qaytgan` va `Qoldiq` ga kirmaydi, faqat `EskiQarzQabul` da ko'rinadi.
    - **Ekran:** Nasiyalar bo'limida "Operator: Hammasi / …" tanlovi bo'ladi. Ro'yxat nasiya yozuvlaridagi operatorlardan olinadi: `NasiyaDto.MuallifId` (= `Nasiya.OperatorId`, nasiyani yozgan odam) va `OperatorIsmi`. Operator tanlanganda umumiy KPI'lar yashirinadi, o'rniga operator KPI'lari chiqadi. Operator tanlansa, KPI'lar shu operator bo'yicha chiqadi: bergan, qaytgan, qoldiq, soni va alohida "eski qarzdan qabul qilgan". Excel eksporti filtrni hisobga oladi, sarlavhada operator ismi yoziladi.
 
+13. **Savdo va smenani yopishda bir xil pult ko'rsatkichi (2026-10-17).**
+   - **Muammo.** Savdo kartasi `AparatDto.TotalLitr` ni ko'rsatadi, ya'ni oxirgi yopilgan smenadagi qiymatni. Smenani yopish sahifasi esa "Oldingi"ni ochiq smenada narx o'zgarishida qayd etilgan oxirgi segmentdan oladi. Narx smena ichida o'zgarsa, ikki joyda ikki xil raqam chiqadi. Mijozda shunday bo'ldi: Savdo'da 109 797.58, yopishda 1 099 797.58.
+   - **Qoida.** Ochiq smenada aparatning joriy pult ko'rsatkichi ko'rinadigan hamma joyda manba bitta: `SmenaHisobi.Oldingi`. Bu shu aparatning ochiq smenadagi oxirgi narx o'zgarishi segmentining `Oxiri`, segment bo'lmasa `TotalLitr`. Shu qoida quyidagi joylarga tegishli:
+     - Savdo kartasi;
+     - smenani yopish sahifasidagi "Oldingi";
+     - narx o'zgarishi dialogidagi oldingi qiymat.
+   - **Izoh.** Qiymat narx o'zgarishi segmentidan olingan bo'lsa, Savdo kartasida kichik izoh chiqadi: "Narx o'zgarishida qayd etilgan". `KorsatkichTuzatish` ruxsati bo'lsa, yonida "Tuzatish" havolasi turadi (14-band).
+   - **Yangilanish.** Narx o'zgarishi, 14-banddagi tuzatish yoki smena yopilishidan keyin karta SignalR orqali o'zi yangilanadi.
+   - **Server o'zgarmaydi.** Kerakli ma'lumot ochiq smena tafsilotida (`SmenaTafsilotDto.Korsatkichlar`) va `AparatDto` da bor.
+14. **Ochiq smenada narx o'zgarishi ko'rsatkichini tuzatish (2026-10-17).**
+   - **Muammo.** Mijozda DIZEL ECO narxi o'zgarganda 4-aparatga 109 797.58 o'rniga 1 099 797.58 yozildi, natijada 990 000 L × 15 500 chiqdi. Ochiq smenada buni tuzatishning yo'li yo'q:
+     - aparatni tahrirlash 409 qaytaradi;
+     - ko'rsatkichni tuzatish faqat yopilgan smenada ishlaydi;
+     - smenani yopib ham bo'lmaydi, chunki yopish ko'rsatkichi 1 099 797.58 dan kichik bo'lishi mumkin emas.
+     fc bazani qo'lda tuzatdi: segment o'chirildi, audit #22 yozildi.
+   - **Server.** `PUT /smenalar/{id}/narx-korsatkichi`.
+     - Tana: mavjud `KorsatkichTuzatishDto(int AparatId, decimal Qiymat, string Sabab)`. Javob: ochiq smenaning `SmenaTafsilotDto` si. Ruxsat: `KorsatkichTuzatish`.
+     - Xatolar:
+       - `id` ochiq smena bo'lmasa, 409;
+       - aparat topilmasa, 404;
+       - aparatda shu smenada narx o'zgarishi segmenti bo'lmasa, 409: "Bu aparatda ochiq smenada narx o'zgarishi ko'rsatkichi yo'q.";
+       - sabab bo'sh bo'lsa, 400.
+     - Aparatning shu smenadagi **oxirgi** narx o'zgarishi segmenti tuzatiladi. `q = Yaxlitla(Qiymat)`.
+       - `q < Boshi` bo'lsa, 400, mavjud "oldingi ko'rsatkichdan kichik" matni bilan.
+       - `q == Oxiri` bo'lsa, 400: "Yangi ko'rsatkich joriy ko'rsatkichdan farq qilishi kerak."
+       - `q == Boshi` bo'lsa, segment **o'chiriladi**, chunki narx o'zgarguncha savdo bo'lmagan. 0 litrli segment saqlanmaydi, bu `NarxOzgarishi` qoidasi bilan bir xil.
+       - Boshqa hollarda `Oxiri = q` bo'ladi, `Litr` va `Summa` qayta hisoblanadi. `Narx` eski narx bo'lib qoladi.
+     - Aparatning `TotalLitr` va `BakQoldiq` qiymatlari o'zgarmaydi. Harakat yozilmaydi, chunki ochiq smenada pul hali hisoblanmagan.
+     - Audit: "Ko'rsatkich tuzatildi", tur `tuzatish`. Matn yangi `AuditMatnlari.NarxKorsatkichiTuzatildi(smenaId, raqam, eski, yangi, sabab)` orqali yasaladi, masalan: `Smena #4 · 4-aparat narx o'zgarishidagi ko'rsatkich 1 099 797.58 dan 109 797.58 ga · sabab: …`.
+     - Saqlangach kuzatuvchilarga `SmenaOzgardi` yuboriladi, xuddi narx o'zgarishidagi kabi.
+     - Testlar:
+       - yuqoridagi har bir holat;
+       - ruxsatsiz so'rov 403 qaytaradi;
+       - 2026-10-17 ssenariysi: 1 099 797.58 dan 109 797.58 ga tuzatilganda segment o'chadi. Shundan keyin smena yopiladi, 4-aparat to'liq yangi narxda hisoblanadi va bakdan to'g'ri litr ayriladi.
+   - **Ekran** (desktop va web bir xil).
+     - "Tuzatish" havolasi ikki joyda chiqadi: smenani yopish sahifasidagi "N-aparat: narx o'zgargunicha …" izohi yonida va Savdo kartasidagi izoh yonida (13-band). Faqat `KorsatkichTuzatish` ruxsati bilan.
+     - Dialog sarlavhasi: "N-aparat: narx o'zgarishidagi ko'rsatkich". Ichida:
+       - hozirgi qiymat, faqat o'qish uchun;
+       - "To'g'ri ko'rsatkich" maydoni;
+       - "Sabab" maydoni, majburiy;
+       - jonli hisob: "narx o'zgargunicha X L × narx = summa".
+     - Agar `q == Boshi` bo'lsa, izoh chiqadi: "Narx o'zgarguncha savdo bo'lmagan, bu qator o'chiriladi."
+     - Enter tartibi 8.4 bo'yicha. Server xatosi dialog ichida ko'rinadi.
+15. **Bakdagidan ko'p litr chiqsa ogohlantirish (2026-10-17).**
+   - **Qayerda.** Pult ko'rsatkichi kiritiladigan hamma joyda:
+     - narx o'zgarishi dialogi;
+     - smenani yopish qatorlari;
+     - 14-band dialogi;
+     - yopilgan smena ko'rsatkichini tuzatish dialogi.
+   - **Hisob.** Klientda bajariladi, server o'zgarmaydi. Kiritilayotgan qator litri = yangi ko'rsatkich − shu qatorning boshlanishi. Boshlanish har joyda boshqacha:
+     - yopishda "Oldingi";
+     - narx o'zgarishida joriy oldingi qiymat (13-band);
+     - 14-bandda segmentning `Boshi`;
+     - yopilgan smena tuzatishida segmentning boshi.
+   - **Ochiq smenada solishtirish** (yopish, narx o'zgarishi, 14-band) aparat bo'yicha jami litr bilan qilinadi. 2026-10-17 dagi kelishuvga ko'ra, manfiy "bakda bor" ko'rsatilmaydi.
+     - chiqyapti = shu smenada shu aparatdan chiqadigan jami litr: qayd etilgan narx o'zgarishi segmentlari + kiritilayotgan qator. Tuzatilayotgan segment yangi qiymati bilan olinadi.
+     - bor = `AparatDto.BakQoldiq`, chunki smena yopilguncha bakdan hech narsa ayrilmaydi.
+   - **Yopilgan smenani tuzatishda:** chiqyapti = tuzatilayotgan segmentning yangi litri, bor = `BakQoldiq` + shu segmentning eski litri. Bu eski litr yopishda bakdan ayrilgan edi.
+   - Qator bo'sh bo'lsa ogohlantirilmaydi.
+   - **Ogohlantirish.** chiqyapti > bor bo'lsa:
+     - maydon ostida sariq matn chiqadi: "Bakda {bor} L bor, {chiqyapti} L chiqyapti. Ko'rsatkichni tekshiring.";
+     - saqlash tugmasi bosilganda (smenani yopish, narx o'zgarishi yoki tuzatish) tasdiq dialogi chiqadi. Unda shunday aparatlar ro'yxati, masalan "4-aparat: 990 000 L (bakda 5 017.83 L)", va ikki tugma bo'ladi: "Tekshiraman" (fokus shunda, dialog yopiladi) va "Baribir saqlash".
+     - Smenani yopishda bak tasdig'i odatdagi "Smenani yopasizmi?" dan **oldin** chiqadi. "Baribir saqlash" bosilgandan keyin "Smenani yopasizmi?" chiqadi. Ogohlantirish bo'lmasa, avvalgidek darhol "Smenani yopasizmi?" chiqadi.
+     - Escape faqat eng ustki oynani yopadi.
+   - **Bloklamaydi**, chunki bak qoldig'i eskirgan bo'lishi mumkin, masalan kirim hali kiritilmagan bo'lsa.
+   - 13–15-band matnlari Til.cs ga qo'shiladi (uz, kiril, ru). Kalitlarni fc-desktop qo'shadi va ro'yxatini fc-web ga yuboradi. fc-web lug'atni `npm run lugat` bilan yangilaydi. Mavjud mos kalit bo'lsa, qayta ishlatiladi.
+   - **Migratsiya yo'q.** Versiya 0.1.4 bo'ladi. Installer e2e 0.1.3 dan yangilanishni tekshiradi: ochiq smenada narx o'zgarishi segmenti bilan, keyin u yangi endpoint orqali tuzatiladi.
+16. **Pult krugi: 10 000 da 0 ga qaytadigan pult (2026-10-17).**
+   - **Muammo.** Mijozdagi 5-aparat pulti 9 999.99 gacha sanaydi. 10 000 ga yetganda 0 dan qayta boshlaydi va pultdagi "krug" hisoblagichi 1 ga oshadi. Hozir pultda krug 2, 560.52 turibdi. Dastur krugni bilmagani uchun operator 10 000 ni qo'lda qo'shib, 10 560.52 deb yozgan.
+   - **Asosiy qoida.**
+     - Dastur ichida va API'da ko'rsatkich doim **umumiy litr** bo'lib qoladi: `TotalLitr`, segmentlarning `Boshi`/`Oxiri`, `AparatKorsatkichDto.Qiymat`. Litr, summa, bak va hisobotlar formulasi o'zgarmaydi.
+     - Krug faqat ekranda ko'rsatish va kiritish qoidasi. Pult qiymatini umumiy litrga klient o'giradi.
+   - **Server va shartnoma.**
+     - `Aparat.KrugHajmi` qo'shiladi: `decimal?`, L. `null` bo'lsa krug yo'q. Migratsiya bitta nullable ustun qo'shadi, mavjud qatorlar `null` bo'lib qoladi.
+     - `AparatDto` oxiriga `decimal? KrugHajmi` qo'shiladi.
+     - `AparatYaratishDto` oxiriga `decimal? KrugHajmi = null`: `null` yoki `0` bo'lsa krug yo'q.
+     - `AparatTahrirlashDto` oxiriga `decimal? KrugHajmi = null`. Bu yerda ma'nosi boshqacha, chunki eski klient maydonni yubormasa, sozlama o'chib qolmasligi kerak:
+       - `null` – **o'zgarmaydi**;
+       - `0` – krug o'chiriladi;
+       - `> 0` – krug hajmi o'rnatiladi.
+     - Manfiy qiymat 400 qaytaradi.
+     - O'zgarsa audit "Aparat o'zgartirildi" yoziladi, matnida "krug 10 000 L" yoki "krug yo'q" bo'ladi.
+     - Krug hajmini istalgan payt o'zgartirish mumkin, ochiq smena ham to'sqinlik qilmaydi, chunki bu faqat ko'rinish. `AparatOzgardi` yangi qiymat bilan yuboriladi.
+   - **Ko'rsatish.** Umumiy qiymat T, krug hajmi H bo'lsa:
+     - `krug = floor(T / H) + 1`;
+     - `pult = T − (krug − 1) × H`.
+     - Misol: 10 560.52 bo'lsa, pult **560.52**, ostida kichik "krug 2". T = 10 000.00 bo'lsa, pult 0.00, krug 2.
+     - Bu qoida ko'rsatkich ko'rinadigan hamma joyga tegishli: Savdo kartasi, smenani yopishdagi "Oldingi", narx o'zgarishi dialogi, smenalar tarixi va tafsiloti (Boshi/Oxiri), Sozlamalardagi aparat, tuzatish dialoglari.
+   - **Kiritish.** Krugli aparatga operator pultda ko'rgan qiymatni yozadi.
+     - Qiymat `0 ≤ p < H` bo'lishi shart. Aks holda maydonda xato chiqadi: "Pult ko'rsatkichi {H} dan kichik bo'lishi kerak".
+     - Asos B — o'sha qatorning boshlanishi:
+       - yopish va narx o'zgarishida "Oldingi";
+       - 14-band va yopilgan smena tuzatishida segmentning `Boshi`.
+     - `kB = floor(B / H) + 1`, `pB = B − (kB − 1) × H`.
+     - `p ≥ pB` bo'lsa, umumiy = `(kB − 1) × H + p`, krug o'zgarmaydi.
+     - `p < pB` bo'lsa, pult 0 dan qayta boshlangan: umumiy = `kB × H + p`, krug 1 ga oshadi. Maydon ostida "krug kB+1" yozuvi ajralib turadi.
+     - Sotilgan litr = umumiy − B. Bir kiritishda faqat bitta krug aniqlanadi.
+     - Misollar:
+       - Oldingi 10 560.52 (560.52, krug 2), yozildi 1 250.30: umumiy 11 250.30, 689.78 L.
+       - Oldingi 9 800.00 (krug 1), yozildi 350.00: umumiy 10 350.00, krug 2, 550.00 L.
+   - **Tasdiq.** Saqlashda (smenani yopish, narx o'zgarishi, tuzatishlar) krug oshgan aparat bo'lsa, tasdiq dialogi chiqadi.
+     - Sarlavha: "Pult krugi oshdi".
+     - Qatorlar: "{N}-aparat: pult 0 dan qayta boshlangan, krug {k} → {k+1}, sotilgan {L} L".
+     - Tugmalar: "Tekshiraman" (fokus shunda) va "Ha, to'g'ri".
+     - Tartib: avval krug tasdig'i, keyin bak tasdig'i (15-band), keyin "Smenani yopasizmi?".
+   - **Sozlamalar → aparat.**
+     - "Pult 0 ga qaytadi (krug)" belgisi va "Krug hajmi, L" maydoni bo'ladi. Odatda 10 000.
+     - Krug yoqilgan aparatda pultni tuzatish va boshlang'ich qiymat ikki maydon bilan kiritiladi: "Pult ko'rsatkichi" va "Krug". Umumiy qiymat `(krug − 1) × H + pult` bo'ladi.
+     - Joriy holat "560.52 · krug 2" ko'rinishida chiqadi.
+   - **Desktopning NamunaServer'i** ham `KrugHajmi` ni qo'llab-quvvatlaydi.
+   - **Mijozda.** O'rnatilgandan keyin 5-aparatga `KrugHajmi = 10 000` yoqiladi. Mavjud 10 560.52 o'zgarmaydi, darhol "560.52 · krug 2" bo'lib ko'rinadi.
+   - **Testlar.**
+     - Backend: migratsiya, DTO, tahrirlashning null/0/>0 ma'nolari, 400, audit, SignalR.
+     - Klientlar: o'girish va krug aniqlash testlari, yuqoridagi misollar, `p ≥ H` xatosi, tasdiq dialoglari tartibi va skrinshotlar.
+     - Installer e2e 0.1.3 → 0.1.4: ustun qo'shiladi, barcha ma'lumotlar o'zgarishsiz qoladi. Keyin 5-aparatga krug yoqiladi va smena krug bilan yopiladi.
+
 ## 9. Ish tartibi
 
 - Faqat o'z papkangizga tegasiz: backend `src/backend` + `tests`, web `src/frontend/web`, desktop `src/frontend/desktop`. `docs/` — faqat fc.

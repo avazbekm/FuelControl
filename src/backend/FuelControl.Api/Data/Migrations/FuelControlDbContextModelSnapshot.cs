@@ -27,6 +27,10 @@ namespace FuelControl.Api.Data.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal?>("KrugHajmi")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Raqam")
                         .HasColumnType("INTEGER");
 

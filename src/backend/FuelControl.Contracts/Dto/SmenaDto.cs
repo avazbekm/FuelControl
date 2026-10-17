@@ -57,5 +57,9 @@ public sealed record AparatKorsatkichDto(int AparatId, decimal Qiymat);
 public sealed record SmenaYopishDto(AparatKorsatkichDto[] Korsatkichlar, long Terminal, long Depozit, long SanalganNaqd, string? Izoh,
     long[]? PlastikSummalari = null);
 
-/// <summary>Faqat oxirgi yopilgan smena uchun (KorsatkichTuzatish ruxsati), Sabab majburiy.</summary>
+/// <summary>
+/// Pult ko'rsatkichini qo'lda tuzatish (KorsatkichTuzatish ruxsati), Sabab majburiy; Qiymat - aparatning to'g'ri ko'rsatkichi.
+/// PUT /smenalar/{id}/korsatkich - faqat oxirgi yopilgan smena; PUT /smenalar/{id}/narx-korsatkichi - faqat ochiq smena: aparatning oxirgi
+/// narx o'zgarishi segmenti (Qiymat segment boshiga teng bo'lsa narx o'zgarguncha savdo bo'lmagan - qator o'chadi).
+/// </summary>
 public sealed record KorsatkichTuzatishDto(int AparatId, decimal Qiymat, string Sabab);

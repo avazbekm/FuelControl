@@ -13,6 +13,9 @@ public sealed class NasiyaApiTests : ApiBaza
 {
     private static DateOnly Bugun => DateOnly.FromDateTime(DateTime.UtcNow.AddHours(5));
 
+    /// <summary>O'tgan oyning kun-chi kuni (12:00 Toshkent): "bu oy berilgan" hisobiga kirmasligi kerak, bugungi sanaga bog'liq emas.</summary>
+    private static DateTime OtganOyda(int kun) => new DateTime(Bugun.Year, Bugun.Month, 1, 7, 0, 0, DateTimeKind.Utc).AddMonths(-1).AddDays(kun - 1);
+
     private static NasiyaYaratishDto Yangi(string ism = "Bobur Aliyev", long summa = 600_000, int kun = 7, string tel = "+998 97 700 80 90", string raqam = "01 H 202 MA") =>
         new(ism, tel, raqam, summa, Bugun.AddDays(kun), "izoh");
 
@@ -61,9 +64,9 @@ public sealed class NasiyaApiTests : ApiBaza
         using var scope = Ilova.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<FuelControlDbContext>();
         var otgan = new Nasiya { SmenaId = smenaId, OperatorId = operatorId, KimYozdi = "ali", MijozIsmi = "Sherzod Qodirov", Telefon = "+998 91 888 77 66", MashinaRaqami = "40 C 919 DA",
-            Summa = 180_000, Muddat = Bugun.AddDays(-6), Yozildi = DateTime.UtcNow.AddDays(-14) };
+            Summa = 180_000, Muddat = Bugun.AddDays(-6), Yozildi = OtganOyda(5) };
         var yopilgan = new Nasiya { SmenaId = smenaId, OperatorId = operatorId, KimYozdi = "ali", MijozIsmi = "Davron Rahimov", Telefon = "+998 90 000 11 22", MashinaRaqami = "10 B 100 BB",
-            Summa = 90_000, Qaytgan = 90_000, Muddat = Bugun.AddDays(-20), Yozildi = DateTime.UtcNow.AddDays(-30), Yopildi = DateTime.UtcNow.AddDays(-25) };
+            Summa = 90_000, Qaytgan = 90_000, Muddat = Bugun.AddDays(-20), Yozildi = OtganOyda(1), Yopildi = OtganOyda(6) };
         db.Nasiyalar.AddRange(otgan, yopilgan);
         await db.SaveChangesAsync();
         return (otgan.Id, yopilgan.Id);

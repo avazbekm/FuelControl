@@ -30,6 +30,12 @@ public static class SmenaHisoblagich
 
     public sealed record TuzatishNatijasi(Natija Eski, Natija Yangi, decimal EskiOxiri, decimal YangiOxiri, HisobHarakati? Harakat);
 
+    /// <summary>
+    /// Ochiq smenada narx o'zgarishi ko'rsatkichini tuzatish natijasi. Ochirildi - segment 0 litrga tushdi: chaqiruvchi uni bazadan o'chiradi
+    /// (Segment o'zgartirilmagan holda qoladi); aks holda Segment allaqachon yangilangan.
+    /// </summary>
+    public sealed record NarxKorsatkichiNatijasi(SmenaKorsatkichi Segment, decimal EskiOxiri, decimal YangiOxiri, bool Ochirildi);
+
     /// <summary>Yopishda kiritiladigan plastik qismlarining eng ko'p soni.</summary>
     public const int MaksPlastikSummalari = 20;
 
@@ -253,5 +259,32 @@ public static class SmenaHisoblagich
             KimYozdi = kim,
         };
         return new TuzatishNatijasi(eski, yangi, eskiOxiri, q, harakat);
+    }
+
+    /// <summary>
+    /// Ochiq smenada aparatning OXIRGI narx o'zgarishi segmentidagi ko'rsatkichni tuzatadi (narx o'zgarganda noto'g'ri yozilgan bo'lsa).
+    /// q = Yaxlitla(qiymat): q &lt; Boshi - 400; q == Oxiri - 400; q == Boshi - segment o'chiriladi (narx o'zgarguncha savdo bo'lmagan; 0 litrli
+    /// segment saqlanmaydi, <see cref="NarxOzgarishi"/> kabi); aks holda Oxiri = q, Litr va Summa qayta hisoblanadi, Narx eskicha qoladi.
+    /// Aparatning TotalLitr'i va bak qoldig'iga tegilmaydi (ular smena yopilganda o'zgaradi), kamomat/ortiqcha harakati ham yo'q: ochiq smenada
+    /// pul hali hisoblanmagan. mavjud - smenaning segmentlari (boshqa aparatlarniki ham bo'lishi mumkin: kerakligini o'zi tanlaydi).
+    /// Smena yopiq yoki aparatda narx o'zgarishi segmenti yo'q bo'lsa InvalidOperationException (409), sabab bo'sh yoki q noto'g'ri bo'lsa ArgumentException (400).
+    /// </summary>
+    public static NarxKorsatkichiNatijasi NarxKorsatkichiniTuzat(Smena smena, Aparat aparat, IReadOnlyCollection<SmenaKorsatkichi> mavjud, decimal qiymat, string sabab)
+    {
+        if (!smena.Ochiqmi) throw new InvalidOperationException("Smena yopilgan: narx o'zgarishi ko'rsatkichini faqat ochiq smenada tuzatish mumkin.");
+        var segment = mavjud.Where(x => x.SmenaId == smena.Id && x.AparatId == aparat.Id && x.NarxOzgarishida)
+            .OrderByDescending(x => x.Tartib).FirstOrDefault()
+            ?? throw new InvalidOperationException("Bu aparatda ochiq smenada narx o'zgarishi ko'rsatkichi yo'q.");
+        if (string.IsNullOrWhiteSpace(sabab)) throw new ArgumentException("Tuzatish sababi majburiy.");
+        var q = Yaxlitla(qiymat);
+        if (q < segment.Boshi) throw KichikKorsatkich(aparat, segment.Boshi);
+        var eskiOxiri = segment.Oxiri;
+        if (q == eskiOxiri) throw new ArgumentException("Yangi ko'rsatkich joriy ko'rsatkichdan farq qilishi kerak.");
+        if (q == segment.Boshi) return new NarxKorsatkichiNatijasi(segment, eskiOxiri, q, true);
+
+        segment.Oxiri = q;
+        segment.Litr = Litr(segment.Boshi, q);
+        segment.Summa = Summa(segment.Litr, segment.Narx);
+        return new NarxKorsatkichiNatijasi(segment, eskiOxiri, q, false);
     }
 }

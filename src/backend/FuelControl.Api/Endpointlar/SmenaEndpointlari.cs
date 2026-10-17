@@ -145,6 +145,31 @@ public static class SmenaEndpointlari
             await hub.Bildir(Bolimlar.Harakatlar);
             return Results.Ok(tafsilot);
         }).RuxsatKerak(Ruxsat.KorsatkichTuzatish).Produces<SmenaTafsilotDto>().ProducesProblem(400).ProducesProblem(404).ProducesProblem(409);
+
+        // Ochiq smenada narx o'zgarishida noto'g'ri yozilgan ko'rsatkichni tuzatish (yuqoridagi /korsatkich faqat yopilgan smena uchun):
+        // aparatning shu smenadagi OXIRGI narx o'zgarishi segmenti. Qiymat segment boshiga teng bo'lsa segment o'chadi. Aparatning pult va bak
+        // qoldig'iga tegilmaydi, harakat yozilmaydi (ochiq smenada pul hali hisoblanmagan). Javob - ochiq smenaning yangilangan tafsiloti.
+        s.MapPut("/{id:int}/narx-korsatkichi", async (int id, KorsatkichTuzatishDto t, HttpContext ctx, FuelControlDbContext db, IHubContext<SotuvHub> hub) =>
+        {
+            var tafsilot = await Tranzaksiya.Bajar(db, async () =>
+            {
+                var smena = await db.Smenalar.FirstOrDefaultAsync(x => x.Id == id) ?? throw new BiznesXatosi("Smena topilmadi.", 404);
+                if (!smena.Ochiqmi)
+                    throw new BiznesXatosi($"Smena #{id} yopilgan: narx o'zgarishi ko'rsatkichini faqat ochiq smenada tuzatish mumkin.", 409);
+                var a = await db.Aparatlar.FirstOrDefaultAsync(x => x.Id == t.AparatId) ?? throw new BiznesXatosi("Aparat topilmadi.", 404);
+
+                var segmentlar = await db.SmenaKorsatkichlari.Where(x => x.SmenaId == id && x.AparatId == a.Id).ToListAsync();
+                var natija = SmenaHisoblagich.NarxKorsatkichiniTuzat(smena, a, segmentlar, t.Qiymat, t.Sabab);
+                if (natija.Ochirildi) db.SmenaKorsatkichlari.Remove(natija.Segment);
+
+                Audit.Yoz(db, ctx.User.Ism(), "Ko'rsatkich tuzatildi",
+                    AuditMatnlari.NarxKorsatkichiTuzatildi(id, a.Raqam, natija.EskiOxiri, natija.YangiOxiri, t.Sabab), AuditTurlari.Tuzatish);
+                await db.SaveChangesAsync();
+                return await db.SmenaTafsiloti(smena);
+            });
+            await hub.Kuzatuvchilarga(Xabarlar.SmenaOzgardi, tafsilot.Smena);
+            return Results.Ok(tafsilot);
+        }).RuxsatKerak(Ruxsat.KorsatkichTuzatish).Produces<SmenaTafsilotDto>().ProducesProblem(400).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409);
     }
 
     private static BiznesXatosi OchiqSmenaBor() => new("Smena allaqachon ochiq: avval uni yoping.", 409);
