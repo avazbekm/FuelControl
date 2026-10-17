@@ -8,7 +8,7 @@ import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { jonliYangila } from '../../core/malumot';
 import { davomiylikSD, harflar, ishoraPul, kunQisqa, litr, litrQisqa, pul, sana, soat } from '../../core/format';
 import { telefonFormat } from '../../core/telefon';
-import { berilganNasiyalar } from '../../core/hisob';
+import { berilganNasiyalar, joriyKorsatkich } from '../../core/hisob';
 import type { AparatDto, NasiyaDto, NasiyaQaytishiDto, NasiyalarXulosaDto, SmenaDto, SmenaTafsilotDto, SmenaTopshirishDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { AparatYoq } from '../../ui/aparat-yoq';
@@ -19,6 +19,9 @@ import { NasiyaDialog } from '../../ui/dialoglar/nasiya-dialog';
 import { QarzQaytdiDialog } from '../../ui/dialoglar/qarz-qaytdi-dialog';
 import { XarajatDialog } from '../../ui/dialoglar/xarajat-dialog';
 import { BakKirimDialog } from '../../ui/dialoglar/bak-kirim-dialog';
+import { NarxKorsatkichDialog } from '../../ui/dialoglar/narx-korsatkich-dialog';
+import { PultQiymat } from '../../ui/krug';
+import { Sigdir } from '../../ui/sigdir';
 
 /**
  * Savdo (docs/dizayn/Main, SmenaOchish): ochiq smenada — boshlang'ich qoldiqlar, joriy smena, aparatlar, nasiya/xarajat/muddati o'tgan qarzlar;
@@ -26,7 +29,7 @@ import { BakKirimDialog } from '../../ui/dialoglar/bak-kirim-dialog';
  */
 @Component({
   selector: 'savdo-sahifa',
-  imports: [RouterLink, FormsModule, Ikon, AparatYoq, YoqilgiPill, MashinaRaqami, SonKiritish, EnterKeyingi, NasiyaDialog, QarzQaytdiDialog, XarajatDialog, BakKirimDialog],
+  imports: [RouterLink, FormsModule, Ikon, AparatYoq, YoqilgiPill, MashinaRaqami, SonKiritish, EnterKeyingi, NasiyaDialog, QarzQaytdiDialog, XarajatDialog, BakKirimDialog, NarxKorsatkichDialog, PultQiymat, Sigdir],
   templateUrl: './savdo.html',
   styleUrl: './savdo.scss',
 })
@@ -114,6 +117,17 @@ export class SavdoSahifa {
     const egasi = !!tp && tp.operatorId === this.auth.foydalanuvchi()?.id;
     return { tafsilot: egasi ? await this.server.oxirgiYopilgan() : null, topshirish: tp };
   }
+
+  /**
+   * Aparatning joriy pult ko'rsatkichi (docs §8.13): smenani yopishdagi "Oldingi" bilan bir manba — ochiq smenadagi oxirgi narx o'zgarishi segmentining
+   * `oxiri`, bo'lmasa `TotalLitr`. `segment` bo'lsa karta "Narx o'zgarishida qayd etilgan" izohi va "Tuzatish" havolasini ko'rsatadi.
+   */
+  protected pult(a: AparatDto) { return joriyKorsatkich(a, this.joriy()?.korsatkichlar); }
+  /** "Tuzatish" havolasi: narx o'zgarishidagi ko'rsatkichni tuzatish dialogi (docs §8.14). */
+  protected readonly tuzatishOchiq = signal(false);
+  private readonly tuzatishId = signal<number | null>(null);
+  protected readonly tuzatishAparat = computed(() => this.aparatlar().find((a) => a.id === this.tuzatishId()) ?? null);
+  protected tuzatishOch(a: AparatDto) { this.tuzatishId.set(a.id); this.tuzatishOchiq.set(true); }
 
   protected rang(id: number): string { return this.yoqilgilar().find((y) => y.id === id)?.rang ?? '#2563EB'; }
   protected narx(id: number): number { return this.yoqilgilar().find((y) => y.id === id)?.narx ?? 0; }

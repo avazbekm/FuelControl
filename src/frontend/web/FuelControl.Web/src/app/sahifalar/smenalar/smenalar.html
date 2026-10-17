@@ -144,8 +144,8 @@
                   @for (g of q.segmentlar; track $index) {
                     <div class="apt-qator">
                       <span class="nom"><b>{{ q.raqam }} · {{ q.yoqilgi }}</b>@if (q.segmentlar.length > 1) { <small>× {{ pul(g.narx) }}</small> }</span>
-                      <span class="o oldingi">{{ litr(g.boshi) }}</span>
-                      <span class="o oldingi">{{ litr(g.oxiri) }}</span>
+                      <span class="o oldingi"><pult-qiymat [jami]="g.boshi" [krugHajmi]="q.krugHajmi" /></span>
+                      <span class="o oldingi"><pult-qiymat [jami]="g.oxiri" [krugHajmi]="q.krugHajmi" /></span>
                       <span class="o qalin">{{ litr(g.litr) }}</span>
                       <span class="o qalin">{{ pul(g.summa) }}</span>
                     </div>
@@ -170,8 +170,8 @@
                   @for (g of q.segmentlar; track $index) {
                     <dl class="mini">
                       @if (q.segmentlar.length > 1) { <dt class="narx-sarlavha">× {{ pul(g.narx) }}</dt><dd></dd> }
-                      <dt>{{ til.t('Smenalar_Oldingi') }}</dt><dd>{{ litr(g.boshi) }}</dd>
-                      <dt>{{ til.t('Smenalar_Yangi') }}</dt><dd>{{ litr(g.oxiri) }}</dd>
+                      <dt>{{ til.t('Smenalar_Oldingi') }}</dt><dd><pult-qiymat [jami]="g.boshi" [krugHajmi]="q.krugHajmi" /></dd>
+                      <dt>{{ til.t('Smenalar_Yangi') }}</dt><dd><pult-qiymat [jami]="g.oxiri" [krugHajmi]="q.krugHajmi" /></dd>
                       <dt>{{ til.t('Smenalar_Litr') }}</dt><dd class="qalin">{{ litr(g.litr) }}</dd>
                       <dt>{{ til.t('Smenalar_Summa') }}</dt><dd class="qalin">{{ pul(g.summa) }}</dd>
                     </dl>

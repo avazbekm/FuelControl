@@ -1,4 +1,4 @@
-import { Component, ElementRef, effect, input, model, output, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, afterNextRender, effect, inject, input, model, output, viewChild } from '@angular/core';
 
 /** Probel bilan guruhlangan butun qism: "1234567" → "1 234 567". */
 function guruhla(b: string): string {
@@ -7,7 +7,7 @@ function guruhla(b: string): string {
 
 /**
  * Son kiritish maydoni: yozish paytida minglar probel bilan guruhlanadi ("4 878 000"), kasr (`kasr` > 0) — nuqta yoki vergul bilan, ko'pi bilan `kasr` xona.
- * Qiymat — son yoki bo'sh bo'lsa `null`. `manfiy` — "−" belgisiga ruxsat. Stil `sinf` orqali (`kiritish pul`, `kiritish katta` …).
+ * Qiymat — son yoki bo'sh bo'lsa `null`. Matn maydonga sig'masa (11 xonali summa) shrift o'zi kichrayadi — qiymat kesilib qolmaydi. `manfiy` — "−" belgisiga ruxsat. Stil `sinf` orqali (`kiritish pul`, `kiritish katta` …).
  * Ishlatilishi: `<son-kiritish [(qiymat)]="x" sinf="kiritish pul" placeholder="0" />`.
  */
 @Component({
@@ -45,7 +45,27 @@ export class SonKiritish {
       if (this.fokusda && this.taxlil(this.matn) === q) return;
       this.matn = this.korsat(q);
       inp.value = this.matn;
+      this.sigdir();
     });
+    const yoqot = inject(DestroyRef);
+    afterNextRender(() => {
+      const ro = new ResizeObserver(() => this.sigdir());
+      ro.observe(this.el().nativeElement);
+      yoqot.onDestroy(() => ro.disconnect());
+    });
+  }
+
+  /** Matn sig'masa shrift kichrayadi (asl o'lchamning 60 % igacha); sig'sa asl o'lcham (stil varag'idan) qaytadi. */
+  private sigdir() {
+    const inp = this.el().nativeElement;
+    inp.style.fontSize = '';
+    if (!inp.clientWidth || inp.scrollWidth <= inp.clientWidth) return;
+    const c = getComputedStyle(inp);
+    const bosh = (parseFloat(c.paddingLeft) || 0) + (parseFloat(c.paddingRight) || 0);
+    const matn = inp.scrollWidth - bosh;
+    const joy = inp.clientWidth - bosh;
+    const asl = parseFloat(c.fontSize);
+    if (matn > 0 && joy > 0 && asl > 0) inp.style.fontSize = `${Math.max(asl * 0.6, Math.floor((asl * joy) / matn * 98) / 100)}px`;
   }
 
   private korsat(q: number | null): string {
@@ -84,6 +104,7 @@ export class SonKiritish {
     const korsatma = (manfiy ? '−' : '') + guruhla(xom) + kasr;
     this.matn = korsatma;
     inp.value = korsatma;
+    this.sigdir();
     // kursor
     let say = 0, yangi = korsatma.length;
     for (let i = 0; i < korsatma.length; i++) {
@@ -100,6 +121,7 @@ export class SonKiritish {
     const inp = this.el().nativeElement;
     this.matn = this.korsat(this.qiymat());
     inp.value = this.matn;
+    this.sigdir();
   }
 
   focus() { this.el().nativeElement.focus(); }

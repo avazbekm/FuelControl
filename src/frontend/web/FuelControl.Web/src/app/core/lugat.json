@@ -2359,6 +2359,11 @@
   "Аппаратлар",
   "Аппараты"
  ],
+ "Savdo_AparatlarIzohQayd": [
+  "Pult — oxirgi qayd etilgan ko'rsatkich; bak qoldig'i — oxirgi yopilgan smena holatida, {0}",
+  "Пулт — охирги қайд этилган кўрсаткич; бак қолдиғи — охирги ёпилган смена ҳолатида, {0}",
+  "Пульт — последнее записанное показание; остаток бака — на момент последней закрытой смены, {0}"
+ ],
  "Savdo_AparatlarIzoh": [
   "Pult ko'rsatkichi va bak qoldig'i oxirgi yopilgan smena holatida, {0}",
   "Пулт кўрсаткичи ва бак қолдиғи охирги ёпилган смена ҳолатида, {0}",
@@ -3333,6 +3338,136 @@
   "Narxni saqlash",
   "Нархни сақлаш",
   "Сохранить цену"
+ ],
+ "NarxQayd_Izoh": [
+  "Narx o'zgarishida qayd etilgan",
+  "Нарх ўзгаришида қайд этилган",
+  "Записано при смене цены"
+ ],
+ "NarxQayd_Tuzatish": [
+  "Tuzatish",
+  "Тузатиш",
+  "Исправить"
+ ],
+ "NarxQayd_Sarlavha": [
+  "{0}: narx o'zgarishidagi ko'rsatkich",
+  "{0}: нарх ўзгаришидаги кўрсаткич",
+  "{0}: показание при смене цены"
+ ],
+ "NarxQayd_Togri": [
+  "To'g'ri ko'rsatkich, L",
+  "Тўғри кўрсаткич, Л",
+  "Верное показание, л"
+ ],
+ "NarxQayd_Ochiriladi": [
+  "Narx o'zgarguncha savdo bo'lmagan, bu qator o'chiriladi.",
+  "Нарх ўзгаргунча савдо бўлмаган, бу қатор ўчирилади.",
+  "До смены цены продаж не было — эта строка будет удалена."
+ ],
+ "NarxQayd_XatoTeng": [
+  "Yangi ko'rsatkich joriy ko'rsatkichdan farq qilishi kerak.",
+  "Янги кўрсаткич жорий кўрсаткичдан фарқ қилиши керак.",
+  "Новое показание должно отличаться от текущего."
+ ],
+ "NarxQayd_TuzatishIzoh": [
+  "Smena yopilganda shu aparat ikki qismda hisoblanadi: tuzatilgan ko'rsatkichgacha eski narxda, keyin yangi narxda. Tuzatish auditga yoziladi.",
+  "Смена ёпилганда шу аппарат икки қисмда ҳисобланади: тузатилган кўрсаткичгача эски нархда, кейин янги нархда. Тузатиш аудитга ёзилади.",
+  "При закрытии смены аппарат считается в две части: до исправленного показания по старой цене, затем по новой. Исправление записывается в аудит."
+ ],
+ "BakOgoh_Matn": [
+  "Bakda {0} L bor, {1} L chiqyapti. Ko'rsatkichni tekshiring.",
+  "Бакда {0} Л бор, {1} Л чиқяпти. Кўрсаткични текширинг.",
+  "В баке {0} л, а выходит {1} л. Проверьте показание."
+ ],
+ "BakOgoh_Sarlavha": [
+  "Bakdagidan ko'p litr chiqyapti",
+  "Бакдагидан кўп литр чиқяпти",
+  "Выходит больше литров, чем в баке"
+ ],
+ "BakOgoh_Savol": [
+  "Bu aparatlarda chiqadigan litr bakdagidan ko'p:",
+  "Бу аппаратларда чиқадиган литр бакдагидан кўп:",
+  "По этим аппаратам выходит больше литров, чем есть в баке:"
+ ],
+ "BakOgoh_Qator": [
+  "{0}: {1} L (bakda {2} L)",
+  "{0}: {1} Л (бакда {2} Л)",
+  "{0}: {1} л (в баке {2} л)"
+ ],
+ "BakOgoh_Eslatma": [
+  "Bak qoldig'i eskirgan bo'lishi mumkin, masalan kirim hali kiritilmagan bo'lsa.",
+  "Бак қолдиғи эскирган бўлиши мумкин, масалан кирим ҳали киритилмаган бўлса.",
+  "Остаток бака может быть устаревшим, например, если приход ещё не внесён."
+ ],
+ "BakOgoh_Tekshiraman": [
+  "Tekshiraman",
+  "Текшираман",
+  "Проверю"
+ ],
+ "BakOgoh_BaribirSaqlash": [
+  "Baribir saqlash",
+  "Барибир сақлаш",
+  "Всё равно сохранить"
+ ],
+ "Krug_Belgi": [
+  "krug {0}",
+  "круг {0}",
+  "круг {0}"
+ ],
+ "Krug_XatoKatta": [
+  "Pult ko'rsatkichi {0} dan kichik bo'lishi kerak",
+  "Пулт кўрсаткичи {0} дан кичик бўлиши керак",
+  "Показание пульта должно быть меньше {0}"
+ ],
+ "Krug_TasdiqSarlavha": [
+  "Pult krugi oshdi",
+  "Пулт круги ошди",
+  "Круг пульта увеличился"
+ ],
+ "Krug_TasdiqQator": [
+  "{0}: pult 0 dan qayta boshlangan, krug {1} → {2}, sotilgan {3} L",
+  "{0}: пулт 0 дан қайта бошланган, круг {1} → {2}, сотилган {3} Л",
+  "{0}: пульт начал счёт с 0, круг {1} → {2}, продано {3} л"
+ ],
+ "Krug_HaTogri": [
+  "Ha, to'g'ri",
+  "Ҳа, тўғри",
+  "Да, верно"
+ ],
+ "Krug_Yoqish": [
+  "Pult 0 ga qaytadi (krug)",
+  "Пулт 0 га қайтади (круг)",
+  "Пульт обнуляется (круг)"
+ ],
+ "Krug_Hajmi": [
+  "Krug hajmi, L",
+  "Круг ҳажми, Л",
+  "Объём круга, л"
+ ],
+ "Krug_Raqami": [
+  "Krug",
+  "Круг",
+  "Круг"
+ ],
+ "Krug_Izoh": [
+  "Pult shu hajmga yetganda 0 dan qayta boshlaydi va pultdagi krug bittaga oshadi. Dastur umumiy litrni o'zi hisoblaydi.",
+  "Пулт шу ҳажмга етганда 0 дан қайта бошлайди ва пултдаги круг биттага ошади. Дастур умумий литрни ўзи ҳисоблайди.",
+  "Дойдя до этого объёма, пульт начинает счёт с 0, а круг на пульте увеличивается на один. Общие литры программа считает сама."
+ ],
+ "Krug_XatoHajm": [
+  "Krug hajmini to'g'ri yozing",
+  "Круг ҳажмини тўғри ёзинг",
+  "Укажите корректный объём круга"
+ ],
+ "Krug_XatoRaqam": [
+  "Krug 1 yoki undan katta bo'lishi kerak",
+  "Круг 1 ёки ундан катта бўлиши керак",
+  "Круг должен быть не меньше 1"
+ ],
+ "Krug_Umumiy": [
+  "Umumiy: {0} L",
+  "Умумий: {0} Л",
+  "Всего: {0} л"
  ],
  "Operator_Izoh": [
   "Oylik maosh, avans, kamomat va ortiqcha. Kamomat smena yopilganda avtomatik yoziladi.",

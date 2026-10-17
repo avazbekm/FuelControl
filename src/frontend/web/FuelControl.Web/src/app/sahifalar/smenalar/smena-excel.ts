@@ -1,6 +1,6 @@
 import type { SmenaTafsilotDto } from '../../api/model';
-import { kunSoat, kunToliq, pul } from '../../core/format';
-import { berilganNasiyalar, plastikIfodasi } from '../../core/hisob';
+import { kunSoat, kunToliq, litr, pul } from '../../core/format';
+import { berilganNasiyalar, krugKorinish, plastikIfodasi } from '../../core/hisob';
 
 type T = (kalit: string, ...args: unknown[]) => string;
 type Hujayra = { value?: string | number; type?: StringConstructor | NumberConstructor; format?: string; fontWeight?: 'bold'; backgroundColor?: string; align?: 'left' | 'right' | 'center' };
@@ -8,8 +8,11 @@ type Hujayra = { value?: string | number; type?: StringConstructor | NumberConst
 const PUL = '#,##0';
 const LITR = '#,##0.00';
 
-/** Bitta smena hisobini haqiqiy .xlsx ga chiqaradi (write-excel-file, faqat eksportda yuklanadi). */
-export async function smenaExcel(t: SmenaTafsilotDto, T: T): Promise<void> {
+/**
+ * Bitta smena hisobini haqiqiy .xlsx ga chiqaradi (write-excel-file, faqat eksportda yuklanadi).
+ * `krugHajmi(aparatId)` — aparatning pult krugi (docs §8.16): krugli aparatda Boshi/Oxiri MATN ("560.52 · krug 2"), krugsizda — raqam; Litr va Summa doim raqam.
+ */
+export async function smenaExcel(t: SmenaTafsilotDto, T: T, krugHajmi: (aparatId: number) => number | null = () => null): Promise<void> {
   const { default: writeXlsxFile } = await import('write-excel-file/browser');
   const s = t.smena;
   const matn = (v: string, qalin = false, fon?: string): Hujayra => ({ value: v, type: String, ...(qalin ? { fontWeight: 'bold' as const } : {}), ...(fon ? { backgroundColor: fon } : {}) });
@@ -26,7 +29,13 @@ export async function smenaExcel(t: SmenaTafsilotDto, T: T): Promise<void> {
   if (t.korsatkichlar.length) {
     m.push([T('Smenalar_Aparat'), T('Smenalar_Oldingi'), T('Smenalar_Yangi'), T('Smenalar_Narx'), T('Smenalar_Litr'), T('Smenalar_Summa')].map((x) => matn(x, true, SARLAVHA)));
     for (const k of t.korsatkichlar) {
-      m.push([matn(`${k.aparatRaqam} · ${k.yoqilgiNomi}`), son(k.boshi, LITR), son(k.oxiri, LITR), son(k.narx), son(k.litr, LITR), son(k.summa)]);
+      const h = krugHajmi(k.aparatId);
+      const pult = (v: number): Hujayra => {
+        if (!h) return son(v, LITR);
+        const g = krugKorinish(v, h);
+        return { ...matn(`${litr(g.pult)} · ${T('Krug_Belgi', g.krug)}`), align: 'right' };
+      };
+      m.push([matn(`${k.aparatRaqam} · ${k.yoqilgiNomi}`), pult(k.boshi), pult(k.oxiri), son(k.narx), son(k.litr, LITR), son(k.summa)]);
     }
     m.push([matn(T('Jami'), true), {}, {}, {}, son(s.jamiLitr, LITR, true), son(s.savdo, PUL, true)]);
     m.push([]);

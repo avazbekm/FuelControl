@@ -66,3 +66,75 @@ export const naqdSavdo = (savdo: number, plastik: number, depozitFarqi: number, 
 export function berilganNasiyalar<T extends { eskiQarz: boolean }>(royxat: T[]): T[] {
   return royxat.filter((n) => !n.eskiQarz);
 }
+
+/** Ochiq smenada narx o'zgarishida qayd etilgan aparat segmentlari (tartib bo'yicha). */
+export function narxSegmentlari<T extends { aparatId: number; narxOzgarishida: boolean }>(korsatkichlar: T[] | null | undefined, aparatId: number): T[] {
+  return (korsatkichlar ?? []).filter((k) => k.aparatId === aparatId && k.narxOzgarishida);
+}
+
+/**
+ * Aparatning joriy pult ko'rsatkichi (docs §8.13) — Savdo kartasi, smenani yopishdagi "Oldingi" va narx o'zgarishi dialogida bitta manba
+ * (desktop `SmenaHisobi.Oldingi`): ochiq smenadagi OXIRGI narx o'zgarishi segmentining `oxiri`, segment bo'lmasa `TotalLitr`.
+ */
+export function joriyKorsatkich<T extends { aparatId: number; narxOzgarishida: boolean; oxiri: number }>(
+  aparat: { id: number; totalLitr: number }, korsatkichlar: T[] | null | undefined,
+): { qiymat: number; segment: T | null } {
+  const s = narxSegmentlari(korsatkichlar, aparat.id);
+  const oxirgi = s.length ? s[s.length - 1] : null;
+  return { qiymat: oxirgi ? oxirgi.oxiri : aparat.totalLitr, segment: oxirgi };
+}
+
+export interface BakOgohi { chiqadi: number; bakda: number }
+
+/**
+ * Bakdagidan ko'p litr chiqsa ogohlantirish (docs §8.15, faqat klientda, bloklamaydi).
+ * Ochiq smenada: chiqyapti = aparatning shu smenadagi jami litri = narx o'zgarishida qayd etilgan segmentlar (`oldingiSegmentlar`; tuzatilayotgani kirmaydi)
+ * + kiritilayotgan qator (`yangi − boshi`); bor = `BakQoldiq` (kamaytirilmaydi). Yopilgan smena tuzatishida: chiqyapti = segmentning yangi litri,
+ * bor = `BakQoldiq` + segmentning eski litri (u yopishda bakdan ayrilgan edi) — `oldingiSegmentlar` berilmaydi.
+ * Qator bo'sh yoki boshidan kichik (alohida xato) bo'lsa ogohlantirilmaydi; chiqadigan 0 L bo'lsa ham.
+ */
+export function bakOgohi(boshi: number, yangi: number | null | undefined, bakda: number, oldingiSegmentlar: { litr: number }[] = []): BakOgohi | null {
+  if (yangi == null || litrSent(yangi) < litrSent(boshi)) return null;
+  const chiqadiSent = litrSent(segmentLitri(boshi, yangi)) + oldingiSegmentlar.reduce((x, g) => x + litrSent(g.litr), 0);
+  return chiqadiSent > 0 && chiqadiSent > litrSent(bakda) ? { chiqadi: sentLitr(chiqadiSent), bakda } : null;
+}
+
+// ---- Pult krugi (docs §8.16): ba'zi pultlar `KrugHajmi` (H, masalan 10 000) da 0 ga qaytadi. API'da ko'rsatkich doim UMUMIY litr (T) —
+// krug faqat ekranda ko'rsatish va kiritish qoidasi; klient pult qiymatini umumiy litrga o'giradi. Hisob butun "sent"larda (suzuvchi nuqtasiz).
+
+/**
+ * Umumiy qiymat T → ekrandagi pult va krug: `krug = floor(T / H) + 1`, `pult = T − (krug − 1) × H`.
+ * Masalan H = 10 000, T = 10 560.52 → pult 560.52, krug 2; T = 10 000 → pult 0.00, krug 2. `H` yo'q (null/0) bo'lsa krug yo'q: pult = T.
+ */
+export function krugKorinish(jami: number, krugHajmi?: number | null): { pult: number; krug: number | null } {
+  const h = litrSent(krugHajmi ?? 0);
+  if (h <= 0) return { pult: jami, krug: null };
+  const t = litrSent(jami);
+  const krug = Math.max(Math.floor(t / h), 0) + 1;
+  return { pult: sentLitr(t - (krug - 1) * h), krug };
+}
+
+/** Kiritilgan pult qiymatining natijasi: `xato` — `0 ≤ p < H` buzilgan; `jami` — API'ga yuboriladigan umumiy qiymat; `oshdi` — krug oshgan. */
+export interface PultNatijasi { xato: boolean; jami: number; krug: number | null; oshdi: boolean }
+
+/**
+ * Operator pultda ko'rgan qiymat `p` → umumiy litr (docs §8.16). `boshi` (B) — shu qatorning boshlanishi (umumiy litr): yopish va narx o'zgarishida "Oldingi",
+ * 14-band va yopilgan smena tuzatishida segmentning `Boshi`. `kB = floor(B / H) + 1`, `pB = B − (kB − 1) × H`:
+ * `p ≥ pB` — krug o'zgarmaydi, umumiy = `(kB − 1) × H + p`; `p < pB` — pult 0 dan qayta boshlangan, umumiy = `kB × H + p`, krug +1.
+ * Bir kiritishda faqat bitta krug aniqlanadi. `H` yo'q bo'lsa `p` o'zi umumiy qiymat. `p` `[0, H)` dan tashqarida bo'lsa `xato`.
+ */
+export function pultJamiga(p: number, boshi: number, krugHajmi?: number | null): PultNatijasi {
+  const h = litrSent(krugHajmi ?? 0);
+  if (h <= 0) return { xato: false, jami: p, krug: null, oshdi: false };
+  const pc = litrSent(p);
+  const { pult: pB, krug: kB } = krugKorinish(boshi, krugHajmi);
+  const k = kB ?? 1;
+  if (pc < 0 || pc >= h) return { xato: true, jami: p, krug: k, oshdi: false };
+  if (pc >= litrSent(pB)) return { xato: false, jami: sentLitr((k - 1) * h + pc), krug: k, oshdi: false };
+  return { xato: false, jami: sentLitr(k * h + pc), krug: k + 1, oshdi: true };
+}
+
+/** Sozlamalardagi ikki maydon ("Pult ko'rsatkichi" + "Krug") → umumiy qiymat: `(krug − 1) × H + pult`. */
+export function krugdanJamiga(pult: number, krug: number, krugHajmi: number): number {
+  return sentLitr((krug - 1) * litrSent(krugHajmi) + litrSent(pult));
+}

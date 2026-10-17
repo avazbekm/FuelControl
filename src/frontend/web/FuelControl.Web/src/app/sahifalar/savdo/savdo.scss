@@ -47,8 +47,10 @@
 .chiziq-och { height: 1px; background: var(--chiziq); }
 .ustun-kichik { display: flex; flex-direction: column; gap: 4px; }
 .pult-qiymat { font-size: 20px; font-weight: 800; letter-spacing: -0.3px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pult-izoh { line-height: 1.4; }
+.h-yacheyka.o { --krug-tekis: flex-end; }
 .pult-qiymat small, .bak-qiymat small, .jami-qiymat small { font-size: 13px; font-weight: 600; color: var(--matn-2); }
-.bak-blok { padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; border-radius: 14px; background: rgba(217, 245, 230, 0.6); border: 1px solid rgba(14, 122, 74, 0.14); }
+.bak-blok { margin-top: auto; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; border-radius: 14px; background: rgba(217, 245, 230, 0.6); border: 1px solid rgba(14, 122, 74, 0.14); }
 :host-context(:root[data-theme="dark"]) .bak-blok { background: var(--b-yashil-fon); }
 .bak-bosh { display: flex; align-items: center; gap: 6px; color: var(--yashil); }
 .bak-qiymat { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }

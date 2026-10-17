@@ -35,6 +35,11 @@ export class Server {
     return ol(api.PUT('/smenalar/{id}/korsatkich', { params: { path: { id } }, body: d }));
   }
 
+  /** Ochiq smenada narx o'zgarishida yozilgan ko'rsatkichni tuzatish (docs §8.14): aparatning shu smenadagi oxirgi segmenti; `qiymat` segment boshiga teng bo'lsa segment o'chadi. */
+  narxKorsatkichTuzat(id: number, d: KorsatkichTuzatishDto): Promise<SmenaTafsilotDto> {
+    return ol(api.PUT('/smenalar/{id}/narx-korsatkichi', { params: { path: { id } }, body: d }));
+  }
+
   // ---- Nasiya
   /** `operatorId` berilsa server shu operator yozgan nasiyalarni qaytaradi va `operator` xulosasini to'ldiradi (docs §8.12). */
   nasiyalar(holat?: 'faol' | 'otgan' | 'yopilgan', q?: string, operatorId?: number): Promise<NasiyalarDto> {

@@ -3,9 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { Til } from '../../core/til';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { litr, litrQisqa } from '../../core/format';
+import { krugKorinish, krugdanJamiga, litrSent } from '../../core/hisob';
 import type { AparatDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { SonKiritish } from '../../ui/son-kiritish';
+import { PultQiymat } from '../../ui/krug';
 import { SozlamalarXizmati } from './sozlamalar-xizmati';
 
 /**
@@ -14,7 +16,7 @@ import { SozlamalarXizmati } from './sozlamalar-xizmati';
  */
 @Component({
   selector: 'sozlamalar-aparatlar',
-  imports: [FormsModule, Ikon, SonKiritish],
+  imports: [FormsModule, Ikon, SonKiritish, PultQiymat],
   template: `
     <div class="qator-panjara">
       <section class="shisha karta kartalar-karta asosiy" aria-labelledby="ap-sarlavha">
@@ -33,7 +35,7 @@ import { SozlamalarXizmati } from './sozlamalar-xizmati';
                 <span class="yoq-pill" [style.--r]="rang(a.yoqilgiTuriId)">{{ a.yoqilgiNomi }}</span>
                 <button type="button" class="qalam" [attr.aria-label]="til.t('Aparat_Tahrirlash', a.raqam)" (click)="tanla(a)"><ikon nomi="edit" [olcham]="16" [qalinlik]="2" /></button>
               </div>
-              <span class="juft"><span class="ikkilamchi">{{ til.t('Aparat_PultKorsatkichi') }}</span><b class="son">{{ litr(a.totalLitr) }} L</b></span>
+              <span class="juft"><span class="ikkilamchi">{{ til.t('Aparat_PultKorsatkichi') }}</span><b class="son"><pult-qiymat [jami]="a.totalLitr" [krugHajmi]="a.krugHajmi" birlik satrda /></b></span>
               <span class="juft"><span class="ikkilamchi">{{ til.t('Aparat_BakQoldigi') }}</span><b class="son bak" [class.manfiy]="a.bakQoldiq < 0">{{ litrQisqa(a.bakQoldiq) }} L</b></span>
             </article>
           } @empty { <div class="bosh">{{ til.t('MalumotYoq') }}</div> }
@@ -65,11 +67,36 @@ import { SozlamalarXizmati } from './sozlamalar-xizmati';
               </select>
             </div>
           </div>
-          <div class="maydon">
-            <label for="ap-pult">{{ til.t(yangi() ? 'Aparat_BoshlangichPult' : 'Aparat_PultLitr') }}</label>
-            <son-kiritish [(qiymat)]="pult" [kasr]="2" sinf="kiritish pul" inputId="ap-pult" />
-            <span class="yordam-matn">{{ til.t('Aparat_PultIzoh') }}</span>
+          <div class="krug-belgi">
+            <label class="belgi"><input id="ap-krug-bor" type="checkbox" name="krugBor" [ngModel]="krugBor()" (ngModelChange)="krugAlmash($event)" /> {{ til.t('Krug_Yoqish') }}</label>
+            @if (krugBor()) { <span class="yordam-matn">{{ til.t('Krug_Izoh') }}</span> }
           </div>
+          @if (krugBor()) {
+            <div class="maydon">
+              <label for="ap-krug-hajm">{{ til.t('Krug_Hajmi') }}</label>
+              <son-kiritish [(qiymat)]="krugHajm" [kasr]="2" sinf="kiritish pul" inputId="ap-krug-hajm" />
+            </div>
+            <div class="ikki-ustun juft-ustun">
+              <div class="maydon">
+                <label for="ap-pult">{{ til.t('Aparat_PultKorsatkichi') }}</label>
+                <son-kiritish [qiymat]="pultKorsat()" (qiymatChange)="pultP.set($event)" [kasr]="2" sinf="kiritish pul" inputId="ap-pult" />
+              </div>
+              <div class="maydon">
+                <label for="ap-krug">{{ til.t('Krug_Raqami') }}</label>
+                <son-kiritish [qiymat]="krugKorsat()" (qiymatChange)="krugK.set($event)" sinf="kiritish pul" inputId="ap-krug" />
+              </div>
+            </div>
+            @if (pultKatta()) { <span class="xato-matn" role="alert" data-test="krug-xato">{{ til.t('Krug_XatoKatta', litr(krugH() ?? 0)) }}</span> }
+            @if (urindi() && krugH() == null) { <span class="xato-matn" role="alert" data-test="krug-xato-hajm">{{ til.t('Krug_XatoHajm') }}</span> }
+            @if (urindi() && !krugRaqamiTogri()) { <span class="xato-matn" role="alert" data-test="krug-xato-raqam">{{ til.t('Krug_XatoRaqam') }}</span> }
+            @if (pultJami() != null) { <span class="yordam-matn" data-test="krug-jami">{{ til.t('Krug_Umumiy', litr(pultJami()!)) }}</span> }
+          } @else {
+            <div class="maydon">
+              <label for="ap-pult">{{ til.t(yangi() ? 'Aparat_BoshlangichPult' : 'Aparat_PultLitr') }}</label>
+              <son-kiritish [(qiymat)]="pult" [kasr]="2" sinf="kiritish pul" inputId="ap-pult" />
+              <span class="yordam-matn">{{ til.t('Aparat_PultIzoh') }}</span>
+            </div>
+          }
           <div class="maydon">
             <label for="ap-bak">{{ til.t(yangi() ? 'Aparat_BoshlangichBak' : 'Aparat_BakLitr') }}</label>
             <son-kiritish [(qiymat)]="bak" [kasr]="2" sinf="kiritish pul" inputId="ap-bak" />
@@ -107,6 +134,7 @@ import { SozlamalarXizmati } from './sozlamalar-xizmati';
       display: inline-flex; align-items: center; padding: 4px 11px; border-radius: 999px; font-size: 12px; font-weight: 700;
       color: color-mix(in srgb, var(--r, #2563EB) 72%, light-dark(#0B1530, #fff)); background: color-mix(in srgb, var(--r, #2563EB) 16%, light-dark(#fff, #0C1120));
     }
+    .krug-belgi { display: flex; flex-direction: column; gap: 6px; }
     .qalam { width: 44px; height: 44px; flex: none; margin: -6px -4px -6px 0; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: var(--matn-3); cursor: pointer; background: transparent; border: 0; }
     .juft { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
     .juft b { font-weight: 800; }
@@ -138,6 +166,26 @@ export class AparatlarBolimi {
   protected readonly yoqilgiId = signal(0);
   protected readonly pult = signal<number | null>(null);
   protected readonly bak = signal<number | null>(null);
+  /** Pult krugi (docs §8.16): "Pult 0 ga qaytadi" belgisi va krug hajmi; krugli rejimda pult ikki maydon — pult + krug — bilan kiritiladi. */
+  protected readonly krugBor = signal(false);
+  protected readonly krugHajm = signal<number | null>(null);
+  /** Operator yozgan pult/krug (null — hali yozilmagan: joriy umumiy qiymatdan hisoblanadi, shuning uchun hajm o'zgarganda qiymat o'zgarmaydi). */
+  protected readonly pultP = signal<number | null>(null);
+  protected readonly krugK = signal<number | null>(null);
+  protected readonly krugH = computed(() => { const h = this.krugBor() ? this.krugHajm() : null; return h != null && h > 0 ? h : null; });
+  private readonly asos = computed(() => krugKorinish(this.pult() ?? 0, this.krugH()));
+  protected readonly pultKorsat = computed(() => this.pultP() ?? (this.krugH() != null && this.pult() != null ? this.asos().pult : null));
+  protected readonly krugKorsat = computed(() => this.krugK() ?? (this.krugH() != null && this.pult() != null ? this.asos().krug : this.yangi() ? 1 : null));
+  /** `0 ≤ pult < H` buzilgan. */
+  protected readonly pultKatta = computed(() => { const p = this.pultKorsat(); const h = this.krugH(); return h != null && p != null && (litrSent(p) < 0 || litrSent(p) >= litrSent(h)); });
+  /** Krug raqami 1 yoki undan katta butun son. */
+  protected readonly krugRaqamiTogri = computed(() => { const k = this.krugKorsat(); return k != null && k >= 1 && Number.isInteger(k); });
+  /** Saqlanadigan UMUMIY pult: krugli rejimda `(krug − 1) × H + pult`, aks holda kiritilgan qiymat; to'liq emas/noto'g'ri bo'lsa null. */
+  protected readonly pultJami = computed<number | null>(() => {
+    if (!this.krugBor()) return this.pult();
+    const h = this.krugH(); const p = this.pultKorsat(); const k = this.krugKorsat();
+    return h != null && p != null && k != null && this.krugRaqamiTogri() && !this.pultKatta() ? krugdanJamiga(p, k, h) : null;
+  });
   protected sabab = '';
   protected readonly band = signal(false);
   protected readonly xato = signal<string | null>(null);
@@ -146,7 +194,7 @@ export class AparatlarBolimi {
   /** Maydonlar asl (saqlangan) qiymatdan farq qiladimi. */
   private ozgargan(): boolean {
     const a = this.tanlangan();
-    return !!a && (this.raqam() !== a.raqam || this.yoqilgiId() !== a.yoqilgiTuriId || this.pult() !== a.totalLitr || this.bak() !== a.bakQoldiq || !!this.sabab);
+    return !!a && (this.raqam() !== a.raqam || this.yoqilgiId() !== a.yoqilgiTuriId || this.pultJami() !== a.totalLitr || this.bak() !== a.bakQoldiq || !!this.sabab || this.krugBor() !== (a.krugHajmi != null) || (this.krugBor() && this.krugH() !== a.krugHajmi));
   }
 
   private readonly tanlangan = computed<AparatDto | null>(() => this.x.aparatlar().find((a) => a.id === this.tanlanganId()) ?? null);
@@ -156,7 +204,7 @@ export class AparatlarBolimi {
   protected readonly sababKerak = computed(() => {
     const a = this.tanlangan();
     if (this.yangi() || !a) return false;
-    return this.pult() !== a.totalLitr || this.bak() !== a.bakQoldiq;
+    return this.pultJami() !== a.totalLitr || this.bak() !== a.bakQoldiq;
   });
 
   constructor() {
@@ -188,6 +236,9 @@ export class AparatlarBolimi {
     this.raqam.set(a.raqam);
     this.yoqilgiId.set(a.yoqilgiTuriId);
     this.pult.set(a.totalLitr);
+    this.krugBor.set(a.krugHajmi != null);
+    this.krugHajm.set(a.krugHajmi);
+    this.pultP.set(null); this.krugK.set(null);
     this.bak.set(a.bakQoldiq);
     this.sabab = '';
     this.xato.set(null);
@@ -212,10 +263,24 @@ export class AparatlarBolimi {
     this.yoqilgiId.set(this.x.yoqilgilar()[0]?.id ?? 0);
     // Bo'sh maydon (placeholder "0"): "0.00" qiymat ustiga yozilganda raqamlar qo'shilib ketardi ("1000" → "10000").
     this.pult.set(null);
+    this.krugBor.set(false); this.krugHajm.set(null); this.pultP.set(null); this.krugK.set(null);
     this.bak.set(null);
     this.sabab = '';
     this.xato.set(null);
     this.urindi.set(false);
+  }
+
+  /** "Pult 0 ga qaytadi" belgisi: yoqilganda hajm 10 000 deb boshlanadi; o'chirilganda umumiy qiymat saqlanadi. */
+  protected krugAlmash(yoq: boolean) {
+    if (yoq) {
+      this.krugBor.set(true);
+      if (this.krugHajm() == null) this.krugHajm.set(10000);
+      return;
+    }
+    const j = this.pultJami();
+    this.krugBor.set(false);
+    if (j != null) this.pult.set(j);
+    this.pultP.set(null); this.krugK.set(null);
   }
 
   protected bekor() {
@@ -232,18 +297,22 @@ export class AparatlarBolimi {
     this.urindi.set(true);
     if (this.yoqilgiYoq()) return this.xato.set(this.til.t('Bosh_YoqilgiYoq'));
     const raqam = this.raqam();
-    const pult = this.pult();
+    const pult = this.pultJami();
     const bak = this.bak();
     if (!raqam || raqam <= 0 || !this.yoqilgiId()) return this.xato.set(this.til.t('Xato_Maydon'));
+    if (this.krugBor() && this.krugH() == null) return this.xato.set(this.til.t('Krug_XatoHajm'));
+    if (this.krugBor() && !this.krugRaqamiTogri()) return this.xato.set(this.til.t('Krug_XatoRaqam'));
+    if (this.krugBor() && this.pultKatta()) return this.xato.set(this.til.t('Krug_XatoKatta', litr(this.krugH() ?? 0)));
     if (pult == null || bak == null) return this.xato.set(this.til.t('Xato_Maydon'));
     if (pult < 0) return this.xato.set(this.til.t('Aparat_XatoPult'));
-    if (bak < 0) return this.xato.set(this.til.t('Aparat_XatoBakManfiy'));
+    // Manfiy bak (kirim yozilmay qolgan, smena yopilishida manfiyga tushgan) o'zgartirilmasa xato emas; qo'lda manfiy qiymat yozish taqiqlanadi.
+    if (bak < 0 && (this.yangi() || bak !== this.tanlangan()?.bakQoldiq)) return this.xato.set(this.til.t('Aparat_XatoBakManfiy'));
     if (this.x.aparatlar().some((a) => a.raqam === raqam && a.id !== this.tanlanganId())) return this.xato.set(this.til.t('Aparat_XatoRaqamBand'));
     this.xato.set(null);
     this.band.set(true);
     try {
       if (this.yangi()) {
-        await this.x.aparatYarat({ raqam, yoqilgiTuriId: this.yoqilgiId(), boshlangichTotalLitr: pult, boshlangichBakQoldiq: bak });
+        await this.x.aparatYarat({ raqam, yoqilgiTuriId: this.yoqilgiId(), boshlangichTotalLitr: pult, boshlangichBakQoldiq: bak, krugHajmi: this.krugH() });
         this.yangi.set(false);
         const yangiAparat = this.x.aparatlar().find((a) => a.raqam === raqam);
         if (yangiAparat) this.maydonlar(yangiAparat);
@@ -255,6 +324,8 @@ export class AparatlarBolimi {
         await this.x.aparatTahrirla(a.id, {
           raqam, yoqilgiTuriId: this.yoqilgiId(),
           totalLitr: pult !== a.totalLitr ? pult : null, bakQoldiq: bak !== a.bakQoldiq ? bak : null, sabab: o ? this.sabab.trim() : null,
+          // Krug hajmi: null — o'zgarmaydi, 0 — o'chiriladi, > 0 — o'rnatiladi (belgi olib tashlansa 0 yuboriladi, null emas)
+          krugHajmi: this.krugH() !== a.krugHajmi ? (this.krugH() ?? 0) : null,
         });
         this.sabab = '';
       }

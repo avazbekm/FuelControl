@@ -11,11 +11,12 @@ import type { NasiyaDto, NasiyaQaytishiDto, SmenaDto, SmenaKorsatkichDto, SmenaT
 import { Ikon } from '../../ui/ikon';
 import { smenaExcel } from './smena-excel';
 import { TuzatishDialog } from './tuzatish-dialog';
+import { PultQiymat } from '../../ui/krug';
 
 type Davr = '7kun' | 'shuoy' | 'otganoy';
 
 /** Aparat bo'yicha guruhlangan ko'rsatkichlar (narx o'zgarganda aparatda bir nechta segment bo'ladi). */
-interface AparatQatori { aparatId: number; raqam: number; yoqilgi: string; segmentlar: SmenaKorsatkichDto[]; litr: number; summa: number }
+interface AparatQatori { aparatId: number; raqam: number; yoqilgi: string; segmentlar: SmenaKorsatkichDto[]; litr: number; summa: number; /** Pult krugi (docs §8.16): ko'rsatish qoidasi — aparatning hozirgi sozlamasi. */ krugHajmi: number | null }
 interface HisobSatri { yorliq: string; qiymat: string; qalin?: boolean; ustChiziq?: boolean }
 
 const HODISALAR = ['SmenaOzgardi', 'NasiyaOzgardi', 'XarajatOzgardi', 'AparatOzgardi'];
@@ -27,7 +28,7 @@ const HODISALAR = ['SmenaOzgardi', 'NasiyaOzgardi', 'XarajatOzgardi', 'AparatOzg
  */
 @Component({
   selector: 'smenalar-sahifa',
-  imports: [Ikon, TuzatishDialog],
+  imports: [Ikon, TuzatishDialog, PultQiymat],
   templateUrl: './smenalar.html',
   styleUrl: './smenalar.scss',
 })
@@ -49,6 +50,8 @@ export class SmenalarSahifa {
   protected readonly operatorId = signal<number | null>(null);
   protected readonly operatorlar = signal<OperatorElement[]>([]);
   protected readonly smenalar = signal<SmenaDto[]>([]);
+  /** Aparat → krug hajmi (docs §8.16): Boshi/Oxiri ko'rsatkichlari krugli aparatda pult + krug ko'rinishida chiqadi. */
+  private readonly krugHajmlari = signal<Map<number, number | null>>(new Map());
   protected readonly joriy = signal<SmenaTafsilotDto | null>(null);
   protected readonly oxirgiYopilganId = signal<number | null>(null);
   protected readonly tafsilot = signal<SmenaTafsilotDto | null>(null);
@@ -119,7 +122,7 @@ export class SmenalarSahifa {
     const m = new Map<number, AparatQatori>();
     for (const k of t.korsatkichlar) {
       let q = m.get(k.aparatId);
-      if (!q) { q = { aparatId: k.aparatId, raqam: k.aparatRaqam, yoqilgi: k.yoqilgiNomi, segmentlar: [], litr: 0, summa: 0 }; m.set(k.aparatId, q); }
+      if (!q) { q = { aparatId: k.aparatId, raqam: k.aparatRaqam, yoqilgi: k.yoqilgiNomi, segmentlar: [], litr: 0, summa: 0, krugHajmi: this.krugHajmlari().get(k.aparatId) ?? null }; m.set(k.aparatId, q); }
       q.segmentlar.push(k);
       q.litr = Math.round((q.litr + k.litr) * 100) / 100;
       q.summa += k.summa;
@@ -170,11 +173,13 @@ export class SmenalarSahifa {
   private async royxatniYukla() {
     const [dan, gacha] = this.oraliq();
     try {
-      const [royxat, joriy, oxirgi] = await Promise.all([
+      const [royxat, joriy, oxirgi, aparatlar] = await Promise.all([
         this.server.smenalar(dan, gacha, this.operatorId() ?? undefined),
         this.server.joriySmena(),
         this.server.oxirgiYopilgan(),
+        this.server.aparatlar().catch(() => []),
       ]);
+      this.krugHajmlari.set(new Map(aparatlar.map((a) => [a.id, a.krugHajmi])));
       this.smenalar.set(royxat);
       this.joriy.set(joriy);
       this.oxirgiYopilganId.set(oxirgi?.smena.id ?? null);
@@ -226,7 +231,7 @@ export class SmenalarSahifa {
     if (!t || this.eksportBand()) return;
     this.eksportBand.set(true);
     try {
-      await smenaExcel(t, (k, ...a) => this.til.t(k, ...a));
+      await smenaExcel(t, (k, ...a) => this.til.t(k, ...a), (id) => this.krugHajmlari().get(id) ?? null);
       this.bildirish.korsat(this.til.t('FaylSaqlandi'));
       void this.server.auditEksport('Smena', `#${t.smena.id} — fuelcontrol-smena-${t.smena.id}.xlsx`);
     } catch (e) {

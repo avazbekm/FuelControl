@@ -1,14 +1,17 @@
-import { Component, computed, effect, inject, input, model, output, signal, untracked } from '@angular/core';
+import { Component, computed, effect, inject, input, model, output, signal, untracked, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Til } from '../../core/til';
 import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { litr, pul } from '../../core/format';
-import { litrSent, segmentLitri, segmentSummasi, sentLitr } from '../../core/hisob';
+import { BakOgohi, PultNatijasi, bakOgohi, joriyKorsatkich, krugKorinish, litrSent, narxSegmentlari, pultJamiga, segmentLitri, segmentSummasi, sentLitr } from '../../core/hisob';
 import type { AparatDto, AparatKorsatkichDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { Oyna } from '../../ui/oyna';
 import { SonKiritish } from '../../ui/son-kiritish';
 import { EnterKeyingi } from '../../ui/enter-keyingi';
+import { BakOgohMatn, BakOgohQatori } from '../../ui/bak-ogoh';
+import { PultTasdiq } from '../../ui/pult-tasdiq';
+import { KrugIzoh, KrugQatori, PultQiymat } from '../../ui/krug';
 import { SozlamalarXizmati } from './sozlamalar-xizmati';
 
 interface AparatQatori {
@@ -16,10 +19,16 @@ interface AparatQatori {
   /** Oldingi ko'rsatkich: ochiq smenada oxirgi qayd etilgan segmentning `oxiri`, yo'q bo'lsa aparat `TotalLitr` (§7.1). */
   oldingi: number;
   segmentBor: boolean;
+  /** Operator yozgan pult qiymati (krugli aparatda krugsiz qism). */
   qiymat: number | null;
+  /** Umumiy litr (API'ga yuboriladi) — krugli aparatda pultdan o'giriladi (docs §8.16). */
+  jami: number | null;
+  krug: PultNatijasi | null;
   holat: 'bosh' | 'xato' | 'ok';
   litr: number;
   summa: number;
+  /** Bakdagidan ko'p litr chiqsa (docs §8.15): shu smenadagi jami litr (qayd etilgan segmentlar + shu qator) > `BakQoldiq`. */
+  ogoh: BakOgohi | null;
 }
 
 /**
@@ -28,10 +37,10 @@ interface AparatQatori {
  */
 @Component({
   selector: 'narx-dialog',
-  imports: [FormsModule, Ikon, Oyna, SonKiritish, EnterKeyingi],
+  imports: [FormsModule, Ikon, Oyna, SonKiritish, EnterKeyingi, BakOgohMatn, PultTasdiq, PultQiymat, KrugIzoh],
   template: `
     <oyna [(ochiq)]="ochiq" [sarlavha]="til.t('Narx_Sarlavha')" [tagsarlavha]="til.t('Narx_Kontekst', yoqilgi()?.nomi ?? '')" ikon="tag" [kenglik]="620">
-      <form class="forma-ustun" enterKeyingi (ngSubmit)="saqla()" autocomplete="off" novalidate>
+      <form class="forma-ustun" enterKeyingi (ngSubmit)="saqlaBos()" autocomplete="off" novalidate>
         <div class="ikki-ustun narx-juft">
           <div class="maydon">
             <span class="yorliq">{{ til.t('Narx_Hozirgi') }}</span>
@@ -58,11 +67,13 @@ interface AparatQatori {
                   <span class="nom"><b>{{ til.t('Aparat_Raqami', q.aparat.raqam) }}</b>
                     <span class="yoq-pill" [style.--r]="yoqilgi()?.rang">{{ q.aparat.yoqilgiNomi }}</span>
                   </span>
-                  <span class="oldingi">{{ til.t(q.segmentBor ? 'Narx_OxirgiQayd' : 'Narx_SmenaBoshida') }}<b class="son">{{ litr(q.oldingi) }}</b></span>
+                  <span class="oldingi">{{ til.t(q.segmentBor ? 'Narx_OxirgiQayd' : 'Narx_SmenaBoshida') }}<b class="son"><pult-qiymat [jami]="q.oldingi" [krugHajmi]="q.aparat.krugHajmi" /></b></span>
                   <son-kiritish [qiymat]="q.qiymat" (qiymatChange)="qiymatYoz(q.aparat.id, $event)" [kasr]="2" [sinf]="q.holat === 'xato' ? 'kiritish korsatkich xato' : 'kiritish korsatkich'"
-                                [ariaLabel]="til.t('Narx_KorsatkichLabel', til.t('Aparat_Raqami', q.aparat.raqam))" placeholder="0.00" />
+                                [ariaLabel]="til.t('Narx_KorsatkichLabel', til.t('Aparat_Raqami', q.aparat.raqam))" [placeholder]="pultMatni(q.oldingi, q.aparat.krugHajmi)" />
                 </div>
-                <span class="natija son" [class.xato-matn]="q.holat === 'xato'">{{ natijaMatni(q) }}</span>
+                @if (!q.krug?.xato) { <span class="natija son" [class.xato-matn]="q.holat === 'xato'">{{ natijaMatni(q) }}</span> }
+                <krug-izoh [natija]="q.krug" [krugHajmi]="q.aparat.krugHajmi" />
+                <bak-ogoh-matn [ogoh]="q.ogoh" />
               </div>
             } @empty { <div class="bosh">{{ til.t('Narx_AparatYoq') }}</div> }
           </div>
@@ -87,6 +98,7 @@ interface AparatQatori {
         </div>
       </form>
     </oyna>
+    <pult-tasdiq [krugQatorlari]="krugQatorlari()" [bakQatorlari]="bakQatorlari()" (davom)="saqla()" />
   `,
   styles: `
     .narx-juft { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
@@ -133,6 +145,7 @@ export class NarxDialog {
   protected readonly yangiNarx = signal<number | null>(null);
   private readonly qiymatlar = signal<Record<number, number | null>>({});
   protected readonly band = signal(false);
+  private readonly tasdiq = viewChild(PultTasdiq);
   protected readonly xato = signal<string | null>(null);
 
   /** Ochiq smena (dialog ochilganda yangilanadi). */
@@ -143,16 +156,18 @@ export class NarxDialog {
     const smena = this.x.joriySmena();
     if (!y || !smena) return [];
     const q = this.qiymatlar();
-    return this.x.aparatlar().filter((a) => a.yoqilgiTuriId === y.id).map((a) => {
-      const segmentlar = smena.korsatkichlar.filter((k) => k.aparatId === a.id && k.narxOzgarishida);
-      const oxirgi = segmentlar.length ? segmentlar[segmentlar.length - 1] : null;
-      const oldingi = oxirgi ? oxirgi.oxiri : a.totalLitr;
+    return this.x.aparatlar().filter((a) => a.yoqilgiTuriId === y.id).map((a): AparatQatori => {
+      // Oldingi ko'rsatkich — Savdo kartasi va yopishdagi bilan bir manba (§8.13)
+      const { qiymat: oldingi, segment } = joriyKorsatkich(a, smena.korsatkichlar);
       const qiymat = q[a.id] ?? null;
-      if (qiymat == null) return { aparat: a, oldingi, segmentBor: !!oxirgi, qiymat, holat: 'bosh', litr: 0, summa: 0 };
-      // Yangi ko'rsatkich oldingisidan kichik bo'lsa — rad; teng bo'lsa (0 L sotilgan) — xato emas.
-      if (litrSent(qiymat) < litrSent(oldingi)) return { aparat: a, oldingi, segmentBor: !!oxirgi, qiymat, holat: 'xato', litr: 0, summa: 0 };
-      const l = segmentLitri(oldingi, qiymat);
-      return { aparat: a, oldingi, segmentBor: !!oxirgi, qiymat, holat: 'ok', litr: l, summa: segmentSummasi(l, y.narx) };
+      const krug = qiymat != null ? pultJamiga(qiymat, oldingi, a.krugHajmi) : null;
+      const jami = krug && !krug.xato ? krug.jami : null;
+      const asos = { aparat: a, oldingi, segmentBor: !!segment, qiymat, jami, krug };
+      if (qiymat == null) return { ...asos, holat: 'bosh', litr: 0, summa: 0, ogoh: null };
+      // Yangi ko'rsatkich oldingisidan kichik (krugli aparatda — pult `0 ≤ p < H` dan tashqarida) bo'lsa — rad; teng bo'lsa (0 L sotilgan) — xato emas.
+      if (krug!.xato || (jami != null && litrSent(jami) < litrSent(oldingi))) return { ...asos, holat: 'xato', litr: 0, summa: 0, ogoh: null };
+      const l = segmentLitri(oldingi, jami!);
+      return { ...asos, holat: 'ok', litr: l, summa: segmentSummasi(l, y.narx), ogoh: bakOgohi(oldingi, jami, a.bakQoldiq, narxSegmentlari(smena.korsatkichlar, a.id)) };
     });
   });
   protected readonly hammasiTayyor = computed(() => this.qatorlar().length > 0 && this.qatorlar().every((q) => q.holat === 'ok'));
@@ -162,6 +177,15 @@ export class NarxDialog {
     this.hammasiTayyor() ? this.til.t('Narx_JamiLitr', litr(this.jamiLitr()), pul(this.yoqilgi()?.narx ?? 0)) : this.til.t('Narx_KorsatkichlarniTogri'));
 
   /** Narx haqiqatan o'zgargan va (ochiq smenada) hamma ko'rsatkich to'g'ri. */
+  /** Krug oshgan aparatlar — "Pult krugi oshdi" tasdig'i (docs §8.16). */
+  protected readonly krugQatorlari = computed<KrugQatori[]>(() =>
+    this.qatorlar().filter((q) => q.krug?.oshdi && q.holat === 'ok').map((q) => ({ raqam: q.aparat.raqam, krugdan: q.krug!.krug! - 1, krugga: q.krug!.krug!, sotilgan: q.litr })));
+  protected readonly pultMatni = (jami: number, h: number | null | undefined) => litr(krugKorinish(jami, h).pult);
+
+  /** Bakdagidan ko'p litr chiqayotgan aparatlar — "Baribir saqlash" tasdig'i uchun. */
+  protected readonly bakQatorlari = computed<BakOgohQatori[]>(() =>
+    this.qatorlar().filter((q) => q.ogoh).map((q) => ({ raqam: q.aparat.raqam, chiqadi: q.ogoh!.chiqadi, bakda: q.ogoh!.bakda })));
+
   protected readonly saqlash = computed(() => {
     const y = this.yoqilgi();
     const n = this.yangiNarx();
@@ -191,11 +215,17 @@ export class NarxDialog {
     return this.til.t('Narx_Sotilgan', litr(q.litr), pul(this.yoqilgi()?.narx ?? 0), pul(q.summa));
   }
 
+  /** Saqlash tugmasi: tasdiqlar zanjiri (bak ogohlantirishi, bloklamaydi), so'ng saqlash. */
+  protected saqlaBos() {
+    if (!this.saqlash()) return;
+    this.tasdiq()?.boshla();
+  }
+
   protected async saqla() {
     const y = this.yoqilgi();
     const n = this.yangiNarx();
     if (!y || !n || !this.saqlash()) return;
-    const korsatkichlar: AparatKorsatkichDto[] = this.smenaId() ? this.qatorlar().map((q) => ({ aparatId: q.aparat.id, qiymat: q.qiymat as number })) : [];
+    const korsatkichlar: AparatKorsatkichDto[] = this.smenaId() ? this.qatorlar().map((q) => ({ aparatId: q.aparat.id, qiymat: q.jami as number })) : [];
     this.xato.set(null);
     this.band.set(true);
     try {

@@ -38,15 +38,15 @@
         <div class="plitkalar">
           <div class="plitka qoldiq">
             <span class="ikon-doira"><ikon nomi="cash" [olcham]="19" [qalinlik]="2" /></span>
-            <div class="matn"><span class="yorliq">{{ til.t('Savdo_QaytimNaqd') }}</span><span class="xulosa-qiymat">{{ pul(t.smena.ochishQaytim) }} <small>{{ til.t('Som') }}</small></span></div>
+            <div class="matn"><span class="yorliq">{{ til.t('Savdo_QaytimNaqd') }}</span><span class="xulosa-qiymat" sigdir>{{ pul(t.smena.ochishQaytim) }} <small>{{ til.t('Som') }}</small></span></div>
           </div>
           <div class="plitka qoldiq">
             <span class="ikon-doira moviy"><ikon nomi="card" [olcham]="19" [qalinlik]="2" /></span>
-            <div class="matn"><span class="yorliq">{{ til.t('Savdo_TerminalPlastik') }}</span><span class="xulosa-qiymat">{{ pul(t.smena.ochishTerminal) }} <small>{{ til.t('Som') }}</small></span><span class="izoh">{{ til.t('Savdo_TerminalIzoh') }}</span></div>
+            <div class="matn"><span class="yorliq">{{ til.t('Savdo_TerminalPlastik') }}</span><span class="xulosa-qiymat" sigdir>{{ pul(t.smena.ochishTerminal) }} <small>{{ til.t('Som') }}</small></span><span class="izoh">{{ til.t('Savdo_TerminalIzoh') }}</span></div>
           </div>
           <div class="plitka qoldiq">
             <span class="ikon-doira binafsha"><ikon nomi="wallet" [olcham]="19" [qalinlik]="2" /></span>
-            <div class="matn"><span class="yorliq">{{ til.t('Savdo_DepozitKarta') }}</span><span class="xulosa-qiymat">{{ pul(t.smena.ochishDepozit) }} <small>{{ til.t('Som') }}</small></span><span class="izoh">{{ til.t('Savdo_DepozitIzoh') }}</span></div>
+            <div class="matn"><span class="yorliq">{{ til.t('Savdo_DepozitKarta') }}</span><span class="xulosa-qiymat" sigdir>{{ pul(t.smena.ochishDepozit) }} <small>{{ til.t('Som') }}</small></span><span class="izoh">{{ til.t('Savdo_DepozitIzoh') }}</span></div>
           </div>
         </div>
         <ol class="bosqichlar" [attr.aria-label]="til.t('Savdo_Bosqichlar')">
@@ -89,7 +89,7 @@
     <section class="shisha karta" aria-labelledby="aparat-s">
       <div class="karta-bosh">
         <h2 id="aparat-s">{{ til.t('Savdo_Aparatlar') }}</h2>
-        <span class="karta-izoh">{{ til.t('Savdo_AparatlarIzoh', oxirgiYopilganVaqt()) }}</span>
+        <span class="karta-izoh">{{ til.t('Savdo_AparatlarIzohQayd', oxirgiYopilganVaqt()) }}</span>
       </div>
       <div class="aparatlar">
         @for (a of aparatlar(); track a.id) {
@@ -100,9 +100,16 @@
             </div>
             <span class="karta-izoh">{{ pul(narx(a.yoqilgiTuriId)) }} {{ til.t('Savdo_SomLitr') }}</span>
             <div class="chiziq-och"></div>
+            @let p = pult(a);
             <div class="ustun-kichik">
               <span class="yorliq">{{ til.t('Savdo_PultKorsatkichi') }}</span>
-              <span class="pult-qiymat">{{ litr(a.totalLitr) }} <small>L</small></span>
+              <span class="pult-qiymat" data-test="pult"><pult-qiymat [jami]="p.qiymat" [krugHajmi]="a.krugHajmi" birlik /></span>
+              @if (p.segment) {
+                <span class="karta-izoh pult-izoh" data-test="pult-izoh">
+                  {{ til.t('NarxQayd_Izoh') }}
+                  @if (auth.bor('KorsatkichTuzatish')) { <button type="button" class="havola" data-test="pult-tuzatish" (click)="tuzatishOch(a)">{{ til.t('NarxQayd_Tuzatish') }}</button> }
+                </span>
+              }
             </div>
             <div class="bak-blok">
               <span class="bak-bosh"><ikon nomi="database" [olcham]="14" [qalinlik]="2" /><span class="yorliq">{{ til.t('Savdo_BakQoldigi') }}</span></span>
@@ -308,7 +315,7 @@
             <span class="yorliq">{{ til.t('Savdo_Aparat') }}</span><span class="yorliq o">{{ til.t('Savdo_Pult') }}</span><span class="yorliq o">{{ til.t('Savdo_Bak') }}</span>
             @for (a of aparatlar(); track a.id) {
               <span class="h-yacheyka qalin">{{ a.raqam }} · {{ a.yoqilgiNomi }}</span>
-              <span class="h-yacheyka o">{{ litr(a.totalLitr) }}</span>
+              <span class="h-yacheyka o"><pult-qiymat [jami]="a.totalLitr" [krugHajmi]="a.krugHajmi" /></span>
               <span class="h-yacheyka o qalin" [class.manfiy]="a.bakQoldiq < 0">{{ litr(a.bakQoldiq) }}</span>
             }
           </div>
@@ -323,3 +330,4 @@
 <qarz-qaytdi-dialog [(ochiq)]="qaytishOchiq" (saqlandi)="yukla(true)" />
 <xarajat-dialog [(ochiq)]="xarajatOchiq" (saqlandi)="yukla(true)" />
 <bak-kirim-dialog [(ochiq)]="bakOchiq" (saqlandi)="yukla(true)" />
+<narx-korsatkich-dialog [(ochiq)]="tuzatishOchiq" [aparat]="tuzatishAparat()" [tafsilot]="joriy()" (tuzatildi)="yukla(true)" />

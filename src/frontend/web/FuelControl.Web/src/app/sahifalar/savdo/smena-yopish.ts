@@ -1,4 +1,4 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Til } from '../../core/til';
@@ -8,27 +8,37 @@ import { Bildirish, xatoMatni } from '../../core/bildirish';
 import { jonliYangila } from '../../core/malumot';
 import { YopishQoralama } from '../../core/yopish-qoralama';
 import { davomiylikSD, ishoraPul, kunQisqa, litr, pul, soat } from '../../core/format';
-import { berilganNasiyalar, segmentLitri, segmentSummasi, smenaHisobla } from '../../core/hisob';
+import { BakOgohi, PultNatijasi, bakOgohi, berilganNasiyalar, joriyKorsatkich, krugKorinish, narxSegmentlari, pultJamiga, segmentLitri, segmentSummasi, smenaHisobla } from '../../core/hisob';
 import type { AparatDto, SmenaKorsatkichDto, SmenaTafsilotDto, YoqilgiTuriDto } from '../../api/model';
 import { Ikon } from '../../ui/ikon';
 import { Oyna } from '../../ui/oyna';
 import { YoqilgiPill } from '../../ui/belgilar';
 import { SonKiritish } from '../../ui/son-kiritish';
 import { EnterKeyingi } from '../../ui/enter-keyingi';
+import { BakOgohMatn, BakOgohQatori } from '../../ui/bak-ogoh';
+import { PultTasdiq } from '../../ui/pult-tasdiq';
+import { KrugIzoh, KrugQatori, PultQiymat } from '../../ui/krug';
+import { Sigdir } from '../../ui/sigdir';
 import { NasiyaDialog } from '../../ui/dialoglar/nasiya-dialog';
 import { QarzQaytdiDialog } from '../../ui/dialoglar/qarz-qaytdi-dialog';
+import { NarxKorsatkichDialog } from '../../ui/dialoglar/narx-korsatkich-dialog';
 import { XarajatDialog } from '../../ui/dialoglar/xarajat-dialog';
 
 interface Qator {
   aparat: AparatDto;
   rang: string;
   narx: number;
-  /** "Oldingi": ochiq smenada qayd etilgan oxirgi segment `oxiri`, aks holda `AparatDto.totalLitr` (docs §7.1). */
+  /** "Oldingi": ochiq smenada qayd etilgan oxirgi segment `oxiri`, aks holda `AparatDto.totalLitr` (docs §7.1, §8.13 — Savdo kartasi bilan bir manba). */
   oldingi: number;
   /** Narx o'zgarishida qayd etilgan (eski narxdagi) segmentlar. */
   segmentlar: SmenaKorsatkichDto[];
+  /** Yangi ko'rsatkich — UMUMIY litr (API qiymati); pult krugli aparatda kiritilgan pult qiymatidan o'giriladi (docs §8.16). */
   yangi: number | null;
+  /** Kiritilgan pult qiymatining krug natijasi (krugsiz aparatda ham; `oshdi` faqat krugli). */
+  krug: PultNatijasi | null;
   xato: boolean;
+  /** Bakdagidan ko'p litr chiqayotgan bo'lsa (bloklamaydi): shu smenadagi jami litr (segmentlar + shu qator) > `BakQoldiq` (docs §8.15). */
+  ogoh: BakOgohi | null;
   sotilgan: number | null;
   summa: number | null;
 }
@@ -39,7 +49,7 @@ interface Qator {
  */
 @Component({
   selector: 'smena-yopish-sahifa',
-  imports: [RouterLink, FormsModule, Ikon, Oyna, YoqilgiPill, SonKiritish, EnterKeyingi, NasiyaDialog, QarzQaytdiDialog, XarajatDialog],
+  imports: [RouterLink, FormsModule, Ikon, Oyna, YoqilgiPill, SonKiritish, EnterKeyingi, NasiyaDialog, QarzQaytdiDialog, XarajatDialog, BakOgohMatn, PultTasdiq, NarxKorsatkichDialog, PultQiymat, KrugIzoh, Sigdir],
   templateUrl: './smena-yopish.html',
   styleUrl: './smena-yopish.scss',
 })
@@ -74,6 +84,12 @@ export class SmenaYopishSahifa {
   protected readonly qaytishOchiq = signal(false);
   protected readonly xarajatOchiq = signal(false);
   protected readonly tasdiqOchiq = signal(false);
+  private readonly tasdiq = viewChild(PultTasdiq);
+  /** "Tuzatish" havolasi bosilgan aparat (narx o'zgarishidagi ko'rsatkichni tuzatish, 14-band). */
+  protected readonly tuzatishOchiq = signal(false);
+  private readonly tuzatishId = signal<number | null>(null);
+  protected readonly tuzatishAparat = computed(() => this.aparatlar().find((a) => a.id === this.tuzatishId()) ?? null);
+  protected tuzatishOch(a: AparatDto) { this.tuzatishId.set(a.id); this.tuzatishOchiq.set(true); }
   protected readonly band = signal(false);
   protected readonly yopishXato = signal<string | null>(null);
 
@@ -85,15 +101,26 @@ export class SmenaYopishSahifa {
     const yangi = this.yangi();
     return [...this.aparatlar()].sort((a, b) => a.raqam - b.raqam).map((a) => {
       const yoq = this.yoqilgilar().find((y) => y.id === a.yoqilgiTuriId);
-      const segmentlar = t.korsatkichlar.filter((k) => k.aparatId === a.id && k.narxOzgarishida);
-      const oldingi = segmentlar.length ? segmentlar[segmentlar.length - 1].oxiri : a.totalLitr;
+      const segmentlar = narxSegmentlari(t.korsatkichlar, a.id);
+      const oldingi = joriyKorsatkich(a, t.korsatkichlar).qiymat;
       const narx = yoq?.narx ?? 0;
-      const y = yangi[a.id] ?? null;
-      const xato = y != null && y < oldingi;
-      const sotilgan = y != null && !xato ? segmentLitri(oldingi, y) : null;
-      return { aparat: a, rang: yoq?.rang ?? '#2563EB', narx, oldingi, segmentlar, yangi: y, xato, sotilgan, summa: sotilgan != null ? segmentSummasi(sotilgan, narx) : null };
+      const p = yangi[a.id] ?? null;   // operator yozgan pult qiymati
+      const krug = p != null ? pultJamiga(p, oldingi, a.krugHajmi) : null;
+      const jami = krug && !krug.xato ? krug.jami : null;
+      const xato = p != null && (!!krug?.xato || (jami != null && jami < oldingi));
+      const y = xato ? null : jami;
+      const sotilgan = y != null ? segmentLitri(oldingi, y) : null;
+      return { aparat: a, rang: yoq?.rang ?? '#2563EB', narx, oldingi, segmentlar, yangi: y, krug, xato, ogoh: bakOgohi(oldingi, y, a.bakQoldiq, segmentlar), sotilgan, summa: sotilgan != null ? segmentSummasi(sotilgan, narx) : null };
     });
   });
+  /** Bakdagidan ko'p litr chiqayotgan aparatlar — yopishdan oldingi tasdiq ro'yxati. */
+  protected readonly bakQatorlari = computed<BakOgohQatori[]>(() =>
+    this.qatorlar().filter((r) => r.ogoh).map((r) => ({ raqam: r.aparat.raqam, chiqadi: r.ogoh!.chiqadi, bakda: r.ogoh!.bakda })));
+  /** Krug oshgan aparatlar — yopishdan oldingi "Pult krugi oshdi" tasdig'i (docs §8.16). */
+  protected readonly krugQatorlari = computed<KrugQatori[]>(() =>
+    this.qatorlar().filter((r) => r.krug?.oshdi && r.sotilgan != null).map((r) => ({ raqam: r.aparat.raqam, krugdan: r.krug!.krug! - 1, krugga: r.krug!.krug!, sotilgan: r.sotilgan! })));
+  /** Pult qiymati (krugli aparatda krugsiz qism) — placeholder uchun. */
+  protected readonly pultMatni = (jami: number, h: number | null | undefined) => litr(krugKorinish(jami, h).pult);
   protected readonly tayyorAparatlar = computed(() => this.qatorlar().length > 0 && this.qatorlar().every((r) => r.sotilgan != null));
   protected readonly jamiLitr = computed(() => Math.round(this.qatorlar().reduce((s, r) => s + r.segmentlar.reduce((x, g) => x + Math.round(g.litr * 100), 0) + Math.round((r.sotilgan ?? 0) * 100), 0)) / 100);
   protected readonly jamiSavdo = computed(() => this.qatorlar().reduce((s, r) => s + r.segmentlar.reduce((x, g) => x + g.summa, 0) + (r.summa ?? 0), 0));
@@ -131,7 +158,8 @@ export class SmenaYopishSahifa {
     const l: string[] = [];
     for (const r of this.qatorlar()) {
       const nomi = this.til.t('Aparat_Raqami', r.aparat.raqam);
-      if (r.xato) l.push(this.til.t('Yopish_SababKichik', nomi, litr(r.oldingi)));
+      if (r.krug?.xato) l.push(`${nomi}: ${this.til.t('Krug_XatoKatta', litr(r.aparat.krugHajmi ?? 0))}`);
+      else if (r.xato) l.push(this.til.t('Yopish_SababKichik', nomi, litr(r.oldingi)));
       else if (r.yangi == null) l.push(this.til.t('Yopish_SababBosh', nomi));
     }
     if (this.terminal() == null) l.push(this.til.t('Yopish_SababTerminal'));
@@ -216,6 +244,11 @@ export class SmenaYopishSahifa {
   protected ayirma(n: number): string { const r = Math.round(n); return r === 0 ? '0' : r > 0 ? '−' + pul(r) : '+' + pul(-r); }
   /** Kirim: "+1 000"; nol (yoki yaxlitlanganda nol) — ishorasiz "0". */
   protected qosh(n: number): string { const r = Math.round(n); return r === 0 ? '0' : r > 0 ? '+' + pul(r) : pul(r); }
+
+  /**
+   * "Smenani yopish" tugmasi: avval tasdiqlar zanjiri (bakdagidan ko'p litr chiqsa bak tasdig'i), keyin odatdagi "Smenani yopasizmi?".
+   */
+  protected yopishBos() { this.tasdiq()?.boshla(); }
 
   async yop() {
     const t = this.tafsilot();

@@ -27,7 +27,7 @@
       <!-- Chap ustun -->
       <div class="chap">
         <!-- 1. Aparat ko'rsatkichlari -->
-        <section class="shisha karta" aria-labelledby="k-s">
+        <section class="shisha karta yopish-karta" aria-labelledby="k-s">
           <div class="qator bosqich-bosh">
             <span class="bosqich-raqam">1</span>
             <div class="bosh-joy"><h2 id="k-s">{{ til.t('Yopish_AparatKorsatkichlari') }}</h2><span class="karta-izoh">{{ til.t('Yopish_AparatIzoh') }}</span></div>
@@ -47,6 +47,7 @@
                   <div class="j-segment">
                     <ikon nomi="tag" [olcham]="13" [qalinlik]="2" />
                     <span>{{ til.t('Yopish_EskiNarxda', til.t('Aparat_Raqami', r.aparat.raqam), litr(g.litr), pul(g.narx), pul(g.summa)) }}</span>
+                    @if ($last && auth.bor('KorsatkichTuzatish')) { <button type="button" class="havola" data-test="segment-tuzatish" (click)="tuzatishOch(r.aparat)">{{ til.t('NarxQayd_Tuzatish') }}</button> }
                   </div>
                 }
                 <div class="j-qator" role="row">
@@ -54,24 +55,26 @@
                     <b>{{ til.t('Aparat_Raqami', r.aparat.raqam) }}</b>
                     <yoqilgi-pill [nomi]="r.aparat.yoqilgiNomi" [rang]="r.rang" />
                   </span>
-                  <span class="j-hujayra o oddiy" [attr.data-yorliq]="til.t('Yopish_Oldingi')">{{ litr(r.oldingi) }}</span>
+                  <span class="j-hujayra o oddiy" [attr.data-yorliq]="til.t('Yopish_Oldingi')"><pult-qiymat [jami]="r.oldingi" [krugHajmi]="r.aparat.krugHajmi" /></span>
                   <span class="j-hujayra j-kiritish" [attr.data-yorliq]="til.t('Yopish_Yangi')">
                     <son-kiritish [qiymat]="yangi()[r.aparat.id] ?? null" (qiymatChange)="yangiOzgar(r.aparat.id, $event)" [kasr]="2" [sinf]="r.xato ? 'kiritish yopish-in xato' : 'kiritish yopish-in'"
-                                  [placeholder]="litr(r.oldingi)" [ariaLabel]="til.t('Aparat_Raqami', r.aparat.raqam) + ' — ' + til.t('Yopish_Yangi')" [avto]="$first" />
+                                  [placeholder]="pultMatni(r.oldingi, r.aparat.krugHajmi)" [ariaLabel]="til.t('Aparat_Raqami', r.aparat.raqam) + ' — ' + til.t('Yopish_Yangi')" [avto]="$first" />
                   </span>
-                  <span class="j-hujayra o qalin" [attr.data-yorliq]="til.t('Yopish_Sotilgan')">{{ r.sotilgan != null ? litr(r.sotilgan) + ' L' : '—' }}</span>
+                  <span class="j-hujayra o qalin" sigdir [attr.data-yorliq]="til.t('Yopish_Sotilgan')">{{ r.sotilgan != null ? litr(r.sotilgan) + ' L' : '—' }}</span>
                   <span class="j-hujayra o oddiy" [attr.data-yorliq]="til.t('Yopish_Narx')">{{ pul(r.narx) }}</span>
-                  <span class="j-hujayra o qalin" [attr.data-yorliq]="til.t('Yopish_Summa')">{{ r.summa != null ? pul(r.summa) : '—' }}</span>
+                  <span class="j-hujayra o qalin" sigdir [attr.data-yorliq]="til.t('Yopish_Summa')">{{ r.summa != null ? pul(r.summa) : '—' }}</span>
                 </div>
-                @if (r.xato) {
+                @if (r.xato && !r.krug?.xato) {
                   <span class="j-xato" role="alert"><ikon nomi="warning" [olcham]="14" [qalinlik]="2" /> {{ til.t('Yopish_OldingidanKichik', litr(r.oldingi)) }}</span>
                 }
+                <krug-izoh [natija]="r.krug" [krugHajmi]="r.aparat.krugHajmi" />
+                <bak-ogoh-matn [ogoh]="r.ogoh" />
               </div>
             }
             <div class="j-qator j-jami">
               <span class="qalin">{{ til.t('Yopish_Jami') }}</span><span></span><span></span>
-              <span class="o jami-litr">{{ litr(jamiLitr()) }} L</span><span></span>
-              <span class="o jami-summa">{{ pul(jamiSavdo()) }}</span>
+              <span class="o jami-litr" sigdir>{{ litr(jamiLitr()) }} L</span><span></span>
+              <span class="o jami-summa" sigdir>{{ pul(jamiSavdo()) }} <small>{{ til.t('Som') }}</small></span>
             </div>
           </div>
         </section>
@@ -165,7 +168,7 @@
         <div class="kutilgan">
           <span class="yorliq oq">{{ til.t('Yopish_KassadaBolishiKerak') }}</span>
           @if (hisob(); as h) {
-            <span class="katta-son" data-test="kutilgan">{{ pul(h.kutilgan) }} <small>{{ til.t('Som') }}</small></span>
+            <span class="katta-son" sigdir data-test="kutilgan">{{ pul(h.kutilgan) }} <small>{{ til.t('Som') }}</small></span>
           } @else {
             <!-- Hisob chiqmasa "— so'm" o'rniga: nima yetishmasligi (qaysi aparat, nega) va kiritilganlar bo'yicha taxminiy natija -->
             <div class="sabab-blok" data-test="sabablar" role="status">
@@ -184,13 +187,13 @@
             @case ('kamomat') {
               <div class="farq-karta kam">
                 <div class="matnlar"><b>{{ til.t('Savdo_Kamomat') }}</b><span>{{ til.t('Yopish_OylikdanAyiriladi', t.smena.operatorIsmi) }}</span></div>
-                <span class="farq-son" data-test="farq">−{{ pul(-hisob()!.farq!) }}</span>
+                <span class="farq-son" sigdir data-test="farq">−{{ pul(-hisob()!.farq!) }}</span>
               </div>
             }
             @case ('ortiqcha') {
               <div class="farq-karta ort">
                 <div class="matnlar"><b>{{ til.t('Savdo_Ortiqcha') }}</b><span>{{ til.t('Yopish_OrtiqchaYoziladi') }}</span></div>
-                <span class="farq-son" data-test="farq">+{{ pul(hisob()!.farq!) }}</span>
+                <span class="farq-son" sigdir data-test="farq">+{{ pul(hisob()!.farq!) }}</span>
               </div>
             }
             @case ('teng') {
@@ -205,7 +208,7 @@
         </div>
         @if (yopishXato()) { <div class="yopish-xato" role="alert">{{ yopishXato() }}</div> }
         @if (yopsaBoladi()) {
-          <button type="button" class="tugma yashil katta yopish-katta" data-enter-oxirgi [disabled]="band()" (click)="tasdiqOchiq.set(true)">
+          <button type="button" class="tugma yashil katta yopish-katta" data-enter-oxirgi [disabled]="band()" (click)="yopishBos()">
             @if (band()) { <span class="aylanma"></span> } @else { <ikon nomi="check" [olcham]="18" [qalinlik]="2.4" /> } {{ til.t('Savdo_SmenaniYopish') }}
           </button>
         } @else {
@@ -231,6 +234,8 @@
   </div>
 </oyna>
 
+<pult-tasdiq [krugQatorlari]="krugQatorlari()" [bakQatorlari]="bakQatorlari()" (davom)="tasdiqOchiq.set(true)" />
 <nasiya-dialog [(ochiq)]="nasiyaOchiq" (saqlandi)="yukla(true)" />
 <qarz-qaytdi-dialog [(ochiq)]="qaytishOchiq" (saqlandi)="yukla(true)" />
 <xarajat-dialog [(ochiq)]="xarajatOchiq" (saqlandi)="yukla(true)" />
+<narx-korsatkich-dialog [(ochiq)]="tuzatishOchiq" [aparat]="tuzatishAparat()" [tafsilot]="tafsilot()" (tuzatildi)="yukla(true)" />

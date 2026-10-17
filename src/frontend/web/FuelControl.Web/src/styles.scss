@@ -173,6 +173,10 @@ input::placeholder, textarea::placeholder { color: var(--matn-4); opacity: 1; }
 .karta { padding: 20px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
 .karta-bosh { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
 .karta-izoh { font-size: 12.5px; color: var(--matn-2); }
+/* Matn ichidagi tugma-havola (masalan, "Tuzatish") */
+.havola { appearance: none; border: 0; background: none; padding: 2px 3px; margin: -2px 0; font: inherit; font-weight: 700; color: var(--asosiy-toq); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; border-radius: 4px; }
+.havola:hover { opacity: 0.8; }
+.havola:focus-visible { outline: 2px solid var(--asosiy-toq); outline-offset: 1px; }
 .plitka { background: var(--plitka-fon); border: 1px solid var(--plitka-chegara); border-radius: 18px; padding: 14px 16px; min-width: 0; }
 .plitka.katta { border-radius: 20px; padding: 16px; }
 

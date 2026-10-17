@@ -1378,6 +1378,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/smenalar/{id}/narx-korsatkichi": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["KorsatkichTuzatishDto"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SmenaTafsilotDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/problem+json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/nasiyalar": {
         parameters: {
             query?: never;
@@ -2043,6 +2120,8 @@ export interface components {
             oxirgiKirimVaqti: null | string;
             /** Format: double */
             oxirgiKirimLitr: null | number;
+            /** Format: double */
+            krugHajmi: null | number;
         };
         AparatKorsatkichDto: {
             /** Format: int32 */
@@ -2060,6 +2139,8 @@ export interface components {
             /** Format: double */
             bakQoldiq?: null | number;
             sabab?: null | string;
+            /** Format: double */
+            krugHajmi?: null | number;
         };
         AparatYaratishDto: {
             /** Format: int32 */
@@ -2070,6 +2151,8 @@ export interface components {
             boshlangichTotalLitr: number;
             /** Format: double */
             boshlangichBakQoldiq: number;
+            /** Format: double */
+            krugHajmi?: null | number;
         };
         AuditEksportDto: {
             turi: string;

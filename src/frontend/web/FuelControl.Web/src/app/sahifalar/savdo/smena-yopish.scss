@@ -13,28 +13,34 @@
 .bosqich-raqam.shaffof { background: rgba(255, 255, 255, 0.24); }
 
 /* ---- 1. Aparat jadvali (keng ekran) */
+.yopish-karta { container: yopishkarta / inline-size; }
 .jadval-yopish { display: flex; flex-direction: column; overflow-x: auto; margin: 0 -6px; padding: 0 6px; }
 .j-qator, .j-bosh {
-  display: grid; gap: 12px; align-items: center; min-width: 680px;
-  grid-template-columns: minmax(130px, 1.2fr) minmax(96px, 1fr) minmax(140px, 1.25fr) minmax(90px, 0.85fr) minmax(64px, 0.7fr) minmax(96px, 1fr);
+  display: grid; gap: 10px; align-items: center; min-width: 620px;
+  grid-template-columns: minmax(118px, 1.2fr) minmax(86px, 1fr) minmax(132px, 1.25fr) minmax(84px, 0.85fr) minmax(56px, 0.7fr) minmax(88px, 1fr);
 }
 .j-bosh { align-items: end; padding: 0 4px 8px; border-bottom: 1px solid var(--chiziq); }
-.j-yozuv { display: flex; flex-direction: column; gap: 6px; padding: 10px 4px; border-bottom: 1px solid var(--chiziq); min-width: 680px; }
+.j-yozuv { display: flex; flex-direction: column; gap: 6px; padding: 10px 4px; border-bottom: 1px solid var(--chiziq); min-width: 620px; }
 .j-yozuv .j-qator { min-width: 0; }
 .j-nom { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 15px; white-space: nowrap; }
 .j-nom b { font-weight: 800; }
 .j-hujayra { min-width: 0; }
-.j-hujayra.o, .o { text-align: right; }
+.j-hujayra.o, .o { text-align: right; --krug-tekis: flex-end; }
 .j-hujayra.oddiy { font-size: 14px; color: var(--matn-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .j-hujayra.qalin { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .j-kiritish { display: block; }
 .j-segment { display: flex; align-items: center; gap: 6px; padding-left: 4px; font-size: 12.5px; color: var(--matn-2); }
 .j-xato { display: flex; align-items: center; gap: 6px; padding-left: 4px; font-size: 12.5px; font-weight: 600; color: var(--b-qizil); }
 .j-jami { padding: 14px 4px 2px; }
+/* Jami: bo'sh kataklar o'rniga litr va summa kengroq */
+.j-jami > :nth-child(3), .j-jami > :nth-child(5) { display: none; }
+.j-jami > :nth-child(4) { grid-column: 3 / 5; }
+.j-jami > :nth-child(6) { grid-column: 5 / 7; }
 .j-jami .qalin { font-size: 14px; font-weight: 800; }
 .jami-litr { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.jami-summa small { font-size: 0.68em; font-weight: 600; color: var(--matn-2); letter-spacing: 0; }
 .jami-summa { font-size: 18px; font-weight: 800; color: var(--asosiy-toq); font-variant-numeric: tabular-nums; white-space: nowrap; }
-:host ::ng-deep .kiritish.yopish-in { min-height: 44px; padding: 0 16px; border-radius: 22px; font-size: 15px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+:host ::ng-deep .kiritish.yopish-in { min-height: 44px; padding: 0 14px; border-radius: 22px; font-size: 15px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 :host ::ng-deep .kiritish.xato { background: #FFF5F5; border: 1.5px solid #D7262B; }
 :host-context(:root[data-theme="dark"]) ::ng-deep .kiritish.xato { background: rgba(215, 38, 43, 0.14); }
 
@@ -63,7 +69,8 @@
 .plitka.yozuv { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border-radius: 20px; }
 .yozuv-bosh { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; }
 .yozuv-qator { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; font-variant-numeric: tabular-nums; }
-.yozuv-qator > span:first-child { min-width: 0; }
+.yozuv-qator > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.yozuv-qator > :last-child { flex: none; white-space: nowrap; }
 .yozuv-qator.jami { padding-top: 8px; border-top: 1px solid var(--chiziq); font-size: 13.5px; font-weight: 800; }
 .tugma.yozuv-tugma { min-height: 44px; font-size: 13.5px; color: var(--asosiy-toq); background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(47, 107, 255, 0.25); box-shadow: none; }
 :host-context(:root[data-theme="dark"]) .tugma.yozuv-tugma { background: rgba(255, 255, 255, 0.06); }
@@ -118,8 +125,8 @@
 
 .tasdiq-royxat { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border-radius: 18px; background: var(--plitka-fon); border: 1px solid var(--plitka-chegara); font-variant-numeric: tabular-nums; }
 
-/* ---- Telefon (< 700 px): har aparat — alohida karta, jadval emas */
-@media (max-width: 699px) {
+/* ---- Tor karta (< 660 px): har aparat — alohida karta (container query: karta kengligiga bog'liq) */
+@container yopishkarta (max-width: 659px) {
   .jadval-yopish { overflow: visible; margin: 0; padding: 0; gap: 12px; }
   .j-bosh { display: none; }
   .j-yozuv {
@@ -137,16 +144,19 @@
   .j-hujayra[data-yorliq]::before {
     content: attr(data-yorliq); display: block; margin-bottom: 3px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--matn-2); font-variant-numeric: normal;
   }
-  .j-hujayra.o[data-yorliq] { text-align: right; }
   .j-yozuv .j-qator > :nth-child(4)::before { text-align: left; }
   .j-yozuv .j-qator > :nth-child(5)::before { text-align: center; }
   .j-yozuv .j-qator > :nth-child(6)::before { text-align: right; }
-  .j-jami { min-width: 0; grid-template-columns: 1fr auto auto; padding: 4px 4px 0; }
-  .j-jami > :nth-child(2), .j-jami > :nth-child(3), .j-jami > :nth-child(5) { display: none; }
-  .j-qator.j-jami { grid-template-columns: 1fr auto auto; min-width: 0; }
+  .j-jami { padding: 4px 4px 0; }
+  .j-jami > :nth-child(2) { display: none; }
+  .j-jami > :nth-child(4), .j-jami > :nth-child(6) { grid-column: auto; }
+  .j-qator.j-jami { grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.3fr); min-width: 0; }
+}
+
+/* ---- Telefon (< 700 px): sensorli kiritish o'lchamlari */
+@media (max-width: 699px) {
   .katta-son { font-size: 32px; }
   .kassa-karta { padding: 20px; flex-basis: 100%; }
   :host ::ng-deep .kiritish.yopish-in { min-height: 48px; font-size: 18px; }
 }
-
 .eski-belgi { margin-left: 6px; vertical-align: 1px; }
