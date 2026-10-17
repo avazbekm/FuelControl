@@ -166,8 +166,14 @@
                                                             <TextBlock Text="{Binding Aparat}" FontWeight="Bold" FontSize="13" TextTrimming="CharacterEllipsis" />
                                                             <TextBlock Text="{Binding Izoh}" Classes="izoh" FontSize="11.5" IsVisible="{Binding IzohBor}" TextWrapping="Wrap" />
                                                         </StackPanel>
-                                                        <Viewbox Grid.Column="1" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Top"><TextBlock Text="{Binding Boshi}" FontSize="13" Foreground="{DynamicResource MatnYumshoq}" /></Viewbox>
-                                                        <Viewbox Grid.Column="2" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Top"><TextBlock Text="{Binding Oxiri}" FontSize="13" Foreground="{DynamicResource MatnYumshoq}" /></Viewbox>
+                                                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                                            <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Boshi}" FontSize="13" Foreground="{DynamicResource MatnYumshoq}" /></Viewbox>
+                                                            <TextBlock Text="{Binding BoshiKrug}" Classes="krugBelgi" HorizontalAlignment="Right" IsVisible="{Binding KrugBor}" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                                            <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding Oxiri}" FontSize="13" Foreground="{DynamicResource MatnYumshoq}" /></Viewbox>
+                                                            <TextBlock Text="{Binding OxiriKrug}" Classes="krugBelgi" HorizontalAlignment="Right" IsVisible="{Binding KrugBor}" />
+                                                        </StackPanel>
                                                         <Viewbox Grid.Column="3" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Top"><TextBlock Text="{Binding Litr}" FontSize="13" FontWeight="Bold" /></Viewbox>
                                                         <Viewbox Grid.Column="4" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Top"><TextBlock Text="{Binding Summa}" FontSize="13" FontWeight="Bold" /></Viewbox>
                                                     </Grid>
@@ -266,6 +272,11 @@
                     <StackPanel>
                         <TextBlock Text="{l:T Smenalar_TuzatishYangi, Katta=True}" Classes="yorliq" />
                         <TextBox Classes="orta" Classes.xato="{Binding TuzatishKichik}" Text="{Binding TuzatishQiymat}" ctl:AvtoFokus.Yoqilgan="True" />
+                        <!-- §8.16: krugli aparat: chegaradan tashqari — xato, pult 0 dan qayta boshlangan — "krug k+1" -->
+                        <TextBlock Text="{Binding TuzatishKrugXatoMatn}" Classes="xatoMatn" Margin="0,4,0,0" IsVisible="{Binding TuzatishKrugXato}" />
+                        <TextBlock Text="{Binding TuzatishKrugKeyingi}" Classes="krugOshdi" HorizontalAlignment="Right" Margin="0,4,12,0" IsVisible="{Binding TuzatishKrugOshdi}" />
+                        <!-- §8.15: bakdagidan ko'p litr chiqsa — sariq ogohlantirish (bloklamaydi) -->
+                        <TextBlock Text="{Binding TuzatishBakOgohi}" Classes="bakOgoh" Margin="0,6,0,0" IsVisible="{Binding TuzatishBakOgohBor}" />
                     </StackPanel>
                     <Border Classes="malumot" IsVisible="{Binding TuzatishNatija, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"><TextBlock Text="{Binding TuzatishNatija}" /></Border>
                     <StackPanel>

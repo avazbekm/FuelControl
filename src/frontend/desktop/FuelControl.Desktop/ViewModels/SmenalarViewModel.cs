@@ -15,8 +15,13 @@ namespace FuelControl.Desktop.ViewModels;
 public sealed record KorsatkichQatori(SmenaKorsatkichDto K)
 {
     public string Aparat => $"{K.AparatRaqam} · {K.YoqilgiNomi}";
-    public string Boshi => Format.Son(K.Boshi);
-    public string Oxiri => Format.Son(K.Oxiri);
+    /// <summary>§8.16: krugli aparatda pult qismi va ostida "krug N" (krug hajmi — aparatning joriy sozlamasi).</summary>
+    private decimal? H => Malumot.Aparatlar.FirstOrDefault(a => a.Id == K.AparatId)?.KrugHajmi;
+    public string Boshi => Krug.Son(K.Boshi, H);
+    public string Oxiri => Krug.Son(K.Oxiri, H);
+    public string? BoshiKrug => Krug.Belgi(K.Boshi, H);
+    public string? OxiriKrug => Krug.Belgi(K.Oxiri, H);
+    public bool KrugBor => Krug.Hajm(H) is not null;
     public string Litr => Format.Son(K.Litr);
     public string Summa => Format.Pul(K.Summa);
     /// <summary>Narx o'zgarishida qayd etilgan (eski narxdagi) segment — narxi izohda.</summary>
@@ -236,10 +241,18 @@ public partial class SmenalarViewModel : ObservableObject
 
     /// <summary>Har aparatning yopishdagi (oxirgi) segmenti — tuzatiladigan qiymat shu.</summary>
     public List<SmenaKorsatkichDto> TuzatishAparatlari => (Tafsilot?.Korsatkichlar ?? []).GroupBy(k => k.AparatId).Select(g => g.Last()).OrderBy(k => k.AparatRaqam).ToList();
-    public string TuzatishBoshi => TuzatishAparat is { } k ? Format.Son(k.Boshi) : "";
-    public string TuzatishJoriy => TuzatishAparat is { } k ? Format.Son(k.Oxiri) : "";
-    private decimal? TuzatishQ => Format.KasrOl(TuzatishQiymat);
-    public bool TuzatishKichik => TuzatishAparat is { } k && TuzatishQ is { } q && q < k.Boshi;
+    /// <summary>§8.16: tuzatilayotgan aparatning krug hajmi; kiritish asosi — segment Boshi.</summary>
+    private decimal? TuzatishH => TuzatishAparat is { } k ? Malumot.Aparatlar.FirstOrDefault(a => a.Id == k.AparatId)?.KrugHajmi : null;
+    public string TuzatishBoshi => TuzatishAparat is { } k ? Krug.Toliq(k.Boshi, TuzatishH) : "";
+    public string TuzatishJoriy => TuzatishAparat is { } k ? Krug.Toliq(k.Oxiri, TuzatishH) : "";
+    private KrugKiritish? TuzatishKiritish => TuzatishAparat is { } k ? Krug.Kirit(TuzatishQiymat, k.Boshi, TuzatishH) : null;
+    public bool TuzatishKrugXato => Krug.ChegaraXato(TuzatishQiymat, TuzatishH);
+    public bool TuzatishKrugOshdi => TuzatishKiritish?.Oshdi == true;
+    public string TuzatishKrugKeyingi => Krug.KeyingiBelgi(TuzatishKiritish);
+    public string TuzatishKrugXatoMatn => Krug.ChegaraXatoMatn(TuzatishH);
+    /// <summary>Umumiy litr (serverga shu yuboriladi).</summary>
+    private decimal? TuzatishQ => TuzatishKiritish?.Umumiy;
+    public bool TuzatishKichik => TuzatishKrugXato || (TuzatishAparat is { } k && TuzatishQ is { } q && q < k.Boshi);
     public string TuzatishNatija
     {
         get
@@ -253,11 +266,29 @@ public partial class SmenalarViewModel : ObservableObject
         }
     }
 
-    partial void OnTuzatishAparatChanged(SmenaKorsatkichDto? value) { TuzatishQiymat = value is null ? "" : Format.Son(value.Oxiri); TuzatishYangila(); }
+    /// <summary>§8.15: yopilgan smenada bakda bor = BakQoldiq + tuzatilayotgan segmentning eski litri (u yopishda bakdan ayrilgan edi).</summary>
+    private decimal? TuzatishBakdaBor => TuzatishAparat is { } k && Malumot.Aparatlar.FirstOrDefault(a => a.Id == k.AparatId) is { } a ? a.BakQoldiq + k.Litr : null;
+    private decimal? TuzatishChiqadi => TuzatishAparat is { } k && TuzatishQ is { } q && q >= k.Boshi ? SmenaHisobi.Litr(k.Boshi, q) : null;
+    public string? TuzatishBakOgohi => TuzatishBakdaBor is { } b ? SmenaHisobi.BakOgohi(TuzatishChiqadi, b) : null;
+    public bool TuzatishBakOgohBor => TuzatishBakOgohi is not null;
+
+    /// <summary>Qiymat faqat boshqa aparat tanlanganda qayta to'ldiriladi: til almashganda ComboBox tanlovni qayta o'rnatadi
+    /// (null → shu aparat) — yozilgan qiymat yo'qolmasin.</summary>
+    private int? _tuzatishAparatId;
+    partial void OnTuzatishAparatChanged(SmenaKorsatkichDto? value)
+    {
+        if (value is not null && value.AparatId != _tuzatishAparatId)
+        {
+            _tuzatishAparatId = value.AparatId;
+            TuzatishQiymat = Krug.Son(value.Oxiri, Malumot.Aparatlar.FirstOrDefault(a => a.Id == value.AparatId)?.KrugHajmi);
+        }
+        TuzatishYangila();
+    }
     partial void OnTuzatishQiymatChanged(string value) => TuzatishYangila();
     private void TuzatishYangila()
     {
-        foreach (var n in new[] { nameof(TuzatishBoshi), nameof(TuzatishJoriy), nameof(TuzatishKichik), nameof(TuzatishNatija) }) OnPropertyChanged(n);
+        foreach (var n in new[] { nameof(TuzatishBoshi), nameof(TuzatishJoriy), nameof(TuzatishKichik), nameof(TuzatishNatija), nameof(TuzatishBakOgohi), nameof(TuzatishBakOgohBor),
+                     nameof(TuzatishKrugXato), nameof(TuzatishKrugOshdi), nameof(TuzatishKrugKeyingi), nameof(TuzatishKrugXatoMatn) }) OnPropertyChanged(n);
     }
 
     [RelayCommand]
@@ -265,6 +296,7 @@ public partial class SmenalarViewModel : ObservableObject
     {
         if (!TuzataOladi) return;
         OnPropertyChanged(nameof(TuzatishAparatlari));
+        _tuzatishAparatId = null; TuzatishAparat = null;
         TuzatishAparat = TuzatishAparatlari.FirstOrDefault();
         TuzatishSabab = TuzatishXato = "";
         TuzatishOchiq = true;
@@ -276,9 +308,14 @@ public partial class SmenalarViewModel : ObservableObject
     private async Task TuzatishniSaqla()
     {
         if (D is not { } d || TuzatishAparat is not { } k) return;
+        if (TuzatishKrugXato) { TuzatishXato = TuzatishKrugXatoMatn; return; }
         if (TuzatishQ is not { } q) { TuzatishXato = Til.T("Smenalar_TuzatishXatoQiymat"); return; }
         if (q < k.Boshi) { TuzatishXato = Til.F("Smenalar_TuzatishXatoKichik", Format.Son(k.Boshi)); return; }
         if (string.IsNullOrWhiteSpace(TuzatishSabab)) { TuzatishXato = Til.T("Smenalar_TuzatishXatoSabab"); return; }
+        if (TuzatishKiritish is { Oshdi: true } kk && !await Bildirish.KrugTasdiqla([Krug.TasdiqQatori(Til.F("Aparat_Raqami", k.AparatRaqam), kk, TuzatishChiqadi!.Value)]))
+            return;
+        if (TuzatishBakOgohBor && !await Bildirish.BakTasdiqla([SmenaHisobi.BakOgohQatori(Til.F("Aparat_Raqami", k.AparatRaqam), TuzatishChiqadi!.Value, TuzatishBakdaBor!.Value)]))
+            return;
         try
         {
             Tafsilot = await Malumot.KorsatkichTuzat(d.Id, new KorsatkichTuzatishDto(k.AparatId, q, TuzatishSabab.Trim()));
@@ -294,7 +331,9 @@ public partial class SmenalarViewModel : ObservableObject
     {
         if (D is not { } d || Tafsilot is not { } t) return;
         string[] ustunlar = [Til.T("Smenalar_Aparat"), Til.T("Smenalar_Oldingi"), Til.T("Smenalar_Yangi"), Til.T("Smenalar_Narx"), Til.T("Smenalar_Litr"), Til.T("Smenalar_Summa")];
-        var qatorlar = t.Korsatkichlar.Select(k => (new object?[] { $"{k.AparatRaqam} · {k.YoqilgiNomi}", k.Boshi, k.Oxiri, k.Narx, k.Litr, k.Summa }, false)).ToList();
+        // §8.16: krugli aparatda Boshi/Oxiri matn ("560.52 · krug 2"), krugsizda son; Litr va Summa doim son
+        object? Korsatkich(SmenaKorsatkichDto k, decimal v) => Malumot.Aparatlar.FirstOrDefault(a => a.Id == k.AparatId)?.KrugHajmi is { } h ? Krug.Toliq(v, h) : v;
+        var qatorlar = t.Korsatkichlar.Select(k => (new object?[] { $"{k.AparatRaqam} · {k.YoqilgiNomi}", Korsatkich(k, k.Boshi), Korsatkich(k, k.Oxiri), k.Narx, k.Litr, k.Summa }, false)).ToList();
         qatorlar.Add((new object?[] { "", null, null, null, null, null }, false));
         foreach (var p in PulHisobi) qatorlar.Add((new object?[] { p.Nomi, null, null, null, null, p.Qiymat }, false));
         qatorlar.Add((new object?[] { Til.T("Smenalar_KassadaKerak"), null, null, null, null, d.Kutilgan }, true));

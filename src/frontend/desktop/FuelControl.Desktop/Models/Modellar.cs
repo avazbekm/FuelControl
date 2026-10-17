@@ -76,6 +76,8 @@ public sealed class Aparat
     public decimal BakQoldiq { get; set; }
     public DateTime? OxirgiKirimVaqti { get; set; }
     public decimal? OxirgiKirimLitr { get; set; }
+    /// <summary>§8.16: pult shu hajmda 0 ga qaytadi (krug); null — krug yo'q. TotalLitr baribir umumiy litr.</summary>
+    public decimal? KrugHajmi { get; set; }
 
     public bool BakManfiy => BakQoldiq < 0;
 }

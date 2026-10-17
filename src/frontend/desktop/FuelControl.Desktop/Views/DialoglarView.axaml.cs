@@ -29,12 +29,38 @@ public partial class DialoglarView : UserControl
         void QoyibYubor() => Avalonia.Threading.Dispatcher.UIThread.Post(() => (QaytishRoyxat.DataContext as QaytishDialogVM)?.RoyxatniUshla(false), Avalonia.Threading.DispatcherPriority.Background);
         QaytishRoyxat.AddHandler(PointerReleasedEvent, (_, _) => QoyibYubor(), RoutingStrategies.Tunnel, handledEventsToo: true);
         QaytishRoyxat.AddHandler(PointerCaptureLostEvent, (_, _) => QoyibYubor(), RoutingStrategies.Bubble, handledEventsToo: true);
+        // Tasdiq ochiq bo'lsa Esc faqat uni yopadi ("Bekor"/"Tekshiraman") — ostidagi dialog ochiq qoladi.
+        // Fokus tasdiqdan tashqarida bo'lishi mumkin (masalan, "Smenani yopish" tugmasida) — shuning uchun TopLevel'da, tunnel.
+        AttachedToVisualTree += (_, _) => TopLevel.GetTopLevel(this)?.AddHandler(KeyDownEvent, TasdiqEsc, RoutingStrategies.Tunnel);
+        DetachedFromVisualTree += (_, _) => TopLevel.GetTopLevel(this)?.RemoveHandler(KeyDownEvent, TasdiqEsc);
+        // §8.15: bak ogohlantirishida fokus "Tekshiraman"da — Enter saqlamaydi, dialogni yopadi
+        DataContextChanged += (_, _) =>
+        {
+            if (_main is not null) _main.PropertyChanged -= MainOzgardi;
+            _main = DataContext as MainViewModel;
+            if (_main is not null) _main.PropertyChanged += MainOzgardi;
+        };
         NasiyaParda.DataContextChanged += (_, _) =>
         {
             if (_nasiya is not null) _nasiya.PropertyChanged -= NasiyaOzgardi;
             _nasiya = NasiyaParda.DataContext as NasiyaDialogVM;
             if (_nasiya is not null) _nasiya.PropertyChanged += NasiyaOzgardi;
         };
+    }
+
+    private MainViewModel? _main;
+
+    private void TasdiqEsc(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Escape || _main is not { TasdiqOchiq: true } m) return;
+        m.TasdiqJavobCommand.Execute("0");
+        e.Handled = true;
+    }
+
+    private void MainOzgardi(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(MainViewModel.TasdiqOchiq) || _main is not { TasdiqOchiq: true, TasdiqBekorFokus: true }) return;
+        Avalonia.Threading.Dispatcher.UIThread.Post(() => TasdiqBekorTugma.Focus(NavigationMethod.Tab), Avalonia.Threading.DispatcherPriority.Input);
     }
 
     private static bool Ichida(Visual v, Visual ota) => v == ota || v.GetVisualAncestors().Contains(ota);

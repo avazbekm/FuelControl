@@ -102,6 +102,7 @@ public sealed class ApiMijoz
     public Task<SmenaDto?> SmenaOch(SmenaOchishDto d) => Yubor<SmenaDto>(HttpMethod.Post, "smenalar/och", d);
     public Task<SmenaDto?> SmenaYop(int id, SmenaYopishDto d) => Yubor<SmenaDto>(HttpMethod.Post, $"smenalar/{id}/yop", d);
     public Task<SmenaTafsilotDto?> KorsatkichTuzat(int id, KorsatkichTuzatishDto d) => Yubor<SmenaTafsilotDto>(HttpMethod.Put, $"smenalar/{id}/korsatkich", d);
+    public Task<SmenaTafsilotDto?> NarxKorsatkichiniTuzat(int id, KorsatkichTuzatishDto d) => Yubor<SmenaTafsilotDto>(HttpMethod.Put, $"smenalar/{id}/narx-korsatkichi", d);
 
     // ---------- Nasiya / xarajat / bak ----------
     /// <summary>operatorId berilsa — faqat shu operator yozgan nasiyalar va javobda Operator xulosasi (§8.12).</summary>

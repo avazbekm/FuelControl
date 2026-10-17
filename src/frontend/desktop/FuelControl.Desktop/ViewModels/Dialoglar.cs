@@ -20,6 +20,7 @@ public static class Dialoglar
     public static XarajatDialogVM Xarajat { get; } = new();
     public static BakKirimDialogVM Bak { get; } = new();
     public static NarxDialogVM Narx { get; } = new();
+    public static NarxTuzatishDialogVM NarxTuzatish { get; } = new();
 
     /// <summary>"Smena #42 · Alisher Karimov" — dialog sarlavhasi ostidagi matn.</summary>
     public static string SmenaMatni => Malumot.JoriySmena is { } s ? $"{Til.F("Yopish_SmenaN", s.Id)} · {s.Operator.ToliqIsm}" : "";
@@ -562,22 +563,43 @@ public partial class NarxAparatQatori : ObservableObject
         var l = qayd.Where(k => k.AparatId == a.Id).ToList();
         SmenaBoshi = l.Count == 0;
         Oldingi = SmenaHisobi.Oldingi(a, l);
+        _qaydLitri = SmenaHisobi.QaydLitri(a, l);
     }
+
+    /// <summary>§8.15: chiqyapti = shu smenada oldingi narx segmentlari + shu qator litri; bor = BakQoldiq.</summary>
+    private readonly decimal _qaydLitri;
+    public decimal BakdaBor => A.BakQoldiq;
+    public decimal? Chiqyapti => Litr is { } l ? _qaydLitri + l : null;
+    public string? BakOgohi => SmenaHisobi.BakOgohi(Chiqyapti, BakdaBor);
+    public bool BakOgohBor => BakOgohi is not null;
 
     public string Nomi => Til.F("Aparat_Raqami", A.Raqam);
     public string OldingiYorliq => Til.T(SmenaBoshi ? "Narx_SmenaBoshida" : "Narx_OxirgiQayd");
-    public string OldingiMatn => Format.Son(Oldingi);
-    public decimal? Q => Format.KasrOl(Qiymat);
-    public bool Xato => Q is { } q ? q < Oldingi : Qiymat.Trim().Length > 0;
+    /// <summary>Til almashganda — izoh va ogohlantirish qayta o'qilsin.</summary>
+    public void TilYangila() => OnPropertyChanged(string.Empty);
+    public string OldingiMatn => Krug.Son(Oldingi, A.KrugHajmi);
+    /// <summary>§8.16: krugli aparatda "krug 2" (oldingi qiymat ostida) va kiritishda krug oshsa "krug 3".</summary>
+    public string? OldingiKrug => Krug.Belgi(Oldingi, A.KrugHajmi);
+    public bool OldingiKrugBor => OldingiKrug is not null;
+    private KrugKiritish? Kiritish => Krug.Kirit(Qiymat, Oldingi, A.KrugHajmi);
+    public bool KrugXato => Krug.ChegaraXato(Qiymat, A.KrugHajmi);
+    public bool KrugOshdi => Kiritish?.Oshdi == true;
+    public string KrugKeyingi => Krug.KeyingiBelgi(Kiritish);
+    public string? KrugTasdiqQatori => Kiritish is { Oshdi: true } k && Litr is { } l ? Krug.TasdiqQatori(Nomi, k, l) : null;
+    /// <summary>Umumiy litr (serverga shu yuboriladi).</summary>
+    public decimal? Q => Kiritish?.Umumiy;
+    public bool Xato => KrugXato || (Q is { } q ? q < Oldingi : Qiymat.Trim().Length > 0);
     public decimal? Litr => Q is { } q && q >= Oldingi ? SmenaHisobi.Litr(Oldingi, q) : null;
     public long? Summa => Litr is { } l ? SmenaHisobi.Summa(l, _eskiNarx) : null;
-    public string Izoh => Xato ? Til.T(SmenaBoshi ? "Narx_SmenaBoshidanKichik" : "Narx_OxirgidanKichik")
+    public string Izoh => KrugXato ? Krug.ChegaraXatoMatn(A.KrugHajmi)
+        : Xato ? Til.T(SmenaBoshi ? "Narx_SmenaBoshidanKichik" : "Narx_OxirgidanKichik")
         : Litr is { } l ? Til.F("Narx_Sotilgan", Format.Son(l), Format.Pul(_eskiNarx), Format.Pul(Summa!.Value))
         : Til.T("Narx_KorsatkichniYozing");
 
     partial void OnQiymatChanged(string value)
     {
-        foreach (var p in new[] { nameof(Q), nameof(Xato), nameof(Litr), nameof(Summa), nameof(Izoh) }) OnPropertyChanged(p);
+        foreach (var p in new[] { nameof(Q), nameof(Xato), nameof(Litr), nameof(Summa), nameof(Izoh), nameof(BakOgohi), nameof(BakOgohBor),
+                     nameof(KrugXato), nameof(KrugOshdi), nameof(KrugKeyingi), nameof(KrugTasdiqQatori) }) OnPropertyChanged(p);
         _ozgardi();
     }
 }
@@ -585,6 +607,8 @@ public partial class NarxAparatQatori : ObservableObject
 public partial class NarxDialogVM : DialogVM
 {
     public ObservableCollection<NarxAparatQatori> Qatorlar { get; } = new();
+
+    public NarxDialogVM() => Til.Ozgardi += () => { foreach (var q in Qatorlar) q.TilYangila(); };
     public YoqilgiTuri? Yoqilgi { get; private set; }
 
     [ObservableProperty] private string _yangiNarx = "";
@@ -626,21 +650,116 @@ public partial class NarxDialogVM : DialogVM
     }
 
     [RelayCommand]
-    private Task Saqla()
+    private async Task Saqla()
     {
-        if (Yoqilgi is not { } y) return Task.CompletedTask;
-        if (Format.PulOl(YangiNarx) is not > 0) { Xato = Til.T("Nasiya_XatoSumma"); return Task.CompletedTask; }
+        if (Yoqilgi is not { } y) return;
+        if (Format.PulOl(YangiNarx) is not > 0) { Xato = Til.T("Nasiya_XatoSumma"); return; }
         var narx = Format.PulOl(YangiNarx)!.Value;
         AparatKorsatkichDto[]? korsatkichlar = null;
         if (SmenaOchiq && narx != y.Narx)
         {
-            if (Qatorlar.Any(q => q.Q is null || q.Xato)) { Xato = Til.T("Narx_KorsatkichlarniTogri"); return Task.CompletedTask; }
+            if (Qatorlar.Any(q => q.Q is null || q.Xato)) { Xato = Til.T("Narx_KorsatkichlarniTogri"); return; }
             korsatkichlar = Qatorlar.Select(q => new AparatKorsatkichDto(q.A.Id, q.Q!.Value)).ToArray();
+            // §8.16: krug oshgan bo'lsa — avval krug tasdig'i, keyin bak
+            if (!await Bildirish.KrugTasdiqla(Qatorlar.Select(q => q.KrugTasdiqQatori).OfType<string>()))
+                return;
+            // §8.15: bakdagidan ko'p litr — "Tekshiraman" / "Baribir saqlash" (bloklamaydi)
+            if (!await Bildirish.BakTasdiqla(Qatorlar.Where(q => q.BakOgohBor).Select(q => SmenaHisobi.BakOgohQatori(q.Nomi, q.Chiqyapti!.Value, q.BakdaBor))))
+                return;
         }
-        return Bajar(async () =>
+        await Bajar(async () =>
         {
             await Malumot.YoqilgiTahrirla(y.Id, new YoqilgiTahrirlashDto(y.Nomi, narx, y.Rang, korsatkichlar));
             Saqlandi?.Invoke();
         });
+    }
+}
+
+// ========================= Narx o'zgarishi ko'rsatkichini tuzatish (§8.14) =========================
+
+/// <summary>
+/// Ochiq smenada aparatning oxirgi narx o'zgarishi segmentini tuzatish: hozirgi qiymat (o'qish uchun), to'g'ri ko'rsatkich, sabab.
+/// q == Boshi — segment o'chiriladi (narx o'zgarguncha savdo bo'lmagan). Server: PUT /smenalar/{id}/narx-korsatkichi.
+/// </summary>
+public partial class NarxTuzatishDialogVM : DialogVM
+{
+    public Aparat? A { get; private set; }
+    public SmenaKorsatkichDto? K { get; private set; }
+    private decimal _qaydLitri;
+
+    [ObservableProperty] private string _qiymat = "";
+    [ObservableProperty] private string _sabab = "";
+
+    public string Nomi => A is { } a ? Til.F("Aparat_Raqami", a.Raqam) : "";
+    public string Sarlavha => Til.F("NarxQayd_Sarlavha", Nomi);
+    public string Kontekst => Dialoglar.SmenaMatni;
+    private decimal? H => A?.KrugHajmi;
+    public string Hozirgi => Krug.Son(K?.Oxiri ?? 0, H);
+    public string Boshi => Krug.Son(K?.Boshi ?? 0, H);
+    /// <summary>§8.16: krugli aparatda "krug N" yozuvlari; kiritish asosi — segment Boshi.</summary>
+    public string? HozirgiKrug => K is { } k ? Krug.Belgi(k.Oxiri, H) : null;
+    public string? BoshiKrug => K is { } k ? Krug.Belgi(k.Boshi, H) : null;
+    public bool KrugBor => Krug.Hajm(H) is not null;
+    private KrugKiritish? Kiritish => K is { } k ? Krug.Kirit(Qiymat, k.Boshi, H) : null;
+    public bool KrugXato => Krug.ChegaraXato(Qiymat, H);
+    public bool KrugOshdi => Kiritish?.Oshdi == true;
+    public string KrugKeyingi => Krug.KeyingiBelgi(Kiritish);
+    public string NarxMatn => Format.Pul(K?.Narx ?? 0);
+    /// <summary>Umumiy litr (serverga shu yuboriladi).</summary>
+    private decimal? Q => Kiritish?.Umumiy;
+    public bool Kichik => K is { } k && Q is { } q && q < k.Boshi;
+    public bool QiymatXato => KrugXato || Kichik || (Qiymat.Trim().Length > 0 && Format.KasrOl(Qiymat) is null);
+    public bool Ochiriladi => K is { } k && Q is { } q && Yaxlit(q) == k.Boshi;
+    private decimal? Litr => K is { } k && Q is { } q && q >= k.Boshi ? SmenaHisobi.Litr(k.Boshi, q) : null;
+    /// <summary>Jonli hisob: "4-aparat: narx o'zgargunicha X L × narx = summa"; xato bo'lsa — xato matni.</summary>
+    public string Hisob => K is not { } k ? ""
+        : KrugXato ? Krug.ChegaraXatoMatn(H)
+        : Kichik ? Til.F("Smenalar_TuzatishXatoKichik", Format.Son(k.Boshi))
+        : Litr is { } l ? Til.F("Yopish_EskiNarxda", Nomi, Format.Son(l), Format.Pul(k.Narx), Format.Pul(SmenaHisobi.Summa(l, k.Narx)))
+        : "";
+    public bool HisobBor => Hisob.Length > 0 && !Ochiriladi;
+    public bool HisobXato => Kichik || KrugXato;
+    /// <summary>§8.15: chiqyapti = boshqa narx segmentlari + tuzatilayotgan segmentning yangi litri; bor = BakQoldiq.</summary>
+    private decimal? Chiqyapti => Litr is { } l ? _qaydLitri + l : null;
+    public string? BakOgohi => A is { } a ? SmenaHisobi.BakOgohi(Chiqyapti, a.BakQoldiq) : null;
+    public bool BakOgohBor => BakOgohi is not null;
+
+    private static decimal Yaxlit(decimal q) => Math.Round(q, 2, MidpointRounding.AwayFromZero);
+
+    /// <summary>Aparatda ochiq smenada narx o'zgarishi segmenti bo'lsa — dialog ochiladi.</summary>
+    public void Och(Aparat a)
+    {
+        var qayd = Malumot.Joriy?.Korsatkichlar ?? [];
+        var k = qayd.LastOrDefault(x => x.AparatId == a.Id && x.NarxOzgarishida);
+        if (k is null || Malumot.JoriySmena is null) return;
+        A = a; K = k;
+        // §8.15: tuzatilayotgan segment eski litri bilan emas, yangi qiymati bilan hisoblanadi
+        _qaydLitri = SmenaHisobi.QaydLitri(a, qayd, k);
+        Qiymat = Krug.Son(k.Oxiri, a.KrugHajmi);
+        Sabab = Xato = "";
+        OnPropertyChanged(string.Empty);
+        Ochiq = true;
+    }
+
+    partial void OnQiymatChanged(string value)
+    {
+        foreach (var p in new[] { nameof(Kichik), nameof(QiymatXato), nameof(Ochiriladi), nameof(Hisob), nameof(HisobBor), nameof(HisobXato), nameof(BakOgohi), nameof(BakOgohBor),
+                     nameof(KrugXato), nameof(KrugOshdi), nameof(KrugKeyingi) })
+            OnPropertyChanged(p);
+    }
+
+    [RelayCommand]
+    private async Task Saqla()
+    {
+        if (K is not { } k || A is not { } a || Malumot.JoriySmena is not { } s) return;
+        Xato = "";
+        if (KrugXato) { Xato = Krug.ChegaraXatoMatn(H); return; }
+        if (Q is not { } q) { Xato = Til.T("Smenalar_TuzatishXatoQiymat"); return; }
+        if (Yaxlit(q) < k.Boshi) { Xato = Til.F("Smenalar_TuzatishXatoKichik", Format.Son(k.Boshi)); return; }
+        if (Yaxlit(q) == k.Oxiri) { Xato = Til.T("NarxQayd_XatoTeng"); return; }
+        if (string.IsNullOrWhiteSpace(Sabab)) { Xato = Til.T("Smenalar_TuzatishXatoSabab"); return; }
+        if (Kiritish is { Oshdi: true } kk && !await Bildirish.KrugTasdiqla([Krug.TasdiqQatori(Nomi, kk, Litr!.Value)])) return;
+        if (BakOgohBor && !await Bildirish.BakTasdiqla([SmenaHisobi.BakOgohQatori(Nomi, Chiqyapti!.Value, a.BakQoldiq)])) return;
+        await Bajar(() => Malumot.NarxKorsatkichiniTuzat(s.Id, new KorsatkichTuzatishDto(a.Id, q, Sabab.Trim())));
     }
 }

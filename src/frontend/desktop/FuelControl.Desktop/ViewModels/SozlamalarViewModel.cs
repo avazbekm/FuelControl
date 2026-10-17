@@ -120,6 +120,50 @@ public partial class SozlamalarViewModel : ObservableObject
     public string AparatPultYorliq => Til.T(AparatTahrir is null ? "Aparat_BoshlangichPult" : "Aparat_PultLitr").ToUpperInvariant();
     public string AparatBakYorliq => Til.T(AparatTahrir is null ? "Aparat_BoshlangichBak" : "Aparat_BakLitr").ToUpperInvariant();
 
+    // §8.16: pult krugi. Yoqilgan bo'lsa pult ikki maydon bilan kiritiladi: "Pult ko'rsatkichi" (AparatTotalLitr) + "Krug";
+    // umumiy = (krug − 1) × H + pult. Belgi almashtirilganda yozilgan qiymat shu qoida bo'yicha o'giriladi (umumiy litr o'zgarmaydi).
+    [ObservableProperty] private bool _aparatKrug;
+    [ObservableProperty] private string _aparatKrugHajmi = "";
+    [ObservableProperty] private string _aparatKrugRaqami = "";
+    private bool _aparatYuklanmoqda;
+    public const decimal StandartKrug = 10_000m;
+    private decimal? AparatH => Format.KasrOl(AparatKrugHajmi) is > 0 and var h ? h : null;
+    /// <summary>Kiritilgan maydonlardan umumiy litr (krug o'chiq — pult maydonining o'zi); noto'g'ri bo'lsa null.</summary>
+    private decimal? AparatUmumiy
+    {
+        get
+        {
+            if (Format.KasrOl(AparatTotalLitr) is not { } p) return null;
+            if (!AparatKrug) return p;
+            if (AparatH is not { } h || p < 0 || p >= h || !int.TryParse(AparatKrugRaqami.Trim(), out var k) || k < 1) return null;
+            return Krug.Umumiy(p, k, h);
+        }
+    }
+    public string AparatUmumiyMatn => AparatKrug && AparatUmumiy is { } u ? Til.F("Krug_Umumiy", Format.Son(u)) : "";
+    public bool AparatUmumiyBor => AparatUmumiyMatn.Length > 0;
+
+    partial void OnAparatKrugChanged(bool value)
+    {
+        if (!_aparatYuklanmoqda)
+        {
+            var h = AparatH ?? StandartKrug;
+            if (AparatH is null) AparatKrugHajmi = Format.ButunLitr(h);
+            // Yozilgan qiymat saqlanadi: umumiy → pult + krug yoki aksincha
+            if (value && Format.KasrOl(AparatTotalLitr) is { } t && t >= 0)
+            {
+                AparatTotalLitr = Format.Son(Krug.Pult(t, h));
+                AparatKrugRaqami = Krug.Raqam(t, h).ToString();
+            }
+            else if (!value && Format.KasrOl(AparatTotalLitr) is { } p && int.TryParse(AparatKrugRaqami.Trim(), out var k) && k >= 1)
+                AparatTotalLitr = Format.Son(Krug.Umumiy(p, k, h));
+        }
+        AparatUmumiyYangila();
+    }
+    partial void OnAparatKrugHajmiChanged(string value) => AparatUmumiyYangila();
+    partial void OnAparatKrugRaqamiChanged(string value) => AparatUmumiyYangila();
+    partial void OnAparatTotalLitrChanged(string value) => AparatUmumiyYangila();
+    private void AparatUmumiyYangila() { OnPropertyChanged(nameof(AparatUmumiyMatn)); OnPropertyChanged(nameof(AparatUmumiyBor)); }
+
     // ---- Foydalanuvchi dialogi
     [ObservableProperty] private bool _fDialogOchiq;
     [ObservableProperty] private Foydalanuvchi? _fTahrir;
@@ -190,7 +234,7 @@ public partial class SozlamalarViewModel : ObservableObject
             _yoqilgiImzo = yImzo;
         }
 
-        var aImzo = string.Join("|", Malumot.Aparatlar.Select(a => $"{a.Id}:{a.Raqam}:{a.Yoqilgi.Id}:{a.Yoqilgi.Nomi}:{a.TotalLitr}:{a.BakQoldiq}:{a.Yoqilgi.Rang}"));
+        var aImzo = string.Join("|", Malumot.Aparatlar.Select(a => $"{a.Id}:{a.Raqam}:{a.Yoqilgi.Id}:{a.Yoqilgi.Nomi}:{a.TotalLitr}:{a.BakQoldiq}:{a.Yoqilgi.Rang}:{a.KrugHajmi}"));
         if (aImzo != _aparatImzo)
         {
             Aparatlar.Clear();
@@ -359,6 +403,9 @@ public partial class SozlamalarViewModel : ObservableObject
         AparatTahrir = null;
         AparatRaqam = (Malumot.Aparatlar.Count == 0 ? 1 : Malumot.Aparatlar.Max(a => a.Raqam) + 1).ToString();
         AparatYoqilgi = YoqilgiTurlari.FirstOrDefault();
+        _aparatYuklanmoqda = true;
+        AparatKrug = false; AparatKrugHajmi = Format.ButunLitr(StandartKrug); AparatKrugRaqami = "1";
+        _aparatYuklanmoqda = false;
         AparatTotalLitr = ""; AparatBak = ""; AparatSabab = "";
         AparatXato = "";
         AparatSarlavhalari();
@@ -371,7 +418,12 @@ public partial class SozlamalarViewModel : ObservableObject
         AparatTahrir = a;
         AparatRaqam = a.Raqam.ToString();
         AparatYoqilgi = YoqilgiTurlari.FirstOrDefault(y => y.Id == a.Yoqilgi.Id);
-        AparatTotalLitr = Format.Son(a.TotalLitr);
+        _aparatYuklanmoqda = true;
+        AparatKrug = a.KrugHajmi is not null;
+        AparatKrugHajmi = Format.ButunLitr(a.KrugHajmi ?? StandartKrug);
+        AparatKrugRaqami = a.KrugHajmi is { } h ? Krug.Raqam(a.TotalLitr, h).ToString() : "1";
+        AparatTotalLitr = Krug.Son(a.TotalLitr, a.KrugHajmi);
+        _aparatYuklanmoqda = false;
         AparatBak = Format.Son(a.BakQoldiq);
         AparatSabab = "";
         AparatXato = "";
@@ -398,22 +450,35 @@ public partial class SozlamalarViewModel : ObservableObject
         if (Malumot.Aparatlar.Any(a => a.Raqam == raqam && a.Id != AparatTahrir?.Id)) { AparatXato = Til.T("Aparat_XatoRaqamBand"); return; }
         // Yangi aparatda boshlang'ich pult/bak jimgina 0 bo'lib ketmasin — haqiqiy ko'rsatkich kiritilishi shart (0 bo'lsa "0" yoziladi).
         if (AparatTahrir is null && (AparatTotalLitr.Trim().Length == 0 || AparatBak.Trim().Length == 0)) { AparatXato = Til.T("Xato_Maydon"); return; }
-        var pult = AparatTotalLitr.Trim().Length == 0 ? 0m : Format.KasrOl(AparatTotalLitr);
-        var bak = AparatBak.Trim().Length == 0 ? 0m : Format.KasrOl(AparatBak);
+        // §8.16: krug yoqilgan bo'lsa — hajm > 0, pult 0 ≤ p < H, krug ≥ 1; umumiy = (krug − 1) × H + pult
+        if (AparatKrug)
+        {
+            if (AparatH is not { } h) { AparatXato = Til.T("Krug_XatoHajm"); return; }
+            if (Format.KasrOl(AparatTotalLitr) is { } p0 && (p0 < 0 || p0 >= h)) { AparatXato = Krug.ChegaraXatoMatn(h); return; }
+            if (!int.TryParse(AparatKrugRaqami.Trim(), out var kr) || kr < 1) { AparatXato = Til.T("Krug_XatoRaqam"); return; }
+        }
+        var pult = AparatTotalLitr.Trim().Length == 0 ? 0m : AparatUmumiy;
+        decimal? krugHajmi = AparatKrug ? AparatH : null;
+        // Tahrirda bak o'zgartirilmagan bo'lsa — joriy qiymat (manfiy qoldiq "−1 234.00" ko'rinishida to'ldiriladi va KasrOl uni o'qimaydi;
+        // aks holda manfiy bakli aparatni, masalan krugini yoqish uchun, umuman saqlab bo'lmasdi)
+        var bak = AparatTahrir is { } at && AparatBak == Format.Son(at.BakQoldiq) ? at.BakQoldiq
+            : AparatBak.Trim().Length == 0 ? 0m : Format.KasrOl(AparatBak);
         if (pult is null or < 0) { AparatXato = Til.T("Aparat_XatoPult"); return; }
         if (bak is null) { AparatXato = Til.T("Xato_Maydon"); return; }
-        if (bak < 0) { AparatXato = Til.T("Aparat_XatoBakManfiy"); return; }
+        if (bak < 0 && bak != AparatTahrir?.BakQoldiq) { AparatXato = Til.T("Aparat_XatoBakManfiy"); return; }
 
         try
         {
-            if (AparatTahrir is not { } a) await Malumot.AparatYarat(new AparatYaratishDto(raqam, AparatYoqilgi.Id, pult.Value, bak.Value));
+            if (AparatTahrir is not { } a) await Malumot.AparatYarat(new AparatYaratishDto(raqam, AparatYoqilgi.Id, pult.Value, bak.Value, krugHajmi));
             else
             {
                 var ozgardi = pult != a.TotalLitr || bak != a.BakQoldiq;
                 var sabab = AparatSabab.Trim();
                 if (ozgardi && sabab.Length == 0) { AparatXato = Til.T("Aparat_XatoSabab"); return; }
+                // KrugHajmi: null — o'zgarmaydi, 0 — o'chiriladi, > 0 — o'rnatiladi (faqat ko'rinish, sabab so'ralmaydi)
+                decimal? krug = krugHajmi is { } kh ? (kh != a.KrugHajmi ? kh : null) : (a.KrugHajmi is not null ? 0m : null);
                 await Malumot.AparatTahrirla(a.Id, new AparatTahrirlashDto(raqam, AparatYoqilgi.Id,
-                    pult != a.TotalLitr ? pult : null, bak != a.BakQoldiq ? bak : null, ozgardi ? sabab : null));
+                    pult != a.TotalLitr ? pult : null, bak != a.BakQoldiq ? bak : null, ozgardi ? sabab : null, krug));
             }
             AparatDialogOchiq = false;
         }

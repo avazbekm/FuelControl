@@ -12,5 +12,6 @@
   <Folder Name="/tests/">
     <Project Path="tests/FuelControl.Api.Tests/FuelControl.Api.Tests.csproj" />
     <Project Path="tests/FuelControl.Core.Tests/FuelControl.Core.Tests.csproj" />
+    <Project Path="src/frontend/desktop/FuelControl.Desktop.Tests/FuelControl.Desktop.Tests.csproj" />
   </Folder>
 </Solution>

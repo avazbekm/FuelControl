@@ -36,6 +36,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _tasdiqMatni = "";
     [ObservableProperty] private string _tasdiqTugma = "";
     [ObservableProperty] private bool _tasdiqXavfli;
+    [ObservableProperty] private string _tasdiqBekor = "";
+    /// <summary>§8.15: fokus bekor tugmasida ("Tekshiraman"), Enter o'zi saqlamaydi.</summary>
+    [ObservableProperty] private bool _tasdiqBekorFokus;
     private System.Threading.Tasks.TaskCompletionSource<bool>? _tasdiq;
 
     [RelayCommand] private void TasdiqJavob(string ha)
@@ -51,6 +54,7 @@ public partial class MainViewModel : ObservableObject
     public XarajatDialogVM XarajatDialog => Dialoglar.Xarajat;
     public BakKirimDialogVM BakDialog => Dialoglar.Bak;
     public NarxDialogVM NarxDialog => Dialoglar.Narx;
+    public NarxTuzatishDialogVM NarxTuzatishDialog => Dialoglar.NarxTuzatish;
 
     /// <summary>Yon menyudagi indikator: SignalR ulanishi holati.</summary>
     public bool AloqaBor => Malumot.Holat == Malumot.AloqaHolati.Bor;
@@ -120,11 +124,12 @@ public partial class MainViewModel : ObservableObject
             BildirishSarlavha = sarlavha; BildirishMatni = matn; BildirishXato = xato;
             BildirishOchiq = true;
         };
-        Bildirish.TasdiqSoraldi += (sarlavha, matn, tugma, xavfli, t) =>
+        Bildirish.TasdiqSoraldi += s =>
         {
             _tasdiq?.TrySetResult(false);
-            _tasdiq = t;
-            TasdiqSarlavha = sarlavha; TasdiqMatni = matn; TasdiqTugma = tugma; TasdiqXavfli = xavfli;
+            _tasdiq = s.Javob;
+            TasdiqSarlavha = s.Sarlavha; TasdiqMatni = s.Matn; TasdiqTugma = s.Tugma; TasdiqXavfli = s.Xavfli;
+            TasdiqBekor = s.Bekor ?? Til.T("BekorQilish"); TasdiqBekorFokus = s.BekorFokus;
             TasdiqOchiq = true;
         };
         Til.Ozgardi += () => OnPropertyChanged(string.Empty);
@@ -136,7 +141,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (!Kirilgan) return;
         Kirilgan = false;
-        foreach (var d in new DialogVM[] { Dialoglar.Nasiya, Dialoglar.Qaytish, Dialoglar.Xarajat, Dialoglar.Bak, Dialoglar.Narx }) d.Ochiq = false;
+        foreach (var d in new DialogVM[] { Dialoglar.Nasiya, Dialoglar.Qaytish, Dialoglar.Xarajat, Dialoglar.Bak, Dialoglar.Narx, Dialoglar.NarxTuzatish }) d.Ochiq = false;
         if (TasdiqOchiq) TasdiqJavob("0");
         await Malumot.Chiqish();
         Joriy = Malumot.JoriyFoydalanuvchi;

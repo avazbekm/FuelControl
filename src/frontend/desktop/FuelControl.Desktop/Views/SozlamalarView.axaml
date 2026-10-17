@@ -128,7 +128,7 @@
                                                 </Grid>
                                                 <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="6">
                                                     <TextBlock Classes="qator" Text="{l:T Aparat_PultKorsatkichi}" />
-                                                    <StackPanel Orientation="Horizontal" Grid.Column="1"><TextBlock Text="{Binding Pult}" FontWeight="ExtraBold" FontSize="13.5" VerticalAlignment="Bottom" /><TextBlock Text=" L" FontWeight="ExtraBold" FontSize="13.5" VerticalAlignment="Bottom" /></StackPanel>
+                                                    <TextBlock Grid.Column="1" Text="{Binding PultToliqLitr}" FontWeight="ExtraBold" FontSize="13.5" VerticalAlignment="Bottom" />
                                                     <TextBlock Grid.Row="1" Classes="qator" Text="{l:T Aparat_BakQoldigi}" />
                                                     <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1"><TextBlock Text="{Binding Bak}" FontWeight="ExtraBold" FontSize="13.5" Foreground="{DynamicResource Yashil}" Classes.manfiy="{Binding BakManfiy}" VerticalAlignment="Bottom" /><TextBlock Text=" L" FontWeight="ExtraBold" FontSize="13.5" Foreground="{DynamicResource Yashil}" Classes.manfiy="{Binding BakManfiy}" VerticalAlignment="Bottom" /></StackPanel>
                                                 </Grid>
@@ -167,9 +167,27 @@
                                 </ComboBox>
                             </StackPanel>
                         </Grid>
+                        <!-- §8.16: pult krugi -->
                         <StackPanel Spacing="6">
-                            <TextBlock Text="{Binding AparatPultYorliq}" Classes="yorliq" Margin="0" />
-                            <TextBox Classes="orta" Text="{Binding AparatTotalLitr}" PlaceholderText="0.00" />
+                            <CheckBox x:Name="AparatKrugBelgi" IsChecked="{Binding AparatKrug}" Content="{l:T Krug_Yoqish}" />
+                            <StackPanel Spacing="6" IsVisible="{Binding AparatKrug}">
+                                <TextBlock Text="{l:T Krug_Hajmi, Katta=True}" Classes="yorliq" Margin="0" />
+                                <TextBox x:Name="AparatKrugHajmi" Classes="orta" Text="{Binding AparatKrugHajmi}" PlaceholderText="10 000" />
+                                <TextBlock Text="{l:T Krug_Izoh}" Classes="izoh" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="{Binding AparatPultYorliq}" Classes="yorliq" Margin="0" TextWrapping="Wrap" />
+                                    <TextBox x:Name="AparatPult" Classes="orta" Text="{Binding AparatTotalLitr}" PlaceholderText="0.00" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="6" Width="86" IsVisible="{Binding AparatKrug}" VerticalAlignment="Bottom">
+                                    <TextBlock Text="{l:T Krug_Raqami, Katta=True}" Classes="yorliq" Margin="0" />
+                                    <TextBox x:Name="AparatKrugRaqami" Classes="orta" Text="{Binding AparatKrugRaqami}" PlaceholderText="1" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="{Binding AparatUmumiyMatn}" Classes="krugBelgi" FontSize="12.5" IsVisible="{Binding AparatUmumiyBor}" />
                             <TextBlock Text="{l:T Aparat_PultIzoh}" Classes="izoh" TextWrapping="Wrap" />
                         </StackPanel>
                         <StackPanel Spacing="6">

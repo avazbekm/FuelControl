@@ -424,6 +424,24 @@
         <Setter Property="FontSize" Value="12" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
+    <!-- §8.16: pult krugi — ko'rsatkich ostida kichik "krug 2"; kiritishda krug oshsa ajralib turadi -->
+    <Style Selector="TextBlock.krugBelgi">
+        <Setter Property="Foreground" Value="{DynamicResource MatnYumshoq}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.krugOshdi">
+        <Setter Property="Foreground" Value="{DynamicResource BadgeBinafshaMatn}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <!-- §8.15: bakdagidan ko'p litr chiqsa — maydon ostida sariq ogohlantirish (bloklamaydi) -->
+    <Style Selector="TextBlock.bakOgoh">
+        <Setter Property="Foreground" Value="{DynamicResource Sariq}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
     <Style Selector="TextBlock.qator">
         <Setter Property="FontSize" Value="13" />
         <Setter Property="Foreground" Value="{DynamicResource MatnYumshoq}" />

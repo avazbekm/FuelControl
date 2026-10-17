@@ -25,12 +25,27 @@ public sealed record YoqilgiBelgi(string Nomi, IBrush Nuqta, IBrush Fon, IBrush 
     public static YoqilgiBelgi Ol(YoqilgiTuri y) => Yarat(y.Nomi, y.Rang);
 }
 
-/// <summary>Savdo sahifasidagi aparat kartasi (oxirgi yopilgan smena holati).</summary>
-public sealed record AparatKartasi(Aparat A, YoqilgiBelgi Yoqilgi)
+/// <summary>
+/// Savdo sahifasidagi aparat kartasi. §8.13: pult ko'rsatkichi yopish sahifasidagi "Oldingi" bilan bir manbadan (SmenaHisobi.Oldingi) —
+/// ochiq smenada narx o'zgarishi segmenti bo'lsa uning Oxiri ("Narx o'zgarishida qayd etilgan" izohi bilan), aks holda TotalLitr.
+/// </summary>
+/// Sozlamalar kartasi qayd'siz (aparatning saqlangan TotalLitr qiymati) ishlatadi.
+public sealed record AparatKartasi(Aparat A, YoqilgiBelgi Yoqilgi, IReadOnlyList<SmenaKorsatkichDto>? QaydRoyxati = null, bool TuzataOladi = false)
 {
+    public IReadOnlyList<SmenaKorsatkichDto> Qayd => QaydRoyxati ?? [];
     public string Nomi => Til.F("Aparat_Raqami", A.Raqam);
     public string Narx => Format.Pul(A.Yoqilgi.Narx) + " " + Til.T("Savdo_SomLitr");
-    public string Pult => Format.Son(A.TotalLitr);
+    /// <summary>§8.16: krugli aparatda pult qismi ("560.52") va ostida "krug 2".</summary>
+    public string Pult => Krug.Son(SmenaHisobi.Oldingi(A, Qayd), A.KrugHajmi);
+    public string? PultKrug => Krug.Belgi(SmenaHisobi.Oldingi(A, Qayd), A.KrugHajmi);
+    public bool PultKrugBor => PultKrug is not null;
+    /// <summary>Bir qatorda: "560.52 · krug 2" (Aparatlar holati ro'yxati).</summary>
+    public string PultToliq => Krug.Toliq(SmenaHisobi.Oldingi(A, Qayd), A.KrugHajmi);
+    /// <summary>Sozlamalar kartasi: "9 710.00 L · krug 3" — birlik songa yopishgan.</summary>
+    public string PultToliqLitr => Krug.ToliqLitr(SmenaHisobi.Oldingi(A, Qayd), A.KrugHajmi);
+    public bool QaydEtilgan => Qayd.Count > 0;
+    /// <summary>"Tuzatish" havolasi (§8.14) — KorsatkichTuzatish ruxsati bilan.</summary>
+    public bool TuzatishKorinsin => QaydEtilgan && TuzataOladi;
     public string Bak => Format.ButunLitr(A.BakQoldiq);
     public string BakAniq => Format.Son(A.BakQoldiq);
     public bool BakManfiy => A.BakManfiy;
@@ -90,15 +105,38 @@ public partial class YopishQatori : ObservableObject
         A = a; Qayd = qayd; _ozgardi = ozgardi;
         Yoqilgi = YoqilgiBelgi.Ol(a.Yoqilgi);
         Oldingi = SmenaHisobi.Oldingi(a, qayd);
+        H = a.KrugHajmi;   // qurilgan paytdagi qiymat: krug sozlamasi o'zgarsa qator imzosi farq qilib, qator qayta quriladi
     }
 
+    /// <summary>§8.15: chiqyapti = shu smenadagi jami litr (narx segmentlari + shu qator); bor = BakQoldiq.</summary>
+    public decimal BakdaBor => A.BakQoldiq;
+    public decimal? Chiqyapti => Litr is { } l ? QaydLitr + l : null;
+    public string? BakOgohi => SmenaHisobi.BakOgohi(Chiqyapti, BakdaBor);
+    public bool BakOgohBor => BakOgohi is not null;
+    /// <summary>"Tuzatish" havolasi oxirgi narx segmenti yonida (§8.14).</summary>
+    public bool TuzatishKorinsin => QaydBor && Malumot.JoriyFoydalanuvchi.Bor(Ruxsat.KorsatkichTuzatish);
+
     public string Nomi => Til.F("Aparat_Raqami", A.Raqam);
-    public string OldingiMatn => Format.Son(Oldingi);
+    /// <summary>Til almashganda — matnli xossalar (izoh, ogohlantirish) qayta o'qilsin.</summary>
+    public void TilYangila() => OnPropertyChanged(string.Empty);
+    public string OldingiMatn => Krug.Son(Oldingi, H);
     public string NarxMatn => Format.Pul(Narx);
 
-    public decimal? Qiymat => Format.KasrOl(Yangi);
-    public bool Xato => (Qiymat is { } q && q < Oldingi) || (Yangi.Trim().Length > 0 && Qiymat is null);
-    public string XatoMatn => Til.F("Yopish_OldingidanKichik", Format.Son(Oldingi));
+    /// <summary>§8.16: krug hajmi (null — krug yo'q). Krugli aparatga pultda ko'ringan qiymat yoziladi, umumiy litrga o'giriladi.</summary>
+    public decimal? H { get; }
+    public string? OldingiKrug => Krug.Belgi(Oldingi, H);
+    public bool OldingiKrugBor => OldingiKrug is not null;
+    private KrugKiritish? Kiritish => Krug.Kirit(Yangi, Oldingi, H);
+    public bool KrugXato => Krug.ChegaraXato(Yangi, H);
+    public bool KrugOshdi => Kiritish?.Oshdi == true;
+    public string KrugKeyingi => Krug.KeyingiBelgi(Kiritish);
+    /// <summary>Krug tasdig'i qatori (krug oshgan bo'lsa).</summary>
+    public string? KrugTasdiqQatori => Kiritish is { Oshdi: true } k && Litr is { } l ? Krug.TasdiqQatori(Nomi, k, l) : null;
+
+    /// <summary>Umumiy litr (serverga shu yuboriladi).</summary>
+    public decimal? Qiymat => Kiritish?.Umumiy;
+    public bool Xato => KrugXato || (Qiymat is { } q && q < Oldingi) || (Yangi.Trim().Length > 0 && Format.KasrOl(Yangi) is null);
+    public string XatoMatn => KrugXato ? Krug.ChegaraXatoMatn(H) : Til.F("Yopish_OldingidanKichik", OldingiMatn);
     public decimal? Litr => Qiymat is { } q && q >= Oldingi ? SmenaHisobi.Litr(Oldingi, q) : null;
     public long? Summa => Litr is { } l ? SmenaHisobi.Summa(l, Narx) : null;
     public string LitrMatn => Litr is { } l ? Format.Son(l) + " L" : "—";
@@ -112,7 +150,8 @@ public partial class YopishQatori : ObservableObject
 
     partial void OnYangiChanged(string value)
     {
-        foreach (var n in new[] { nameof(Qiymat), nameof(Xato), nameof(Litr), nameof(Summa), nameof(LitrMatn), nameof(SummaMatn) })
+        foreach (var n in new[] { nameof(Qiymat), nameof(Xato), nameof(Litr), nameof(Summa), nameof(LitrMatn), nameof(SummaMatn), nameof(BakOgohi), nameof(BakOgohBor),
+                     nameof(XatoMatn), nameof(KrugXato), nameof(KrugOshdi), nameof(KrugKeyingi), nameof(KrugTasdiqQatori) })
             OnPropertyChanged(n);
         _ozgardi();
     }
@@ -134,7 +173,7 @@ public partial class SavdoViewModel : ObservableObject
         Yukla();
         Malumot.Ozgardi += Yukla;
         Malumot.AloqaOzgardi += Buyruqlar;
-        Til.Ozgardi += () => { Yukla(); OnPropertyChanged(string.Empty); };
+        Til.Ozgardi += () => { Yukla(); foreach (var q in YopishQatorlari) q.TilYangila(); OnPropertyChanged(string.Empty); };
         // Davomiylik matni yangilanib tursin (har 30 s). DispatcherTimer emas, Task.Delay — taymer ishga tushmay qolardi.
         _ = DavomiylikniYangilab();
     }
@@ -176,7 +215,7 @@ public partial class SavdoViewModel : ObservableObject
     public string XarajatJami => Format.Pul(S?.XarajatJami ?? 0);
 
     public List<AparatKartasi> Aparatlar { get; private set; } = new();
-    public string AparatlarIzoh => Til.F("Savdo_AparatlarIzoh", OxirgiQisqa?.Tugadi is { } t ? Format.QisqaSanaVaqt(t) : "—");
+    public string AparatlarIzoh => Til.F("Savdo_AparatlarIzohQayd", OxirgiQisqa?.Tugadi is { } t ? Format.QisqaSanaVaqt(t) : "—");
 
     // Joriy smena yozuvlari (nasiya / qaytish / xarajat) har doim AYNAN hozirgi smena tafsilotidan (T) olinadi:
     // T almashsa (yangi smena — o'zi ochgan yoki SignalR), ro'yxatlar o'qilish paytida qayta quriladi — oldingi smena
@@ -480,7 +519,7 @@ public partial class SavdoViewModel : ObservableObject
     {
         var qayd = T?.Korsatkichlar ?? [];
         return string.Join("|", Malumot.Aparatlar.OrderBy(a => a.Raqam).Select(a =>
-            $"{a.Id}:{SmenaHisobi.Oldingi(a, qayd.Where(k => k.AparatId == a.Id && k.NarxOzgarishida))}:{a.Yoqilgi.Narx}"));
+            $"{a.Id}:{SmenaHisobi.Oldingi(a, qayd.Where(k => k.AparatId == a.Id && k.NarxOzgarishida))}:{a.Yoqilgi.Narx}:{a.KrugHajmi}"));
     }
 
     private bool YopishMumkin() => Malumot.AloqaBor && Natija is not null && NaqdQ is not null && YopishQatorlari.All(q => !q.Xato);
@@ -489,6 +528,12 @@ public partial class SavdoViewModel : ObservableObject
     private async Task SmenaniYop()
     {
         if (S is not { } s || Natija is not { } n) return;
+        // §8.16: pult krugi oshgan bo'lsa — avval krug tasdig'i
+        if (!await Bildirish.KrugTasdiqla(YopishQatorlari.Select(q => q.KrugTasdiqQatori).OfType<string>()))
+            return;
+        // §8.15: bakdagidan ko'p litr chiqsa — avval "Tekshiraman" / "Baribir saqlash" (bloklamaydi)
+        if (!await Bildirish.BakTasdiqla(YopishQatorlari.Where(q => q.BakOgohBor).Select(q => SmenaHisobi.BakOgohQatori(q.Nomi, q.Chiqyapti!.Value, q.BakdaBor))))
+            return;
         var farqMatn = n.Farq switch
         {
             < 0 => $"{Til.T("Savdo_Kamomat")}: {Format.Pul(-n.Farq)}",
@@ -517,6 +562,8 @@ public partial class SavdoViewModel : ObservableObject
     [RelayCommand] private void QarzQaytdi() => Dialoglar.Qaytish.Och(null);
     [RelayCommand] private void XarajatYoz() => Dialoglar.Xarajat.Och();
     [RelayCommand] private void BakKirim() => Dialoglar.Bak.Och(null);
+    /// <summary>§8.14: narx o'zgarishidagi ko'rsatkichni tuzatish (Savdo kartasi va yopish sahifasidan).</summary>
+    [RelayCommand] private void NarxTuzat(Aparat a) => Dialoglar.NarxTuzatish.Och(a);
     [RelayCommand] private void BarchaNasiyalar() => Navigatsiya.Och(MainViewModel.SNasiyalar);
 
     [RelayCommand]
@@ -547,7 +594,10 @@ public partial class SavdoViewModel : ObservableObject
     {
         if (!SmenaOchiq && YopishRejimi) YopishRejimi = false;
 
-        Aparatlar = Malumot.Aparatlar.OrderBy(a => a.Raqam).Select(a => new AparatKartasi(a, YoqilgiBelgi.Ol(a.Yoqilgi))).ToList();
+        SmenaKorsatkichDto[] qayd = S is null ? [] : T?.Korsatkichlar ?? [];
+        var tuzata = S is not null && Joriy.Bor(Ruxsat.KorsatkichTuzatish);
+        Aparatlar = Malumot.Aparatlar.OrderBy(a => a.Raqam).Select(a => new AparatKartasi(a, YoqilgiBelgi.Ol(a.Yoqilgi),
+            qayd.Where(k => k.AparatId == a.Id && k.NarxOzgarishida).ToList(), tuzata)).ToList();
 
         RoyxatlarniQur();
         var faol = Malumot.FaolNasiyalar?.Royxat ?? [];
@@ -581,7 +631,7 @@ public partial class SavdoViewModel : ObservableObject
             if (YopishRejimi) YopishQatorlariniQur();
         }
         // Yozib turilgan qatorlar faqat aparat yoki "oldingi" qiymat o'zgarsa qayta quriladi (fokus yo'qolmasin).
-        if (YopishRejimi && QatorImzosi() != string.Join("|", YopishQatorlari.Select(q => $"{q.A.Id}:{q.Oldingi}:{q.Narx}")))
+        if (YopishRejimi && QatorImzosi() != string.Join("|", YopishQatorlari.Select(q => $"{q.A.Id}:{q.Oldingi}:{q.Narx}:{q.H}")))
             YopishQatorlariniQur();
         OnPropertyChanged(string.Empty);
         Buyruqlar();

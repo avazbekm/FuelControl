@@ -192,6 +192,14 @@
                                             <Border Classes="chiziq" />
                                             <TextBlock Text="{l:T Savdo_PultKorsatkichi, Katta=True}" Classes="yorliq" Margin="0,2,0,0" />
                                             <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><StackPanel Orientation="Horizontal"><TextBlock Text="{Binding Pult}" FontSize="20" FontWeight="ExtraBold" VerticalAlignment="Bottom" /><TextBlock Text=" L" FontSize="13" VerticalAlignment="Bottom" /></StackPanel></Viewbox>
+                                            <!-- §8.16: krugli pult — ostida "krug 2" -->
+                                            <TextBlock Text="{Binding PultKrug}" Classes="krugBelgi" Margin="0,-6,0,0" IsVisible="{Binding PultKrugBor}" />
+                                            <!-- §8.13: qiymat narx o'zgarishi segmentidan — izoh va (KorsatkichTuzatish ruxsati bilan) "Tuzatish" (§8.14) -->
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding QaydEtilgan}">
+                                                <TextBlock Text="{l:T NarxQayd_Izoh}" Classes="izoh" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center" />
+                                                <Button Grid.Column="1" Classes="link" FontSize="12.5" FontWeight="Bold" Content="{l:T NarxQayd_Tuzatish}" VerticalAlignment="Center" IsVisible="{Binding TuzatishKorinsin}"
+                                                        Command="{Binding $parent[ItemsControl].((vm:SavdoViewModel)DataContext).NarxTuzatCommand}" CommandParameter="{Binding A}" />
+                                            </Grid>
                                             <Panel>
                                                 <Border Classes="yashilTile" IsVisible="{Binding !BakManfiy}">
                                                     <StackPanel Spacing="2">
@@ -531,7 +539,7 @@
                                             <Border BorderBrush="{DynamicResource Chiziq}" BorderThickness="0,1,0,0" Padding="0,8">
                                                 <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="14">
                                                     <Grid ColumnDefinitions="Auto,Auto,*"><TextBlock Text="{Binding A.Raqam}" FontWeight="Bold" FontSize="13" VerticalAlignment="Bottom" /><TextBlock Grid.Column="1" Text=" · " FontWeight="Bold" FontSize="13" VerticalAlignment="Bottom" /><TextBlock Grid.Column="2" Text="{Binding A.Yoqilgi.Nomi}" FontWeight="Bold" FontSize="13" VerticalAlignment="Bottom" TextTrimming="CharacterEllipsis" /></Grid>
-                                                    <TextBlock Grid.Column="1" Text="{Binding Pult}" FontSize="13" HorizontalAlignment="Right" />
+                                                    <TextBlock Grid.Column="1" Text="{Binding PultToliq}" FontSize="13" HorizontalAlignment="Right" />
                                                     <TextBlock Grid.Column="2" Text="{Binding BakAniq}" FontSize="13" FontWeight="Bold" MinWidth="64" TextAlignment="Right"
                                                                Classes.manfiy="{Binding BakManfiy}" />
                                                 </Grid>
@@ -601,14 +609,28 @@
                                                                 </Grid>
                                                             </Border>
                                                         </StackPanel>
-                                                        <Viewbox Grid.Column="1" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Center"><TextBlock Text="{Binding OldingiMatn}" FontSize="14" Foreground="{DynamicResource MatnYumshoq}" /></Viewbox>
-                                                        <TextBox Grid.Column="2" Classes="pult" Classes.xato="{Binding Xato}" Text="{Binding Yangi}" PlaceholderText="0.00" ctl:EnterTartib.Guruh="yopish" />
+                                                        <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                            <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Right"><TextBlock Text="{Binding OldingiMatn}" FontSize="14" Foreground="{DynamicResource MatnYumshoq}" /></Viewbox>
+                                                            <TextBlock Text="{Binding OldingiKrug}" Classes="krugBelgi" HorizontalAlignment="Right" IsVisible="{Binding OldingiKrugBor}" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                            <TextBox Classes="pult" Classes.xato="{Binding Xato}" Text="{Binding Yangi}" PlaceholderText="0.00" ctl:EnterTartib.Guruh="yopish" />
+                                                            <!-- §8.16: pult 0 dan qayta boshlangan — "krug k+1" ajralib turadi -->
+                                                            <TextBlock Text="{Binding KrugKeyingi}" Classes="krugOshdi" HorizontalAlignment="Right" Margin="0,3,12,0" IsVisible="{Binding KrugOshdi}" />
+                                                        </StackPanel>
                                                         <Viewbox Grid.Column="3" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Center"><TextBlock Text="{Binding LitrMatn}" FontSize="14" FontWeight="ExtraBold" /></Viewbox>
                                                         <Viewbox Grid.Column="4" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Center"><TextBlock Text="{Binding NarxMatn}" FontSize="14" Foreground="{DynamicResource MatnYumshoq}" /></Viewbox>
                                                         <Viewbox Grid.Column="5" StretchDirection="DownOnly" HorizontalAlignment="Right" VerticalAlignment="Center"><TextBlock Text="{Binding SummaMatn}" FontSize="14" FontWeight="ExtraBold" /></Viewbox>
                                                     </Grid>
                                                     <TextBlock Text="{Binding XatoMatn}" Classes="xatoMatn" HorizontalAlignment="Right" TextAlignment="Right" TextWrapping="Wrap" IsVisible="{Binding Xato}" />
-                                                    <TextBlock Text="{Binding QaydMatn}" Classes="izoh" FontSize="12" TextWrapping="Wrap" IsVisible="{Binding QaydBor}" />
+                                                    <!-- §8.15: bakdagidan ko'p litr chiqsa — sariq ogohlantirish (bloklamaydi) -->
+                                                    <TextBlock Text="{Binding BakOgohi}" Classes="bakOgoh" HorizontalAlignment="Right" TextAlignment="Right" IsVisible="{Binding BakOgohBor}" />
+                                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" IsVisible="{Binding QaydBor}">
+                                                        <TextBlock Text="{Binding QaydMatn}" Classes="izoh" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Bottom" />
+                                                        <!-- §8.14: oxirgi narx o'zgarishi segmentini tuzatish -->
+                                                        <Button Grid.Column="1" Classes="link" FontSize="12.5" FontWeight="Bold" Content="{l:T NarxQayd_Tuzatish}" VerticalAlignment="Bottom" IsVisible="{Binding TuzatishKorinsin}"
+                                                                Command="{Binding $parent[ItemsControl].((vm:SavdoViewModel)DataContext).NarxTuzatCommand}" CommandParameter="{Binding A}" />
+                                                    </Grid>
                                                 </StackPanel>
                                             </Border>
                                         </DataTemplate>

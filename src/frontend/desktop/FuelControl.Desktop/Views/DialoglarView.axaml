@@ -479,10 +479,15 @@
                                                 <StackPanel Grid.Column="2" Spacing="1" VerticalAlignment="Center" HorizontalAlignment="Right">
                                                     <TextBlock Text="{Binding OldingiYorliq}" Classes="izoh" FontSize="12" />
                                                     <TextBlock Text="{Binding OldingiMatn}" FontWeight="ExtraBold" FontSize="14" />
+                                                    <TextBlock Text="{Binding OldingiKrug}" Classes="krugBelgi" IsVisible="{Binding OldingiKrugBor}" />
                                                 </StackPanel>
-                                                <TextBox Grid.Column="3" Classes="pult" Classes.xato="{Binding Xato}" Text="{Binding Qiymat}" PlaceholderText="0.00" ctl:EnterTartib.Guruh="narx" />
+                                                <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                                    <TextBox Classes="pult" Classes.xato="{Binding Xato}" Text="{Binding Qiymat}" PlaceholderText="0.00" ctl:EnterTartib.Guruh="narx" />
+                                                    <TextBlock Text="{Binding KrugKeyingi}" Classes="krugOshdi" HorizontalAlignment="Right" Margin="0,3,12,0" IsVisible="{Binding KrugOshdi}" />
+                                                </StackPanel>
                                             </Grid>
                                             <TextBlock Text="{Binding Izoh}" FontSize="12.5" Foreground="{DynamicResource MatnYumshoq}" Classes.xatoMatn="{Binding Xato}" TextWrapping="Wrap" />
+                                            <TextBlock Text="{Binding BakOgohi}" Classes="bakOgoh" TextWrapping="Wrap" IsVisible="{Binding BakOgohBor}" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -510,6 +515,61 @@
             </Border>
         </Border>
 
+        <!-- ===================== Narx o'zgarishi ko'rsatkichini tuzatish (§8.14) ===================== -->
+        <Border Classes="parda" DataContext="{Binding NarxTuzatishDialog}" x:DataType="vm:NarxTuzatishDialogVM" IsVisible="{Binding Ochiq}">
+            <Border Classes="dialog smena">
+                <ScrollViewer Classes="dialogIchi" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel Spacing="14">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Border Classes="ikonDoira" Background="{DynamicResource BadgeSariqFon}">
+                            <ctl:Ikon Nomi="tag" Olcham="19" Rang="{DynamicResource BadgeSariqMatn}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                            <TextBlock Classes="dSarlavha" Text="{Binding Sarlavha}" TextWrapping="Wrap" />
+                            <TextBlock Classes="izoh" FontSize="13" Text="{Binding Kontekst}" />
+                        </StackPanel>
+                        <Button Grid.Column="2" Classes="yopX" Command="{Binding YopCommand}" ToolTip.Tip="{l:T Yopish}"><ctl:Ikon Nomi="x" Olcham="15" /></Button>
+                    </Grid>
+                    <UniformGrid Columns="2" ColumnSpacing="12">
+                        <Border Classes="miniTile" Padding="16,12">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{l:T Yopish_Oldingi, Katta=True}" Classes="yorliq" Margin="0" FontSize="10.5" TextTrimming="CharacterEllipsis" />
+                                <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock Text="{Binding Boshi}" FontSize="18" FontWeight="ExtraBold" Foreground="{DynamicResource MatnIkkilamchi}" /></Viewbox>
+                                <TextBlock Text="{Binding BoshiKrug}" Classes="krugBelgi" IsVisible="{Binding KrugBor}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Classes="miniTile" Padding="16,12">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{l:T Smenalar_TuzatishJoriy, Katta=True}" Classes="yorliq" Margin="0" FontSize="10.5" TextTrimming="CharacterEllipsis" />
+                                <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left"><TextBlock x:Name="NarxTuzatishHozirgi" Text="{Binding Hozirgi}" FontSize="18" FontWeight="ExtraBold" /></Viewbox>
+                                <TextBlock Text="{Binding HozirgiKrug}" Classes="krugBelgi" IsVisible="{Binding KrugBor}" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{l:T NarxQayd_Togri, Katta=True}" Classes="yorliq" Margin="0" />
+                        <TextBox x:Name="NarxTuzatishQiymat" Classes="pult" Classes.xato="{Binding QiymatXato}" Text="{Binding Qiymat}" PlaceholderText="0.00" HorizontalAlignment="Stretch"
+                                 ctl:AvtoFokus.Yoqilgan="True" ctl:EnterTartib.Guruh="narxTuzatish" />
+                        <TextBlock Text="{Binding KrugKeyingi}" Classes="krugOshdi" HorizontalAlignment="Right" Margin="0,0,12,0" IsVisible="{Binding KrugOshdi}" />
+                        <TextBlock Text="{Binding Hisob}" FontSize="12.5" Foreground="{DynamicResource MatnYumshoq}" Classes.xatoMatn="{Binding HisobXato}" TextWrapping="Wrap" IsVisible="{Binding HisobBor}" />
+                        <TextBlock Text="{l:T NarxQayd_Ochiriladi}" Classes="izoh" FontWeight="SemiBold" TextWrapping="Wrap" IsVisible="{Binding Ochiriladi}" />
+                        <TextBlock Text="{Binding BakOgohi}" Classes="bakOgoh" TextWrapping="Wrap" IsVisible="{Binding BakOgohBor}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="{l:T Smenalar_TuzatishSabab, Katta=True}" Classes="yorliq" />
+                        <TextBox x:Name="NarxTuzatishSabab" Text="{Binding Sabab}" PlaceholderText="{l:T Smenalar_TuzatishSababPlaceholder}" MinHeight="46" CornerRadius="23" ctl:EnterTartib.Guruh="narxTuzatish" />
+                    </StackPanel>
+                    <Border Classes="malumot"><TextBlock Text="{l:T NarxQayd_TuzatishIzoh}" TextWrapping="Wrap" /></Border>
+                    <TextBlock Text="{Binding Xato}" Classes="xatoMatn" TextWrapping="Wrap" IsVisible="{Binding Xato, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                        <Button Content="{l:T BekorQilish}" Command="{Binding YopCommand}" />
+                        <Button x:Name="NarxTuzatishSaqla" Classes="primary" MinWidth="110" Content="{l:T Saqlash}" Command="{Binding SaqlaCommand}" ctl:EnterTartib.Guruh="narxTuzatish" />
+                    </StackPanel>
+                </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Border>
+
         <!-- ===================== Tasdiq ===================== -->
         <Border Classes="parda" IsVisible="{Binding TasdiqOchiq}">
             <Border Classes="dialog" Width="460">
@@ -518,8 +578,8 @@
                     <TextBlock Classes="sarlavha" FontSize="20" Text="{Binding TasdiqSarlavha}" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding TasdiqMatni}" TextWrapping="Wrap" FontSize="14" LineHeight="21" />
                     <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
-                        <Button Content="{l:T BekorQilish}" Command="{Binding TasdiqJavobCommand}" CommandParameter="0" />
-                        <Button Classes="primary" Classes.danger="{Binding TasdiqXavfli}" Content="{Binding TasdiqTugma}" Command="{Binding TasdiqJavobCommand}" CommandParameter="1" IsDefault="True" />
+                        <Button x:Name="TasdiqBekorTugma" Content="{Binding TasdiqBekor}" Command="{Binding TasdiqJavobCommand}" CommandParameter="0" />
+                        <Button x:Name="TasdiqHaTugma" Classes="primary" Classes.danger="{Binding TasdiqXavfli}" Content="{Binding TasdiqTugma}" Command="{Binding TasdiqJavobCommand}" CommandParameter="1" IsDefault="{Binding !TasdiqBekorFokus}" />
                     </StackPanel>
                 </StackPanel>
                 </ScrollViewer>

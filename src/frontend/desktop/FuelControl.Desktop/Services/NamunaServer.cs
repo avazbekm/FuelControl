@@ -49,11 +49,11 @@ public sealed class NamunaServer : INamunaServer
         ];
         _aparatlar =
         [
-            new(1, 1, 1, "AI-92", 184_230.50m, 6_840m, Utc(b.AddDays(-2), 9, 30), 5_000m),
-            new(2, 2, 1, "AI-92", 97_410.00m, 3_215m, Utc(b.AddDays(-6), 10, 0), 4_000m),
-            new(3, 3, 2, "AI-95", 63_118.20m, 4_120m, Utc(b.AddDays(-3), 11, 0), 3_000m),
-            new(4, 4, 2, "AI-95", 41_902.75m, 1_960m, Utc(b.AddDays(-9), 14, 0), 3_000m),
-            new(5, 5, 3, "Dizel", 120_560.00m, 9_480m, Utc(b.AddDays(-1), 16, 30), 8_000m),
+            new(1, 1, 1, "AI-92", 184_230.50m, 6_840m, Utc(b.AddDays(-2), 9, 30), 5_000m, null),
+            new(2, 2, 1, "AI-92", 97_410.00m, 3_215m, Utc(b.AddDays(-6), 10, 0), 4_000m, null),
+            new(3, 3, 2, "AI-95", 63_118.20m, 4_120m, Utc(b.AddDays(-3), 11, 0), 3_000m, null),
+            new(4, 4, 2, "AI-95", 41_902.75m, 1_960m, Utc(b.AddDays(-9), 14, 0), 3_000m, null),
+            new(5, 5, 3, "Dizel", 120_560.00m, 9_480m, Utc(b.AddDays(-1), 16, 30), 8_000m, null),
         ];
 
         // Yopilgan smenalar #30–#41 (eskisidan yangisiga), har biri bir sutka.
@@ -199,6 +199,10 @@ public sealed class NamunaServer : INamunaServer
                 return NarxOzgartir(int.Parse(s[1]), (YoqilgiTahrirlashDto)tana!);
             case "aparatlar" when get:
                 return _aparatlar.ToList();
+            case "aparatlar" when usul == HttpMethod.Post && s.Length == 1:
+                return AparatYarat((AparatYaratishDto)tana!);
+            case "aparatlar" when usul == HttpMethod.Put && s.Length == 2:
+                return AparatTahrirla(int.Parse(s[1]), (AparatTahrirlashDto)tana!);
             case "aparatlar" when s.Length == 3 && s[2] == "kirim":
                 return BakKirim(int.Parse(s[1]), (BakKirimYaratishDto)tana!);
             case "smenalar" when get && s.Length == 1:
@@ -225,6 +229,8 @@ public sealed class NamunaServer : INamunaServer
                 return SmenaOch((SmenaOchishDto)tana!);
             case "smenalar" when s.Length == 3 && s[2] == "yop":
                 return SmenaYop(int.Parse(s[1]), (SmenaYopishDto)tana!);
+            case "smenalar" when usul == HttpMethod.Put && s.Length == 3 && s[2] == "narx-korsatkichi":
+                return NarxKorsatkichiniTuzat(int.Parse(s[1]), (KorsatkichTuzatishDto)tana!);
             case "nasiyalar" when get && s.Length == 2 && s[1] == "mijozlar":
                 return MijozTakliflari(q.GetValueOrDefault("q"));
             case "nasiyalar" when get && s.Length == 1:
@@ -320,6 +326,62 @@ public sealed class NamunaServer : INamunaServer
                 natija.Farq < 0 ? HarakatTuri.Kamomat : HarakatTuri.Ortiqcha, natija.Farq, $"Smena #{id}", "Tizim"));
         Audit(Ism(_joriyFoydalanuvchi), "Smena yopildi", $"#{id} · savdo {Format.Pul(natija.Savdo)} · farq {Format.Farq(natija.Farq)}", "smena");
         return yopilgan;
+    }
+
+    /// <summary>§8.16: KrugHajmi — yaratishda null/0 = krug yo'q; tahrirda null = o'zgarmaydi, 0 = o'chiriladi, &gt; 0 = o'rnatiladi; manfiy — 400.</summary>
+    private AparatDto AparatYarat(AparatYaratishDto d)
+    {
+        if (d.KrugHajmi < 0) throw Xato("Krug hajmi manfiy bo'lishi mumkin emas");
+        if (_aparatlar.Any(a => a.Raqam == d.Raqam)) throw Xato("Bu raqamli aparat allaqachon bor", 409);
+        var y = _yoqilgilar.First(x => x.Id == d.YoqilgiTuriId);
+        var a = new AparatDto(_aparatlar.Max(x => x.Id) + 1, d.Raqam, y.Id, y.Nomi, d.BoshlangichTotalLitr, d.BoshlangichBakQoldiq, null, null,
+            d.KrugHajmi is > 0 ? d.KrugHajmi : null);
+        _aparatlar.Add(a);
+        Audit(Ism(_joriyFoydalanuvchi), "Aparat qo'shildi", $"{a.Raqam}-aparat · {y.Nomi}{KrugAudit(a.KrugHajmi)}", "sozlama");
+        return a;
+    }
+
+    private AparatDto AparatTahrirla(int id, AparatTahrirlashDto d)
+    {
+        if (d.KrugHajmi < 0) throw Xato("Krug hajmi manfiy bo'lishi mumkin emas");
+        var i = _aparatlar.FindIndex(x => x.Id == id);
+        if (i < 0) throw Xato("Aparat topilmadi", 404);
+        var eski = _aparatlar[i];
+        var pultOzgardi = d.TotalLitr is { } t && t != eski.TotalLitr;
+        if (pultOzgardi && Ochiq is not null) throw Xato("Ochiq smenada pult ko'rsatkichini tuzatib bo'lmaydi", 409);
+        if ((pultOzgardi || d.BakQoldiq is { } b0 && b0 != eski.BakQoldiq) && string.IsNullOrWhiteSpace(d.Sabab)) throw Xato("Sabab majburiy");
+        var y = _yoqilgilar.First(x => x.Id == d.YoqilgiTuriId);
+        var krug = d.KrugHajmi switch { null => eski.KrugHajmi, 0 => null, var h => h };
+        var yangi = eski with
+        {
+            Raqam = d.Raqam, YoqilgiTuriId = y.Id, YoqilgiNomi = y.Nomi,
+            TotalLitr = d.TotalLitr ?? eski.TotalLitr, BakQoldiq = d.BakQoldiq ?? eski.BakQoldiq, KrugHajmi = krug,
+        };
+        _aparatlar[i] = yangi;
+        Audit(Ism(_joriyFoydalanuvchi), "Aparat o'zgartirildi", $"{yangi.Raqam}-aparat{KrugAudit(krug)}{(d.Sabab is { } sb ? " · sabab: " + sb : "")}", "sozlama");
+        return yangi;
+    }
+
+    private static string KrugAudit(decimal? h) => h is { } v ? $" · krug {Format.ButunLitr(v)} L" : " · krug yo'q";
+
+    /// <summary>§8.14: ochiq smenada aparatning oxirgi narx o'zgarishi segmentini tuzatish (server qoidalari bilan bir xil).</summary>
+    private SmenaTafsilotDto NarxKorsatkichiniTuzat(int smenaId, KorsatkichTuzatishDto d)
+    {
+        if (Ochiq is not { } s || s.Id != smenaId) throw Xato("Smena ochiq emas", 409);
+        var a = _aparatlar.FirstOrDefault(x => x.Id == d.AparatId) ?? throw Xato("Aparat topilmadi", 404);
+        if (string.IsNullOrWhiteSpace(d.Sabab)) throw Xato("Sabab majburiy");
+        var l = _korsatkichlar.TryGetValue(s.Id, out var x0) ? x0 : new List<SmenaKorsatkichDto>();
+        var i = l.FindLastIndex(k => k.AparatId == a.Id && k.NarxOzgarishida);
+        if (i < 0) throw Xato("Bu aparatda ochiq smenada narx o'zgarishi ko'rsatkichi yo'q.", 409);
+        var seg = l[i];
+        var q = Math.Round(d.Qiymat, 2, MidpointRounding.AwayFromZero);
+        if (q < seg.Boshi) throw Xato($"Yangi ko'rsatkich oldingi ko'rsatkichdan ({Format.Son(seg.Boshi)}) kichik bo'lishi mumkin emas");
+        if (q == seg.Oxiri) throw Xato("Yangi ko'rsatkich joriy ko'rsatkichdan farq qilishi kerak.");
+        if (q == seg.Boshi) l.RemoveAt(i);
+        else l[i] = Segment(a, seg.Boshi, q, true, seg.Narx);
+        Audit(Ism(_joriyFoydalanuvchi), "Ko'rsatkich tuzatildi",
+            $"Smena #{s.Id} · {a.Raqam}-aparat narx o'zgarishidagi ko'rsatkich {Format.Son(seg.Oxiri)} dan {Format.Son(q)} ga · sabab: {d.Sabab.Trim()}", "tuzatish");
+        return Tafsilot(s);
     }
 
     private YoqilgiTuriDto NarxOzgartir(int id, YoqilgiTahrirlashDto d)

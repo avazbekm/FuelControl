@@ -204,6 +204,7 @@ public static class Malumot
                 a.Yoqilgi = YoqilgiOl(d.YoqilgiTuriId, d.YoqilgiNomi);
                 a.TotalLitr = d.TotalLitr; a.BakQoldiq = d.BakQoldiq;
                 a.OxirgiKirimVaqti = d.OxirgiKirimVaqti?.ToLocalTime(); a.OxirgiKirimLitr = d.OxirgiKirimLitr;
+                a.KrugHajmi = Krug.Hajm(d.KrugHajmi);
             });
 
         if (b.HasFlag(Bolim.JoriySmena))
@@ -414,6 +415,14 @@ public static class Malumot
         var t = (await Api.KorsatkichTuzat(smenaId, d))!;
         SmenaniQoy(t.Smena);
         await JimYukla(Bolim.JoriySmena | Bolim.Aparatlar | Bolim.Harakatlar | Bolim.Audit);
+        return t;
+    }
+
+    /// <summary>§8.14: ochiq smenada aparatning oxirgi narx o'zgarishi segmentini tuzatish (TotalLitr, BakQoldiq o'zgarmaydi).</summary>
+    public static async Task<SmenaTafsilotDto> NarxKorsatkichiniTuzat(int smenaId, KorsatkichTuzatishDto d)
+    {
+        var t = (await Api.NarxKorsatkichiniTuzat(smenaId, d))!;
+        await JimYukla(Bolim.JoriySmena | Bolim.Audit);
         return t;
     }
 

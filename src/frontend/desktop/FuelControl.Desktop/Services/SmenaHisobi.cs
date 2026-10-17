@@ -28,6 +28,22 @@ public static class SmenaHisobi
     public static decimal Oldingi(AparatDto a, IEnumerable<SmenaKorsatkichDto> qayd) => Oldingi(a.Id, a.TotalLitr, qayd);
     public static decimal Oldingi(Aparat a, IEnumerable<SmenaKorsatkichDto> qayd) => Oldingi(a.Id, a.TotalLitr, qayd);
 
+    /// <summary>
+    /// §8.15: ochiq smenada shu aparatning narx o'zgarishi segmentlarida qayd etilgan litr (hali bakdan ayrilmagan).
+    /// Ochiq smenada ogohlantirish: chiqyapti = shu litr + kiritilayotgan qator litri, bor = BakQoldiq (kamaytirilmaydi — manfiy "bor" chiqmaydi).
+    /// Tuzatilayotgan segment (istisno) bu yig'indiga kirmaydi — u yangi qiymati bilan qator litri sifatida qo'shiladi.
+    /// </summary>
+    public static decimal QaydLitri(Aparat a, IEnumerable<SmenaKorsatkichDto> qayd, SmenaKorsatkichDto? istisno = null) =>
+        qayd.Where(k => k.AparatId == a.Id && k.NarxOzgarishida && !Equals(k, istisno)).Sum(k => k.Litr);
+
+    /// <summary>§8.15: chiqadigan litr bakdagidan ko'p bo'lsa — sariq ogohlantirish matni, aks holda null (bloklamaydi; bo'sh qator — null).</summary>
+    public static string? BakOgohi(decimal? chiqadi, decimal bakdaBor) =>
+        chiqadi is { } c && c > 0 && c > bakdaBor ? Til.F("BakOgoh_Matn", Format.Son(bakdaBor), Format.Son(c)) : null;
+
+    /// <summary>Tasdiq dialogidagi qator: "4-aparat: 990 000.00 L (bakda 5 017.83 L)".</summary>
+    public static string BakOgohQatori(string nomi, decimal chiqadi, decimal bakdaBor) =>
+        Til.F("BakOgoh_Qator", nomi, Format.Son(chiqadi), Format.Son(bakdaBor));
+
     public static SmenaNatijasi Hisobla(long qaytim, long ochishTerminal, long ochishDepozit, long savdo,
         long qaytganNasiya, long nasiyaJami, long xarajatJami, long yopishTerminal, long yopishDepozit, long sanalganNaqd)
     {
